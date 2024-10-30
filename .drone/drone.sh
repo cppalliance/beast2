@@ -48,6 +48,10 @@ common_install () {
   fi
 }
 
+if [[ $(uname) == "Linux" && "$B2_ASAN" == "1" ]]; then
+    echo 0 | sudo tee /proc/sys/kernel/randomize_va_space > /dev/null
+fi
+
 if [ "$DRONE_JOB_BUILDTYPE" == "boost" ]; then
 
 echo '==================================> INSTALL'
