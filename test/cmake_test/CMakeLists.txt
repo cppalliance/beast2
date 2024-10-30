@@ -35,7 +35,6 @@ else()
 
     align
     context
-    coroutine
     date_time
     buffers
     container_hash
