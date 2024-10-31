@@ -16,6 +16,7 @@ project
       <library>/boost/http_proto//boost_http_proto
       [ ac.check-library /boost/http_proto//boost_http_proto_zlib : <library>/boost/http_proto//boost_http_proto_zlib : ]
       <library>/boost/http_io//boost_http_io
+      <library>/boost/program_options//boost_program_options
       <library>/openssl//ssl/<link>shared
       <library>/openssl//crypto/<link>shared
       <include>.

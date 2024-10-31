@@ -30,7 +30,7 @@ endif()
 
 include(GNUInstallDirs)
 if(BOOST_HTTP_IO_IS_ROOT)
-    set(BOOST_INCLUDE_LIBRARIES http_io http_proto url)
+    set(BOOST_INCLUDE_LIBRARIES http_io http_proto program_options url)
     set(BOOST_EXCLUDE_LIBRARIES http_io)
     set(CMAKE_FOLDER Dependencies)
     add_subdirectory(../.. Dependencies/boost EXCLUDE_FROM_ALL)
