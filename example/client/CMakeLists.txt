@@ -7,4 +7,4 @@
 # Official repository: https://github.com/cppalliance/http_io
 #
 
-add_subdirectory(flex_await)
+add_subdirectory(burl)

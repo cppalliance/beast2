@@ -22,6 +22,6 @@ project
       <include>.
     ;
 
-exe flex_await :
+exe burl :
     main.cpp
     ;
