@@ -107,8 +107,8 @@ target(urls::url_view url) noexcept
 
 struct is_redirect_result
 {
-    bool is_redirect;
-    bool need_method_change;
+    bool is_redirect = false;
+    bool need_method_change = false;
 };
 
 is_redirect_result
@@ -119,16 +119,34 @@ is_redirect(http_proto::status status) noexcept
     // user agents do change the method in practice.
     switch(status)
     {
-        case http_proto::status::moved_permanently:
-        case http_proto::status::found:
-        case http_proto::status::see_other:
-            return { true, true };
-        case http_proto::status::temporary_redirect:
-        case http_proto::status::permanent_redirect:
-            return { true, false };
-        default:
-            return { false, false };
+    case http_proto::status::moved_permanently:
+    case http_proto::status::found:
+    case http_proto::status::see_other:
+        return { true, true };
+    case http_proto::status::temporary_redirect:
+    case http_proto::status::permanent_redirect:
+        return { true, false };
+    default:
+        return { false, false };
     }
+}
+
+bool
+can_reuse_connection(
+    http_proto::response_view response,
+    urls::url_view a,
+    urls::url_view b) noexcept
+{
+    if(a.encoded_origin() != b.encoded_origin())
+        return false;
+
+    if(response.version() != http_proto::version::http_1_1)
+        return false;
+
+    if(response.metadata().connection.close)
+        return false;
+
+    return true;
 }
 
 class any_stream
@@ -378,8 +396,7 @@ class multipart_form
         std::optional<std::uint64_t> file_size;
     };
 
-    // storage_ containts boundary with extra "--" prefix and postfix.
-    // This reduces the number of steps needed during serialization.
+    // boundary with extra "--" prefix and postfix.
     std::array<char, 2 + 46 + 2> storage_{ generate_boundary() };
     std::vector<part_t> parts_;
 
@@ -554,61 +571,61 @@ public:
         {
             switch(step_)
             {
-                case 0:
-                    // --boundary
-                    if(!copy({ form_->storage_.data(),
-                        form_->storage_.size() - 2 })) return rs;
-                    ++step_;
-                case 1:
-                    if(!copy(content_disposition_)) return rs;
-                    ++step_;
-                case 2:
-                    if(!copy(it_->name)) return rs;
-                    ++step_;
-                case 3:
-                    if(!copy("\"")) return rs;
-                    ++step_;
-                case 4:
-                    if(!it_->file_size.has_value())
-                        goto content_type;
-                    if(!copy(filename_)) return rs;
-                    ++step_;
-                case 5:
-                    if(!copy(filename(it_->value_or_path))) return rs;
-                    ++step_;
-                case 6:
-                    if(!copy("\"")) return rs;
-                    ++step_;
-                case 7:
-                content_type:
-                    if(it_->content_type.empty())
-                        goto end_of_header;
-                    if(!copy(content_type_)) return rs;
-                    ++step_;
-                case 8:
-                    if(!copy(it_->content_type)) return rs;
-                    ++step_;
-                case 9:
-                end_of_header:
-                    if(!copy("\r\n\r\n")) return rs;
-                    ++step_;
-                case 10:
-                    if(it_->file_size)
-                    {
-                        if(!read(
-                            it_->value_or_path,
-                            it_->file_size.value())) return rs;
-                    }
-                    else
-                    {
-                        if(!copy(it_->value_or_path)) return rs;
-                    }
-                    ++step_;
-                case 11:
-                    if(!copy("\r\n"))
-                        return rs;
-                    step_ = 0;
-                    ++it_;
+            case 0:
+                // --boundary
+                if(!copy({ form_->storage_.data(),
+                    form_->storage_.size() - 2 })) return rs;
+                ++step_;
+            case 1:
+                if(!copy(content_disposition_)) return rs;
+                ++step_;
+            case 2:
+                if(!copy(it_->name)) return rs;
+                ++step_;
+            case 3:
+                if(!copy("\"")) return rs;
+                ++step_;
+            case 4:
+                if(!it_->file_size.has_value())
+                    goto content_type;
+                if(!copy(filename_)) return rs;
+                ++step_;
+            case 5:
+                if(!copy(filename(it_->value_or_path))) return rs;
+                ++step_;
+            case 6:
+                if(!copy("\"")) return rs;
+                ++step_;
+            case 7:
+            content_type:
+                if(it_->content_type.empty())
+                    goto end_of_header;
+                if(!copy(content_type_)) return rs;
+                ++step_;
+            case 8:
+                if(!copy(it_->content_type)) return rs;
+                ++step_;
+            case 9:
+            end_of_header:
+                if(!copy("\r\n\r\n")) return rs;
+                ++step_;
+            case 10:
+                if(it_->file_size)
+                {
+                    if(!read(
+                        it_->value_or_path,
+                        it_->file_size.value())) return rs;
+                }
+                else
+                {
+                    if(!copy(it_->value_or_path)) return rs;
+                }
+                ++step_;
+            case 11:
+                if(!copy("\r\n"))
+                    return rs;
+                step_ = 0;
+                ++it_;
             }
         }
 
@@ -686,7 +703,6 @@ public:
         body_);
     }
 };
-
 
 asio::awaitable<any_stream>
 connect(ssl::context& ssl_ctx, urls::url_view url)
@@ -809,7 +825,7 @@ request(
     co_await http_io::async_read_header(stream, parser);
 
     // handle redirects
-    auto referer_url = urls::url{ url };
+    auto referer = urls::url{ url };
     for(;;)
     {
         auto [is_redirect, need_method_change] =
@@ -822,11 +838,16 @@ request(
         if(auto it = response.find(http_proto::field::location);
            it != response.end())
         {
-            auto redirect_url = urls::parse_uri(it->value).value();
+            auto redirect = urls::parse_uri(it->value).value();
 
-            // TODO: reuse the established connection when possible
-            co_await stream.async_shutdown(asio::as_tuple);
-            stream = co_await connect(ssl_ctx, redirect_url);
+            // Consume the body
+            co_await http_io::async_read(stream, parser);
+
+            if(!can_reuse_connection(response, referer, redirect))
+            {
+                co_await stream.async_shutdown(asio::as_tuple);
+                stream = co_await connect(ssl_ctx, redirect);
+            }
 
             // Change the method according to RFC 9110, Section 15.4.4.
             if(need_method_change && !vm.count("head"))
@@ -836,11 +857,11 @@ request(
                 request.erase(http_proto::field::content_type);
                 msg = {}; // drop the body
             }
-            request.set_target(target(redirect_url));
-            request.set(http_proto::field::host, redirect_url.host());
-            request.set(http_proto::field::referer, referer_url);
+            request.set_target(target(redirect));
+            request.set(http_proto::field::host, redirect.host());
+            request.set(http_proto::field::referer, redirect);
 
-            referer_url = redirect_url;
+            referer = redirect;
 
             serializer.reset();
             msg.start_serializer(serializer, request);
@@ -891,8 +912,6 @@ request(
 int
 main(int argc, char* argv[])
 {
-    int co_main(int argc, char* argv[]);
-    //return co_main(argc, argv);
     try
     {
         auto odesc = po::options_description{"Options"};
@@ -963,12 +982,7 @@ main(int argc, char* argv[])
 
         auto url = urls::parse_uri(vm.at("url").as<std::string>());
         if(url.has_error())
-        {
-            std::cerr
-                << "Failed to parse URL\n"
-                << "Error: " << url.error().what() << std::endl;
-            return EXIT_FAILURE;
-        }
+            throw system_error{ url.error(), "Failed to parse URL" };
 
         auto ioc            = asio::io_context{};
         auto ssl_ctx        = ssl::context{ ssl::context::tlsv12_client };
