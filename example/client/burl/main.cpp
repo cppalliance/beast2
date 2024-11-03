@@ -105,6 +105,22 @@ target(urls::url_view url) noexcept
     return url.encoded_target();
 }
 
+core::string_view
+effective_port(urls::url_view url)
+{
+    if(url.has_port())
+        return url.port();
+
+    if(url.scheme() == "https")
+        return "443";
+
+    if(url.scheme() == "http")
+        return "80";
+
+    throw std::runtime_error{
+        "Unsupported scheme" };
+}
+
 struct is_redirect_result
 {
     bool is_redirect = false;
@@ -705,31 +721,97 @@ public:
 };
 
 asio::awaitable<any_stream>
-connect(ssl::context& ssl_ctx, urls::url_view url)
+connect(
+    const po::variables_map& vm,
+    ssl::context& ssl_ctx,
+    http_proto::context& http_proto_ctx,
+    urls::url_view url)
 {
     auto executor = co_await asio::this_coro::executor;
     auto resolver = asio::ip::tcp::resolver{ executor };
-    auto service  = url.has_port() ? url.port() : url.scheme();
-    auto rresults = co_await resolver.async_resolve(url.host(), service);
+    auto stream   = asio::ip::tcp::socket{ executor };
+
+    if(vm.count("proxy"))
+    {
+        auto proxy_url = urls::parse_uri(vm.at("proxy").as<std::string>());
+
+        if(proxy_url.has_error())
+            throw system_error{ proxy_url.error(), "Failed to parse proxy" };
+
+        if(proxy_url->scheme() != "http")
+            throw std::runtime_error{ "only HTTP proxies are supported" };
+
+        // Connect to the HTTP proxy server
+        auto rr = co_await resolver.async_resolve(
+            proxy_url->host(), effective_port(proxy_url.value()));
+        co_await asio::async_connect(stream, rr);
+
+        {
+            using http_proto::field;
+            auto request = http_proto::request{};
+            auto host    = std::string{ url.encoded_host() };
+
+            host.push_back(':');
+            host.append(effective_port(url));
+
+            request.set_method(http_proto::method::connect);
+            request.set_target(host);
+            request.set(field::host, host);
+            request.set(field::proxy_connection, "keep-alive");
+
+            if(vm.count("user-agent"))
+            {
+                request.set(
+                    field::user_agent,
+                    vm.at("user-agent").as<std::string>());
+            }
+            else
+            {
+                request.set(field::user_agent, "Boost.Http.Io");
+            }
+
+            // TODO
+            // request.set(field::proxy_authorization, "");
+
+            auto serializer = http_proto::serializer{ http_proto_ctx };
+            serializer.start(request);
+            co_await http_io::async_write(stream, serializer);
+        }
+
+        {
+            auto parser = http_proto::response_parser{ http_proto_ctx };
+            parser.reset();
+            parser.start();
+            co_await http_io::async_read_header(stream, parser);
+            if(parser.get().status() != http_proto::status::ok)
+                throw std::runtime_error{
+                    "Proxy server rejected the connection" };
+        }
+    }
+    else // no proxy
+    {
+        auto rr = co_await resolver.async_resolve(
+            url.host(), effective_port(url));
+        co_await asio::async_connect(stream, rr);
+    }
 
     if(url.scheme() == "https")
     {
-        auto stream = ssl::stream<asio::ip::tcp::socket>{ executor, ssl_ctx };
-        co_await asio::async_connect(stream.lowest_layer(), rresults);
+        auto ssl_stream = ssl::stream<asio::ip::tcp::socket>{
+            std::move(stream), ssl_ctx };
 
-        if(auto host_s = std::string{ url.host() };
-           !SSL_set_tlsext_host_name(stream.native_handle(), host_s.c_str()))
+        auto host = std::string{ url.host() };
+        if(!SSL_set_tlsext_host_name(
+            ssl_stream.native_handle(), host.c_str()))
         {
             throw system_error{ static_cast<int>(::ERR_get_error()),
                 asio::error::get_ssl_category() };
         }
 
-        co_await stream.async_handshake(ssl::stream_base::client);
-        co_return stream;
+        co_await ssl_stream.async_handshake(ssl::stream_base::client);
+        co_return ssl_stream;
     }
 
-    auto stream = asio::ip::tcp::socket{ executor };
-    co_await asio::async_connect(stream, rresults);
     co_return stream;
 }
 
@@ -813,7 +895,7 @@ request(
     http_proto::request request,
     urls::url_view url)
 {
-    auto stream     = co_await connect(ssl_ctx, url);
+    auto stream     = co_await connect(vm, ssl_ctx, http_proto_ctx, url);
     auto parser     = http_proto::response_parser{ http_proto_ctx };
     auto serializer = http_proto::serializer{ http_proto_ctx };
 
@@ -838,15 +920,18 @@ request(
         if(auto it = response.find(http_proto::field::location);
            it != response.end())
         {
-            auto redirect = urls::parse_uri(it->value).value();
+            auto location = urls::parse_uri(it->value).value();
 
             // Consume the body
             co_await http_io::async_read(stream, parser);
 
-            if(!can_reuse_connection(response, referer, redirect))
+            if(!can_reuse_connection(response, referer, location))
             {
-                co_await stream.async_shutdown(asio::as_tuple);
-                stream = co_await connect(ssl_ctx, redirect);
+                if(!vm.count("proxy"))
+                    co_await stream.async_shutdown(asio::as_tuple);
+
+                stream = co_await connect(
+                    vm, ssl_ctx, http_proto_ctx, location);
             }
 
             // Change the method according to RFC 9110, Section 15.4.4.
@@ -857,11 +942,11 @@ request(
                 request.erase(http_proto::field::content_type);
                 msg = {}; // drop the body
             }
-            request.set_target(target(redirect));
-            request.set(http_proto::field::host, redirect.host());
-            request.set(http_proto::field::referer, redirect);
+            request.set_target(target(location));
+            request.set(http_proto::field::host, location.host());
+            request.set(http_proto::field::referer, location);
 
-            referer = redirect;
+            referer = location;
 
             serializer.reset();
             msg.start_serializer(serializer, request);
@@ -904,9 +989,12 @@ request(
     }
 
     // clean shutdown
-    auto [ec] = co_await stream.async_shutdown(asio::as_tuple);
-    if(ec && ec != ssl::error::stream_truncated)
-        throw system_error{ ec };
+    if(!vm.count("proxy"))
+    {
+        auto [ec] = co_await stream.async_shutdown(asio::as_tuple);
+        if(ec && ec != ssl::error::stream_truncated)
+            throw system_error{ ec };
+    }
 };
 
 int
@@ -936,6 +1024,9 @@ main(int argc, char* argv[])
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
                 "Write to file instead of stdout")
+            ("proxy,x",
+                po::value<std::string>()->value_name("<url>"),
+                "Use this proxy")
             ("range,r",
                 po::value<std::string>()->value_name("<range>"),
                 "Retrieve only the bytes within range")
