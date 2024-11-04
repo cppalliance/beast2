@@ -165,6 +165,49 @@ can_reuse_connection(
     return true;
 }
 
+void
+base64_encode(std::string& dest, core::string_view src)
+{
+    // Adapted from Boost.Beast project
+    char const* in = static_cast<char const*>(src.data());
+    static char constexpr tab[] = {
+        "ABCDEFGHIJKLMNOP"
+        "QRSTUVWXYZabcdef"
+        "ghijklmnopqrstuv"
+        "wxyz0123456789+/"
+    };
+
+    for(auto n = src.size() / 3; n--;)
+    {
+        dest.append({
+            tab[(in[0] & 0xfc) >> 2],
+            tab[((in[0] & 0x03) << 4) + ((in[1] & 0xf0) >> 4)],
+            tab[((in[2] & 0xc0) >> 6) + ((in[1] & 0x0f) << 2)],
+            tab[in[2] & 0x3f] });
+        in += 3;
+    }
+
+    switch(src.size() % 3)
+    {
+    case 2:
+        dest.append({
+            tab[ (in[0] & 0xfc) >> 2],
+            tab[((in[0] & 0x03) << 4) + ((in[1] & 0xf0) >> 4)],
+            tab[                         (in[1] & 0x0f) << 2],
+            '=' });
+        break;
+    case 1:
+        dest.append({
+            tab[ (in[0] & 0xfc) >> 2],
+            tab[((in[0] & 0x03) << 4)],
+            '=',
+            '=' });
+        break;
+    case 0:
+        break;
+    }
+}
+
 class any_stream
 {
 public:
@@ -870,8 +913,13 @@ connect_http_proxy(
         request.set(field::user_agent, "Boost.Http.Io");
     }
 
-    // TODO
-    // request.set(field::proxy_authorization, "");
+    if(proxy.has_userinfo())
+    {
+        auto credentials = proxy.encoded_userinfo().decode();
+        auto basic_auth  = std::string{ "Basic " };
+        base64_encode(basic_auth, credentials);
+        request.set(field::proxy_authorization, basic_auth);
+    }
 
     auto serializer = http_proto::serializer{ http_proto_ctx };
     auto parser     = http_proto::response_parser{ http_proto_ctx };
@@ -1000,8 +1048,10 @@ create_request(
 
     if(vm.count("user"))
     {
-        // TODO: use base64 encoding for basic authentication
-        request.set(field::authorization, vm.at("user").as<std::string>());
+        auto credentials = vm.at("user").as<std::string>();
+        auto basic_auth  = std::string{ "Basic " };
+        base64_encode(basic_auth, credentials);
+        request.set(field::authorization, basic_auth);
     }
 
     if(vm.count("compressed") && http_proto_has_zlib)
