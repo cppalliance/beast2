@@ -23,5 +23,6 @@ project
     ;
 
 exe burl :
+    cookie.cpp
     main.cpp
     ;

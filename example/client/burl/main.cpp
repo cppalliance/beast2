@@ -7,6 +7,8 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
+#include "cookie.hpp"
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/buffers.hpp>
@@ -16,6 +18,7 @@
 #include <boost/url.hpp>
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <random>
 
@@ -53,17 +56,17 @@ mime_type(core::string_view path) noexcept
         return path.substr(pos);
     }();
 
-    using ci_equal = urls::grammar::ci_equal;
-    if(ci_equal{}(ext, ".gif"))  return "image/gif";
-    if(ci_equal{}(ext, ".jpg"))  return "image/jpeg";
-    if(ci_equal{}(ext, ".jpeg")) return "image/jpeg";
-    if(ci_equal{}(ext, ".png"))  return "image/png";
-    if(ci_equal{}(ext, ".svg"))  return "image/svg+xml";
-    if(ci_equal{}(ext, ".txt"))  return "text/plain";
-    if(ci_equal{}(ext, ".htm"))  return "text/html";
-    if(ci_equal{}(ext, ".html")) return "text/html";
-    if(ci_equal{}(ext, ".pdf"))  return "application/pdf";
-    if(ci_equal{}(ext, ".xml"))  return "application/xml";
+    namespace ug = urls::grammar;
+    if(ug::ci_is_equal(ext, ".gif"))  return "image/gif";
+    if(ug::ci_is_equal(ext, ".jpg"))  return "image/jpeg";
+    if(ug::ci_is_equal(ext, ".jpeg")) return "image/jpeg";
+    if(ug::ci_is_equal(ext, ".png"))  return "image/png";
+    if(ug::ci_is_equal(ext, ".svg"))  return "image/svg+xml";
+    if(ug::ci_is_equal(ext, ".txt"))  return "text/plain";
+    if(ug::ci_is_equal(ext, ".htm"))  return "text/html";
+    if(ug::ci_is_equal(ext, ".html")) return "text/html";
+    if(ug::ci_is_equal(ext, ".pdf"))  return "application/pdf";
+    if(ug::ci_is_equal(ext, ".xml"))  return "application/xml";
     return "application/octet-stream";
 }
 
@@ -111,10 +114,10 @@ effective_port(urls::url_view url)
     if(url.has_port())
         return url.port();
 
-    if(url.scheme() == "https")
+    if(url.scheme_id() == urls::scheme::https)
         return "443";
 
-    if(url.scheme() == "http")
+    if(url.scheme_id() ==  urls::scheme::http)
         return "80";
 
     throw std::runtime_error{
@@ -887,7 +890,7 @@ connect_http_proxy(
     // Connect to the proxy server
     co_await asio::async_connect(stream, rresults);
 
-    using http_proto::field;
+    using field    = http_proto::field;
     auto request   = http_proto::request{};
     auto host_port = [&]()
     {
@@ -978,7 +981,7 @@ connect(
     }
 
     // TLS handshake
-    if(url.scheme() == "https")
+    if(url.scheme_id() == urls::scheme::https)
     {
         auto ssl_stream = ssl::stream<asio::ip::tcp::socket>{
             std::move(stream), ssl_ctx };
@@ -1004,9 +1007,9 @@ create_request(
     const message& msg,
     urls::url_view url)
 {
-    using http_proto::field;
-    using http_proto::method;
-    using http_proto::version;
+    using field   = http_proto::field;
+    using method  = http_proto::method;
+    using version = http_proto::version;
 
     auto request = http_proto::request{};
 
@@ -1075,21 +1078,45 @@ request(
     const po::variables_map& vm,
     output_stream& output,
     message& msg,
+    std::optional<cookie_jar>& cookie_jar,
+    core::string_view explicit_cookies,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
     http_proto::request request,
     urls::url_view url)
 {
+    using field     = http_proto::field;
     auto stream     = co_await connect(vm, ssl_ctx, http_proto_ctx, url);
     auto parser     = http_proto::response_parser{ http_proto_ctx };
     auto serializer = http_proto::serializer{ http_proto_ctx };
 
+    auto set_cookies = [&](urls::url_view url)
+    {
+        auto field = cookie_jar ? cookie_jar->make_field(url) : std::string{};
+        field.append(explicit_cookies);
+        if(!field.empty())
+            request.set(field::cookie, field);
+    };
+
+    auto extract_cookies = [&](
+        urls::url_view url,
+        http_proto::response_view response)
+    {
+        if(!cookie_jar)
+            return;
+
+        for(auto sv : response.find_all(field::set_cookie))
+            cookie_jar->add(url, parse_cookie(sv).value());
+    };
+
+    set_cookies(url);
     msg.start_serializer(serializer, request);
     co_await http_io::async_write(stream, serializer);
 
     parser.reset();
     parser.start();
     co_await http_io::async_read_header(stream, parser);
+    extract_cookies(url, parser.get());
 
     // handle redirects
     auto referer = urls::url{ url };
@@ -1102,10 +1129,10 @@ request(
             break;
 
         auto response = parser.get();
-        if(auto it = response.find(http_proto::field::location);
+        if(auto it = response.find(field::location);
            it != response.end())
         {
-            auto location = urls::parse_uri(it->value).value();
+            urls::url location = urls::parse_uri(it->value).value();
 
             // Consume the body
             co_await http_io::async_read(stream, parser);
@@ -1124,12 +1151,16 @@ request(
             {
                 request.set_method(http_proto::method::get);
                 request.set_content_length(0);
-                request.erase(http_proto::field::content_type);
+                request.erase(field::content_type);
                 msg = {}; // drop the body
             }
             request.set_target(target(location));
-            request.set(http_proto::field::host, location.host());
-            request.set(http_proto::field::referer, location);
+            request.set(field::host, location.host());
+            request.set(field::referer, location);
+
+            // Update the cookies for the new url
+            request.erase(field::cookie);
+            set_cookies(location);
 
             referer = location;
 
@@ -1140,6 +1171,7 @@ request(
             parser.reset();
             parser.start();
             co_await http_io::async_read_header(stream, parser);
+            extract_cookies(location, parser.get());
         }
         else
         {
@@ -1193,6 +1225,12 @@ main(int argc, char* argv[])
             ("continue-at,C",
                 po::value<std::uint64_t>()->value_name("<offset>"),
                 "Resume transfer offset")
+            ("cookie,b",
+                po::value<std::vector<std::string>>()->value_name("<data|filename>"),
+                "Send cookies from string/file")
+            ("cookie-jar,c",
+                po::value<std::string>()->value_name("<filename>"),
+                "Write cookies to <filename> after operation")
             ("data,d",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST data")
@@ -1349,12 +1387,39 @@ main(int argc, char* argv[])
             msg = std::move(form);
         }
 
+        auto cookie_jar       = std::optional<::cookie_jar>{};
+        auto explicit_cookies = std::string{};
+
+        if(vm.count("cookie") || vm.count("cookie-jar"))
+            cookie_jar.emplace();
+
+        if(vm.count("cookie"))
+        {
+            for(auto& option : vm.at("cookie").as<std::vector<std::string>>())
+            {
+                if(option.find('=') != std::string::npos)
+                {
+                    if(!explicit_cookies.ends_with(';'))
+                        explicit_cookies.push_back(';');
+                    explicit_cookies.append(option);
+                }
+                else
+                {
+                    auto ifs = std::ifstream{ option };
+                    ifs.exceptions(std::ifstream::badbit);
+                    ifs >> cookie_jar.value();
+                }
+            }
+        }
+
         asio::co_spawn(
             ioc,
             request(
                 vm,
                 output,
                 msg,
+                cookie_jar,
+                explicit_cookies,
                 ssl_ctx,
                 http_proto_ctx,
                 create_request(vm, msg, url.value()),
@@ -1366,6 +1431,13 @@ main(int argc, char* argv[])
             });
 
         ioc.run();
+
+        if(vm.count("cookie-jar"))
+        {
+            auto ofs = std::ofstream{ vm.at("cookie-jar").as<std::string>() };
+            ofs.exceptions(std::ofstream::badbit);
+            ofs << cookie_jar.value();
+        }
     }
     catch(std::exception const& e)
     {
