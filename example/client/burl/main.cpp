@@ -704,14 +704,76 @@ public:
     };
 };
 
+class json_body
+{
+    std::string body_;
+
+public:
+    class source;
+    void
+    append_text(core::string_view value) noexcept
+    {
+        body_.append(value);
+    }
+
+    void
+    append_file(core::string_view path)
+    {
+        http_proto::file file;
+        error_code ec;
+
+        file.open(
+            std::string{ path }.c_str(),
+            http_proto::file_mode::read,
+            ec);
+        if(ec)
+            throw system_error{ ec };
+
+        for(;;)
+        {
+            char buf[64 * 1024];
+            const auto read = file.read(buf, sizeof(buf), ec);
+            if(ec)
+                throw system_error{ ec };
+            if(read == 0)
+                break;
+            body_.append(buf, read);
+        }
+    }
+
+    core::string_view
+    content_type() const noexcept
+    {
+        return "application/json";
+    }
+
+    std::size_t
+    content_length() const noexcept
+    {
+        return body_.size();
+    }
+
+    buffers::const_buffer
+    body() const noexcept
+    {
+        return { body_.data(), body_.size() };
+    }
+};
+
 class message
 {
     std::variant<
         std::monostate,
+        json_body,
         urlencoded_form,
         multipart_form> body_;
 public:
     message() = default;
+
+    message(json_body&& json_body)
+        : body_{ std::move(json_body) }
+    {
+    }
 
     message(urlencoded_form&& form)
         : body_{ std::move(form) }
@@ -756,8 +818,9 @@ public:
                 ser.start<
                     multipart_form::source>(req, &f);
             }
-            else if constexpr(std::is_same_v<
-                decltype(f), const urlencoded_form&>)
+            else if constexpr(
+                std::is_same_v<decltype(f), const json_body&> ||
+                std::is_same_v<decltype(f), const urlencoded_form&>)
             {
                 ser.start(req, f.body());
             }
@@ -1253,6 +1316,9 @@ main(int argc, char* argv[])
                 "Pass custom header(s) to server")
             ("help,h", "produce help message")
             ("http1.0", "Use HTTP 1.0")
+            ("json",
+                po::value<std::vector<std::string>>()->value_name("<data>"),
+                "HTTP POST JSON")
             ("junk-session-cookies,j", "Ignore session cookies read from file")
             ("location,L", "Follow redirects")
             ("no-keepalive", "Disable TCP keepalive on the connection")
@@ -1342,7 +1408,7 @@ main(int argc, char* argv[])
 
         auto msg = message{};
 
-        if(vm.count("form") && vm.count("data"))
+        if((!!vm.count("form") + !!vm.count("data") + !!vm.count("json")) == 2)
             throw std::runtime_error{
                 "You can only select one HTTP request method"};
 
@@ -1401,6 +1467,23 @@ main(int argc, char* argv[])
                 }
             }
             msg = std::move(form);
+        }
+
+        if(vm.count("json"))
+        {
+            auto body = json_body{};
+            for(auto& data : vm.at("json").as<std::vector<std::string>>())
+            {
+                if(!data.empty() && data[0] == '@')
+                {
+                    body.append_file(data.substr(1));
+                }
+                else
+                {
+                    body.append_text(data);
+                }
+            }
+            msg = std::move(body);
         }
 
         auto cookie_jar       = std::optional<::cookie_jar>{};
