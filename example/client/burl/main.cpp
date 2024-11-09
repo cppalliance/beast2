@@ -35,6 +35,7 @@ namespace http_proto = boost::http_proto;
 namespace po         = boost::program_options;
 namespace ssl        = boost::asio::ssl;
 namespace urls       = boost::urls;
+namespace ch         = std::chrono;
 
 using error_code   = boost::system::error_code;
 using system_error = boost::system::system_error;
@@ -222,12 +223,12 @@ public:
     using plain_stream_type = asio::ip::tcp::socket;
     using ssl_stream_type   = ssl::stream<plain_stream_type>;
 
-    explicit any_stream(plain_stream_type stream)
+    any_stream(plain_stream_type stream)
         : stream_{ std::move(stream) }
     {
     }
 
-    explicit any_stream(ssl_stream_type stream)
+    any_stream(ssl_stream_type stream)
         : stream_{ std::move(stream) }
     {
     }
@@ -1006,15 +1007,16 @@ connect_http_proxy(
             "Proxy server rejected the connection" };
 }
 
-asio::awaitable<any_stream>
+asio::awaitable<void>
 connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
+    any_stream& stream,
     urls::url_view url)
 {
     auto executor = co_await asio::this_coro::executor;
-    auto stream   = asio::ip::tcp::socket{ executor };
+    auto socket   = asio::ip::tcp::socket{ executor };
 
     if(vm.count("proxy"))
     {
@@ -1026,12 +1028,12 @@ connect(
         if(proxy_url->scheme() == "http")
         {
             co_await connect_http_proxy(
-                vm, http_proto_ctx, stream, url, proxy_url.value());
+                vm, http_proto_ctx, socket, url, proxy_url.value());
         }
         else if(proxy_url->scheme() == "socks5")
         {
             co_await connect_socks5_proxy(
-                stream, url, proxy_url.value());
+                socket, url, proxy_url.value());
         }
         else
         {
@@ -1044,20 +1046,20 @@ connect(
         auto resolver = asio::ip::tcp::resolver{ executor };
         auto rresults = co_await resolver.async_resolve(
             url.host(), effective_port(url));
-        co_await asio::async_connect(stream, rresults);
+        co_await asio::async_connect(socket, rresults);
     }
 
     if(vm.count("tcp-nodelay"))
-        stream.set_option(asio::ip::tcp::no_delay{ true });
+        socket.set_option(asio::ip::tcp::no_delay{ true });
 
     if(vm.count("no-keepalive"))
-        stream.set_option(asio::ip::tcp::socket::keep_alive{ false });
+        socket.set_option(asio::ip::tcp::socket::keep_alive{ false });
 
     // TLS handshake
     if(url.scheme_id() == urls::scheme::https)
     {
         auto ssl_stream = ssl::stream<asio::ip::tcp::socket>{
-            std::move(stream), ssl_ctx };
+            std::move(socket), ssl_ctx };
 
         auto host = std::string{ url.host() };
         if(!SSL_set_tlsext_host_name(
@@ -1068,10 +1070,11 @@ connect(
         }
 
         co_await ssl_stream.async_handshake(ssl::stream_base::client);
-        co_return ssl_stream;
+        stream = std::move(ssl_stream);
+        co_return ;
     }
 
-    co_return stream;
+    stream = std::move(socket);
 }
 
 http_proto::request
@@ -1159,9 +1162,23 @@ request(
     urls::url_view url)
 {
     using field     = http_proto::field;
-    auto stream     = co_await connect(vm, ssl_ctx, http_proto_ctx, url);
+    auto executor   = co_await asio::this_coro::executor;
     auto parser     = http_proto::response_parser{ http_proto_ctx };
     auto serializer = http_proto::serializer{ http_proto_ctx };
+    auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
+
+    auto connect_to = [&](const urls::url_view& url)
+    {
+        auto timeout = vm.count("connect-timeout")
+            ? ch::duration_cast<ch::steady_clock::duration>(
+                ch::duration<float>(vm.at("connect-timeout").as<float>()))
+            : ch::steady_clock::duration::max();
+
+        return asio::co_spawn(
+            executor,
+            connect(vm, ssl_ctx, http_proto_ctx, stream, url),
+            asio::cancel_after(timeout));
+    };
 
     auto set_cookies = [&](urls::url_view url)
     {
@@ -1181,6 +1198,8 @@ request(
         for(auto sv : response.find_all(field::set_cookie))
             cookie_jar->add(url, parse_cookie(sv).value());
     };
+
+    co_await connect_to(url);
 
     set_cookies(url);
     msg.start_serializer(serializer, request);
@@ -1215,8 +1234,7 @@ request(
                 if(!vm.count("proxy"))
                     co_await stream.async_shutdown(asio::as_tuple);
 
-                stream = co_await connect(
-                    vm, ssl_ctx, http_proto_ctx, location);
+                co_await connect_to(location);
             }
 
             // Change the method according to RFC 9110, Section 15.4.4.
@@ -1295,6 +1313,9 @@ main(int argc, char* argv[])
         auto odesc = po::options_description{"Options"};
         odesc.add_options()
             ("compressed", "Request compressed response")
+            ("connect-timeout",
+                po::value<float>()->value_name("<fractional seconds>"),
+                "Maximum time allowed for connection")
             ("continue-at,C",
                 po::value<std::uint64_t>()->value_name("<offset>"),
                 "Resume transfer offset")
