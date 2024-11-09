@@ -980,6 +980,12 @@ connect(
         co_await asio::async_connect(stream, rresults);
     }
 
+    if(vm.count("tcp-nodelay"))
+        stream.set_option(asio::ip::tcp::no_delay{ true });
+
+    if(vm.count("no-keepalive"))
+        stream.set_option(asio::ip::tcp::socket::keep_alive{ false });
+
     // TLS handshake
     if(url.scheme_id() == urls::scheme::https)
     {
@@ -1245,6 +1251,7 @@ main(int argc, char* argv[])
             ("http1.0", "Use HTTP 1.0")
             ("junk-session-cookies,j", "Ignore session cookies read from file")
             ("location,L", "Follow redirects")
+            ("no-keepalive", "Disable TCP keepalive on the connection")
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
                 "Write to file instead of stdout")
@@ -1260,6 +1267,7 @@ main(int argc, char* argv[])
             ("request,X",
                 po::value<std::string>()->value_name("<method>"),
                 "Specify request method to use")
+            ("tcp-nodelay", "Use the TCP_NODELAY option")
             ("show-headers,i", "Show response headers in the output")
             ("url",
                 po::value<std::string>()->value_name("<url>"),
