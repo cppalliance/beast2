@@ -131,7 +131,9 @@ struct is_redirect_result
 };
 
 is_redirect_result
-is_redirect(http_proto::status status) noexcept
+is_redirect(
+    const po::variables_map& vm,
+    http_proto::status status) noexcept
 {
     // The specifications do not intend for 301 and 302
     // redirects to change the HTTP method, but most
@@ -139,9 +141,11 @@ is_redirect(http_proto::status status) noexcept
     switch(status)
     {
     case http_proto::status::moved_permanently:
+        return { true, !vm.count("post301") };
     case http_proto::status::found:
+        return { true, !vm.count("post302") };
     case http_proto::status::see_other:
-        return { true, true };
+        return { true, !vm.count("post303") };
     case http_proto::status::temporary_redirect:
     case http_proto::status::permanent_redirect:
         return { true, false };
@@ -1129,7 +1133,7 @@ request(
     for(;;)
     {
         auto [is_redirect, need_method_change] =
-            ::is_redirect(parser.get().status());
+            ::is_redirect(vm, parser.get().status());
 
         if(!is_redirect || !vm.count("location"))
             break;
@@ -1255,6 +1259,9 @@ main(int argc, char* argv[])
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
                 "Write to file instead of stdout")
+            ("post301", "Do not switch to GET after following a 301")
+            ("post302", "Do not switch to GET after following a 302")
+            ("post303", "Do not switch to GET after following a 303")
             ("proxy,x",
                 po::value<std::string>()->value_name("<url>"),
                 "Use this proxy")
