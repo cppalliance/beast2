@@ -1314,7 +1314,7 @@ main(int argc, char* argv[])
         odesc.add_options()
             ("compressed", "Request compressed response")
             ("connect-timeout",
-                po::value<float>()->value_name("<fractional seconds>"),
+                po::value<float>()->value_name("<frac sec>"),
                 "Maximum time allowed for connection")
             ("continue-at,C",
                 po::value<std::uint64_t>()->value_name("<offset>"),
@@ -1337,6 +1337,7 @@ main(int argc, char* argv[])
                 "Pass custom header(s) to server")
             ("help,h", "produce help message")
             ("http1.0", "Use HTTP 1.0")
+            ("insecure,k", "Allow insecure server connections")
             ("json",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST JSON")
@@ -1405,7 +1406,15 @@ main(int argc, char* argv[])
         auto ssl_ctx        = ssl::context{ ssl::context::tlsv12_client };
         auto http_proto_ctx = http_proto::context{};
 
-        ssl_ctx.set_verify_mode(ssl::verify_none);
+        if(vm.count("insecure"))
+        {
+            ssl_ctx.set_verify_mode(ssl::verify_none);
+        }
+        else
+        {
+            ssl_ctx.set_default_verify_paths();
+            ssl_ctx.set_verify_mode(ssl::verify_peer);
+        }
 
         {
             http_proto::response_parser::config cfg;
