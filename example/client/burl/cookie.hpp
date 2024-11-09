@@ -77,6 +77,9 @@ public:
     std::string
     make_field(const urls::url_view& url);
 
+    void
+    clear_session_cookies();
+
     friend
     std::ostream&
     operator<<(std::ostream& os, const cookie_jar& cj);

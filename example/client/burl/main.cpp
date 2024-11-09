@@ -1243,6 +1243,7 @@ main(int argc, char* argv[])
                 "Pass custom header(s) to server")
             ("help,h", "produce help message")
             ("http1.0", "Use HTTP 1.0")
+            ("junk-session-cookies,j", "Ignore session cookies read from file")
             ("location,L", "Follow redirects")
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
@@ -1411,6 +1412,9 @@ main(int argc, char* argv[])
                 }
             }
         }
+
+        if(vm.count("junk-session-cookies") && cookie_jar.has_value())
+            cookie_jar->clear_session_cookies();
 
         asio::co_spawn(
             ioc,

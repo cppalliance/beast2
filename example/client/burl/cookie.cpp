@@ -313,6 +313,19 @@ cookie_jar::make_field(const urls::url_view& url)
     return rs;
 }
 
+void
+cookie_jar::clear_session_cookies()
+{
+    cookies_.erase(
+        std::remove_if(
+            cookies_.begin(),
+            cookies_.end(),
+            [](const pair_t& p) {
+                return !p.c.expires.has_value();
+            }),
+        cookies_.end());
+}
+
 std::ostream&
 operator<<(std::ostream& os, const cookie_jar& cj)
 {
