@@ -341,36 +341,41 @@ private:
     std::variant<plain_stream_type, ssl_stream_type> stream_;
 };
 
-class output_stream
+class any_ostream
 {
-    http_proto::file file_;
+    std::variant<std::ofstream, std::ostream*> stream_;
 
 public:
-    output_stream() = default;
-
-    explicit output_stream(core::string_view path)
+    any_ostream(core::string_view path)
     {
-        error_code ec;
-        file_.open(
-            std::string{ path }.c_str(),
-            http_proto::file_mode::write,
-            ec);
-        if(ec)
-            throw system_error{ ec };
+        if(path == "-")
+        {
+            stream_.emplace<std::ostream*>(&std::cout);
+        }
+        else if(path == "%")
+        {
+            stream_.emplace<std::ostream*>(&std::cerr);
+        }
+        else
+        {
+            auto& f= stream_.emplace<std::ofstream>();
+            f.exceptions(std::ofstream::failbit);
+            f.open(path);
+        }
     }
 
-    void
-    write(core::string_view sv)
-    {
-        if(file_.is_open())
-        {
-            error_code ec;
-            file_.write(sv.data(), sv.size(), ec);
-            if(ec)
-                throw system_error{ ec };
-            return;
-        }
-        std::cout.write(sv.data(), sv.size());
+    template <typename T>
+    any_ostream& operator<<(const T& data) {
+        std::visit(
+            [&](auto& s)
+            {
+                if constexpr(std::is_same_v<decltype(s), std::ofstream&>)
+                    s << data;
+                else
+                    *s << data;
+            },
+            stream_);
+        return *this;
     }
 };
 
@@ -1152,7 +1157,8 @@ create_request(
 asio::awaitable<void>
 request(
     const po::variables_map& vm,
-    output_stream& output,
+    any_ostream& body_output,
+    std::optional<any_ostream>& header_output,
     message& msg,
     std::optional<cookie_jar>& cookie_jar,
     core::string_view explicit_cookies,
@@ -1188,15 +1194,22 @@ request(
             request.set(field::cookie, field);
     };
 
-    auto extract_cookies = [&](
-        urls::url_view url,
-        http_proto::response_view response)
+    auto extract_cookies = [&](urls::url_view url)
     {
         if(!cookie_jar)
             return;
 
-        for(auto sv : response.find_all(field::set_cookie))
+        for(auto sv : parser.get().find_all(field::set_cookie))
             cookie_jar->add(url, parse_cookie(sv).value());
+    };
+
+    auto stream_headers = [&]()
+    {
+        if(vm.count("head") || vm.count("include"))
+            body_output << parser.get().buffer();
+
+        if(header_output.has_value())
+            header_output.value() << parser.get().buffer();
     };
 
     co_await connect_to(url);
@@ -1208,7 +1221,8 @@ request(
     parser.reset();
     parser.start();
     co_await http_io::async_read_header(stream, parser);
-    extract_cookies(url, parser.get());
+    extract_cookies(url);
+    stream_headers();
 
     // handle redirects
     auto referer = urls::url{ url };
@@ -1226,15 +1240,18 @@ request(
         {
             urls::url location = urls::parse_uri(it->value).value();
 
-            // Consume the body
-            co_await http_io::async_read(stream, parser);
-
             if(!can_reuse_connection(response, referer, location))
             {
                 if(!vm.count("proxy"))
                     co_await stream.async_shutdown(asio::as_tuple);
 
                 co_await connect_to(location);
+            }
+            else
+            {
+                // Consume the body
+                if(request.method() != http_proto::method::head)
+                    co_await http_io::async_read(stream, parser);
             }
 
             // Change the method according to RFC 9110, Section 15.4.4.
@@ -1262,17 +1279,14 @@ request(
             parser.reset();
             parser.start();
             co_await http_io::async_read_header(stream, parser);
-            extract_cookies(location, parser.get());
+            extract_cookies(location);
+            stream_headers();
         }
         else
         {
             throw std::runtime_error{ "Bad redirect response" };
         }
     }
-
-    // stream headers
-    if(vm.count("head") || vm.count("show-headers"))
-        output.write(parser.get().buffer());
 
     // stream body
     if(request.method() != http_proto::method::head)
@@ -1281,8 +1295,8 @@ request(
         {
             for(auto cb : parser.pull_body())
             {
-                output.write(
-                    { static_cast<const char*>(cb.data()), cb.size() });
+                body_output << core::string_view{
+                    static_cast<const char*>(cb.data()), cb.size() };
                 parser.consume_body(cb.size());
             }
 
@@ -1328,6 +1342,9 @@ main(int argc, char* argv[])
             ("data,d",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST data")
+            ("dump-header,D",
+                po::value<std::string>()->value_name("<filename>"),
+                "Write the received headers to <filename>")
             ("form,F",
                 po::value<std::vector<std::string>>()->value_name("<name=content>"),
                 "Specify multipart MIME data")
@@ -1363,7 +1380,7 @@ main(int argc, char* argv[])
                 po::value<std::string>()->value_name("<method>"),
                 "Specify request method to use")
             ("tcp-nodelay", "Use the TCP_NODELAY option")
-            ("show-headers,i", "Show response headers in the output")
+            ("include,i", "Include protocol response headers in the output")
             ("url",
                 po::value<std::string>()->value_name("<url>"),
                 "URL to work with")
@@ -1429,11 +1446,18 @@ main(int argc, char* argv[])
             http_proto::install_parser_service(http_proto_ctx, cfg);
         }
 
-        auto output = [&]
+        auto body_output = [&]()
         {
             if(vm.count("output"))
-                return output_stream{ vm.at("output").as<std::string>() };
-            return output_stream{};
+                return any_ostream{ vm.at("output").as<std::string>() };
+            return any_ostream{ "-" };
+        }();
+
+        auto header_output = [&]() -> std::optional<any_ostream>
+        {
+            if(vm.count("dump-header"))
+                return any_ostream{ vm.at("dump-header").as<std::string>() };
+            return std::nullopt;
         }();
 
         auto msg = message{};
@@ -1548,7 +1572,8 @@ main(int argc, char* argv[])
             ioc,
             request(
                 vm,
-                output,
+                body_output,
+                header_output,
                 msg,
                 cookie_jar,
                 explicit_cookies,
@@ -1566,9 +1591,8 @@ main(int argc, char* argv[])
 
         if(vm.count("cookie-jar"))
         {
-            auto ofs = std::ofstream{ vm.at("cookie-jar").as<std::string>() };
-            ofs.exceptions(std::ofstream::badbit);
-            ofs << cookie_jar.value();
+            auto s = any_ostream{ vm.at("cookie-jar").as<std::string>() };
+            s << cookie_jar.value();
         }
     }
     catch(std::exception const& e)
