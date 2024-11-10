@@ -256,6 +256,9 @@ cookie_jar::add(const urls::url_view& url, cookie c)
             c.path->push_back('/');
     }
 
+    if(c.secure && url.scheme_id() != urls::scheme::https)
+        return;
+
     cookies_.erase(
         std::remove_if(
             cookies_.begin(),
