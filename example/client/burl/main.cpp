@@ -384,7 +384,6 @@ class urlencoded_form
     std::string body_;
 
 public:
-    class source;
     void
     append_text(
         core::string_view name,
@@ -715,7 +714,6 @@ class json_body
     std::string body_;
 
 public:
-    class source;
     void
     append_text(core::string_view value) noexcept
     {
@@ -1354,6 +1352,7 @@ main(int argc, char* argv[])
             ("form,F",
                 po::value<std::vector<std::string>>()->value_name("<name=content>"),
                 "Specify multipart MIME data")
+            ("get,G", "Put the post data in the URL and use GET")
             ("head,I", "Show document info only")
             ("header,H",
                 po::value<std::vector<std::string>>()->value_name("<header>"),
@@ -1421,9 +1420,13 @@ main(int argc, char* argv[])
             return EXIT_FAILURE;
         }
 
-        auto url = urls::parse_uri(vm.at("url").as<std::string>());
-        if(url.has_error())
-            throw system_error{ url.error(), "Failed to parse URL" };
+        urls::url url = [&]()
+        {
+            auto rs = urls::parse_uri(vm.at("url").as<std::string>());
+            if(rs.has_error())
+                throw system_error{ rs.error(), "Failed to parse URL" };
+            return rs.value();
+        }();
 
         auto ioc            = asio::io_context{};
         auto ssl_ctx        = ssl::context{ ssl::context::tlsv12_client };
@@ -1504,29 +1507,46 @@ main(int argc, char* argv[])
 
         if(vm.count("data"))
         {
-            auto form = urlencoded_form{};
-            for(auto& data : vm.at("data").as<std::vector<std::string>>())
+            if(vm.count("get"))
             {
-                if(!data.empty() && data[0] == '@')
+                for(auto data : vm.at("data").as<std::vector<std::string>>())
                 {
-                    form.append_file(data.substr(1));
-                }
-                else
-                {
-                    if(auto pos = data.find('=');
-                        pos != std::string::npos)
+                    if(auto pos = data.find('='); pos != std::string::npos)
                     {
-                        form.append_text(
-                            data.substr(0, pos),
-                            data.substr(pos + 1));
+                        url.params().append(
+                            { data.substr(0, pos), data.substr(pos + 1) });
                     }
                     else
                     {
-                        form.append_text(data, "");
+                        url.params().append({ data, urls::no_value });
                     }
                 }
             }
-            msg = std::move(form);
+            else
+            {
+                auto form = urlencoded_form{};
+                for(auto& data : vm.at("data").as<std::vector<std::string>>())
+                {
+                    if(!data.empty() && data[0] == '@')
+                    {
+                        form.append_file(data.substr(1));
+                    }
+                    else
+                    {
+                        if(auto pos = data.find('='); pos != std::string::npos)
+                        {
+                            form.append_text(
+                                data.substr(0, pos),
+                                data.substr(pos + 1));
+                        }
+                        else
+                        {
+                            form.append_text(data, "");
+                        }
+                    }
+                }
+                msg = std::move(form);
+            }
         }
 
         if(vm.count("json"))
@@ -1585,8 +1605,8 @@ main(int argc, char* argv[])
                 explicit_cookies,
                 ssl_ctx,
                 http_proto_ctx,
-                create_request(vm, msg, url.value()),
-                url.value()),
+                create_request(vm, msg, url),
+                url),
             [](std::exception_ptr ep)
             {
                 if(ep)
