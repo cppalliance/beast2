@@ -1400,6 +1400,13 @@ main(int argc, char* argv[])
                 po::value<std::string>()->value_name("<method>"),
                 "Specify request method to use")
             ("tcp-nodelay", "Use the TCP_NODELAY option")
+            ("tls-max",
+                po::value<std::string>()->value_name("<version>"),
+                "Set maximum allowed TLS version")
+            ("tlsv1.0", "Use TLSv1.0 or greater")
+            ("tlsv1.1", "Use TLSv1.1 or greater")
+            ("tlsv1.2", "Use TLSv1.2 or greater")
+            ("tlsv1.3", "Use TLSv1.3 or greater")
             ("include,i", "Include protocol response headers in the output")
             ("url",
                 po::value<std::string>()->value_name("<url>"),
@@ -1444,8 +1451,34 @@ main(int argc, char* argv[])
         }();
 
         auto ioc            = asio::io_context{};
-        auto ssl_ctx        = ssl::context{ ssl::context::tlsv12_client };
+        auto ssl_ctx        = ssl::context{ ssl::context::tls_client };
         auto http_proto_ctx = http_proto::context{};
+
+        {
+            auto tls_min = 11;
+            auto tls_max = 13;
+
+            if(vm.count("tls-max"))
+            {
+                auto s = vm.at("tls-max").as<std::string>();
+                if(     s == "1.0") tls_max = 10;
+                else if(s == "1.1") tls_max = 11;
+                else if(s == "1.2") tls_max = 12;
+                else if(s == "1.3") tls_max = 13;
+                else throw std::runtime_error{ "Wrong TLS version" };
+            }
+
+            if(vm.count("tlsv1.0")) tls_min = 10;
+            if(vm.count("tlsv1.1")) tls_min = 11;
+            if(vm.count("tlsv1.2")) tls_min = 12;
+            if(vm.count("tlsv1.3")) tls_min = 13;
+
+            if(tls_min > 10                ) ssl_ctx.set_options(ssl_ctx.no_tlsv1);
+            if(tls_min > 11 || tls_max < 11) ssl_ctx.set_options(ssl_ctx.no_tlsv1_1);
+            if(tls_min > 12 || tls_max < 12) ssl_ctx.set_options(ssl_ctx.no_tlsv1_2);
+            if(tls_max < 13                ) ssl_ctx.set_options(ssl_ctx.no_tlsv1_3);
+        }
+
 
         if(vm.count("insecure"))
         {
