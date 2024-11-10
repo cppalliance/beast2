@@ -1330,6 +1330,12 @@ main(int argc, char* argv[])
     {
         auto odesc = po::options_description{"Options"};
         odesc.add_options()
+            ("cacert",
+                po::value<std::string>()->value_name("<file>"),
+                "CA certificate to verify peer against")
+            ("capath",
+                po::value<std::string>()->value_name("<dir>"),
+                "CA directory to verify peer against")
             ("compressed", "Request compressed response")
             ("connect-timeout",
                 po::value<float>()->value_name("<frac sec>"),
@@ -1438,7 +1444,21 @@ main(int argc, char* argv[])
         }
         else
         {
-            ssl_ctx.set_default_verify_paths();
+            if(vm.count("cacert"))
+            {
+                ssl_ctx.load_verify_file(
+                    vm.at("cacert").as<std::string>());
+            }
+            else if(vm.count("capath"))
+            {
+                ssl_ctx.add_verify_path(
+                    vm.at("capath").as<std::string>());
+            }
+            else
+            {
+                ssl_ctx.set_default_verify_paths();
+            }
+
             ssl_ctx.set_verify_mode(ssl::verify_peer);
         }
 
