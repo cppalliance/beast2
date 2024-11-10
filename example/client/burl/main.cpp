@@ -1336,6 +1336,9 @@ main(int argc, char* argv[])
             ("capath",
                 po::value<std::string>()->value_name("<dir>"),
                 "CA directory to verify peer against")
+            ("cert,E",
+                po::value<std::string>()->value_name("<certificate>"),
+                "Client certificate file")
             ("compressed", "Request compressed response")
             ("connect-timeout",
                 po::value<float>()->value_name("<frac sec>"),
@@ -1358,6 +1361,9 @@ main(int argc, char* argv[])
             ("form,F",
                 po::value<std::vector<std::string>>()->value_name("<name=content>"),
                 "Specify multipart MIME data")
+            ("key",
+                po::value<std::string>()->value_name("<key>"),
+                "Private key file")
             ("get,G", "Put the post data in the URL and use GET")
             ("head,I", "Show document info only")
             ("header,H",
@@ -1375,6 +1381,9 @@ main(int argc, char* argv[])
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
                 "Write to file instead of stdout")
+            ("pass",
+                po::value<std::string>()->value_name("<phrase>"),
+                "Passphrase for the private key")
             ("post301", "Do not switch to GET after following a 301")
             ("post302", "Do not switch to GET after following a 302")
             ("post303", "Do not switch to GET after following a 303")
@@ -1460,6 +1469,26 @@ main(int argc, char* argv[])
             }
 
             ssl_ctx.set_verify_mode(ssl::verify_peer);
+        }
+
+        if(vm.count("cert"))
+        {
+            ssl_ctx.use_certificate_file(
+                vm.at("cert").as<std::string>(),
+                ssl::context::file_format::pem);
+        }
+
+        if(vm.count("pass"))
+        {
+            ssl_ctx.set_password_callback(
+                [&](auto, auto) { return vm.at("pass").as<std::string>(); });
+        }
+
+        if(vm.count("key"))
+        {
+            ssl_ctx.use_private_key_file(
+                vm.at("key").as<std::string>(),
+                ssl::context::file_format::pem);
         }
 
         {
