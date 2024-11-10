@@ -1130,10 +1130,16 @@ create_request(
     if(vm.count("referer"))
         request.set(field::referer, vm.at("referer").as<std::string>());
 
-    if(vm.count("user"))
+    auto credentials = [&]()
     {
-        auto credentials = vm.at("user").as<std::string>();
-        auto basic_auth  = std::string{ "Basic " };
+        if(vm.count("user"))
+            return vm.at("user").as<std::string>();
+        return url.userinfo();
+    }();
+
+    if(!credentials.empty())
+    {
+        auto basic_auth = std::string{ "Basic " };
         base64_encode(basic_auth, credentials);
         request.set(field::authorization, basic_auth);
     }
