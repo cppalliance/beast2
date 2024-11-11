@@ -1242,20 +1242,32 @@ request(
         if(auto it = response.find(field::location);
            it != response.end())
         {
-            urls::url location = urls::parse_uri(it->value).value();
+            auto location = urls::url{};
 
-            if(!can_reuse_connection(response, referer, location))
+            urls::resolve(
+                referer,
+                urls::parse_uri_reference(it->value).value(),
+                location);
+
+            if(can_reuse_connection(response, referer, location))
+            {
+                // Discard body
+                if(request.method() != http_proto::method::head)
+                {
+                    while(!parser.is_complete())
+                    {
+                        parser.consume_body(
+                            buffers::buffer_size(parser.pull_body()));
+                        co_await http_io::async_read_some(stream, parser);
+                    }
+                }
+            }
+            else
             {
                 if(!vm.count("proxy"))
                     co_await stream.async_shutdown(asio::as_tuple);
 
                 co_await connect_to(location);
-            }
-            else
-            {
-                // Consume the body
-                if(request.method() != http_proto::method::head)
-                    co_await http_io::async_read(stream, parser);
             }
 
             // Change the method according to RFC 9110, Section 15.4.4.
@@ -1268,7 +1280,7 @@ request(
             }
             request.set_target(target(location));
             request.set(field::host, location.host());
-            request.set(field::referer, location);
+            request.set(field::referer, referer);
 
             // Update the cookies for the new url
             request.erase(field::cookie);
@@ -1699,8 +1711,8 @@ main(int argc, char* argv[])
 
         if(vm.count("cookie-jar"))
         {
-            auto s = any_ostream{ vm.at("cookie-jar").as<std::string>() };
-            s << cookie_jar.value();
+            any_ostream{ vm.at("cookie-jar").as<std::string>() }
+                << cookie_jar.value();
         }
     }
     catch(std::exception const& e)
