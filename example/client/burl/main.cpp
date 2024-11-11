@@ -359,22 +359,58 @@ public:
         else
         {
             auto& f= stream_.emplace<std::ofstream>();
-            f.exceptions(std::ofstream::failbit);
+            f.exceptions(std::ofstream::badbit);
             f.open(path);
+            if(!f.is_open())
+                throw std::runtime_error{ "Couldn't open file" };
         }
     }
 
+    operator std::ostream&()
+    {
+        if(auto* s = std::get_if<std::ofstream>(&stream_))
+            return *s;
+        return *std::get<std::ostream*>(stream_);
+    }
+
     template <typename T>
-    any_ostream& operator<<(const T& data) {
-        std::visit(
-            [&](auto& s)
-            {
-                if constexpr(std::is_same_v<decltype(s), std::ofstream&>)
-                    s << data;
-                else
-                    *s << data;
-            },
-            stream_);
+    std::ostream& operator<<(const T& data) {
+        static_cast<std::ostream&>(*this) << data;
+        return *this;
+    }
+};
+
+class any_istream
+{
+    std::variant<std::ifstream, std::istream*> stream_;
+
+public:
+    any_istream(core::string_view path)
+    {
+        if(path == "-")
+        {
+            stream_.emplace<std::istream*>(&std::cin);
+        }
+        else
+        {
+            auto& f= stream_.emplace<std::ifstream>();
+            f.exceptions(std::ifstream::badbit);
+            f.open(path);
+            if(!f.is_open())
+                throw std::runtime_error{ "Couldn't open file" };
+        }
+    }
+
+    operator std::istream&()
+    {
+        if(auto* s = std::get_if<std::ifstream>(&stream_))
+            return *s;
+        return *std::get<std::istream*>(stream_);
+    }
+
+    template <typename T>
+    std::istream& operator<<(T& data) {
+        static_cast<std::istream&>(*this) >> data;
         return *this;
     }
 };
@@ -385,7 +421,7 @@ class urlencoded_form
 
 public:
     void
-    append_text(
+    append(
         core::string_view name,
         core::string_view value) noexcept
     {
@@ -398,30 +434,19 @@ public:
     }
 
     void
-    append_file(core::string_view path)
+    append(std::istream& is)
     {
-        http_proto::file file;
-        error_code ec;
-
-        file.open(
-            std::string{ path }.c_str(),
-            http_proto::file_mode::read,
-            ec);
-        if(ec)
-            throw system_error{ ec };
-
         if(!body_.empty())
             body_ += '&';
 
         for(;;)
         {
             char buf[64 * 1024];
-            const auto read = file.read(buf, sizeof(buf), ec);
-            if(ec)
-                throw system_error{ ec };
-            if(read == 0)
+            is.read(buf, sizeof(buf));
+            if(is.gcount() == 0)
                 break;
-            append_encoded({ buf, read });
+            append_encoded(
+                { buf, static_cast<std::size_t>(is.gcount()) });
         }
     }
 
@@ -715,34 +740,15 @@ class json_body
 
 public:
     void
-    append_text(core::string_view value) noexcept
+    append(core::string_view value) noexcept
     {
         body_.append(value);
     }
 
     void
-    append_file(core::string_view path)
+    append(std::istream& is)
     {
-        http_proto::file file;
-        error_code ec;
-
-        file.open(
-            std::string{ path }.c_str(),
-            http_proto::file_mode::read,
-            ec);
-        if(ec)
-            throw system_error{ ec };
-
-        for(;;)
-        {
-            char buf[64 * 1024];
-            const auto read = file.read(buf, sizeof(buf), ec);
-            if(ec)
-                throw system_error{ ec };
-            if(read == 0)
-                break;
-            body_.append(buf, read);
-        }
+        body_.append(std::istreambuf_iterator<char>{ is }, {});
     }
 
     core::string_view
@@ -1623,19 +1629,19 @@ main(int argc, char* argv[])
                 {
                     if(!data.empty() && data[0] == '@')
                     {
-                        form.append_file(data.substr(1));
+                        form.append(any_istream{ data.substr(1) });
                     }
                     else
                     {
                         if(auto pos = data.find('='); pos != std::string::npos)
                         {
-                            form.append_text(
+                            form.append(
                                 data.substr(0, pos),
                                 data.substr(pos + 1));
                         }
                         else
                         {
-                            form.append_text(data, "");
+                            form.append(data, "");
                         }
                     }
                 }
@@ -1648,13 +1654,16 @@ main(int argc, char* argv[])
             auto body = json_body{};
             for(auto& data : vm.at("json").as<std::vector<std::string>>())
             {
-                if(!data.empty() && data[0] == '@')
+                if(data.empty())
+                    continue;
+
+                if(data[0] == '@')
                 {
-                    body.append_file(data.substr(1));
+                    body.append(any_istream{ data.substr(1) });
                 }
                 else
                 {
-                    body.append_text(data);
+                    body.append(data);
                 }
             }
             msg = std::move(body);
@@ -1670,17 +1679,16 @@ main(int argc, char* argv[])
         {
             for(auto& option : vm.at("cookie").as<std::vector<std::string>>())
             {
+                // empty options are allowerd and just activates cookie engine
                 if(option.find('=') != std::string::npos)
                 {
                     if(!explicit_cookies.ends_with(';'))
                         explicit_cookies.push_back(';');
                     explicit_cookies.append(option);
                 }
-                else
+                else if(!option.empty())
                 {
-                    auto ifs = std::ifstream{ option };
-                    ifs.exceptions(std::ifstream::badbit);
-                    ifs >> cookie_jar.value();
+                    any_istream{ option } >> cookie_jar.value();
                 }
             }
         }
