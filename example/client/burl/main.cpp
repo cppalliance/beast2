@@ -7,37 +7,29 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
+#include "any_iostream.hpp"
+#include "any_stream.hpp"
+#include "base64.hpp"
+#include "connect.hpp"
 #include "cookie.hpp"
+#include "mime_type.hpp"
+#include "multipart_form.hpp"
+#include "urlencoded_form.hpp"
 
-#include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
+#include <boost/asio/as_tuple.hpp>
+#include <boost/asio/awaitable.hpp>
+#include <boost/asio/cancel_after.hpp>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/read.hpp>
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
-#include <boost/program_options.hpp>
-#include <boost/url.hpp>
+#include <boost/url/parse.hpp>
+#include <boost/url/url.hpp>
 
 #include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <random>
 
-#if defined(BOOST_ASIO_HAS_CO_AWAIT)
-
-#include <variant>
-#include <optional>
-
-namespace asio       = boost::asio;
-namespace buffers    = boost::buffers;
-namespace core       = boost::core;
-namespace http_io    = boost::http_io;
-namespace http_proto = boost::http_proto;
-namespace po         = boost::program_options;
-namespace ssl        = boost::asio::ssl;
-namespace urls       = boost::urls;
-namespace ch         = std::chrono;
-
-using error_code   = boost::system::error_code;
+namespace http_io  = boost::http_io;
 using system_error = boost::system::system_error;
 
 #ifdef BOOST_HTTP_PROTO_HAS_ZLIB
@@ -47,82 +39,12 @@ inline const bool http_proto_has_zlib = false;
 #endif
 
 core::string_view
-mime_type(core::string_view path) noexcept
-{
-    const auto ext = [&path]
-    {
-        const auto pos = path.rfind(".");
-        if(pos == core::string_view::npos)
-            return core::string_view{};
-        return path.substr(pos);
-    }();
-
-    namespace ug = urls::grammar;
-    if(ug::ci_is_equal(ext, ".gif"))  return "image/gif";
-    if(ug::ci_is_equal(ext, ".jpg"))  return "image/jpeg";
-    if(ug::ci_is_equal(ext, ".jpeg")) return "image/jpeg";
-    if(ug::ci_is_equal(ext, ".png"))  return "image/png";
-    if(ug::ci_is_equal(ext, ".svg"))  return "image/svg+xml";
-    if(ug::ci_is_equal(ext, ".txt"))  return "text/plain";
-    if(ug::ci_is_equal(ext, ".htm"))  return "text/html";
-    if(ug::ci_is_equal(ext, ".html")) return "text/html";
-    if(ug::ci_is_equal(ext, ".pdf"))  return "application/pdf";
-    if(ug::ci_is_equal(ext, ".xml"))  return "application/xml";
-    return "application/octet-stream";
-}
-
-core::string_view
-filename(core::string_view path) noexcept
-{
-    const auto pos = path.find_last_of("/\\");
-    if((pos != std::string_view::npos))
-        return path.substr(pos + 1);
-    return path;
-}
-
-std::uint64_t
-filesize(core::string_view path)
-{
-    http_proto::file file;
-    boost::system::error_code ec;
-
-    file.open(
-        std::string{ path }.c_str(),
-        http_proto::file_mode::scan,
-        ec);
-    if(ec)
-        throw system_error{ ec };
-
-    const auto size = file.size(ec);
-    if(ec)
-        throw system_error{ ec };
-
-    return size;
-}
-
-core::string_view
-target(urls::url_view url) noexcept
+target(const urls::url_view& url) noexcept
 {
     if(url.encoded_target().empty())
         return "/";
 
     return url.encoded_target();
-}
-
-core::string_view
-effective_port(urls::url_view url)
-{
-    if(url.has_port())
-        return url.port();
-
-    if(url.scheme_id() == urls::scheme::https)
-        return "443";
-
-    if(url.scheme_id() ==  urls::scheme::http)
-        return "80";
-
-    throw std::runtime_error{
-        "Unsupported scheme" };
 }
 
 struct is_redirect_result
@@ -158,8 +80,8 @@ is_redirect(
 bool
 can_reuse_connection(
     http_proto::response_view response,
-    urls::url_view a,
-    urls::url_view b) noexcept
+    const urls::url_view& a,
+    const urls::url_view& b) noexcept
 {
     if(a.encoded_origin() != b.encoded_origin())
         return false;
@@ -172,567 +94,6 @@ can_reuse_connection(
 
     return true;
 }
-
-void
-base64_encode(std::string& dest, core::string_view src)
-{
-    // Adapted from Boost.Beast project
-    char const* in = static_cast<char const*>(src.data());
-    static char constexpr tab[] = {
-        "ABCDEFGHIJKLMNOP"
-        "QRSTUVWXYZabcdef"
-        "ghijklmnopqrstuv"
-        "wxyz0123456789+/"
-    };
-
-    for(auto n = src.size() / 3; n--;)
-    {
-        dest.append({
-            tab[(in[0] & 0xfc) >> 2],
-            tab[((in[0] & 0x03) << 4) + ((in[1] & 0xf0) >> 4)],
-            tab[((in[2] & 0xc0) >> 6) + ((in[1] & 0x0f) << 2)],
-            tab[in[2] & 0x3f] });
-        in += 3;
-    }
-
-    switch(src.size() % 3)
-    {
-    case 2:
-        dest.append({
-            tab[ (in[0] & 0xfc) >> 2],
-            tab[((in[0] & 0x03) << 4) + ((in[1] & 0xf0) >> 4)],
-            tab[                         (in[1] & 0x0f) << 2],
-            '=' });
-        break;
-    case 1:
-        dest.append({
-            tab[ (in[0] & 0xfc) >> 2],
-            tab[((in[0] & 0x03) << 4)],
-            '=',
-            '=' });
-        break;
-    case 0:
-        break;
-    }
-}
-
-class any_stream
-{
-public:
-    using executor_type     = asio::any_io_executor;
-    using plain_stream_type = asio::ip::tcp::socket;
-    using ssl_stream_type   = ssl::stream<plain_stream_type>;
-
-    any_stream(plain_stream_type stream)
-        : stream_{ std::move(stream) }
-    {
-    }
-
-    any_stream(ssl_stream_type stream)
-        : stream_{ std::move(stream) }
-    {
-    }
-
-    executor_type
-    get_executor() noexcept
-    {
-        return std::visit([](auto& s) { return s.get_executor(); }, stream_);
-    }
-
-    template<
-        typename ConstBufferSequence,
-        typename CompletionToken =
-            asio::default_completion_token_t<executor_type>>
-    auto
-    async_write_some(
-        const ConstBufferSequence& buffers,
-        CompletionToken&& token =
-            asio::default_completion_token_t<executor_type>{})
-    {
-        return boost::asio::async_compose<
-            CompletionToken,
-            void(error_code, size_t)>(
-            [this, buffers, init = false](
-                auto&& self,
-                error_code ec = {},
-                size_t n      = 0) mutable
-            {
-                if(std::exchange(init, true))
-                    return self.complete(ec, n);
-
-                std::visit(
-                    [&](auto& s)
-                    { s.async_write_some(buffers, std::move(self)); },
-                    stream_);
-            },
-            token,
-            get_executor());
-    }
-
-    template<
-        typename MutableBufferSequence,
-        typename CompletionToken =
-            asio::default_completion_token_t<executor_type>>
-    auto
-    async_read_some(
-        const MutableBufferSequence& buffers,
-        CompletionToken&& token =
-            asio::default_completion_token_t<executor_type>{})
-    {
-        return boost::asio::async_compose<
-            CompletionToken,
-            void(error_code, size_t)>(
-            [this, buffers, init = false](
-                auto&& self,
-                error_code ec = {},
-                size_t n      = 0) mutable
-            {
-                if(std::exchange(init, true))
-                    return self.complete(ec, n);
-
-                std::visit(
-                    [&](auto& s)
-                    { s.async_read_some(buffers, std::move(self)); },
-                    stream_);
-            },
-            token,
-            get_executor());
-    }
-
-    template<
-        typename CompletionToken =
-            asio::default_completion_token_t<executor_type>>
-    auto
-    async_shutdown(
-        CompletionToken&& token =
-            asio::default_completion_token_t<executor_type>{})
-    {
-        return boost::asio::
-            async_compose<CompletionToken, void(error_code)>(
-                [this, init = false](
-                    auto&& self, error_code ec = {}) mutable
-                {
-                    if(std::exchange(init, true))
-                        return self.complete(ec);
-
-                    std::visit(
-                        [&](auto& s)
-                        {
-                            if constexpr(
-                                std::is_same_v<decltype(s),ssl_stream_type&>)
-                            {
-                                s.async_shutdown(std::move(self));
-                            }
-                            else
-                            {
-                                s.close(ec);
-                                asio::async_immediate(
-                                    s.get_executor(),
-                                    asio::append(std::move(self), ec));
-                            }
-                        },
-                        stream_);
-                },
-                token,
-                get_executor());
-    }
-
-private:
-    std::variant<plain_stream_type, ssl_stream_type> stream_;
-};
-
-class any_ostream
-{
-    std::variant<std::ofstream, std::ostream*> stream_;
-
-public:
-    any_ostream(core::string_view path)
-    {
-        if(path == "-")
-        {
-            stream_.emplace<std::ostream*>(&std::cout);
-        }
-        else if(path == "%")
-        {
-            stream_.emplace<std::ostream*>(&std::cerr);
-        }
-        else
-        {
-            auto& f= stream_.emplace<std::ofstream>();
-            f.exceptions(std::ofstream::badbit);
-            f.open(path);
-            if(!f.is_open())
-                throw std::runtime_error{ "Couldn't open file" };
-        }
-    }
-
-    operator std::ostream&()
-    {
-        if(auto* s = std::get_if<std::ofstream>(&stream_))
-            return *s;
-        return *std::get<std::ostream*>(stream_);
-    }
-
-    template <typename T>
-    std::ostream& operator<<(const T& data) {
-        static_cast<std::ostream&>(*this) << data;
-        return *this;
-    }
-};
-
-class any_istream
-{
-    std::variant<std::ifstream, std::istream*> stream_;
-
-public:
-    any_istream(core::string_view path)
-    {
-        if(path == "-")
-        {
-            stream_.emplace<std::istream*>(&std::cin);
-        }
-        else
-        {
-            auto& f= stream_.emplace<std::ifstream>();
-            f.exceptions(std::ifstream::badbit);
-            f.open(path);
-            if(!f.is_open())
-                throw std::runtime_error{ "Couldn't open file" };
-        }
-    }
-
-    operator std::istream&()
-    {
-        if(auto* s = std::get_if<std::ifstream>(&stream_))
-            return *s;
-        return *std::get<std::istream*>(stream_);
-    }
-
-    template <typename T>
-    std::istream& operator<<(T& data) {
-        static_cast<std::istream&>(*this) >> data;
-        return *this;
-    }
-};
-
-class urlencoded_form
-{
-    std::string body_;
-
-public:
-    void
-    append(
-        core::string_view name,
-        core::string_view value) noexcept
-    {
-        if(!body_.empty())
-            body_ += '&';
-        body_ += name;
-        if(!value.empty())
-            body_ += '=';
-        append_encoded(value);
-    }
-
-    void
-    append(std::istream& is)
-    {
-        if(!body_.empty())
-            body_ += '&';
-
-        for(;;)
-        {
-            char buf[64 * 1024];
-            is.read(buf, sizeof(buf));
-            if(is.gcount() == 0)
-                break;
-            append_encoded(
-                { buf, static_cast<std::size_t>(is.gcount()) });
-        }
-    }
-
-    core::string_view
-    content_type() const noexcept
-    {
-        return "application/x-www-form-urlencoded";
-    }
-
-    std::size_t
-    content_length() const noexcept
-    {
-        return body_.size();
-    }
-
-    buffers::const_buffer
-    body() const noexcept
-    {
-        return { body_.data(), body_.size() };
-    }
-
-private:
-    void
-    append_encoded(core::string_view sv)
-    {
-        urls::encoding_opts opt;
-        opt.space_as_plus = true;
-        urls::encode(
-            sv,
-            urls::pchars,
-            opt,
-            urls::string_token::append_to(body_));
-    }
-};
-
-class multipart_form
-{
-    struct part_t
-    {
-        core::string_view name;
-        core::string_view value_or_path;
-        core::string_view content_type;
-        std::optional<std::uint64_t> file_size;
-    };
-
-    // boundary with extra "--" prefix and postfix.
-    std::array<char, 2 + 46 + 2> storage_{ generate_boundary() };
-    std::vector<part_t> parts_;
-
-    static constexpr core::string_view content_disposition_ =
-        "\r\nContent-Disposition: form-data; name=\"";
-    static constexpr core::string_view filename_ =
-        "; filename=\"";
-    static constexpr core::string_view content_type_ =
-        "\r\nContent-Type: ";
-
-public:
-    class source;
-
-    void
-    append_text(
-        core::string_view name,
-        core::string_view value,
-        core::string_view content_type)
-    {
-        parts_.emplace_back(name, value, content_type );
-    }
-
-    void
-    append_file(
-        core::string_view name,
-        core::string_view path,
-        core::string_view content_type)
-    {
-        // store size because file may change on disk between
-        // call to content_length and serialization.
-        parts_.emplace_back(
-            name, path, content_type, filesize(path));
-    }
-
-    std::string
-    content_type() const noexcept
-    {
-        std::string res = "multipart/form-data; boundary=";
-        // append boundary
-        res.append(storage_.begin() + 2, storage_.end() - 2);
-        return res;
-    }
-
-    std::uint64_t
-    content_length() const noexcept
-    {
-        auto rs = std::uint64_t{};
-        for(const auto& part : parts_)
-        {
-            rs += storage_.size() - 2; // --boundary
-            rs += content_disposition_.size();
-            rs += part.name.size();
-            rs += 1; // closing double quote
-
-            if(!part.content_type.empty())
-            {
-                rs += content_type_.size();
-                rs += part.content_type.size();
-            }
-
-            if(part.file_size.has_value()) // file
-            {
-                rs += filename_.size();
-                rs += filename(part.value_or_path).size();
-                rs += 1; // closing double quote
-                rs += part.file_size.value();
-            }
-            else // text
-            {
-                rs += part.value_or_path.size();
-            }
-
-            rs += 4; // <CRLF><CRLF> after header
-            rs += 2; // <CRLF> after content
-        }
-        rs += storage_.size(); // --boundary--
-        return rs;
-    }
-
-private:
-    static
-    decltype(storage_)
-    generate_boundary()
-    {
-        decltype(storage_) rs;
-        constexpr static char chars[] =
-            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        static std::random_device rd;
-        std::uniform_int_distribution<int> dist{ 0, sizeof(chars) - 2 };
-        std::fill(rs.begin(), rs.end(), '-');
-        std::generate(
-            rs.begin() + 2 + 24,
-            rs.end() - 2,
-            [&] {  return chars[dist(rd)]; });
-        return rs;
-    }
-};
-
-class multipart_form::source
-    : public http_proto::source
-{
-    const multipart_form* form_;
-    std::vector<part_t>::const_iterator it_{ form_->parts_.begin() };
-    int step_           = 0;
-    std::uint64_t skip_ = 0;
-
-public:
-    explicit source(const multipart_form* form) noexcept
-        : form_{ form }
-    {
-    }
-
-    results
-    on_read(buffers::mutable_buffer mb) override
-    {
-        auto rs = results{};
-
-        auto copy = [&](core::string_view sv)
-        {
-            auto copied = buffers::buffer_copy(
-                mb,
-                buffers::sans_prefix(
-                    buffers::const_buffer{ sv.data(), sv.size() },
-                    static_cast<std::size_t>(skip_)));
-
-            mb = buffers::sans_prefix(mb, copied);
-            rs.bytes += copied;
-            skip_    += copied;
-
-            if(skip_ != sv.size())
-                return false;
-
-            skip_ = 0;
-            return true;
-        };
-
-        auto read = [&](core::string_view path, uint64_t size)
-        {
-            http_proto::file file;
-
-            file.open(
-                std::string{ path }.c_str(),
-                http_proto::file_mode::read,
-                rs.ec);
-            if(rs.ec)
-                return false;
-
-            file.seek(skip_, rs.ec);
-            if(rs.ec)
-                return false;
-
-            auto read = file.read(
-                mb.data(),
-                (std::min)(static_cast<
-                    std::uint64_t>(mb.size()), size),
-                rs.ec);
-            if(rs.ec)
-                return false;
-
-            mb = buffers::sans_prefix(mb, read);
-            rs.bytes += read;
-            skip_    += read;
-
-            if(skip_ != size)
-                return false;
-
-            skip_ = 0;
-            return true;
-        };
-
-        while(it_ != form_->parts_.end())
-        {
-            switch(step_)
-            {
-            case 0:
-                // --boundary
-                if(!copy({ form_->storage_.data(),
-                    form_->storage_.size() - 2 })) return rs;
-                ++step_;
-            case 1:
-                if(!copy(content_disposition_)) return rs;
-                ++step_;
-            case 2:
-                if(!copy(it_->name)) return rs;
-                ++step_;
-            case 3:
-                if(!copy("\"")) return rs;
-                ++step_;
-            case 4:
-                if(!it_->file_size.has_value())
-                    goto content_type;
-                if(!copy(filename_)) return rs;
-                ++step_;
-            case 5:
-                if(!copy(filename(it_->value_or_path))) return rs;
-                ++step_;
-            case 6:
-                if(!copy("\"")) return rs;
-                ++step_;
-            case 7:
-            content_type:
-                if(it_->content_type.empty())
-                    goto end_of_header;
-                if(!copy(content_type_)) return rs;
-                ++step_;
-            case 8:
-                if(!copy(it_->content_type)) return rs;
-                ++step_;
-            case 9:
-            end_of_header:
-                if(!copy("\r\n\r\n")) return rs;
-                ++step_;
-            case 10:
-                if(it_->file_size)
-                {
-                    if(!read(
-                        it_->value_or_path,
-                        it_->file_size.value())) return rs;
-                }
-                else
-                {
-                    if(!copy(it_->value_or_path)) return rs;
-                }
-                ++step_;
-            case 11:
-                if(!copy("\r\n"))
-                    return rs;
-                step_ = 0;
-                ++it_;
-            }
-        }
-
-        // --boundary--
-        if(!copy({ form_->storage_.data(),
-            form_->storage_.size() })) return rs;
-
-        rs.finished = true;
-        return rs;
-    };
-};
 
 class json_body
 {
@@ -843,254 +204,11 @@ public:
     }
 };
 
-asio::awaitable<void>
-connect_socks5_proxy(
-    asio::ip::tcp::socket& stream,
-    urls::url_view url,
-    urls::url_view proxy)
-{
-    auto executor = co_await asio::this_coro::executor;
-    auto resolver = asio::ip::tcp::resolver{ executor };
-    auto rresults = co_await resolver.async_resolve(
-        proxy.host(), effective_port(proxy));
-
-    // Connect to the proxy server
-    co_await asio::async_connect(stream, rresults);
-
-    // Greeting request
-    if(proxy.has_userinfo())
-    {
-        std::uint8_t greeting_req[4] = { 0x05, 0x02, 0x00, 0x02 };
-        co_await asio::async_write(stream, asio::buffer(greeting_req));
-    }
-    else
-    {
-        std::uint8_t greeting_req[3] = { 0x05, 0x01, 0x00 };
-        co_await asio::async_write(stream, asio::buffer(greeting_req));
-    }
-
-    // Greeting response
-    std::uint8_t greeting_resp[2];
-    co_await asio::async_read(stream, asio::buffer(greeting_resp));
-
-    if(greeting_resp[0] != 0x05)
-        throw std::runtime_error{ "SOCKS5 invalid version" };
-
-    switch(greeting_resp[1])
-    {
-    case 0x00: // No Authentication
-        break;
-    case 0x02: // Username/password
-    {
-        // Authentication request
-        auto auth_req = std::string{ 0x01 };
-
-        auto user = proxy.encoded_user();
-        auth_req.push_back(static_cast<std::uint8_t>(user.decoded_size()));
-        user.decode({}, urls::string_token::append_to(auth_req));
-
-        auto pass = proxy.encoded_password();
-        auth_req.push_back(static_cast<std::uint8_t>(pass.decoded_size()));
-        pass.decode({}, urls::string_token::append_to(auth_req));
-
-        co_await asio::async_write(stream, asio::buffer(auth_req));
-
-        // Authentication response
-        std::uint8_t greeting_resp[2];
-        co_await asio::async_read(stream, asio::buffer(greeting_resp));
-
-        if(greeting_resp[1] != 0x00)
-            throw std::runtime_error{
-                "SOCKS5 authentication failed" };
-        break;
-    }
-    default:
-        throw std::runtime_error{
-            "SOCKS5 no acceptable authentication method"
-        };
-    }
-
-    // Connection request
-    auto conn_req = std::string{ 0x05, 0x01, 0x00, 0x03 };
-    auto host     = url.encoded_host();
-    conn_req.push_back(static_cast<std::uint8_t>(host.decoded_size()));
-    host.decode({}, urls::string_token::append_to(conn_req));
-
-    std::uint16_t port = std::stoi(effective_port(url));
-    conn_req.push_back(static_cast<std::uint8_t>((port >> 8) & 0xFF));
-    conn_req.push_back(static_cast<std::uint8_t>(port & 0xFF));
-
-    co_await asio::async_write(stream, asio::buffer(conn_req));
-
-    // Connection response
-    std::uint8_t conn_resp_head[5];
-    co_await asio::async_read(stream, asio::buffer(conn_resp_head));
-
-    if(conn_resp_head[1] != 0x00)
-        throw std::runtime_error{
-            "SOCKS5 connection request failed" };
-
-    std::string conn_resp_tail;
-    conn_resp_tail.resize(
-        [&]()
-        {
-            // subtract 1 because we have pre-read one byte
-            switch(conn_resp_head[3])
-            {
-            case 0x01:
-                return 4 + 2 - 1; // ipv4 + port
-            case 0x03:
-                return conn_resp_head[4] + 2 - 1; // domain name + port
-            case 0x04:
-                return 16 + 2 - 1; // ipv6 + port
-            default:
-                throw std::runtime_error{
-                    "SOCKS5 invalid address type" };
-            }
-        }()); 
-    co_await asio::async_read(stream, asio::buffer(conn_resp_tail));
-}
-
-asio::awaitable<void>
-connect_http_proxy(
-    const po::variables_map& vm,
-    http_proto::context& http_proto_ctx,
-    asio::ip::tcp::socket& stream,
-    urls::url_view url,
-    urls::url_view proxy)
-{
-    auto executor = co_await asio::this_coro::executor;
-    auto resolver = asio::ip::tcp::resolver{ executor };
-    auto rresults = co_await resolver.async_resolve(
-        proxy.host(), effective_port(proxy));
-
-    // Connect to the proxy server
-    co_await asio::async_connect(stream, rresults);
-
-    using field    = http_proto::field;
-    auto request   = http_proto::request{};
-    auto host_port = [&]()
-    {
-        auto rs = url.encoded_host().decode();
-        rs.push_back(':');
-        rs.append(effective_port(url));
-        return rs;
-    }();
-
-    request.set_method(http_proto::method::connect);
-    request.set_target(host_port);
-    request.set(field::host, host_port);
-    request.set(field::proxy_connection, "keep-alive");
-
-    if(vm.count("user-agent"))
-    {
-        request.set(
-            field::user_agent,
-            vm.at("user-agent").as<std::string>());
-    }
-    else
-    {
-        request.set(field::user_agent, "Boost.Http.Io");
-    }
-
-    if(proxy.has_userinfo())
-    {
-        auto credentials = proxy.encoded_userinfo().decode();
-        auto basic_auth  = std::string{ "Basic " };
-        base64_encode(basic_auth, credentials);
-        request.set(field::proxy_authorization, basic_auth);
-    }
-
-    auto serializer = http_proto::serializer{ http_proto_ctx };
-    auto parser     = http_proto::response_parser{ http_proto_ctx };
-
-    serializer.start(request);
-    co_await http_io::async_write(stream, serializer);
-
-    parser.reset();
-    parser.start();
-    co_await http_io::async_read_header(stream, parser);
-
-    if(parser.get().status() != http_proto::status::ok)
-        throw std::runtime_error{
-            "Proxy server rejected the connection" };
-}
-
-asio::awaitable<void>
-connect(
-    const po::variables_map& vm,
-    ssl::context& ssl_ctx,
-    http_proto::context& http_proto_ctx,
-    any_stream& stream,
-    urls::url_view url)
-{
-    auto executor = co_await asio::this_coro::executor;
-    auto socket   = asio::ip::tcp::socket{ executor };
-
-    if(vm.count("proxy"))
-    {
-        auto proxy_url = urls::parse_uri(vm.at("proxy").as<std::string>());
-
-        if(proxy_url.has_error())
-            throw system_error{ proxy_url.error(), "Failed to parse proxy" };
-
-        if(proxy_url->scheme() == "http")
-        {
-            co_await connect_http_proxy(
-                vm, http_proto_ctx, socket, url, proxy_url.value());
-        }
-        else if(proxy_url->scheme() == "socks5")
-        {
-            co_await connect_socks5_proxy(
-                socket, url, proxy_url.value());
-        }
-        else
-        {
-            throw std::runtime_error{
-                "only HTTP and SOCKS5 proxies are supported" };
-        }
-    }
-    else // no proxy
-    {
-        auto resolver = asio::ip::tcp::resolver{ executor };
-        auto rresults = co_await resolver.async_resolve(
-            url.host(), effective_port(url));
-        co_await asio::async_connect(socket, rresults);
-    }
-
-    if(vm.count("tcp-nodelay"))
-        socket.set_option(asio::ip::tcp::no_delay{ true });
-
-    if(vm.count("no-keepalive"))
-        socket.set_option(asio::ip::tcp::socket::keep_alive{ false });
-
-    // TLS handshake
-    if(url.scheme_id() == urls::scheme::https)
-    {
-        auto ssl_stream = ssl::stream<asio::ip::tcp::socket>{
-            std::move(socket), ssl_ctx };
-
-        auto host = std::string{ url.host() };
-        if(!SSL_set_tlsext_host_name(
-            ssl_stream.native_handle(), host.c_str()))
-        {
-            throw system_error{ static_cast<int>(::ERR_get_error()),
-                asio::error::get_ssl_category() };
-        }
-
-        co_await ssl_stream.async_handshake(ssl::stream_base::client);
-        stream = std::move(ssl_stream);
-        co_return ;
-    }
-
-    stream = std::move(socket);
-}
-
 http_proto::request
 create_request(
     const po::variables_map& vm,
     const message& msg,
-    urls::url_view url)
+    const urls::url_view& url)
 {
     using field   = http_proto::field;
     using method  = http_proto::method;
@@ -1175,7 +293,7 @@ request(
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
     http_proto::request request,
-    urls::url_view url)
+    const urls::url_view& url)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
@@ -1185,6 +303,7 @@ request(
 
     auto connect_to = [&](const urls::url_view& url)
     {
+        namespace ch = std::chrono;
         auto timeout = vm.count("connect-timeout")
             ? ch::duration_cast<ch::steady_clock::duration>(
                 ch::duration<float>(vm.at("connect-timeout").as<float>()))
@@ -1196,7 +315,7 @@ request(
             asio::cancel_after(timeout));
     };
 
-    auto set_cookies = [&](urls::url_view url)
+    auto set_cookies = [&](const urls::url_view& url)
     {
         auto field = cookie_jar ? cookie_jar->make_field(url) : std::string{};
         field.append(explicit_cookies);
@@ -1204,7 +323,7 @@ request(
             request.set(field::cookie, field);
     };
 
-    auto extract_cookies = [&](urls::url_view url)
+    auto extract_cookies = [&](const urls::url_view& url)
     {
         if(!cookie_jar)
             return;
@@ -1589,11 +708,11 @@ main(int argc, char* argv[])
                         form.append_file(
                             name,
                             value.substr(1),
-                            mime_type(value.substr(1)));
+                            std::string{ mime_type(value.substr(1)) });
                     }
                     else
                     {
-                        form.append_text(name, value, "");
+                        form.append_text(name, value, boost::none);
                     }
                 }
                 else
@@ -1730,14 +849,3 @@ main(int argc, char* argv[])
     }
     return EXIT_SUCCESS;
 }
-
-#else
-
-int
-main(int, char*[])
-{
-    std::cerr << "Coroutine examples require C++20" << std::endl;
-    return EXIT_FAILURE;
-}
-
-#endif

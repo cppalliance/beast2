@@ -7,31 +7,33 @@
 # Official repository: https://github.com/cppalliance/http_io
 #
 
-file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp
-    CMakeLists.txt
-    Jamfile)
+if (CMAKE_CXX_STANDARD EQUAL 20)
+    file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp
+        CMakeLists.txt
+        Jamfile)
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
 
-add_executable(http_io_example_client_burl ${PFILES})
+    add_executable(http_io_example_client_burl ${PFILES})
 
-target_compile_definitions(http_io_example_client_burl
-    PRIVATE BOOST_ASIO_NO_DEPRECATED)
+    target_compile_definitions(http_io_example_client_burl
+        PRIVATE BOOST_ASIO_NO_DEPRECATED)
 
-set_property(TARGET http_io_example_client_burl
-    PROPERTY FOLDER "examples")
+    set_property(TARGET http_io_example_client_burl
+        PROPERTY FOLDER "examples")
 
-find_package(OpenSSL REQUIRED)
-find_package(ZLIB)
+    find_package(OpenSSL REQUIRED)
+    find_package(ZLIB)
 
-target_link_libraries(http_io_example_client_burl
-    Boost::http_io
-    Boost::http_proto
-    Boost::program_options
-    OpenSSL::SSL
-    OpenSSL::Crypto)
-
-if (ZLIB_FOUND)
     target_link_libraries(http_io_example_client_burl
-        Boost::http_proto_zlib)
+        Boost::http_io
+        Boost::http_proto
+        Boost::program_options
+        OpenSSL::SSL
+        OpenSSL::Crypto)
+
+    if (ZLIB_FOUND)
+        target_link_libraries(http_io_example_client_burl
+            Boost::http_proto_zlib)
+    endif()
 endif()
