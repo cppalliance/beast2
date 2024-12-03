@@ -20,6 +20,7 @@
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/co_spawn.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
