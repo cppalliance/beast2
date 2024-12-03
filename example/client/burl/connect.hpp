@@ -24,12 +24,11 @@ namespace po         = boost::program_options;
 namespace ssl        = boost::asio::ssl;
 namespace urls       = boost::urls;
 
-asio::awaitable<void>
+asio::awaitable<any_stream>
 connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
-    any_stream& stream,
     const urls::url_view& url);
 
 #endif

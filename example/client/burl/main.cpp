@@ -296,15 +296,14 @@ request(
     http_proto::request request,
     const urls::url_view& url)
 {
+    namespace ch    = std::chrono;
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto parser     = http_proto::response_parser{ http_proto_ctx };
     auto serializer = http_proto::serializer{ http_proto_ctx };
-    auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
 
     auto connect_to = [&](const urls::url_view& url)
     {
-        namespace ch = std::chrono;
         auto timeout = vm.count("connect-timeout")
             ? ch::duration_cast<ch::steady_clock::duration>(
                 ch::duration<float>(vm.at("connect-timeout").as<float>()))
@@ -312,7 +311,7 @@ request(
 
         return asio::co_spawn(
             executor,
-            connect(vm, ssl_ctx, http_proto_ctx, stream, url),
+            connect(vm, ssl_ctx, http_proto_ctx, url),
             asio::cancel_after(timeout));
     };
 
@@ -342,7 +341,7 @@ request(
             header_output.value() << parser.get().buffer();
     };
 
-    co_await connect_to(url);
+    auto stream = co_await connect_to(url);
 
     set_cookies(url);
     msg.start_serializer(serializer, request);
@@ -377,7 +376,7 @@ request(
 
             if(can_reuse_connection(response, referer, location))
             {
-                // Discard body
+                // Discard the body
                 if(request.method() != http_proto::method::head)
                 {
                     while(!parser.is_complete())
@@ -390,10 +389,13 @@ request(
             }
             else
             {
+                // clean shutdown
                 if(!vm.count("proxy"))
-                    co_await stream.async_shutdown(asio::as_tuple);
+                    co_await stream.async_shutdown(
+                        asio::cancel_after(
+                            ch::milliseconds{ 500 }, asio::as_tuple));
 
-                co_await connect_to(location);
+                stream = co_await connect_to(location);
             }
 
             // Change the method according to RFC 9110, Section 15.4.4.
@@ -454,11 +456,9 @@ request(
 
     // clean shutdown
     if(!vm.count("proxy"))
-    {
-        auto [ec] = co_await stream.async_shutdown(asio::as_tuple);
-        if(ec && ec != ssl::error::stream_truncated)
-            throw system_error{ ec };
-    }
+        co_await stream.async_shutdown(
+            asio::cancel_after(
+                ch::milliseconds{ 500 }, asio::as_tuple));
 };
 
 int
@@ -546,6 +546,9 @@ main(int argc, char* argv[])
             ("tlsv1.2", "Use TLSv1.2 or greater")
             ("tlsv1.3", "Use TLSv1.3 or greater")
             ("include,i", "Include protocol response headers in the output")
+            ("unix-socket",
+                po::value<std::string>()->value_name("<path>"),
+                "Connect through this Unix domain socket")
             ("url",
                 po::value<std::string>()->value_name("<url>"),
                 "URL to work with")

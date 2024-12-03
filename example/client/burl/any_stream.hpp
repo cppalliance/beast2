@@ -28,6 +28,8 @@ public:
     using mutable_buffers_type = http_proto::parser::mutable_buffers_type;
     using executor_type        = asio::any_io_executor;
 
+    any_stream() = default;
+
     template<typename Stream>
     any_stream(Stream stream)
     {
@@ -98,8 +100,9 @@ public:
     }
 
     executor_type
-    get_executor() noexcept
+    get_executor() const
     {
+        check_stream();
         return stream_->get_executor();
     }
 
@@ -109,16 +112,7 @@ public:
     auto
     async_write_some(
         const const_buffers_type& buffers,
-        CompletionToken&& token =
-            asio::default_completion_token_t<executor_type>{})
-    {
-        return boost::asio::
-            async_initiate<CompletionToken, void(error_code, std::size_t)>(
-                [this](auto handler, const auto& buffers)
-                { stream_->async_write_some(buffers, std::move(handler)); },
-                token,
-                buffers);
-    }
+        CompletionToken&& token = CompletionToken{});
 
     template<
         typename CompletionToken =
@@ -126,32 +120,22 @@ public:
     auto
     async_read_some(
         const mutable_buffers_type& buffers,
-        CompletionToken&& token =
-            asio::default_completion_token_t<executor_type>{})
-    {
-        return boost::asio::
-            async_initiate<CompletionToken, void(error_code, std::size_t)>(
-                [this](auto handler, const auto& buffers)
-                { stream_->async_read_some(buffers, std::move(handler)); },
-                token,
-                buffers);
-    }
+        CompletionToken&& token = CompletionToken{});
 
     template<
         typename CompletionToken =
             asio::default_completion_token_t<executor_type>>
     auto
-    async_shutdown(
-        CompletionToken&& token =
-            asio::default_completion_token_t<executor_type>{})
-    {
-        return boost::asio::async_initiate<CompletionToken, void(error_code)>(
-            [this](auto handler)
-            { stream_->async_shutdown(std::move(handler)); },
-            token);
-    }
+    async_shutdown(CompletionToken&& token = CompletionToken{});
 
 private:
+    void
+    check_stream() const
+    {
+        if(!stream_)
+            throw std::logic_error{ "empty any_stream" };
+    }
+
     struct base
     {
         virtual asio::any_io_executor
@@ -170,12 +154,88 @@ private:
         virtual void async_shutdown(
             asio::any_completion_handler<void(error_code)>) = 0;
 
-        virtual ~base()
-        {
-        }
+        virtual ~base() = default;
     };
+
+    struct base_init;
+    struct write_some_init;
+    struct read_some_init;
+    struct shutdown_init;
 
     std::unique_ptr<base> stream_;
 };
+
+struct any_stream::base_init
+{
+    base* b;
+
+    using executor_type = asio::any_io_executor;
+
+    asio::any_io_executor
+    get_executor() const
+    {
+        return b->get_executor();
+    }
+};
+
+struct any_stream::write_some_init : base_init
+{
+    void
+    operator()(auto&& handler, const const_buffers_type& buffers)
+    {
+        b->async_write_some(buffers, std::move(handler));
+    }
+};
+
+struct any_stream::read_some_init : base_init
+{
+    void
+    operator()(auto&& handler, const mutable_buffers_type& buffers)
+    {
+        b->async_read_some(buffers, std::move(handler));
+    }
+};
+
+struct any_stream::shutdown_init : base_init
+{
+    void
+    operator()(auto&& handler)
+    {
+        b->async_shutdown(std::move(handler));
+    }
+};
+
+template<typename CompletionToken>
+auto
+any_stream::async_write_some(
+    const const_buffers_type& buffers,
+    CompletionToken&& token)
+{
+    check_stream();
+    return boost::asio::
+        async_initiate<CompletionToken, void(error_code, std::size_t)>(
+            write_some_init{ stream_.get() }, token, buffers);
+}
+
+template<typename CompletionToken>
+auto
+any_stream::async_read_some(
+    const mutable_buffers_type& buffers,
+    CompletionToken&& token)
+{
+    check_stream();
+    return boost::asio::
+        async_initiate<CompletionToken, void(error_code, std::size_t)>(
+            read_some_init{ stream_.get() }, token, buffers);
+}
+
+template<typename CompletionToken>
+auto
+any_stream::async_shutdown(CompletionToken&& token)
+{
+    check_stream();
+    return boost::asio::async_initiate<CompletionToken, void(error_code)>(
+        shutdown_init{ stream_.get() }, token);
+}
 
 #endif
