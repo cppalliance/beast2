@@ -1,8 +1,18 @@
+//
+// Copyright (c) 2024 Mohammad Nejati
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+// Official repository: https://github.com/cppalliance/http_io
+//
+
 #include "connect.hpp"
 #include "base64.hpp"
 
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/http_io.hpp>
@@ -196,18 +206,46 @@ connect_http_proxy(
     if(parser.get().status() != http_proto::status::ok)
         throw std::runtime_error{ "Proxy server rejected the connection" };
 }
+
+template<typename Socket>
+asio::awaitable<ssl::stream<Socket>>
+perform_tls_handshake(ssl::context& ssl_ctx, Socket socket, std::string host)
+{
+    auto ssl_stream = ssl::stream<Socket>{ std::move(socket), ssl_ctx };
+
+    if(!SSL_set_tlsext_host_name(ssl_stream.native_handle(), host.c_str()))
+        throw system_error{ static_cast<int>(::ERR_get_error()),
+                            asio::error::get_ssl_category() };
+
+    co_await ssl_stream.async_handshake(ssl::stream_base::client);
+    co_return ssl_stream;
+}
 } // namespace
 
-asio::awaitable<void>
+asio::awaitable<any_stream>
 connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
-    any_stream& stream,
     const urls::url_view& url)
 {
     auto executor = co_await asio::this_coro::executor;
-    auto socket   = asio::ip::tcp::socket{ executor };
+
+    if(vm.count("unix-socket"))
+    {
+        auto socket   = asio::local::stream_protocol::socket{ executor };
+        auto path     = vm.at("unix-socket").as<std::string>();
+        auto endpoint = asio::local::stream_protocol::endpoint{ path };
+        co_await socket.async_connect(endpoint);
+
+        if(url.scheme_id() == urls::scheme::https)
+            co_return co_await perform_tls_handshake(
+                ssl_ctx, std::move(socket), url.host());
+
+        co_return socket;
+    }
+
+    auto socket = asio::ip::tcp::socket{ executor };
 
     if(vm.count("proxy"))
     {
@@ -246,23 +284,9 @@ connect(
     if(vm.count("no-keepalive"))
         socket.set_option(asio::ip::tcp::socket::keep_alive{ false });
 
-    // TLS handshake
     if(url.scheme_id() == urls::scheme::https)
-    {
-        auto ssl_stream =
-            ssl::stream<asio::ip::tcp::socket>{ std::move(socket), ssl_ctx };
+        co_return co_await perform_tls_handshake(
+            ssl_ctx, std::move(socket), url.host());
 
-        auto host = std::string{ url.host() };
-        if(!SSL_set_tlsext_host_name(ssl_stream.native_handle(), host.c_str()))
-        {
-            throw system_error{ static_cast<int>(::ERR_get_error()),
-                                asio::error::get_ssl_category() };
-        }
-
-        co_await ssl_stream.async_handshake(ssl::stream_base::client);
-        stream = std::move(ssl_stream);
-        co_return;
-    }
-
-    stream = std::move(socket);
+    co_return socket;
 }
