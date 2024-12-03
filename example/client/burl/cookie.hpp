@@ -10,7 +10,8 @@
 #ifndef BURL_COOKIES_HPP
 #define BURL_COOKIES_HPP
 
-#include <boost/url.hpp>
+#include <boost/optional.hpp>
+#include <boost/url/url_view.hpp>
 
 #include <chrono>
 #include <iostream>

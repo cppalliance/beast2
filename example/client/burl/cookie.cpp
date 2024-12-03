@@ -9,6 +9,9 @@
 
 #include "cookie.hpp"
 
+#include <boost/url/grammar.hpp>
+#include <boost/url/grammar/all_chars.hpp>
+
 #include <iomanip>
 #include <sstream>
 
