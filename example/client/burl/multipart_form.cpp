@@ -107,12 +107,12 @@ multipart_form::content_length() const noexcept
             rs += 1; // closing double quote
         }
 
-        rs += part.size;
-
         rs += 4; // <CRLF><CRLF> after header
+        rs += part.size;
         rs += 2; // <CRLF> after content
     }
     rs += storage_.size(); // --boundary--
+    rs += 2; // <CRLF>
     return rs;
 }
 
@@ -260,7 +260,6 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
                 return rs;
             ++step_;
         case 10:
-        {
             if(it_->filename.has_value()) // file
             {
                 if(!read(it_->value_or_path, it_->size))
@@ -271,7 +270,6 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
                 if(!copy(it_->value_or_path))
                     return rs;
             }
-        }
             ++step_;
         case 11:
             if(!copy("\r\n"))
@@ -281,9 +279,17 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         }
     }
 
-    // --boundary--
-    if(!copy({ form_->storage_.data(), form_->storage_.size() }))
-        return rs;
+    switch(step_)
+    {
+    case 0:
+        // --boundary--
+        if(!copy({ form_->storage_.data(), form_->storage_.size() }))
+            return rs;
+        ++step_;
+    case 1:
+        if(!copy("\r\n"))
+            return rs;
+    }
 
     rs.finished = true;
     return rs;
