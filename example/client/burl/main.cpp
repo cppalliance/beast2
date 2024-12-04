@@ -167,7 +167,16 @@ public:
                 decltype(f), const std::monostate&>)
             {
                 req.set_method(http_proto::method::post);
-                req.set_content_length(f.content_length());
+
+                auto content_length = f.content_length();
+                req.set_content_length(content_length);
+                if(content_length >= 1024 * 1024)
+                {
+                    req.set(
+                        http_proto::field::expect,
+                        "100-continue");
+                }
+
                 req.set(
                     http_proto::field::content_type,
                     f.content_type());
@@ -342,16 +351,69 @@ request(
     };
 
     auto stream = co_await connect_to(url);
-
-    set_cookies(url);
-    msg.start_serializer(serializer, request);
-    co_await http_io::async_write(stream, serializer);
-
     parser.reset();
-    parser.start();
-    co_await http_io::async_read_header(stream, parser);
-    extract_cookies(url);
-    stream_headers();
+
+    auto send_request_and_read_headers =
+        [&](const urls::url_view& url) -> asio::awaitable<void>
+    {
+        set_cookies(url);
+        msg.start_serializer(serializer, request);
+        auto [ec, _] = co_await http_io::async_write(stream, serializer, asio::as_tuple);
+        if(ec)
+        {
+            if(ec == http_proto::error::expect_100_continue)
+            {
+                auto expect100_timeout = vm.count("expect100-timeout")
+                ? ch::duration_cast<ch::steady_clock::duration>(
+                    ch::duration<float>(vm.at("expect100-timeout").as<float>()))
+                : ch::steady_clock::duration{ch::seconds{ 1 }};
+
+                parser.start();
+                auto [ec, _] = co_await http_io::async_read_header(
+                    stream,
+                    parser,
+                    asio::cancel_after(expect100_timeout, asio::as_tuple));
+                if(ec)
+                {
+                    if(ec != asio::error::operation_aborted)
+                        throw system_error{ ec };
+                }
+                else
+                {
+                    extract_cookies(url);
+                    stream_headers();
+                    if(parser.get().status() != http_proto::status::continue_)
+                        co_return;
+                    parser.start();
+                }
+
+                co_await http_io::async_write(stream, serializer, asio::as_tuple);
+            }
+            else
+            {
+                throw system_error{ ec };
+            }
+        }
+        else
+        {
+            parser.start();
+        }
+
+        co_await http_io::async_read_header(stream, parser);
+        extract_cookies(url);
+        stream_headers();
+
+        // expect100-timeout
+        if(parser.get().status() == http_proto::status::continue_)
+        {
+            parser.start();
+            co_await http_io::async_read_header(stream, parser);
+            extract_cookies(url);
+            stream_headers();
+        }
+    };
+
+    co_await send_request_and_read_headers(url);
 
     // handle redirects
     auto referer = urls::url{ url };
@@ -396,6 +458,7 @@ request(
                             ch::milliseconds{ 500 }, asio::as_tuple));
 
                 stream = co_await connect_to(location);
+                parser.reset();
             }
 
             // Change the method according to RFC 9110, Section 15.4.4.
@@ -404,27 +467,16 @@ request(
                 request.set_method(http_proto::method::get);
                 request.set_content_length(0);
                 request.erase(field::content_type);
+                request.erase(field::expect);
                 msg = {}; // drop the body
             }
             request.set_target(target(location));
             request.set(field::host, location.host());
             request.set(field::referer, referer);
 
-            // Update the cookies for the new url
-            request.erase(field::cookie);
-            set_cookies(location);
-
             referer = location;
 
-            serializer.reset();
-            msg.start_serializer(serializer, request);
-            co_await http_io::async_write(stream, serializer);
-
-            parser.reset();
-            parser.start();
-            co_await http_io::async_read_header(stream, parser);
-            extract_cookies(location);
-            stream_headers();
+            co_await send_request_and_read_headers(location);
         }
         else
         {
@@ -496,6 +548,9 @@ main(int argc, char* argv[])
             ("dump-header,D",
                 po::value<std::string>()->value_name("<filename>"),
                 "Write the received headers to <filename>")
+            ("expect100-timeout",
+                po::value<float>()->value_name("<frac sec>"),
+                "How long to wait for 100-continue")
             ("form,F",
                 po::value<std::vector<std::string>>()->value_name("<name=content>"),
                 "Specify multipart MIME data")
