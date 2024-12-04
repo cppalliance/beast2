@@ -194,8 +194,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20"
@@ -209,8 +208,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (x86)"
@@ -224,8 +222,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (coverage)"
@@ -241,8 +238,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (shared)"
@@ -257,8 +253,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (shared, x86)"
@@ -274,8 +269,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (asan)"
@@ -289,8 +283,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (asan, x86)"
@@ -305,8 +298,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (ubsan)"
@@ -320,8 +312,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "g++-13"
             cc: "gcc-13"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 13: C++17-20 (ubsan, x86)"
@@ -433,8 +424,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++17-20"
@@ -448,8 +438,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++17-20 (x86)"
@@ -463,8 +452,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++20 (time-trace)"
@@ -480,8 +468,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++17-20 (asan)"
@@ -495,15 +482,14 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++17-20 (asan, x86)"
             asan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
+            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386 libclang-rt-17-dev:i386"
 
           - compiler: "clang"
             version: "17"
@@ -511,8 +497,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++17-20 (ubsan)"
@@ -526,15 +511,14 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-17"
             cc: "clang-17"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.10"
+            runs-on: "ubuntu-24.04"
             b2-toolset: "clang"
             is-latest: true
             name: "Clang 17: C++17-20 (ubsan, x86)"
             ubsan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
+            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386 libclang-rt-17-dev:i386"
 
           - compiler: "clang"
             version: "16"
@@ -542,8 +526,7 @@ jobs:
             latest-cxxstd: "20"
             cxx: "clang++-16"
             cc: "clang-16"
-            runs-on: "ubuntu-latest"
-            container: "ubuntu:23.04"
+            runs-on: "ubuntu-24.04"
             install: "cmake"
             b2-toolset: "clang"
             name: "Clang 16: C++17-20"
@@ -709,14 +692,22 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)[matrix.runs-on] }}
     container:
-      image: ${{ matrix.container }}
+      image: ${{matrix.container}}
       options: --privileged
+      volumes:
+        - /node20217:/node20217:rw,rshared
+        - ${{ startsWith(matrix.container, 'ubuntu:1') && '/node20217:/__e/node20:ro,rshared' || ' ' }}
     timeout-minutes: 120
 
     steps:
-      - name: Enable Node 16
+      - name: install nodejs20glibc2.17
+        if: ${{ startsWith( matrix.container, 'ubuntu:1' ) }}
         run: |
-          echo "ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true" >> $GITHUB_ENV
+          apt-get update
+          apt-get -yqq install xz-utils curl
+          curl -LO https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz
+          tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
+          ldd /__e/node20/bin/node
 
       - name: ASLR Fix
         if: ${{ startsWith(matrix.runs-on, 'ubuntu' )}}
@@ -742,7 +733,7 @@ jobs:
           ref: develop
 
       - name: Setup C++
-        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.0
+        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.7
         id: setup-cpp
         with:
           compiler: ${{ matrix.compiler }}
@@ -751,7 +742,7 @@ jobs:
           trace-commands: true
 
       - name: Install packages
-        uses: alandefreitas/cpp-actions/package-install@v1.8.0
+        uses: alandefreitas/cpp-actions/package-install@v1.8.7
         id: package-install
         with:
           apt-get-add-architecture: 'i386'
@@ -761,7 +752,7 @@ jobs:
             build-essential
 
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.0
+        uses: alandefreitas/cpp-actions/boost-clone@v1.8.7
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
@@ -770,7 +761,7 @@ jobs:
           scan-modules-ignore: http_io
 
       - name: Install packages (Windows)
-        uses: alandefreitas/cpp-actions/package-install@v1.8.0
+        uses: alandefreitas/cpp-actions/package-install@v1.8.7
         if: ${{ startsWith(matrix.runs-on, 'windows') }}
         id: package-install-windows
         with:
@@ -830,12 +821,13 @@ jobs:
           echo -E "boost_root=$boost_root" >> $GITHUB_OUTPUT
 
           # Patch boost-root with workspace module
-          cp -r "$workspace_root"/http-io-root "libs/$module"
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/http-proto-root libs/http_proto
+          cp -r "$workspace_root"/http-io-root "libs/$module"
 
           python3 tools/boostdep/depinst/depinst.py buffers
           python3 tools/boostdep/depinst/depinst.py http_proto
+          python3 tools/boostdep/depinst/depinst.py "$module"
 
       - name: Boost B2 Workflow
         uses: alandefreitas/cpp-actions/b2-workflow@v1.7.0
@@ -857,7 +849,7 @@ jobs:
           stop-on-error: true
 
       - name: Boost CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.0
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
         if: ${{ matrix.coverage || matrix.time-trace || matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root
@@ -894,7 +886,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/.local/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Find Package Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.0
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -918,7 +910,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Subdirectory Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.0
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -939,7 +931,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Root Project CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.0
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}
@@ -963,7 +955,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: FlameGraph
-        uses: alandefreitas/cpp-actions/flamegraph@v1.8.0
+        uses: alandefreitas/cpp-actions/flamegraph@v1.8.7
         if: matrix.time-trace
         with:
           source-dir: boost-root/libs/http_io
@@ -1005,7 +997,7 @@ jobs:
         shell: bash
 
     name: Changelog Summary
-    runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)['ubuntu-22.04'] }}
+    runs-on: ubuntu-latest
     timeout-minutes: 120
 
     steps:
@@ -1016,7 +1008,7 @@ jobs:
           fetch-depth: 100
 
       - name: Changelog
-        uses: alandefreitas/cpp-actions/create-changelog@v1.8.0
+        uses: alandefreitas/cpp-actions/create-changelog@v1.8.7
         with:
           thank-non-regular: ${{ startsWith(github.ref, 'refs/tags/') }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
