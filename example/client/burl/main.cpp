@@ -282,10 +282,22 @@ create_request(
     // Set user provided headers
     if(vm.count("header"))
     {
-        for(auto& header : vm.at("header").as<std::vector<std::string>>())
+        for(core::string_view header : vm.at("header").as<std::vector<std::string>>())
         {
             if(auto pos = header.find(':'); pos != std::string::npos)
-                request.set(header.substr(0, pos), header.substr(pos + 1));
+            {
+                auto name  = header.substr(0, pos);
+                auto value = header.substr(pos + 1);
+                if(!value.empty())
+                    request.set(name, value);
+                else
+                    request.erase(name);
+            }
+            else if(auto pos = header.find(';'); pos != std::string::npos)
+            {
+                auto name = header.substr(0, pos);
+                request.set(name, "");
+            }
         }
     }
 
@@ -757,12 +769,12 @@ main(int argc, char* argv[])
         if(vm.count("form"))
         {
             auto form = multipart_form{};
-            for(auto& data : vm.at("form").as<std::vector<std::string>>())
+            for(core::string_view data : vm.at("form").as<std::vector<std::string>>())
             {
-                if(auto pos = data.find('='); pos != std::string::npos)
+                if(auto pos = data.find('='); pos != core::string_view::npos)
                 {
-                    auto name  = core::string_view{ data }.substr(0, pos);
-                    auto value = core::string_view{ data }.substr(pos + 1);
+                    auto name  = data.substr(0, pos);
+                    auto value = data.substr(pos + 1);
                     if(!value.empty() && value[0] == '@')
                     {
                         form.append_file(
@@ -788,9 +800,9 @@ main(int argc, char* argv[])
         {
             if(vm.count("get"))
             {
-                for(auto data : vm.at("data").as<std::vector<std::string>>())
+                for(core::string_view data : vm.at("data").as<std::vector<std::string>>())
                 {
-                    if(auto pos = data.find('='); pos != std::string::npos)
+                    if(auto pos = data.find('='); pos != core::string_view::npos)
                     {
                         url.params().append(
                             { data.substr(0, pos), data.substr(pos + 1) });
@@ -804,7 +816,7 @@ main(int argc, char* argv[])
             else
             {
                 auto form = urlencoded_form{};
-                for(auto& data : vm.at("data").as<std::vector<std::string>>())
+                for(core::string_view data : vm.at("data").as<std::vector<std::string>>())
                 {
                     if(!data.empty() && data[0] == '@')
                     {
@@ -812,7 +824,7 @@ main(int argc, char* argv[])
                     }
                     else
                     {
-                        if(auto pos = data.find('='); pos != std::string::npos)
+                        if(auto pos = data.find('='); pos != core::string_view::npos)
                         {
                             form.append(
                                 data.substr(0, pos),
@@ -831,7 +843,7 @@ main(int argc, char* argv[])
         if(vm.count("json"))
         {
             auto body = json_body{};
-            for(auto& data : vm.at("json").as<std::vector<std::string>>())
+            for(core::string_view data : vm.at("json").as<std::vector<std::string>>())
             {
                 if(data.empty())
                     continue;
@@ -856,10 +868,10 @@ main(int argc, char* argv[])
 
         if(vm.count("cookie"))
         {
-            for(auto& option : vm.at("cookie").as<std::vector<std::string>>())
+            for(core::string_view option : vm.at("cookie").as<std::vector<std::string>>())
             {
                 // empty options are allowerd and just activates cookie engine
-                if(option.find('=') != std::string::npos)
+                if(option.find('=') != core::string_view::npos)
                 {
                     if(!explicit_cookies.ends_with(';'))
                         explicit_cookies.push_back(';');
