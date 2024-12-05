@@ -9,6 +9,31 @@
 
 #include "any_iostream.hpp"
 
+#ifdef _MSC_VER
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
+namespace
+{
+bool
+is_stdout_tty()
+{
+#ifdef _MSC_VER
+    return _isatty(_fileno(stdout));
+#else
+    return isatty(fileno(stdout));
+#endif
+}
+} // namespace
+
+any_ostream::any_ostream()
+    : stream_{ &std::cout }
+    , is_tty_{ ::is_stdout_tty() }
+{
+}
+
 any_ostream::any_ostream(core::string_view path)
 {
     if(path == "-")
@@ -27,6 +52,12 @@ any_ostream::any_ostream(core::string_view path)
         if(!f.is_open())
             throw std::runtime_error{ "Couldn't open file" };
     }
+}
+
+bool
+any_ostream::is_tty() const noexcept
+{
+    return is_tty_;
 }
 
 any_ostream::

@@ -21,9 +21,15 @@ namespace core = boost::core;
 class any_ostream
 {
     std::variant<std::ofstream, std::ostream*> stream_;
+    bool is_tty_ = false;
 
 public:
+    any_ostream();
+
     any_ostream(core::string_view path);
+
+    bool
+    is_tty() const noexcept;
 
     operator std::ostream&();
 

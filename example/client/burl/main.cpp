@@ -504,8 +504,20 @@ request(
         {
             for(auto cb : parser.pull_body())
             {
-                body_output << core::string_view{
+                auto chunk = core::string_view{
                     static_cast<const char*>(cb.data()), cb.size() };
+
+                if(body_output.is_tty() &&
+                    chunk.find(char{0}) != core::string_view::npos)
+                {
+                    std::cerr <<
+                        "Warning: Binary output can mess up your terminal.\n"
+                        "Warning: Use \"--output -\" to tell burl to output it to your terminal anyway, or\n"
+                        "Warning: consider \"--output <FILE>\" to save to a file.\n";
+                    co_return;
+                }
+
+                body_output << chunk;
                 parser.consume_body(cb.size());
             }
 
@@ -750,7 +762,7 @@ main(int argc, char* argv[])
         {
             if(vm.count("output"))
                 return any_ostream{ vm.at("output").as<std::string>() };
-            return any_ostream{ "-" };
+            return any_ostream{};
         }();
 
         auto header_output = [&]() -> std::optional<any_ostream>
