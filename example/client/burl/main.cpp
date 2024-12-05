@@ -236,7 +236,7 @@ create_request(
 
     request.set_target(target(url));
     request.set(field::accept, "*/*");
-    request.set(field::host, url.host());
+    request.set(field::host, url.authority().encoded_host_and_port().decode());
 
     msg.set_headers(request);
 
@@ -471,7 +471,8 @@ request(
                 msg = {}; // drop the body
             }
             request.set_target(target(location));
-            request.set(field::host, location.host());
+            request.set(field::host,
+                location.authority().encoded_host_and_port().decode());
             request.set(field::referer, referer);
 
             referer = location;
