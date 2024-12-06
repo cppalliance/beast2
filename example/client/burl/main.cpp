@@ -429,6 +429,9 @@ main(int argc, char* argv[])
     {
         auto odesc = po::options_description{"Options"};
         odesc.add_options()
+            ("abstract-unix-socket",
+                po::value<std::string>()->value_name("<path>"),
+                "Connect via abstract Unix domain socket")
             ("cacert",
                 po::value<std::string>()->value_name("<file>"),
                 "CA certificate to verify peer against")
