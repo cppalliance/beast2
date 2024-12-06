@@ -231,17 +231,22 @@ connect(
 {
     auto executor = co_await asio::this_coro::executor;
 
-    if(vm.count("unix-socket"))
+    if(vm.count("unix-socket") || vm.count("abstract-unix-socket"))
     {
         auto socket   = asio::local::stream_protocol::socket{ executor };
-        auto path     = vm.at("unix-socket").as<std::string>();
+        auto path     = [&]() -> std::string
+        {
+            if(vm.count("abstract-unix-socket"))
+                return '\0' + vm.at("abstract-unix-socket").as<std::string>();
+
+            return vm.at("unix-socket").as<std::string>();
+        }();
         auto endpoint = asio::local::stream_protocol::endpoint{ path };
         co_await socket.async_connect(endpoint);
 
         if(url.scheme_id() == urls::scheme::https)
             co_return co_await perform_tls_handshake(
                 ssl_ctx, std::move(socket), url.host());
-
         co_return socket;
     }
 
