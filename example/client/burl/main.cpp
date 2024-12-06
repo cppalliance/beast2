@@ -30,8 +30,10 @@
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
 
+#include <filesystem>
 #include <cstdlib>
 
+namespace fs       = std::filesystem;
 namespace http_io  = boost::http_io;
 using system_error = boost::system::system_error;
 
@@ -454,6 +456,7 @@ main(int argc, char* argv[])
             ("cookie-jar,c",
                 po::value<std::string>()->value_name("<filename>"),
                 "Write cookies to <filename> after operation")
+            ("create-dirs", "Create necessary local directory hierarchy")
             ("data,d",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST data")
@@ -650,9 +653,15 @@ main(int argc, char* argv[])
 
         auto body_output = [&]()
         {
-            if(vm.count("output"))
-                return any_ostream{ vm.at("output").as<std::string>() };
-            return any_ostream{};
+            if(!vm.count("output"))
+                return any_ostream{};
+
+            auto path = vm.at("output").as<std::string>();
+
+            if(vm.count("create-dirs"))
+                fs::create_directories(fs::path{ path }.parent_path());
+
+            return any_ostream{ std::move(path) };
         }();
 
         auto header_output = [&]() -> std::optional<any_ostream>
