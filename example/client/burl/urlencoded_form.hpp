@@ -12,12 +12,14 @@
 
 #include <boost/buffers/const_buffer.hpp>
 #include <boost/core/detail/string_view.hpp>
+#include <boost/http_proto/method.hpp>
 
 #include <istream>
 #include <string>
 
-namespace buffers = boost::buffers;
-namespace core    = boost::core;
+namespace buffers    = boost::buffers;
+namespace core       = boost::core;
+namespace http_proto = boost::http_proto;
 
 class urlencoded_form
 {
@@ -29,6 +31,9 @@ public:
 
     void
     append(std::istream& is);
+
+    http_proto::method
+    method() const;
 
     core::string_view
     content_type() const noexcept;

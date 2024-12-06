@@ -12,9 +12,10 @@
 
 #include <boost/buffers/mutable_buffer.hpp>
 #include <boost/core/detail/string_view.hpp>
+#include <boost/http_proto/method.hpp>
 #include <boost/http_proto/source.hpp>
-#include <boost/system/error_code.hpp>
 #include <boost/optional.hpp>
+#include <boost/system/error_code.hpp>
 
 #include <array>
 #include <vector>
@@ -55,11 +56,17 @@ public:
         std::string path,
         boost::optional<std::string> content_type);
 
+    http_proto::method
+    method() const;
+
     std::string
     content_type() const;
 
     std::uint64_t
     content_length() const noexcept;
+
+    source
+    body() const;
 };
 
 class multipart_form::source : public http_proto::source

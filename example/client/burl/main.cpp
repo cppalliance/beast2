@@ -12,6 +12,8 @@
 #include "base64.hpp"
 #include "connect.hpp"
 #include "cookie.hpp"
+#include "file.hpp"
+#include "message.hpp"
 #include "mime_type.hpp"
 #include "multipart_form.hpp"
 #include "urlencoded_form.hpp"
@@ -95,124 +97,6 @@ can_reuse_connection(
 
     return true;
 }
-
-class json_body
-{
-    std::string body_;
-
-public:
-    void
-    append(core::string_view value) noexcept
-    {
-        body_.append(value);
-    }
-
-    void
-    append(std::istream& is)
-    {
-        body_.append(std::istreambuf_iterator<char>{ is }, {});
-    }
-
-    core::string_view
-    content_type() const noexcept
-    {
-        return "application/json";
-    }
-
-    std::size_t
-    content_length() const noexcept
-    {
-        return body_.size();
-    }
-
-    buffers::const_buffer
-    body() const noexcept
-    {
-        return { body_.data(), body_.size() };
-    }
-};
-
-class message
-{
-    std::variant<
-        std::monostate,
-        json_body,
-        urlencoded_form,
-        multipart_form> body_;
-public:
-    message() = default;
-
-    message(json_body&& json_body)
-        : body_{ std::move(json_body) }
-    {
-    }
-
-    message(urlencoded_form&& form)
-        : body_{ std::move(form) }
-    {
-    }
-
-    message(multipart_form&& form)
-        : body_{ std::move(form) }
-    {
-    }
-
-    void
-    set_headers(http_proto::request& req) const
-    {
-        std::visit(
-        [&](auto& f)
-        {
-            if constexpr(!std::is_same_v<
-                decltype(f), const std::monostate&>)
-            {
-                req.set_method(http_proto::method::post);
-
-                auto content_length = f.content_length();
-                req.set_content_length(content_length);
-                if(content_length >= 1024 * 1024)
-                {
-                    req.set(
-                        http_proto::field::expect,
-                        "100-continue");
-                }
-
-                req.set(
-                    http_proto::field::content_type,
-                    f.content_type());
-            }
-        },
-        body_);
-    }
-
-    void
-    start_serializer(
-        http_proto::serializer& ser,
-        http_proto::request& req) const
-    {
-        std::visit(
-        [&](auto& f)
-        {
-            if constexpr(std::is_same_v<
-                decltype(f), const multipart_form&>)
-            {
-                ser.start<
-                    multipart_form::source>(req, &f);
-            }
-            else if constexpr(
-                std::is_same_v<decltype(f), const json_body&> ||
-                std::is_same_v<decltype(f), const urlencoded_form&>)
-            {
-                ser.start(req, f.body());
-            }
-            else
-            {
-                ser.start(req);
-            }
-        },
-        body_);
-    }
-};
 
 http_proto::request
 create_request(
@@ -629,6 +513,9 @@ main(int argc, char* argv[])
             ("unix-socket",
                 po::value<std::string>()->value_name("<path>"),
                 "Connect through this Unix domain socket")
+            ("upload-file,T",
+                po::value<std::string>()->value_name("<file>"),
+                "Transfer local FILE to destination")
             ("url",
                 po::value<std::string>()->value_name("<url>"),
                 "URL to work with")
@@ -774,9 +661,14 @@ main(int argc, char* argv[])
 
         auto msg = message{};
 
-        if((!!vm.count("form") + !!vm.count("data") + !!vm.count("json")) == 2)
+        if((!!vm.count("form") +
+            !!vm.count("data") +
+            !!vm.count("json") +
+            !!vm.count("upload-file")) == 2)
+        {
             throw std::runtime_error{
                 "You can only select one HTTP request method"};
+        }
 
         if(vm.count("form"))
         {
@@ -870,6 +762,30 @@ main(int argc, char* argv[])
                 }
             }
             msg = std::move(body);
+        }
+
+        if(vm.count("upload-file"))
+        {
+            msg = [&]()-> message
+            {
+                auto path = vm.at("upload-file").as<std::string>();
+                if(path == "-")
+                    return stdin_body{};
+
+                // Append the filename to the URL if it
+                // doesn't already end with one
+                auto segs = url.encoded_segments();
+                if(segs.empty())
+                {
+                    segs.push_back(::filename(path));
+                }
+                else if(auto back = --segs.end(); back->empty())
+                {
+                    segs.replace(back, ::filename(path));
+                }
+
+                return file_body{ std::move(path) };
+            }();
         }
 
         auto cookie_jar       = std::optional<::cookie_jar>{};

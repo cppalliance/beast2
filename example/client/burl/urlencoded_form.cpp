@@ -43,6 +43,12 @@ urlencoded_form::append(std::istream& is)
     }
 }
 
+http_proto::method
+urlencoded_form::method() const
+{
+    return http_proto::method::post;
+}
+
 core::string_view
 urlencoded_form::content_type() const noexcept
 {
