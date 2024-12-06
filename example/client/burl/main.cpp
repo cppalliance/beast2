@@ -498,6 +498,9 @@ main(int argc, char* argv[])
                 "HTTP POST JSON")
             ("junk-session-cookies,j", "Ignore session cookies read from file")
             ("location,L", "Follow redirects")
+            ("max-filesize",
+                po::value<std::uint64_t>()->value_name("<bytes>"),
+                "Maximum file size to download")
             ("no-keepalive", "Disable TCP keepalive on the connection")
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
@@ -660,7 +663,13 @@ main(int argc, char* argv[])
 
         {
             http_proto::response_parser::config cfg;
-            cfg.body_limit = std::numeric_limits<std::size_t>::max();
+
+            cfg.body_limit = [&]()
+            {
+                if(vm.count("max-filesize"))
+                    return vm.at("max-filesize").as<std::uint64_t>();
+                return std::numeric_limits<std::uint64_t>::max();
+            }();
             cfg.min_buffer = 1024 * 1024;
             if(http_proto_has_zlib)
             {
