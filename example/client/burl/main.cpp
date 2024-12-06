@@ -195,6 +195,7 @@ request(
     const po::variables_map& vm,
     any_ostream& body_output,
     std::optional<any_ostream>& header_output,
+    std::uint32_t max_redirects,
     message& msg,
     std::optional<cookie_jar>& cookie_jar,
     core::string_view explicit_cookies,
@@ -322,6 +323,9 @@ request(
 
         if(!is_redirect || !vm.count("location"))
             break;
+
+        if(max_redirects-- == 0)
+            throw std::runtime_error{ "Maximum redirects followed" };
 
         auto response = parser.get();
         if(auto it = response.find(field::location);
@@ -501,6 +505,9 @@ main(int argc, char* argv[])
             ("max-filesize",
                 po::value<std::uint64_t>()->value_name("<bytes>"),
                 "Maximum file size to download")
+            ("max-redirs",
+                po::value<std::int32_t>()->value_name("<num>"),
+                "Maximum number of redirects allowed")
             ("no-keepalive", "Disable TCP keepalive on the connection")
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
@@ -856,12 +863,24 @@ main(int argc, char* argv[])
         if(vm.count("junk-session-cookies") && cookie_jar.has_value())
             cookie_jar->clear_session_cookies();
 
+        auto max_redirects = [&]() -> std::uint32_t
+        {
+            if(!vm.count("max-redirs"))
+                return 50; // default
+
+            auto arg = vm.at("max-redirs").as<std::int32_t>();
+            if(arg < 0)
+                return std::numeric_limits<std::uint32_t>::max();
+            return static_cast<std::uint32_t>(arg);
+        }();
+
         asio::co_spawn(
             ioc,
             request(
                 vm,
                 body_output,
                 header_output,
+                max_redirects,
                 msg,
                 cookie_jar,
                 explicit_cookies,
