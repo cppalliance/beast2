@@ -8,6 +8,7 @@
 //
 
 #include "multipart_form.hpp"
+#include "file.hpp"
 
 #include <boost/buffers/algorithm.hpp>
 #include <boost/buffers/buffer_copy.hpp>
@@ -35,32 +36,6 @@ generate_boundary()
     return rs;
 }
 
-std::uint64_t
-filesize(core::string_view path)
-{
-    http_proto::file file;
-    boost::system::error_code ec;
-
-    file.open(std::string{ path }.c_str(), http_proto::file_mode::scan, ec);
-    if(ec)
-        throw system_error{ ec };
-
-    const auto size = file.size(ec);
-    if(ec)
-        throw system_error{ ec };
-
-    return size;
-}
-
-core::string_view
-filename(core::string_view path) noexcept
-{
-    const auto pos = path.find_last_of("/\\");
-    if((pos != core::string_view::npos))
-        return path.substr(pos + 1);
-    return path;
-}
-
 core::string_view content_disposition_ =
     "\r\nContent-Disposition: form-data; name=\"";
 core::string_view filename_     = "; filename=\"";
@@ -72,6 +47,43 @@ core::string_view content_type_ = "\r\nContent-Type: ";
 multipart_form::multipart_form()
     : storage_{ generate_boundary() }
 {
+}
+
+void
+multipart_form::append_text(
+    std::string name,
+    std::string value,
+    boost::optional<std::string> content_type)
+{
+    auto size = value.size();
+    parts_.push_back(
+        { std::move(name),
+          boost::none,
+          std::move(content_type),
+          size,
+          std::move(value) });
+}
+
+void
+multipart_form::append_file(
+    std::string name,
+    std::string path,
+    boost::optional<std::string> content_type)
+{
+    auto filename = ::filename(path);
+    auto size     = ::filesize(path);
+    parts_.push_back(
+        { std::move(name),
+          std::string{ filename },
+          std::move(content_type),
+          size,
+          std::move(path) });
+}
+
+http_proto::method
+multipart_form::method() const
+{
+    return http_proto::method::post;
 }
 
 std::string
@@ -112,39 +124,14 @@ multipart_form::content_length() const noexcept
         rs += 2; // <CRLF> after content
     }
     rs += storage_.size(); // --boundary--
-    rs += 2; // <CRLF>
+    rs += 2;               // <CRLF>
     return rs;
 }
 
-void
-multipart_form::append_text(
-    std::string name,
-    std::string value,
-    boost::optional<std::string> content_type)
+multipart_form::source
+multipart_form::body() const
 {
-    auto size = value.size();
-    parts_.push_back(
-        { std::move(name),
-          boost::none,
-          std::move(content_type),
-          size,
-          std::move(value) });
-}
-
-void
-multipart_form::append_file(
-    std::string name,
-    std::string path,
-    boost::optional<std::string> content_type)
-{
-    auto filename = ::filename(path);
-    auto size     = ::filesize(path);
-    parts_.push_back(
-        { std::move(name),
-          std::string{ filename },
-          std::move(content_type),
-          size,
-          std::move(path) });
+    return source{ this };
 }
 
 // -----------------------------------------------------------------------------
