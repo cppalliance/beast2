@@ -383,6 +383,11 @@ request(
         }
     }
 
+    if(vm.count("fail") && parser.get().status_int() >= 400)
+        throw std::runtime_error{
+            "The requested URL returned error: " +
+            std::to_string(parser.get().status_int()) };
+
     // stream body
     if(request.method() != http_proto::method::head)
     {
@@ -422,6 +427,11 @@ request(
         co_await stream.async_shutdown(
             asio::cancel_after(
                 ch::milliseconds{ 500 }, asio::as_tuple));
+    
+    if(vm.count("fail-with-body") && parser.get().status_int() >= 400)
+        throw std::runtime_error{
+            "The requested URL returned error: " +
+            std::to_string(parser.get().status_int()) };
 };
 
 int
@@ -467,6 +477,8 @@ main(int argc, char* argv[])
             ("expect100-timeout",
                 po::value<float>()->value_name("<frac sec>"),
                 "How long to wait for 100-continue")
+            ("fail,f", "Fail fast with no output on HTTP errors")
+            ("fail-with-body", "Fail on HTTP errors but save the body")
             ("form,F",
                 po::value<std::vector<std::string>>()->value_name("<name=content>"),
                 "Specify multipart MIME data")
@@ -569,6 +581,10 @@ main(int argc, char* argv[])
             throw std::runtime_error{
                 "Credentials was passed in the URL when prohibited" };
 
+        if(vm.count("fail") && vm.count("fail-with-body"))
+            throw std::runtime_error{
+                "You must select either --fail or --fail-with-body, not both." };
+
         auto ioc            = asio::io_context{};
         auto ssl_ctx        = ssl::context{ ssl::context::tls_client };
         auto http_proto_ctx = http_proto::context{};
@@ -597,7 +613,6 @@ main(int argc, char* argv[])
             if(tls_min > 12 || tls_max < 12) ssl_ctx.set_options(ssl_ctx.no_tlsv1_2);
             if(tls_max < 13                ) ssl_ctx.set_options(ssl_ctx.no_tlsv1_3);
         }
-
 
         if(vm.count("insecure"))
         {
