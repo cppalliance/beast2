@@ -460,6 +460,7 @@ main(int argc, char* argv[])
             ("data,d",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST data")
+            ("disallow-username-in-url", "Disallow username in URL")
             ("dump-header,D",
                 po::value<std::string>()->value_name("<filename>"),
                 "Write the received headers to <filename>")
@@ -563,6 +564,10 @@ main(int argc, char* argv[])
                 throw system_error{ rs.error(), "Failed to parse URL" };
             return rs.value();
         }();
+
+        if(vm.count("disallow-username-in-url") && url.has_userinfo())
+            throw std::runtime_error{
+                "Credentials was passed in the URL when prohibited" };
 
         auto ioc            = asio::io_context{};
         auto ssl_ctx        = ssl::context{ ssl::context::tls_client };
