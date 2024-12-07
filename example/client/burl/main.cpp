@@ -256,7 +256,7 @@ request(
 
     auto stream_headers = [&]()
     {
-        if(vm.count("head") || vm.count("include"))
+        if(vm.count("head") || vm.count("include") || vm.count("show-headers"))
             body_output << parser.get().buffer();
 
         if(header_output.has_value())
@@ -553,6 +553,7 @@ main(int argc, char* argv[])
             ("request-target",
                 po::value<std::string>()->value_name("<path>"),
                 "Specify the target for this request")
+            ("show-headers", "Show response headers in the output")
             ("tcp-nodelay", "Use the TCP_NODELAY option")
             ("tls-max",
                 po::value<std::string>()->value_name("<version>"),
