@@ -43,13 +43,26 @@ inline const bool http_proto_has_zlib = true;
 inline const bool http_proto_has_zlib = false;
 #endif
 
-core::string_view
-target(const urls::url_view& url) noexcept
+void
+set_target(
+    const po::variables_map& vm,
+    http_proto::request& request,
+    const urls::url_view& url)
 {
-    if(url.encoded_target().empty())
-        return "/";
+    if(vm.count("request-target"))
+    {
+        request.set_target(
+            vm.at("request-target").as<std::string>());
+        return;
+    }
 
-    return url.encoded_target();
+    if(url.encoded_target().empty())
+    {
+        request.set_target("/");
+        return;
+    }
+
+    request.set_target(url.encoded_target());
 }
 
 struct is_redirect_result
@@ -120,7 +133,8 @@ create_request(
     request.set_version(
         vm.count("http1.0") ? version::http_1_0 : version::http_1_1);
 
-    request.set_target(target(url));
+    set_target(vm, request, url);
+
     request.set(field::accept, "*/*");
     request.set(field::host, url.authority().encoded_host_and_port().decode());
 
@@ -372,7 +386,9 @@ request(
                 request.erase(field::expect);
                 msg = {}; // drop the body
             }
-            request.set_target(target(location));
+
+            set_target(vm, request, location);
+
             request.set(field::host,
                 location.authority().encoded_host_and_port().decode());
             request.set(field::referer, referer);
@@ -530,6 +546,9 @@ main(int argc, char* argv[])
             ("request,X",
                 po::value<std::string>()->value_name("<method>"),
                 "Specify request method to use")
+            ("request-target",
+                po::value<std::string>()->value_name("<path>"),
+                "Specify the target for this request")
             ("tcp-nodelay", "Use the TCP_NODELAY option")
             ("tls-max",
                 po::value<std::string>()->value_name("<version>"),
