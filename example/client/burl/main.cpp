@@ -34,6 +34,7 @@
 #include <filesystem>
 #include <cstdlib>
 
+namespace ch       = std::chrono;
 namespace fs       = std::filesystem;
 namespace http_io  = boost::http_io;
 using system_error = boost::system::system_error;
@@ -220,7 +221,6 @@ request(
     http_proto::request request,
     const urls::url_view& url)
 {
-    namespace ch    = std::chrono;
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto parser     = http_proto::response_parser{ http_proto_ctx };
@@ -547,6 +547,9 @@ main(int argc, char* argv[])
             ("max-redirs",
                 po::value<std::int32_t>()->value_name("<num>"),
                 "Maximum number of redirects allowed")
+            ("max-time",
+                po::value<float>()->value_name("<frac sec>"),
+                "Maximum time allowed for transfer")
             ("no-keepalive", "Disable TCP keepalive on the connection")
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
@@ -951,6 +954,11 @@ main(int argc, char* argv[])
             throw std::runtime_error{
                 "showing headers and --remote-header-name cannot be combined" };
 
+        auto timeout = vm.count("max-time")
+            ? ch::duration_cast<ch::steady_clock::duration>(
+                ch::duration<float>(vm.at("max-time").as<float>()))
+            : ch::steady_clock::duration::max();
+
         asio::co_spawn(
             ioc,
             request(
@@ -966,11 +974,13 @@ main(int argc, char* argv[])
                 http_proto_ctx,
                 create_request(vm, msg, url),
                 url),
-            [](std::exception_ptr ep)
-            {
-                if(ep)
-                    std::rethrow_exception(ep);
-            });
+            asio::cancel_after(
+                timeout,
+                [](std::exception_ptr ep)
+                {
+                    if(ep)
+                        std::rethrow_exception(ep);
+                }));
 
         ioc.run();
 
