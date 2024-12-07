@@ -17,6 +17,7 @@
 #include "mime_type.hpp"
 #include "multipart_form.hpp"
 #include "urlencoded_form.hpp"
+#include "utils.hpp"
 
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/awaitable.hpp>
@@ -210,6 +211,7 @@ request(
     any_ostream& body_output,
     std::optional<any_ostream>& header_output,
     std::uint32_t max_redirects,
+    bool show_headers,
     message& msg,
     std::optional<cookie_jar>& cookie_jar,
     core::string_view explicit_cookies,
@@ -256,7 +258,7 @@ request(
 
     auto stream_headers = [&]()
     {
-        if(vm.count("head") || vm.count("include") || vm.count("show-headers"))
+        if(show_headers)
             body_output << parser.get().buffer();
 
         if(header_output.has_value())
@@ -408,6 +410,27 @@ request(
             "The requested URL returned error: " +
             std::to_string(parser.get().status_int()) };
 
+    if(vm.count("remote-header-name"))
+    {
+        for(auto sv : parser.get().find_all(field::content_disposition))
+        {
+            auto filepath = extract_filename_form_content_disposition(sv);
+            if(filepath.has_value())
+            {
+                // stripp off the potential path
+                auto filename = ::filename(filepath.value());
+                if(filename.empty())
+                    continue;
+
+                fs::path path = vm.count("output-dir")
+                    ? vm.at("output-dir").as<std::string>()
+                    : "";
+                path.append(filename.begin(), filename.end());
+                body_output = any_ostream{ std::string{ path } };
+            }
+        }
+    }
+
     // stream body
     if(request.method() != http_proto::method::head)
     {
@@ -546,6 +569,7 @@ main(int argc, char* argv[])
             ("referer,e",
                 po::value<std::string>()->value_name("<url>"),
                 "Referer URL")
+            ("remote-header-name,J", "Use the header-provided filename")
             ("remote-name,O", "Write output to a file named as the remote file")
             ("request,X",
                 po::value<std::string>()->value_name("<method>"),
@@ -920,6 +944,13 @@ main(int argc, char* argv[])
             return static_cast<std::uint32_t>(arg);
         }();
 
+        bool show_headers =
+            vm.count("head") || vm.count("include") || vm.count("show-headers");
+
+        if(show_headers && vm.count("remote-header-name"))
+            throw std::runtime_error{
+                "showing headers and --remote-header-name cannot be combined" };
+
         asio::co_spawn(
             ioc,
             request(
@@ -927,6 +958,7 @@ main(int argc, char* argv[])
                 body_output,
                 header_output,
                 max_redirects,
+                show_headers,
                 msg,
                 cookie_jar,
                 explicit_cookies,
