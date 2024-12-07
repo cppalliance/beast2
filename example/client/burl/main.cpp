@@ -528,6 +528,9 @@ main(int argc, char* argv[])
             ("output,o",
                 po::value<std::string>()->value_name("<file>"),
                 "Write to file instead of stdout")
+            ("output-dir",
+                po::value<std::string>()->value_name("<dir>"),
+                "Directory to save files in")
             ("pass",
                 po::value<std::string>()->value_name("<phrase>"),
                 "Passphrase for the private key")
@@ -543,6 +546,7 @@ main(int argc, char* argv[])
             ("referer,e",
                 po::value<std::string>()->value_name("<url>"),
                 "Referer URL")
+            ("remote-name,O", "Write output to a file named as the remote file")
             ("request,X",
                 po::value<std::string>()->value_name("<method>"),
                 "Specify request method to use")
@@ -708,15 +712,37 @@ main(int argc, char* argv[])
 
         auto body_output = [&]()
         {
-            if(!vm.count("output"))
-                return any_ostream{};
+            fs::path path;
 
-            auto path = vm.at("output").as<std::string>();
+            if(vm.count("remote-name"))
+            {
+                if(vm.count("output-dir"))
+                    path = vm.at("output-dir").as<std::string>();
+
+                auto segs = url.encoded_segments();
+                if(segs.empty() || segs.back().empty())
+                {
+                    path.append("burl_response");
+                }
+                else
+                {
+                    path.append(segs.back().begin(),
+                    segs.back().end());
+                }
+            }
+            else if(vm.count("output"))
+            {
+                path = vm.at("output").as<std::string>();
+            }
+            else
+            {
+                return any_ostream{};
+            }
 
             if(vm.count("create-dirs"))
-                fs::create_directories(fs::path{ path }.parent_path());
+                fs::create_directories(path.parent_path());
 
-            return any_ostream{ std::move(path) };
+            return any_ostream{ std::string{ path } };
         }();
 
         auto header_output = [&]() -> std::optional<any_ostream>
