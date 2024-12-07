@@ -426,7 +426,7 @@ request(
                     ? vm.at("output-dir").as<std::string>()
                     : "";
                 path.append(filename.begin(), filename.end());
-                body_output = any_ostream{ std::string{ path } };
+                body_output = any_ostream{ path.string() };
             }
         }
     }
@@ -770,7 +770,7 @@ main(int argc, char* argv[])
             if(vm.count("create-dirs"))
                 fs::create_directories(path.parent_path());
 
-            return any_ostream{ std::string{ path } };
+            return any_ostream{ path.string() };
         }();
 
         auto header_output = [&]() -> std::optional<any_ostream>
