@@ -238,10 +238,15 @@ request(
             asio::cancel_after(timeout));
     };
 
-    auto set_cookies = [&](const urls::url_view& url)
+    auto set_cookies = [&](const urls::url_view& url, bool trusted)
     {
         auto field = cookie_jar ? cookie_jar->make_field(url) : std::string{};
-        field.append(explicit_cookies);
+        
+        if(trusted)
+            field.append(explicit_cookies);
+
+        request.erase(field::cookie);
+
         if(!field.empty())
             request.set(field::cookie, field);
     };
@@ -268,9 +273,9 @@ request(
     parser.reset();
 
     auto send_request_and_read_headers =
-        [&](const urls::url_view& url) -> asio::awaitable<void>
+        [&](const urls::url_view& url, bool trusted) -> asio::awaitable<void>
     {
-        set_cookies(url);
+        set_cookies(url, trusted);
         msg.start_serializer(serializer, request);
         auto [ec, _] = co_await http_io::async_write(stream, serializer, asio::as_tuple);
         if(ec)
@@ -327,7 +332,7 @@ request(
         }
     };
 
-    co_await send_request_and_read_headers(url);
+    co_await send_request_and_read_headers(url, true);
 
     // handle redirects
     auto referer = urls::url{ url };
@@ -336,7 +341,7 @@ request(
         auto [is_redirect, need_method_change] =
             ::is_redirect(vm, parser.get().status());
 
-        if(!is_redirect || !vm.count("location"))
+        if(!is_redirect || !vm.count("location") || !vm.count("location-trusted"))
             break;
 
         if(max_redirects-- == 0)
@@ -397,6 +402,13 @@ request(
 
             set_target(vm, request, location);
 
+            const bool trusted =
+                (url.encoded_origin() == location.encoded_origin()) ||
+                vm.count("location-trusted");
+
+            if(!trusted)
+                request.erase(field::authorization);
+
             request.set(field::host,
                 location.authority().encoded_host_and_port().decode());
             referer.remove_userinfo();
@@ -404,7 +416,7 @@ request(
 
             referer = location;
 
-            co_await send_request_and_read_headers(location);
+            co_await send_request_and_read_headers(location, trusted);
         }
         else
         {
@@ -550,6 +562,7 @@ main(int argc, char* argv[])
                 "HTTP POST JSON")
             ("junk-session-cookies,j", "Ignore session cookies read from file")
             ("location,L", "Follow redirects")
+            ("location-trusted", "Like --location, and send auth to other hosts")
             ("max-filesize",
                 po::value<std::uint64_t>()->value_name("<bytes>"),
                 "Maximum file size to download")
