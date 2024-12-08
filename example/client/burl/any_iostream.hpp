@@ -12,24 +12,32 @@
 
 #include <boost/core/detail/string_view.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <variant>
 
+namespace fs   = std::filesystem;
 namespace core = boost::core;
 
 class any_ostream
 {
     std::variant<std::ofstream, std::ostream*> stream_;
     bool is_tty_ = false;
+    fs::path path_;
 
 public:
     any_ostream();
 
     any_ostream(core::string_view path);
 
+    any_ostream(fs::path path);
+
     bool
     is_tty() const noexcept;
+
+    bool
+    remove_file();
 
     operator std::ostream&();
 
@@ -48,6 +56,8 @@ class any_istream
 
 public:
     any_istream(core::string_view path);
+
+    any_istream(fs::path path);
 
     operator std::istream&();
 

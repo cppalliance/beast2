@@ -35,12 +35,18 @@ any_ostream::any_ostream()
 }
 
 any_ostream::any_ostream(core::string_view path)
+    : any_ostream{ fs::path{ path.begin(), path.end() } }
 {
-    if(path == "-")
+}
+
+any_ostream::any_ostream(fs::path path)
+    : path_{ std::move(path) }
+{
+    if(path_ == "-")
     {
         stream_.emplace<std::ostream*>(&std::cout);
     }
-    else if(path == "%")
+    else if(path_ == "%")
     {
         stream_.emplace<std::ostream*>(&std::cerr);
     }
@@ -48,7 +54,7 @@ any_ostream::any_ostream(core::string_view path)
     {
         auto& f = stream_.emplace<std::ofstream>();
         f.exceptions(std::ofstream::badbit);
-        f.open(path);
+        f.open(path_);
         if(!f.is_open())
             throw std::runtime_error{ "Couldn't open file" };
     }
@@ -58,6 +64,12 @@ bool
 any_ostream::is_tty() const noexcept
 {
     return is_tty_;
+}
+
+bool
+any_ostream::remove_file()
+{
+    return fs::remove(path_);
 }
 
 any_ostream::
@@ -71,6 +83,11 @@ operator std::ostream&()
 // -----------------------------------------------------------------------------
 
 any_istream::any_istream(core::string_view path)
+    : any_istream{ fs::path{ path.begin(), path.end() } }
+{
+}
+
+any_istream::any_istream(fs::path path)
 {
     if(path == "-")
     {
