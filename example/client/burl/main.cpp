@@ -541,6 +541,8 @@ main(int argc, char* argv[])
             ("help,h", "produce help message")
             ("http1.0", "Use HTTP 1.0")
             ("insecure,k", "Allow insecure server connections")
+            ("ipv4,4", "Resolve names to IPv4 addresses")
+            ("ipv6,6", "Resolve names to IPv6 addresses")
             ("json",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST JSON")
