@@ -21,6 +21,7 @@
 
 namespace core     = boost::core;
 namespace http_io  = boost::http_io;
+using error_code   = boost::system::error_code;
 using system_error = boost::system::system_error;
 
 namespace
@@ -233,8 +234,8 @@ connect(
 
     if(vm.count("unix-socket") || vm.count("abstract-unix-socket"))
     {
-        auto socket   = asio::local::stream_protocol::socket{ executor };
-        auto path     = [&]() -> std::string
+        auto socket = asio::local::stream_protocol::socket{ executor };
+        auto path   = [&]() -> std::string
         {
             if(vm.count("abstract-unix-socket"))
                 return '\0' + vm.at("abstract-unix-socket").as<std::string>();
@@ -280,7 +281,20 @@ connect(
         auto resolver = asio::ip::tcp::resolver{ executor };
         auto rresults =
             co_await resolver.async_resolve(url.host(), effective_port(url));
-        co_await asio::async_connect(socket, rresults);
+
+        co_await asio::async_connect(
+            socket,
+            rresults,
+            [&](const error_code&, const asio::ip::tcp::endpoint& next)
+            {
+                if(vm.count("ipv4") && next.address().is_v6())
+                    return false;
+
+                if(vm.count("ipv6") && next.address().is_v4())
+                    return false;
+
+                return true;
+            });
     }
 
     if(vm.count("tcp-nodelay"))
