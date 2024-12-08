@@ -388,7 +388,8 @@ request(
             if(need_method_change && !vm.count("head"))
             {
                 request.set_method(http_proto::method::get);
-                request.set_content_length(0);
+                request.erase(field::content_length);
+                request.erase(field::content_encoding);
                 request.erase(field::content_type);
                 request.erase(field::expect);
                 msg = {}; // drop the body
@@ -398,6 +399,7 @@ request(
 
             request.set(field::host,
                 location.authority().encoded_host_and_port().decode());
+            referer.remove_userinfo();
             request.set(field::referer, referer);
 
             referer = location;
