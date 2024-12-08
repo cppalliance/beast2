@@ -36,7 +36,7 @@ struct value_char_t
     constexpr bool
     operator()(char c) const noexcept
     {
-        return attr_char(c) || grammar::hexdig_chars(c) || c == '%';
+        return attr_char(c) || c == '%';
     }
 };
 

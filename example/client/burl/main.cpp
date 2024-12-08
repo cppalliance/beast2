@@ -31,11 +31,9 @@
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
 
-#include <filesystem>
 #include <cstdlib>
 
 namespace ch       = std::chrono;
-namespace fs       = std::filesystem;
 namespace http_io  = boost::http_io;
 using system_error = boost::system::system_error;
 
@@ -426,7 +424,7 @@ request(
                     ? vm.at("output-dir").as<std::string>()
                     : "";
                 path.append(filename.begin(), filename.end());
-                body_output = any_ostream{ path.string() };
+                body_output = any_ostream{ path };
             }
         }
     }
@@ -574,6 +572,7 @@ main(int argc, char* argv[])
                 "Referer URL")
             ("remote-header-name,J", "Use the header-provided filename")
             ("remote-name,O", "Write output to a file named as the remote file")
+            ("remove-on-error", "Remove output file on errors")
             ("request,X",
                 po::value<std::string>()->value_name("<method>"),
                 "Specify request method to use")
@@ -770,13 +769,14 @@ main(int argc, char* argv[])
             if(vm.count("create-dirs"))
                 fs::create_directories(path.parent_path());
 
-            return any_ostream{ path.string() };
+            return any_ostream{ path };
         }();
 
         auto header_output = [&]() -> std::optional<any_ostream>
         {
             if(vm.count("dump-header"))
-                return any_ostream{ vm.at("dump-header").as<std::string>() };
+                return any_ostream{
+                    fs::path{ vm.at("dump-header").as<std::string>() } };
             return std::nullopt;
         }();
 
@@ -976,17 +976,21 @@ main(int argc, char* argv[])
                 url),
             asio::cancel_after(
                 timeout,
-                [](std::exception_ptr ep)
+                [&](std::exception_ptr ep)
                 {
                     if(ep)
+                    {
+                        if(vm.count("remove-on-error"))
+                            body_output.remove_file();
                         std::rethrow_exception(ep);
+                    }
                 }));
 
         ioc.run();
 
         if(vm.count("cookie-jar"))
         {
-            any_ostream{ vm.at("cookie-jar").as<std::string>() }
+            any_ostream{ fs::path{ vm.at("cookie-jar").as<std::string>() } }
                 << cookie_jar.value();
         }
     }
