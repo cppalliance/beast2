@@ -209,6 +209,7 @@ request(
     const po::variables_map& vm,
     any_ostream& body_output,
     std::optional<any_ostream>& header_output,
+    const std::set<urls::scheme>& allowed_redirect_protos,
     std::uint32_t max_redirects,
     bool show_headers,
     message& msg,
@@ -351,6 +352,12 @@ request(
                 referer,
                 urls::parse_uri_reference(it->value).value(),
                 location);
+
+            if(!allowed_redirect_protos.contains(location.scheme_id()))
+                throw std::runtime_error{
+                    "Protocol "
+                    + std::string{ location.scheme() } +
+                    " not supported or disabled" };
 
             if(can_reuse_connection(response, referer, location))
             {
@@ -561,6 +568,9 @@ main(int argc, char* argv[])
             ("post301", "Do not switch to GET after following a 301")
             ("post302", "Do not switch to GET after following a 302")
             ("post303", "Do not switch to GET after following a 303")
+            ("proto-redir",
+                po::value<std::vector<std::string>>()->value_name("<protocol>"),
+                "Enable/disable PROTOCOLS on redirect")
             ("proxy,x",
                 po::value<std::string>()->value_name("<url>"),
                 "Use this proxy")
@@ -959,12 +969,29 @@ main(int argc, char* argv[])
                 ch::duration<float>(vm.at("max-time").as<float>()))
             : ch::steady_clock::duration::max();
 
+        auto allowed_redirect_protos = [&]() -> std::set<urls::scheme>
+        {
+            if(!vm.count("proto-redir"))
+                return { urls::scheme::http, urls::scheme::https };
+
+            std::set<urls::scheme> rs;
+            for(auto& s : vm.at("proto-redir").as<std::vector<std::string>>())
+            {
+                if(s == "http")
+                    rs.emplace(urls::scheme::http);
+                if(s == "https")
+                    rs.emplace(urls::scheme::https);
+            }
+            return rs;
+        }();
+
         asio::co_spawn(
             ioc,
             request(
                 vm,
                 body_output,
                 header_output,
+                allowed_redirect_protos,
                 max_redirects,
                 show_headers,
                 msg,
