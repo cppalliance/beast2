@@ -32,11 +32,14 @@ effective_port(const urls::url_view& url)
     if(url.has_port())
         return url.port();
 
-    if(url.scheme_id() == urls::scheme::https)
+    if(url.scheme() == "https")
         return "443";
 
-    if(url.scheme_id() == urls::scheme::http)
+    if(url.scheme() == "http")
         return "80";
+
+    if(url.scheme() == "socks5")
+        return "1080";
 
     throw std::runtime_error{ "Unsupported scheme" };
 }
