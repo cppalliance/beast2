@@ -17,10 +17,7 @@
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
-#include <boost/url/grammar/optional_rule.hpp>
-#include <boost/url/parse.hpp>
-#include <boost/url/rfc/authority_rule.hpp>
-#include <boost/url/url.hpp>
+#include <boost/url.hpp>
 
 namespace core     = boost::core;
 namespace grammar  = boost::urls::grammar;
@@ -268,9 +265,13 @@ connect(
             grammar::squelch(grammar::optional_rule(grammar::delim_rule(':'))),
             urls::authority_rule);
 
-        for(core::string_view sv : vm.at("connect-to").as<std::vector<std::string>>())
+        for(core::string_view sv :
+            vm.at("connect-to").as<std::vector<std::string>>())
         {
-            auto [left, right] = grammar::parse(sv, parser).value();
+            auto rs = grammar::parse(sv, parser);
+            if(rs.has_error())
+                throw std::runtime_error{ "bad --connect-to option" };
+            auto [left, right] = rs.value();
 
             auto left_host = left.encoded_host();
             auto left_port = left.port();
@@ -286,6 +287,42 @@ connect(
 
             if(!right.port().empty())
                 url.set_port(right.port());
+
+            break;
+        }
+    }
+
+    if(vm.count("resolve"))
+    {
+        static constexpr auto parser = grammar::tuple_rule(
+            grammar::token_rule(grammar::all_chars - grammar::lut_chars(':')),
+            grammar::squelch(grammar::delim_rule(':')),
+            grammar::token_rule(grammar::digit_chars),
+            grammar::squelch(grammar::delim_rule(':')),
+            grammar::squelch(grammar::optional_rule(grammar::delim_rule('['))),
+            grammar::variant_rule(
+                urls::ipv4_address_rule,
+                urls::ipv6_address_rule),
+            grammar::squelch(grammar::optional_rule(grammar::delim_rule(']'))));
+
+        for(core::string_view sv :
+            vm.at("resolve").as<std::vector<std::string>>())
+        {
+            auto rs = grammar::parse(sv, parser);
+            if(rs.has_error())
+                throw std::runtime_error{ "bad --resolve option" };
+            auto [host, port, ip_address] = rs.value();
+
+            if(url.encoded_host() != host && host != "*")
+                continue;
+
+            if(effective_port(url) != port)
+                continue;
+
+            if(ip_address.index() == 0)
+                url.set_host_ipv4(get<0>(ip_address));
+            else
+                url.set_host_ipv6(get<1>(ip_address));
 
             break;
         }
