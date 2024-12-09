@@ -28,11 +28,13 @@ class multipart_form
 {
     struct part
     {
+        bool is_file = false;
         std::string name;
+        std::string value;
+        std::uint64_t size;
         boost::optional<std::string> filename;
         boost::optional<std::string> content_type;
-        std::uint64_t size;
-        std::string value_or_path;
+        std::string headers;
     };
 
     // boundary with extra "--" prefix and postfix.
@@ -45,16 +47,13 @@ public:
     multipart_form();
 
     void
-    append_text(
+    append(
+        bool is_file,
         std::string name,
         std::string value,
-        boost::optional<std::string> content_type);
-
-    void
-    append_file(
-        std::string name,
-        std::string path,
-        boost::optional<std::string> content_type);
+        boost::optional<std::string> filename = {},
+        boost::optional<std::string> content_type = {},
+        std::vector<std::string> headers = {});
 
     http_proto::method
     method() const;

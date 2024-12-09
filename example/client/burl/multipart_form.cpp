@@ -36,6 +36,18 @@ generate_boundary()
     return rs;
 }
 
+std::string
+serialize_headers(std::vector<std::string>& headers)
+{
+    std::string rs;
+    for(const auto& h : headers)
+    {
+        rs.append("\r\n");
+        rs.append(h);
+    }
+    return rs;
+}
+
 core::string_view content_disposition_ =
     "\r\nContent-Disposition: form-data; name=\"";
 core::string_view filename_     = "; filename=\"";
@@ -50,34 +62,24 @@ multipart_form::multipart_form()
 }
 
 void
-multipart_form::append_text(
+multipart_form::append(
+    bool is_file,
     std::string name,
     std::string value,
-    boost::optional<std::string> content_type)
+    boost::optional<std::string> filename,
+    boost::optional<std::string> content_type,
+    std::vector<std::string> headers)
 {
-    auto size = value.size();
-    parts_.push_back(
-        { std::move(name),
-          boost::none,
-          std::move(content_type),
-          size,
-          std::move(value) });
-}
+    auto size = is_file ? ::filesize(value) : value.size();
 
-void
-multipart_form::append_file(
-    std::string name,
-    std::string path,
-    boost::optional<std::string> content_type)
-{
-    auto filename = ::filename(path);
-    auto size     = ::filesize(path);
     parts_.push_back(
-        { std::move(name),
-          std::string{ filename },
-          std::move(content_type),
+        { is_file,
+          std::move(name),
+          std::move(value),
           size,
-          std::move(path) });
+          std::move(filename),
+          std::move(content_type),
+          serialize_headers(headers) });
 }
 
 http_proto::method
@@ -119,7 +121,9 @@ multipart_form::content_length() const noexcept
             rs += 1; // closing double quote
         }
 
-        rs += 4; // <CRLF><CRLF> after header
+        rs += part.headers.size();
+
+        rs += 4; // <CRLF><CRLF> after headers
         rs += part.size;
         rs += 2; // <CRLF> after content
     }
@@ -203,62 +207,66 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
             // --boundary
             if(!copy({ form_->storage_.data(), form_->storage_.size() - 2 }))
                 return rs;
-            ++step_;
+            step_ = 1;
         case 1:
             if(!copy(content_disposition_))
                 return rs;
-            ++step_;
+            step_ = 2;
         case 2:
             if(!copy(it_->name))
                 return rs;
-            ++step_;
+            step_ = 3;
         case 3:
             if(!copy("\""))
                 return rs;
-            ++step_;
+            step_ = 4;
         case 4:
-            if(!it_->filename.has_value())
+            if(!it_->filename)
                 goto content_type;
             if(!copy(filename_))
                 return rs;
-            ++step_;
+            step_ = 5;
         case 5:
             if(!copy(it_->filename.value()))
                 return rs;
-            ++step_;
+            step_ = 6;
         case 6:
             if(!copy("\""))
                 return rs;
-            ++step_;
+            step_ = 7;
         case 7:
         content_type:
-            if(!it_->content_type.has_value())
-                goto end_of_header;
+            if(!it_->content_type)
+                goto headers;
             if(!copy(content_type_))
                 return rs;
-            ++step_;
+            step_ = 8;
         case 8:
             if(!copy(it_->content_type.value()))
                 return rs;
-            ++step_;
+            step_ = 9;
         case 9:
-        end_of_header:
+        headers:
+            if(!copy(it_->headers))
+                return rs;
+            step_ = 10;
+        case 10:
             if(!copy("\r\n\r\n"))
                 return rs;
-            ++step_;
-        case 10:
-            if(it_->filename.has_value()) // file
-            {
-                if(!read(it_->value_or_path, it_->size))
-                    return rs;
-            }
-            else // text
-            {
-                if(!copy(it_->value_or_path))
-                    return rs;
-            }
-            ++step_;
+            step_ = 11;
         case 11:
+            if(it_->is_file)
+            {
+                if(!read(it_->value, it_->size))
+                    return rs;
+            }
+            else
+            {
+                if(!copy(it_->value))
+                    return rs;
+            }
+            step_ = 12;
+        case 12:
             if(!copy("\r\n"))
                 return rs;
             step_ = 0;
@@ -272,7 +280,7 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         // --boundary--
         if(!copy({ form_->storage_.data(), form_->storage_.size() }))
             return rs;
-        ++step_;
+        step_ = 1;
     case 1:
         if(!copy("\r\n"))
             return rs;
