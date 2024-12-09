@@ -644,7 +644,7 @@ main(int argc, char* argv[])
                 po::value<float>()->value_name("<frac sec>"),
                 "Maximum time allowed for connection")
             ("connect-to",
-                po::value<std::vector<std::string>>()->value_name("<HOST1:PORT1:HOST2:PORT2>"),
+                po::value<std::vector<std::string>>()->value_name("<H1:P1:H2:P2>"),
                 "Connect to host")
             ("continue-at,C",
                 po::value<std::uint64_t>()->value_name("<offset>"),
@@ -745,6 +745,9 @@ main(int argc, char* argv[])
             ("request-target",
                 po::value<std::string>()->value_name("<path>"),
                 "Specify the target for this request")
+            ("resolve",
+                po::value<std::vector<std::string>>()->value_name("host:port:addr"),
+                "Resolve the host+port to this address")
             ("show-headers", "Show response headers in the output")
             ("tcp-nodelay", "Use the TCP_NODELAY option")
             ("tls-max",
