@@ -17,9 +17,13 @@
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
+#include <boost/url/grammar/optional_rule.hpp>
 #include <boost/url/parse.hpp>
+#include <boost/url/rfc/authority_rule.hpp>
+#include <boost/url/url.hpp>
 
 namespace core     = boost::core;
+namespace grammar  = boost::urls::grammar;
 namespace http_io  = boost::http_io;
 using error_code   = boost::system::error_code;
 using system_error = boost::system::system_error;
@@ -231,8 +235,9 @@ connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
-    const urls::url_view& url)
+    urls::url url)
 {
+    auto org_host = url.host();
     auto executor = co_await asio::this_coro::executor;
 
     if(vm.count("unix-socket") || vm.count("abstract-unix-socket"))
@@ -250,11 +255,41 @@ connect(
 
         if(url.scheme_id() == urls::scheme::https)
             co_return co_await perform_tls_handshake(
-                ssl_ctx, std::move(socket), url.host());
+                ssl_ctx, std::move(socket), org_host);
         co_return socket;
     }
 
     auto socket = asio::ip::tcp::socket{ executor };
+
+    if(vm.count("connect-to"))
+    {
+        static constexpr auto parser = grammar::tuple_rule(
+            urls::authority_rule,
+            grammar::squelch(grammar::optional_rule(grammar::delim_rule(':'))),
+            urls::authority_rule);
+
+        for(core::string_view sv : vm.at("connect-to").as<std::vector<std::string>>())
+        {
+            auto [left, right] = grammar::parse(sv, parser).value();
+
+            auto left_host = left.encoded_host();
+            auto left_port = left.port();
+
+            if(url.encoded_host() != left_host && !left_host.empty())
+                continue;
+
+            if(effective_port(url) != left_port && !left_port.empty())
+                continue;
+
+            if(!right.encoded_host().empty())
+                url.set_encoded_host(right.encoded_host());
+
+            if(!right.port().empty())
+                url.set_port(right.port());
+
+            break;
+        }
+    }
 
     if(vm.count("proxy"))
     {
@@ -308,7 +343,7 @@ connect(
 
     if(url.scheme_id() == urls::scheme::https)
         co_return co_await perform_tls_handshake(
-            ssl_ctx, std::move(socket), url.host());
+            ssl_ctx, std::move(socket), org_host);
 
     co_return socket;
 }
