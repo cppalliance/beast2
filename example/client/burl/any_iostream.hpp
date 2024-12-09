@@ -59,11 +59,14 @@ public:
 
     any_istream(fs::path path);
 
+    void
+    append_to(std::string& s);
+
     operator std::istream&();
 
     template<typename T>
     std::istream&
-    operator<<(T& data)
+    operator>>(T& data)
     {
         static_cast<std::istream&>(*this) >> data;
         return *this;

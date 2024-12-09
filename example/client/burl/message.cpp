@@ -18,38 +18,32 @@
 
 using system_error = boost::system::system_error;
 
-void
-json_body::append(core::string_view value) noexcept
+string_body::string_body(std::string body, std::string content_type)
+    : body_{ std::move(body) }
+    , content_type_{ std::move(content_type) }
 {
-    body_.append(value);
-}
-
-void
-json_body::append(std::istream& is)
-{
-    body_.append(std::istreambuf_iterator<char>{ is }, {});
 }
 
 http_proto::method
-json_body::method() const
+string_body::method() const
 {
     return http_proto::method::post;
 }
 
 core::string_view
-json_body::content_type() const noexcept
+string_body::content_type() const noexcept
 {
-    return "application/json";
+    return content_type_;
 }
 
 std::size_t
-json_body::content_length() const noexcept
+string_body::content_length() const noexcept
 {
     return body_.size();
 }
 
 buffers::const_buffer
-json_body::body() const noexcept
+string_body::body() const noexcept
 {
     return { body_.data(), body_.size() };
 }

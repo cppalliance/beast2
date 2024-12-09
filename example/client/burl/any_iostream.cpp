@@ -103,6 +103,14 @@ any_istream::any_istream(fs::path path)
     }
 }
 
+void
+any_istream::append_to(std::string& s)
+{
+    s.append(
+        std::istreambuf_iterator<char>{
+            static_cast<std::istream&>(*this) }, {} );
+}
+
 any_istream::
 operator std::istream&()
 {

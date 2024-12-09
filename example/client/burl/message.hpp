@@ -11,7 +11,6 @@
 #define BURL_MESSAGE_HPP
 
 #include "multipart_form.hpp"
-#include "urlencoded_form.hpp"
 
 #include <boost/http_proto/file_body.hpp>
 #include <boost/http_proto/request.hpp>
@@ -19,16 +18,14 @@
 
 #include <variant>
 
-class json_body
+namespace core = boost::core; 
+
+class string_body
 {
     std::string body_;
-
+    std::string content_type_;
 public:
-    void
-    append(core::string_view value) noexcept;
-
-    void
-    append(std::istream& is);
+    string_body(std::string body, std::string content_type);
 
     http_proto::method
     method() const;
@@ -90,8 +87,7 @@ class message
 {
     std::variant<
         std::monostate,
-        json_body,
-        urlencoded_form,
+        string_body,
         multipart_form,
         file_body,
         stdin_body>

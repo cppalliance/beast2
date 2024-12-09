@@ -16,7 +16,6 @@
 #include "message.hpp"
 #include "mime_type.hpp"
 #include "multipart_form.hpp"
-#include "urlencoded_form.hpp"
 #include "utils.hpp"
 
 #include <boost/asio/as_tuple.hpp>
@@ -28,7 +27,9 @@
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
+#include <boost/url/encode.hpp>
 #include <boost/url/parse.hpp>
+#include <boost/url/rfc/pchars.hpp>
 #include <boost/url/url.hpp>
 
 #include <cstdlib>
@@ -496,6 +497,129 @@ request(
             std::to_string(parser.get().status_int()) };
 };
 
+boost::optional<std::string>
+parse_data_options(const po::variables_map& vm)
+{
+    boost::optional<std::string> rs;
+
+    auto append_striped = [&](std::istream& input)
+    {
+        char ch;
+        while(input.get(ch))
+        {
+            if(ch != '\r' && ch != '\n' && ch != '\0')
+                rs->push_back(ch);
+        }
+    };
+
+    auto append_encoded = [&](core::string_view sv)
+    {
+        urls::encoding_opts opt;
+        opt.space_as_plus = true;
+        urls::encode(sv, urls::pchars, opt, urls::string_token::append_to(*rs));
+    };
+
+    auto init = [&, init = false]() mutable
+    {
+        if(std::exchange(init, true))
+            rs->push_back('&');
+        else
+            rs.emplace();
+    };
+
+    if(vm.count("data"))
+    {
+        for(core::string_view sv : vm.at("data").as<std::vector<std::string>>())
+        {
+            init();
+
+            if(sv.starts_with('@'))
+                append_striped(any_istream{ sv.substr(1) });
+            else
+                rs->append(sv);
+        }
+    }
+
+    if(vm.count("data-ascii"))
+    {
+        for(core::string_view sv :
+            vm.at("data-ascii").as<std::vector<std::string>>())
+        {
+            init();
+
+            if(sv.starts_with('@'))
+                append_striped(any_istream{ sv.substr(1) });
+            else
+                rs->append(sv);
+        }
+    }
+
+    if(vm.count("data-binary"))
+    {
+        for(core::string_view sv :
+            vm.at("data-binary").as<std::vector<std::string>>())
+        {
+            init();
+
+            if(sv.starts_with('@'))
+                any_istream{ sv.substr(1) }.append_to(*rs);
+            else
+                rs->append(sv);
+        }
+    }
+
+    if(vm.count("data-raw"))
+    {
+        for(core::string_view sv :
+            vm.at("data-raw").as<std::vector<std::string>>())
+        {
+            init();
+
+            rs->append(sv);
+        }
+    }
+
+    if(vm.count("data-urlencode"))
+    {
+        for(core::string_view sv :
+            vm.at("data-urlencode").as<std::vector<std::string>>())
+        {
+            init();
+
+            if(auto pos = sv.find('='); pos != sv.npos)
+            {
+                auto name    = sv.substr(0, pos);
+                auto content = sv.substr(pos + 1);
+                if(!name.empty())
+                {
+                    rs->append(name);
+                    rs->push_back('=');
+                }
+                append_encoded(content);
+            }
+            else if(auto pos = sv.find('@'); pos != sv.npos)
+            {
+                auto name     = sv.substr(0, pos);
+                auto filename = sv.substr(pos + 1);
+                if(!name.empty())
+                {
+                    rs->append(name);
+                    rs->push_back('=');
+                }
+                std::string tmp;
+                any_istream{ filename }.append_to(tmp);
+                append_encoded(tmp);
+            }
+            else
+            {
+                append_encoded(sv);
+            }
+        }
+    }
+
+    return rs;
+}
+
 int
 main(int argc, char* argv[])
 {
@@ -532,6 +656,18 @@ main(int argc, char* argv[])
             ("data,d",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST data")
+            ("data-ascii",
+                po::value<std::vector<std::string>>()->value_name("<data>"),
+                "HTTP POST ASCII data")
+            ("data-binary",
+                po::value<std::vector<std::string>>()->value_name("<data>"),
+                "HTTP POST binary data")
+            ("data-raw",
+                po::value<std::vector<std::string>>()->value_name("<data>"),
+                "HTTP POST data, '@' allowed")
+            ("data-urlencode",
+                po::value<std::vector<std::string>>()->value_name("<data>"),
+                "HTTP POST data URL encoded")
             ("disallow-username-in-url", "Disallow username in URL")
             ("dump-header,D",
                 po::value<std::string>()->value_name("<filename>"),
@@ -809,8 +945,24 @@ main(int argc, char* argv[])
 
         auto msg = message{};
 
-        if((!!vm.count("form") +
-            !!vm.count("data") +
+        auto data = parse_data_options(vm);
+
+        if(data)
+        {
+            if(vm.count("get"))
+            {
+                urls::params_view params{ data.value() };
+                url.encoded_params().append(params.begin(), params.end());
+            }
+            else
+            {
+                msg = string_body{ std::move(data.value()),
+                    "application/x-www-form-urlencoded" };
+            }
+        }
+
+        if((!!data +
+            !!vm.count("form") +
             !!vm.count("json") +
             !!vm.count("upload-file")) == 2)
         {
@@ -848,68 +1000,19 @@ main(int argc, char* argv[])
             msg = std::move(form);
         }
 
-        if(vm.count("data"))
-        {
-            if(vm.count("get"))
-            {
-                for(core::string_view data : vm.at("data").as<std::vector<std::string>>())
-                {
-                    if(auto pos = data.find('='); pos != core::string_view::npos)
-                    {
-                        url.params().append(
-                            { data.substr(0, pos), data.substr(pos + 1) });
-                    }
-                    else
-                    {
-                        url.params().append({ data, urls::no_value });
-                    }
-                }
-            }
-            else
-            {
-                auto form = urlencoded_form{};
-                for(core::string_view data : vm.at("data").as<std::vector<std::string>>())
-                {
-                    if(!data.empty() && data[0] == '@')
-                    {
-                        form.append(any_istream{ data.substr(1) });
-                    }
-                    else
-                    {
-                        if(auto pos = data.find('='); pos != core::string_view::npos)
-                        {
-                            form.append(
-                                data.substr(0, pos),
-                                data.substr(pos + 1));
-                        }
-                        else
-                        {
-                            form.append(data, "");
-                        }
-                    }
-                }
-                msg = std::move(form);
-            }
-        }
-
         if(vm.count("json"))
         {
-            auto body = json_body{};
-            for(core::string_view data : vm.at("json").as<std::vector<std::string>>())
+            std::string body;
+            for(core::string_view data :
+                vm.at("json").as<std::vector<std::string>>())
             {
-                if(data.empty())
-                    continue;
-
-                if(data[0] == '@')
-                {
-                    body.append(any_istream{ data.substr(1) });
-                }
+                if(data.starts_with('@'))
+                    any_istream{ data.substr(1) }.append_to(body);
                 else
-                {
                     body.append(data);
-                }
             }
-            msg = std::move(body);
+            msg = string_body{ std::move(body),
+                "application/x-www-form-urlencoded" };
         }
 
         if(vm.count("upload-file"))
