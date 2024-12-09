@@ -16,7 +16,7 @@
 #include <boost/asio/ssl/context.hpp>
 #include <boost/http_proto/context.hpp>
 #include <boost/program_options.hpp>
-#include <boost/url/url_view.hpp>
+#include <boost/url/url.hpp>
 
 namespace asio       = boost::asio;
 namespace http_proto = boost::http_proto;
@@ -29,6 +29,6 @@ connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
-    const urls::url_view& url);
+    urls::url url);
 
 #endif

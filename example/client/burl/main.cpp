@@ -643,6 +643,9 @@ main(int argc, char* argv[])
             ("connect-timeout",
                 po::value<float>()->value_name("<frac sec>"),
                 "Maximum time allowed for connection")
+            ("connect-to",
+                po::value<std::vector<std::string>>()->value_name("<HOST1:PORT1:HOST2:PORT2>"),
+                "Connect to host")
             ("continue-at,C",
                 po::value<std::uint64_t>()->value_name("<offset>"),
                 "Resume transfer offset")
