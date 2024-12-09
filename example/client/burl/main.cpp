@@ -683,6 +683,9 @@ main(int argc, char* argv[])
             ("form,F",
                 po::value<std::vector<std::string>>()->value_name("<name=content>"),
                 "Specify multipart MIME data")
+            ("form-string",
+                po::value<std::vector<std::string>>()->value_name("<name=string>"),
+                "Specify multipart MIME data")
             ("key",
                 po::value<std::string>()->value_name("<key>"),
                 "Private key file")
@@ -976,31 +979,64 @@ main(int argc, char* argv[])
                 "You can only select one HTTP request method"};
         }
 
-        if(vm.count("form"))
+        if(vm.count("form") || vm.count("form-string"))
         {
             auto form = multipart_form{};
-            for(core::string_view data : vm.at("form").as<std::vector<std::string>>())
+            if(vm.count("form"))
             {
-                if(auto pos = data.find('='); pos != core::string_view::npos)
+                for(core::string_view sv :
+                    vm.at("form").as<std::vector<std::string>>())
                 {
-                    auto name  = data.substr(0, pos);
-                    auto value = data.substr(pos + 1);
-                    if(!value.empty() && value[0] == '@')
+                    auto [name, prefix, value, filename, type, headers] =
+                        parse_form_option(sv);
+
+                    auto is_file = false;
+
+                    if(prefix == '@' || prefix == '<')
                     {
-                        form.append_file(
-                            name,
-                            value.substr(1),
-                            std::string{ mime_type(value.substr(1)) });
+                        is_file = true;
+
+                        if(!filename && prefix != '<')
+                            filename = ::filename(value);
+
+                        if(value == "-")
+                        {
+                            value.clear();
+                            any_istream{ core::string_view{"-"} }.append_to(value);
+                            is_file = false;
+                        }
+                        else if(!type)
+                        {
+                            type = mime_type(value);
+                        }
+                    }
+                    form.append(
+                        is_file,
+                        std::move(name),
+                        std::move(value),
+                        std::move(filename),
+                        std::move(type),
+                        std::move(headers));
+                }
+            }
+            if(vm.count("form-string"))
+            {
+                for(core::string_view sv :
+                    vm.at("form-string").as<std::vector<std::string>>())
+                {
+                    if(auto pos = sv.find('='); pos != sv.npos)
+                    {
+                        form.append(
+                            false,
+                            sv.substr(0, pos),
+                            sv.substr(pos + 1));
                     }
                     else
                     {
-                        form.append_text(name, value, boost::none);
+                        throw std::runtime_error{
+                            "Illegally formatted input field"
+                        };
                     }
-                }
-                else
-                {
-                    throw std::runtime_error{
-                        "Illegally formatted input field"};
                 }
             }
             msg = std::move(form);

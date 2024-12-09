@@ -11,11 +11,26 @@
 #define BURL_UTILS_HPP
 
 #include <boost/core/detail/string_view.hpp>
-#include <boost/optional/optional_fwd.hpp>
+#include <boost/optional/optional.hpp>
+
+#include <vector>
 
 namespace core = boost::core;
 
 boost::optional<std::string>
-extract_filename_form_content_disposition(core::string_view sv) noexcept;
+extract_filename_form_content_disposition(core::string_view sv);
+
+struct form_option_result
+{
+    std::string name;
+    char prefix = '\0';
+    std::string value;
+    boost::optional<std::string> filename;
+    boost::optional<std::string> type;
+    std::vector<std::string> headers;
+};
+
+form_option_result
+parse_form_option(core::string_view sv);
 
 #endif
