@@ -342,7 +342,8 @@ request(
         auto [is_redirect, need_method_change] =
             ::is_redirect(vm, parser.get().status());
 
-        if(!is_redirect || !vm.count("location") || !vm.count("location-trusted"))
+        if(!is_redirect ||
+           (!vm.count("location") && !vm.count("location-trusted")))
             break;
 
         if(max_redirects-- == 0)
@@ -368,6 +369,7 @@ request(
             if(can_reuse_connection(response, referer, location))
             {
                 // Discard the body
+                // TODO: drop the connection if body is large
                 if(request.method() != http_proto::method::head)
                 {
                     while(!parser.is_complete())
@@ -376,6 +378,10 @@ request(
                             buffers::buffer_size(parser.pull_body()));
                         co_await http_io::async_read_some(stream, parser);
                     }
+                }
+                else
+                {
+                    parser.reset();
                 }
             }
             else
