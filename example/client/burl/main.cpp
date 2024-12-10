@@ -645,6 +645,9 @@ main(int argc, char* argv[])
             ("cert,E",
                 po::value<std::string>()->value_name("<certificate>"),
                 "Client certificate file")
+            ("ciphers",
+                po::value<std::string>()->value_name("<list>"),
+                "SSL ciphers to use")
             ("compressed", "Request compressed response")
             ("connect-timeout",
                 po::value<float>()->value_name("<frac sec>"),
@@ -662,6 +665,9 @@ main(int argc, char* argv[])
                 po::value<std::string>()->value_name("<filename>"),
                 "Write cookies to <filename> after operation")
             ("create-dirs", "Create necessary local directory hierarchy")
+            ("curves",
+                po::value<std::string>()->value_name("<list>"),
+                "(EC) TLS key exchange algorithm(s) to request")
             ("data,d",
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST data")
@@ -762,6 +768,9 @@ main(int argc, char* argv[])
             ("tls-max",
                 po::value<std::string>()->value_name("<version>"),
                 "Set maximum allowed TLS version")
+            ("tls13-ciphers",
+                po::value<std::string>()->value_name("<list>"),
+                "TLS 1.3 cipher suites to use")
             ("tlsv1.0", "Use TLSv1.0 or greater")
             ("tlsv1.1", "Use TLSv1.1 or greater")
             ("tlsv1.2", "Use TLSv1.2 or greater")
@@ -881,6 +890,36 @@ main(int argc, char* argv[])
             ssl_ctx.use_certificate_file(
                 vm.at("cert").as<std::string>(),
                 ssl::context::file_format::pem);
+        }
+
+        if(vm.count("ciphers"))
+        {
+            if(::SSL_CTX_set_cipher_list(
+                ssl_ctx.native_handle(),
+                vm.at("ciphers").as<std::string>().c_str()) != 1)
+            {
+                throw std::runtime_error{ "failed setting cipher list" };
+            }
+        }
+
+        if(vm.count("tls13-ciphers"))
+        {
+            if(::SSL_CTX_set_ciphersuites(
+                ssl_ctx.native_handle(),
+                vm.at("tls13-ciphers").as<std::string>().c_str()) != 1)
+            {
+                throw std::runtime_error{ "failed setting TLS 1.3 cipher suite" };
+            }
+        }
+
+        if(vm.count("curves"))
+        {
+            if(::SSL_CTX_set1_curves_list(
+                ssl_ctx.native_handle(),
+                vm.at("curves").as<std::string>().c_str()) != 1)
+            {
+                throw std::runtime_error{ "failed setting curves list" };
+            }
         }
 
         if(vm.count("pass"))
