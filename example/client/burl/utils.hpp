@@ -12,7 +12,9 @@
 
 #include <boost/core/detail/string_view.hpp>
 #include <boost/optional/optional.hpp>
+#include <boost/system/result.hpp>
 
+#include <cstdint>
 #include <vector>
 
 namespace core = boost::core;
@@ -32,5 +34,8 @@ struct form_option_result
 
 form_option_result
 parse_form_option(core::string_view sv);
+
+boost::system::result<std::uint64_t>
+parse_human_readable_size(core::string_view sv);
 
 #endif

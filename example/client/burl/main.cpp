@@ -226,17 +226,29 @@ request(
     auto parser     = http_proto::response_parser{ http_proto_ctx };
     auto serializer = http_proto::serializer{ http_proto_ctx };
 
-    auto connect_to = [&](const urls::url_view& url)
+    auto connect_to = [&](const urls::url_view& url) -> asio::awaitable<any_stream>
     {
         auto timeout = vm.count("connect-timeout")
             ? ch::duration_cast<ch::steady_clock::duration>(
                 ch::duration<float>(vm.at("connect-timeout").as<float>()))
             : ch::steady_clock::duration::max();
 
-        return asio::co_spawn(
+        auto rs = co_await asio::co_spawn(
             executor,
             connect(vm, ssl_ctx, http_proto_ctx, url),
             asio::cancel_after(timeout));
+
+        if(vm.count("limit-rate"))
+        {
+            auto limit = parse_human_readable_size(
+                vm.at("limit-rate").as<std::string>());
+            if(limit.has_error())
+                throw std::runtime_error{ "unsupported limit-rate unit" };
+            rs->write_limit(limit.value());
+            rs->read_limit(limit.value());
+        }
+
+        co_return std::move(rs.value());
     };
 
     auto set_cookies = [&](const urls::url_view& url, bool trusted)
@@ -453,6 +465,7 @@ request(
                     : "";
                 path.append(filename.begin(), filename.end());
                 body_output = any_ostream{ path };
+                break;
             }
         }
     }
@@ -715,10 +728,13 @@ main(int argc, char* argv[])
                 po::value<std::vector<std::string>>()->value_name("<data>"),
                 "HTTP POST JSON")
             ("junk-session-cookies,j", "Ignore session cookies read from file")
+            ("limit-rate",
+                po::value<std::string>()->value_name("<speed>"),
+                "Limit transfer speed to RATE")
             ("location,L", "Follow redirects")
             ("location-trusted", "Like --location, and send auth to other hosts")
             ("max-filesize",
-                po::value<std::uint64_t>()->value_name("<bytes>"),
+                po::value<std::string>()->value_name("<bytes>"),
                 "Maximum file size to download")
             ("max-redirs",
                 po::value<std::int32_t>()->value_name("<num>"),
@@ -941,7 +957,13 @@ main(int argc, char* argv[])
             cfg.body_limit = [&]()
             {
                 if(vm.count("max-filesize"))
-                    return vm.at("max-filesize").as<std::uint64_t>();
+                {
+                    auto limit = parse_human_readable_size(
+                        vm.at("max-filesize").as<std::string>());
+                    if(limit.has_error())
+                        throw std::runtime_error{ "unsupported max-filesize unit" };
+                    return limit.value();
+                }
                 return std::numeric_limits<std::uint64_t>::max();
             }();
             cfg.min_buffer = 1024 * 1024;
