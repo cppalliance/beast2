@@ -227,7 +227,7 @@ perform_tls_handshake(ssl::context& ssl_ctx, Socket socket, std::string host)
 }
 } // namespace
 
-asio::awaitable<any_stream>
+asio::awaitable<boost::optional<any_stream>>
 connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,

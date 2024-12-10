@@ -24,7 +24,7 @@ namespace po         = boost::program_options;
 namespace ssl        = boost::asio::ssl;
 namespace urls       = boost::urls;
 
-asio::awaitable<any_stream>
+asio::awaitable<boost::optional<any_stream>>
 connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,

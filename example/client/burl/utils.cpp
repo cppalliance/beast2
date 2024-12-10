@@ -86,6 +86,31 @@ unquote_string(core::string_view sv)
     }
     return rs;
 }
+
+struct ci_delim_rule
+{
+    using value_type = char;
+
+    constexpr ci_delim_rule(char ch) noexcept
+        : ch_(grammar::to_lower(ch))
+    {
+    }
+
+    constexpr boost::system::result<value_type>
+    parse(char const*& it, char const* end) const noexcept
+    {
+        if(it == end)
+            return grammar::error::need_more;
+
+        if(grammar::to_lower(*it++) != ch_)
+            return grammar::error::mismatch;
+
+        return ch_;
+    }
+
+private:
+    char ch_;
+};
 }
 
 boost::optional<std::string>
@@ -180,4 +205,30 @@ parse_form_option(core::string_view sv)
     }
 
     return rs;
+}
+
+boost::system::result<std::uint64_t>
+parse_human_readable_size(core::string_view sv)
+{
+    static constexpr auto parser = grammar::tuple_rule(
+        grammar::token_rule(grammar::digit_chars + grammar::lut_chars(".")),
+        grammar::optional_rule(
+            grammar::variant_rule(
+                ci_delim_rule('B'),
+                ci_delim_rule('K'),
+                ci_delim_rule('M'),
+                ci_delim_rule('G'),
+                ci_delim_rule('T'),
+                ci_delim_rule('P'))));
+    const auto parse_rs = grammar::parse(sv, parser);
+
+    if(parse_rs.has_error())
+        return parse_rs.error();
+
+    auto [size, unit] = parse_rs.value();
+
+    // TODO: prevent overflow
+    // TODO: replace std::stod
+    return static_cast<std::uint64_t>(
+        std::stod(size) * (1ULL << 10 * unit.value_or(char{}).index()));
 }
