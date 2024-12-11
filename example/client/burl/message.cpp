@@ -139,7 +139,8 @@ message::set_headers(http_proto::request& request) const
                 if(content_length.has_value())
                 {
                     request.set_content_length(content_length.value());
-                    if(content_length.value() >= 1024 * 1024)
+                    if(content_length.value() >= 1024 * 1024 &&
+                       request.version() == http_proto::version::http_1_1)
                         request.set(field::expect, "100-continue");
                 }
                 else
