@@ -227,11 +227,12 @@ perform_tls_handshake(ssl::context& ssl_ctx, Socket socket, std::string host)
 }
 } // namespace
 
-asio::awaitable<boost::optional<any_stream>>
+asio::awaitable<void>
 connect(
     const po::variables_map& vm,
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
+    any_stream& stream,
     urls::url url)
 {
     auto org_host = url.host();
@@ -251,9 +252,13 @@ connect(
         co_await socket.async_connect(endpoint);
 
         if(url.scheme_id() == urls::scheme::https)
-            co_return co_await perform_tls_handshake(
+        {
+            stream = co_await perform_tls_handshake(
                 ssl_ctx, std::move(socket), org_host);
-        co_return socket;
+            co_return;
+        }
+        stream = std::move(socket);
+        co_return;
     }
 
     auto socket = asio::ip::tcp::socket{ executor };
@@ -379,8 +384,10 @@ connect(
         socket.set_option(asio::ip::tcp::socket::keep_alive{ false });
 
     if(url.scheme_id() == urls::scheme::https)
-        co_return co_await perform_tls_handshake(
+    {
+        stream = co_await perform_tls_handshake(
             ssl_ctx, std::move(socket), org_host);
-
-    co_return socket;
+        co_return;
+    }
+    stream = std::move(socket);
 }

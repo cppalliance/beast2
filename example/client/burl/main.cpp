@@ -16,6 +16,7 @@
 #include "message.hpp"
 #include "mime_type.hpp"
 #include "multipart_form.hpp"
+#include "request.hpp"
 #include "utils.hpp"
 
 #include <boost/asio/as_tuple.hpp>
@@ -114,6 +115,23 @@ can_reuse_connection(
     return true;
 }
 
+urls::url
+redirect_url(http_proto::response_view response, const urls::url_view& referer)
+{
+    auto it = response.find(http_proto::field::location);
+    if(it != response.end())
+    {
+        auto rs = urls::parse_uri_reference(it->value);
+        if(rs.has_value())
+        {
+            urls::url url;
+            urls::resolve(referer, rs.value(), url);
+            return url;
+        }
+    }
+    throw std::runtime_error{ "Bad redirect response" };
+}
+
 http_proto::request
 create_request(
     const po::variables_map& vm,
@@ -206,12 +224,12 @@ create_request(
 }
 
 asio::awaitable<void>
-request(
+co_main(
     const po::variables_map& vm,
     any_ostream& body_output,
     std::optional<any_ostream>& header_output,
     const std::set<urls::scheme>& allowed_redirect_protos,
-    std::uint32_t max_redirects,
+    std::uint64_t max_redirects,
     bool show_headers,
     message& msg,
     std::optional<cookie_jar>& cookie_jar,
@@ -219,23 +237,31 @@ request(
     ssl::context& ssl_ctx,
     http_proto::context& http_proto_ctx,
     http_proto::request request,
-    const urls::url_view& url)
+    urls::url url)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
+    auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
     auto parser     = http_proto::response_parser{ http_proto_ctx };
     auto serializer = http_proto::serializer{ http_proto_ctx };
 
-    auto connect_to = [&](const urls::url_view& url) -> asio::awaitable<any_stream>
+    auto connect_to = [&](any_stream& stream, const urls::url_view& url)
+        -> asio::awaitable<void>
     {
+        // clean shutdown
+        if(!vm.count("proxy"))
+            co_await stream.async_shutdown(
+                asio::cancel_after(
+                    ch::milliseconds{ 500 }, asio::as_tuple));
+
         auto timeout = vm.count("connect-timeout")
             ? ch::duration_cast<ch::steady_clock::duration>(
                 ch::duration<float>(vm.at("connect-timeout").as<float>()))
             : ch::steady_clock::duration::max();
 
-        auto rs = co_await asio::co_spawn(
+        co_await asio::co_spawn(
             executor,
-            connect(vm, ssl_ctx, http_proto_ctx, url),
+            connect(vm, ssl_ctx, http_proto_ctx, stream, url),
             asio::cancel_after(timeout));
 
         if(vm.count("limit-rate"))
@@ -244,17 +270,29 @@ request(
                 vm.at("limit-rate").as<std::string>());
             if(limit.has_error())
                 throw std::runtime_error{ "unsupported limit-rate unit" };
-            rs->write_limit(limit.value());
-            rs->read_limit(limit.value());
+            stream.write_limit(limit.value());
+            stream.read_limit(limit.value());
         }
-
-        co_return std::move(rs.value());
     };
+
+    auto stream_headers = [&](http_proto::response_view response)
+    {
+        if(show_headers)
+            body_output << response.buffer();
+
+        if(header_output.has_value())
+            header_output.value() << response.buffer();
+    };
+
+    auto expect100_timeout = vm.count("expect100-timeout")
+        ? ch::duration_cast<ch::steady_clock::duration>(
+              ch::duration<float>(vm.at("expect100-timeout").as<float>()))
+        : ch::steady_clock::duration{ ch::seconds{ 1 } };
 
     auto set_cookies = [&](const urls::url_view& url, bool trusted)
     {
         auto field = cookie_jar ? cookie_jar->make_field(url) : std::string{};
-        
+
         if(trusted)
             field.append(explicit_cookies);
 
@@ -273,174 +311,91 @@ request(
             cookie_jar->add(url, parse_cookie(sv).value());
     };
 
-    auto stream_headers = [&]()
-    {
-        if(show_headers)
-            body_output << parser.get().buffer();
-
-        if(header_output.has_value())
-            header_output.value() << parser.get().buffer();
-    };
-
-    auto stream = co_await connect_to(url);
+    co_await connect_to(stream, url);
     parser.reset();
 
-    auto send_request_and_read_headers =
-        [&](const urls::url_view& url, bool trusted) -> asio::awaitable<void>
+    auto org_url = urls::url{ url };
+    auto referer = urls::url{ url };
+    bool trusted = true;
+    for(;;)
     {
         set_cookies(url, trusted);
         msg.start_serializer(serializer, request);
-        auto [ec, _] = co_await http_io::async_write(stream, serializer, asio::as_tuple);
-        if(ec)
-        {
-            if(ec == http_proto::error::expect_100_continue)
-            {
-                auto expect100_timeout = vm.count("expect100-timeout")
-                ? ch::duration_cast<ch::steady_clock::duration>(
-                    ch::duration<float>(vm.at("expect100-timeout").as<float>()))
-                : ch::steady_clock::duration{ch::seconds{ 1 }};
+        parser.start();
 
-                parser.start();
-                auto [ec, _] = co_await http_io::async_read_header(
-                    stream,
-                    parser,
-                    asio::cancel_after(expect100_timeout, asio::as_tuple));
-                if(ec)
-                {
-                    if(ec != asio::error::operation_aborted)
-                        throw system_error{ ec };
-                }
-                else
-                {
-                    extract_cookies(url);
-                    stream_headers();
-                    if(parser.get().status() != http_proto::status::continue_)
-                        co_return;
-                    parser.start();
-                }
+        co_await async_request(stream, serializer, parser, expect100_timeout);
 
-                co_await http_io::async_write(stream, serializer, asio::as_tuple);
-            }
-            else
-            {
-                throw system_error{ ec };
-            }
-        }
-        else
-        {
-            parser.start();
-        }
-
-        co_await http_io::async_read_header(stream, parser);
         extract_cookies(url);
-        stream_headers();
+        stream_headers(parser.get());
 
-        // expect100-timeout
-        if(parser.get().status() == http_proto::status::continue_)
-        {
-            parser.start();
-            co_await http_io::async_read_header(stream, parser);
-            extract_cookies(url);
-            stream_headers();
-        }
-    };
-
-    co_await send_request_and_read_headers(url, true);
-
-    // handle redirects
-    auto referer = urls::url{ url };
-    for(;;)
-    {
         auto [is_redirect, need_method_change] =
             ::is_redirect(vm, parser.get().status());
 
-        if(!is_redirect ||
-           (!vm.count("location") && !vm.count("location-trusted")))
+        if(!is_redirect || !(vm.count("location") || vm.count("location-trusted")))
             break;
 
         if(max_redirects-- == 0)
             throw std::runtime_error{ "Maximum redirects followed" };
 
-        auto response = parser.get();
-        if(auto it = response.find(field::location);
-           it != response.end())
+        url = redirect_url(parser.get(), referer);
+
+        if(!allowed_redirect_protos.contains(url.scheme_id()))
+            throw std::runtime_error{ "Protocol not supported or disabled" };
+
+        if(can_reuse_connection(parser.get(), referer, url))
         {
-            auto location = urls::url{};
-
-            urls::resolve(
-                referer,
-                urls::parse_uri_reference(it->value).value(),
-                location);
-
-            if(!allowed_redirect_protos.contains(location.scheme_id()))
-                throw std::runtime_error{
-                    "Protocol "
-                    + std::string{ location.scheme() } +
-                    " not supported or disabled" };
-
-            if(can_reuse_connection(response, referer, location))
+            // Discard the body
+            // TODO: drop the connection if body is large
+            if(request.method() != http_proto::method::head)
             {
-                // Discard the body
-                // TODO: drop the connection if body is large
-                if(request.method() != http_proto::method::head)
+                while(!parser.is_complete())
                 {
-                    while(!parser.is_complete())
-                    {
-                        parser.consume_body(
-                            buffers::buffer_size(parser.pull_body()));
-                        co_await http_io::async_read_some(stream, parser);
-                    }
-                }
-                else
-                {
-                    parser.reset();
+                    parser.consume_body(
+                        buffers::buffer_size(parser.pull_body()));
+                    co_await http_io::async_read_some(stream, parser);
                 }
             }
             else
             {
-                // clean shutdown
-                if(!vm.count("proxy"))
-                    co_await stream.async_shutdown(
-                        asio::cancel_after(
-                            ch::milliseconds{ 500 }, asio::as_tuple));
-
-                stream = co_await connect_to(location);
                 parser.reset();
             }
-
-            // Change the method according to RFC 9110, Section 15.4.4.
-            if(need_method_change && !vm.count("head"))
-            {
-                request.set_method(http_proto::method::get);
-                request.erase(field::content_length);
-                request.erase(field::content_encoding);
-                request.erase(field::content_type);
-                request.erase(field::expect);
-                msg = {}; // drop the body
-            }
-
-            set_target(vm, request, location);
-
-            const bool trusted =
-                (url.encoded_origin() == location.encoded_origin()) ||
-                vm.count("location-trusted");
-
-            if(!trusted)
-                request.erase(field::authorization);
-
-            request.set(field::host,
-                location.authority().encoded_host_and_port().decode());
-            referer.remove_userinfo();
-            request.set(field::referer, referer);
-
-            referer = location;
-
-            co_await send_request_and_read_headers(location, trusted);
         }
         else
         {
-            throw std::runtime_error{ "Bad redirect response" };
+            // clean shutdown
+            if(!vm.count("proxy"))
+                co_await stream.async_shutdown(
+                    asio::cancel_after(
+                        ch::milliseconds{ 500 }, asio::as_tuple));
+
+            co_await connect_to(stream, url);
+            parser.reset();
         }
+
+        // Change the method according to RFC 9110, Section 15.4.4.
+        if(need_method_change && request.method() != http_proto::method::head)
+        {
+            request.set_method(http_proto::method::get);
+            request.erase(field::content_length);
+            request.erase(field::content_encoding);
+            request.erase(field::content_type);
+            request.erase(field::expect);
+            msg = {}; // drop the body
+        }
+
+        set_target(vm, request, url);
+
+        trusted = (org_url.encoded_origin() == url.encoded_origin()) ||
+            vm.count("location-trusted");
+
+        if(!trusted)
+            request.erase(field::authorization);
+
+        referer.remove_userinfo();
+        request.set(field::referer, referer);
+        request.set(field::host, url.authority().encoded_host_and_port().decode());
+
+        referer = url;
     }
 
     if(vm.count("fail") && parser.get().status_int() >= 400)
@@ -448,6 +403,7 @@ request(
             "The requested URL returned error: " +
             std::to_string(parser.get().status_int()) };
 
+    // use the server-specified Content-Disposition filename
     if(vm.count("remote-header-name"))
     {
         for(auto sv : parser.get().find_all(field::content_disposition))
@@ -737,7 +693,7 @@ main(int argc, char* argv[])
                 po::value<std::string>()->value_name("<bytes>"),
                 "Maximum file size to download")
             ("max-redirs",
-                po::value<std::int32_t>()->value_name("<num>"),
+                po::value<std::int64_t>()->value_name("<num>"),
                 "Maximum number of redirects allowed")
             ("max-time",
                 po::value<float>()->value_name("<frac sec>"),
@@ -1175,15 +1131,15 @@ main(int argc, char* argv[])
         if(vm.count("junk-session-cookies") && cookie_jar.has_value())
             cookie_jar->clear_session_cookies();
 
-        auto max_redirects = [&]() -> std::uint32_t
+        auto max_redirects = [&]() -> std::uint64_t
         {
             if(!vm.count("max-redirs"))
                 return 50; // default
 
-            auto arg = vm.at("max-redirs").as<std::int32_t>();
+            auto arg = vm.at("max-redirs").as<std::int64_t>();
             if(arg < 0)
-                return std::numeric_limits<std::uint32_t>::max();
-            return static_cast<std::uint32_t>(arg);
+                return std::numeric_limits<std::uint64_t>::max();
+            return static_cast<std::uint64_t>(arg);
         }();
 
         bool show_headers =
@@ -1204,11 +1160,11 @@ main(int argc, char* argv[])
                 return { urls::scheme::http, urls::scheme::https };
 
             std::set<urls::scheme> rs;
-            for(auto& s : vm.at("proto-redir").as<std::vector<std::string>>())
+            for(core::string_view sv : vm.at("proto-redir").as<std::vector<std::string>>())
             {
-                if(s == "http")
+                if(sv == "http")
                     rs.emplace(urls::scheme::http);
-                if(s == "https")
+                if(sv == "https")
                     rs.emplace(urls::scheme::https);
             }
             return rs;
@@ -1216,7 +1172,7 @@ main(int argc, char* argv[])
 
         asio::co_spawn(
             ioc,
-            request(
+            co_main(
                 vm,
                 body_output,
                 header_output,
