@@ -232,3 +232,24 @@ parse_human_readable_size(core::string_view sv)
     return static_cast<std::uint64_t>(
         std::stod(size) * (1ULL << 10 * unit.value_or(char{}).index()));
 }
+
+boost::system::result<urls::url>
+normalize_and_parse_url(std::string str)
+{
+    static constexpr auto scheme_rule = grammar::tuple_rule(
+        grammar::token_rule(grammar::alnum_chars + grammar::lut_chars("+-.")),
+        grammar::delim_rule(':'),
+        grammar::token_rule(grammar::all_chars));
+
+    const auto scheme_rs = grammar::parse(str, scheme_rule);
+
+    if(scheme_rs.has_error())
+        str.insert(0, "http://");
+
+    auto rs = urls::parse_uri(str);
+
+    if(rs.has_error())
+        return rs.error();
+
+    return urls::url{ rs.value() }.normalize();
+}

@@ -876,9 +876,11 @@ main(int argc, char* argv[])
 
         urls::url url = [&]()
         {
-            auto rs = urls::parse_uri(vm.at("url").as<std::string>());
+            auto rs = normalize_and_parse_url(vm.at("url").as<std::string>());
             if(rs.has_error())
                 throw system_error{ rs.error(), "Failed to parse URL" };
+            if(rs.value().host().empty())
+                throw std::runtime_error{ "No host part in the URL" };
             return rs.value();
         }();
 
