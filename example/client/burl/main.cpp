@@ -223,15 +223,15 @@ create_request(
     return request;
 }
 
-asio::awaitable<void>
-co_main(
+asio::awaitable<http_proto::status>
+perform_request(
     const po::variables_map& vm,
     any_ostream& body_output,
     std::optional<any_ostream>& header_output,
     const std::set<urls::scheme>& allowed_redirect_protos,
     std::uint64_t max_redirects,
     bool show_headers,
-    message& msg,
+    message msg,
     std::optional<cookie_jar>& cookie_jar,
     core::string_view explicit_cookies,
     ssl::context& ssl_ctx,
@@ -439,11 +439,10 @@ co_main(
                 if(body_output.is_tty() &&
                     chunk.find(char{0}) != core::string_view::npos)
                 {
-                    std::cerr <<
+                    throw std::runtime_error{
                         "Warning: Binary output can mess up your terminal.\n"
                         "Warning: Use \"--output -\" to tell burl to output it to your terminal anyway, or\n"
-                        "Warning: consider \"--output <FILE>\" to save to a file.\n";
-                    co_return;
+                        "Warning: consider \"--output <FILE>\" to save to a file.\n" };
                 }
 
                 body_output << chunk;
@@ -470,6 +469,8 @@ co_main(
         throw std::runtime_error{
             "The requested URL returned error: " +
             std::to_string(parser.get().status_int()) };
+    
+    co_return parser.get().status();
 };
 
 boost::optional<std::string>
@@ -593,6 +594,80 @@ parse_data_options(const po::variables_map& vm)
     }
 
     return rs;
+}
+
+asio::awaitable<void>
+retry(
+    const po::variables_map& vm,
+    std::function<asio::awaitable<http_proto::status>()> request_task)
+{
+    auto timer = asio::steady_timer{ co_await asio::this_coro::executor };
+    auto retries = vm.count("retry") ? vm.at("retry").as<std::uint64_t>() : 0;
+    auto retry_delay = [&, backoff = ch::seconds{ 1 }]() mutable
+    {
+        if(vm.count("retry-delay"))
+            return ch::seconds{ vm.at("retry-delay").as<std::uint64_t>() };
+        auto rs = backoff;
+        if(backoff < ch::seconds{ 10 * 60 })
+            backoff *= 2;
+        return rs;
+    };
+    auto retry_max_time = [&]() -> ch::steady_clock::time_point
+    {
+        if(vm.count("retry-max-time"))
+            return ch::steady_clock::now() +
+                ch::seconds{ vm.at("retry-max-time").as<std::uint64_t>() };
+        return ch::steady_clock::time_point::max();
+    }();
+
+    auto can_retry = [&]()
+    {
+        return retries != 0 && retry_max_time > ch::steady_clock::now();
+    };
+
+    for(;;)
+    {
+        try
+        {
+            switch(co_await request_task())
+            {
+            case http_proto::status::request_timeout:
+            case http_proto::status::too_many_requests:
+            case http_proto::status::internal_server_error:
+            case http_proto::status::bad_gateway:
+            case http_proto::status::service_unavailable:
+            case http_proto::status::gateway_timeout:
+                if(!can_retry())
+                    co_return;
+                std::cerr << "Error: HTTP error" << std::endl;
+                break;
+            default:
+                co_return;
+            }
+        }
+        catch(const boost::system::system_error& e)
+        {
+            if( can_retry() &&
+                (vm.count("retry-all-errors") ||
+                e.code() == asio::error::operation_aborted ||
+                (vm.count("retry-connrefused") && e.code() == asio::error::connection_refused)))
+            {
+                std::cerr << "Error: " << e.what() << std::endl;
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        auto delay = retry_delay();
+        std::cerr 
+            << "Will retry in " << delay << " seconds. "
+            << retries << " retries left." << std::endl;
+        retries--;
+        timer.expires_after(delay);
+        co_await timer.async_wait();
+    }
 }
 
 int
@@ -735,6 +810,17 @@ main(int argc, char* argv[])
             ("resolve",
                 po::value<std::vector<std::string>>()->value_name("host:port:addr"),
                 "Resolve the host+port to this address")
+            ("retry",
+                po::value<std::uint64_t>()->value_name("<num>"),
+                "Retry request if transient problems occur")
+            ("retry-all-errors", "Retry all errors (use with --retry)")
+            ("retry-connrefused", "Retry on connection refused (use with --retry)")
+            ("retry-delay",
+                po::value<std::uint64_t>()->value_name("<seconds>"),
+                "Wait time between retries")
+            ("retry-max-time",
+                po::value<std::uint64_t>()->value_name("<seconds>"),
+                "Retry only within this period")
             ("show-headers", "Show response headers in the output")
             ("tcp-nodelay", "Use the TCP_NODELAY option")
             ("tls-max",
@@ -977,23 +1063,23 @@ main(int argc, char* argv[])
 
         auto msg = message{};
 
-        auto data = parse_data_options(vm);
+        auto data_opt = parse_data_options(vm);
 
-        if(data)
+        if(data_opt)
         {
             if(vm.count("get"))
             {
-                urls::params_view params{ data.value() };
+                urls::params_view params{ data_opt.value() };
                 url.encoded_params().append(params.begin(), params.end());
             }
             else
             {
-                msg = string_body{ std::move(data.value()),
+                msg = string_body{ std::move(data_opt.value()),
                     "application/x-www-form-urlencoded" };
             }
         }
 
-        if((!!data +
+        if((!!data_opt +
             !!vm.count("form") +
             !!vm.count("json") +
             !!vm.count("upload-file")) == 2)
@@ -1170,33 +1256,39 @@ main(int argc, char* argv[])
             return rs;
         }();
 
+        auto request_task = [&]()
+        {
+            return asio::co_spawn(
+                ioc,
+                perform_request(
+                    vm,
+                    body_output,
+                    header_output,
+                    allowed_redirect_protos,
+                    max_redirects,
+                    show_headers,
+                    msg,
+                    cookie_jar,
+                    explicit_cookies,
+                    ssl_ctx,
+                    http_proto_ctx,
+                    create_request(vm, msg, url),
+                    url),
+                asio::cancel_after(timeout, asio::use_awaitable));
+        };
+
         asio::co_spawn(
             ioc,
-            co_main(
-                vm,
-                body_output,
-                header_output,
-                allowed_redirect_protos,
-                max_redirects,
-                show_headers,
-                msg,
-                cookie_jar,
-                explicit_cookies,
-                ssl_ctx,
-                http_proto_ctx,
-                create_request(vm, msg, url),
-                url),
-            asio::cancel_after(
-                timeout,
-                [&](std::exception_ptr ep)
+            retry(vm, request_task),
+            [&](std::exception_ptr ep)
+            {
+                if(ep)
                 {
-                    if(ep)
-                    {
-                        if(vm.count("remove-on-error"))
-                            body_output.remove_file();
-                        std::rethrow_exception(ep);
-                    }
-                }));
+                    if(vm.count("remove-on-error"))
+                        body_output.remove_file();
+                    std::rethrow_exception(ep);
+                }
+            });
 
         ioc.run();
 
