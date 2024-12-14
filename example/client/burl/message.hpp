@@ -18,12 +18,13 @@
 
 #include <variant>
 
-namespace core = boost::core; 
+namespace core = boost::core;
 
 class string_body
 {
     std::string body_;
     std::string content_type_;
+
 public:
     string_body(std::string body, std::string content_type);
 
@@ -96,7 +97,10 @@ class message
 public:
     message() = default;
 
-    message(auto&& body)
+    template<
+        class Body,
+        std::enable_if_t<!std::is_same_v<std::decay_t<Body>, message>, int> = 0>
+    message(Body&& body)
         : body_{ std::move(body) }
     {
     }
