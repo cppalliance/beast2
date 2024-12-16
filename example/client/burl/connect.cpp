@@ -20,7 +20,6 @@
 #include <boost/url.hpp>
 
 namespace core     = boost::core;
-namespace grammar  = boost::urls::grammar;
 namespace http_io  = boost::http_io;
 using error_code   = boost::system::error_code;
 using system_error = boost::system::system_error;
@@ -152,8 +151,8 @@ connect_socks5_proxy(
 
 asio::awaitable<void>
 connect_http_proxy(
-    const po::variables_map& vm,
-    http_proto::context& http_proto_ctx,
+    const operation_config& oc,
+    http_proto::context& proto_ctx,
     asio::ip::tcp::socket& stream,
     const urls::url_view& url,
     const urls::url_view& proxy)
@@ -180,15 +179,7 @@ connect_http_proxy(
     request.set_target(host_port);
     request.set(field::host, host_port);
     request.set(field::proxy_connection, "keep-alive");
-
-    if(vm.count("user-agent"))
-    {
-        request.set(field::user_agent, vm.at("user-agent").as<std::string>());
-    }
-    else
-    {
-        request.set(field::user_agent, "Boost.Http.Io");
-    }
+    request.set(field::user_agent, oc.useragent.value_or("Boost.Http.Io"));
 
     if(proxy.has_userinfo())
     {
@@ -198,8 +189,8 @@ connect_http_proxy(
         request.set(field::proxy_authorization, basic_auth);
     }
 
-    auto serializer = http_proto::serializer{ http_proto_ctx };
-    auto parser     = http_proto::response_parser{ http_proto_ctx };
+    auto serializer = http_proto::serializer{ proto_ctx };
+    auto parser     = http_proto::response_parser{ proto_ctx };
 
     serializer.start(request);
     co_await http_io::async_write(stream, serializer);
@@ -229,25 +220,19 @@ perform_tls_handshake(ssl::context& ssl_ctx, Socket socket, std::string host)
 
 asio::awaitable<void>
 connect(
-    const po::variables_map& vm,
+    const operation_config& oc,
     ssl::context& ssl_ctx,
-    http_proto::context& http_proto_ctx,
+    http_proto::context& proto_ctx,
     any_stream& stream,
     urls::url url)
 {
     auto org_host = url.host();
     auto executor = co_await asio::this_coro::executor;
 
-    if(vm.count("unix-socket") || vm.count("abstract-unix-socket"))
+    if(!oc.unix_socket_path.empty())
     {
-        auto socket = asio::local::stream_protocol::socket{ executor };
-        auto path   = [&]() -> std::string
-        {
-            if(vm.count("abstract-unix-socket"))
-                return '\0' + vm.at("abstract-unix-socket").as<std::string>();
-
-            return vm.at("unix-socket").as<std::string>();
-        }();
+        auto socket   = asio::local::stream_protocol::socket{ executor };
+        auto path     = oc.unix_socket_path.string();
         auto endpoint = asio::local::stream_protocol::endpoint{ path };
         co_await socket.async_connect(endpoint);
 
@@ -263,97 +248,26 @@ connect(
 
     auto socket = asio::ip::tcp::socket{ executor };
 
-    if(vm.count("connect-to"))
+    if(oc.connect_to)
+        oc.connect_to(url);
+
+    if(oc.resolve_to)
+        oc.resolve_to(url);
+
+    if(!oc.proxy.empty())
     {
-        static constexpr auto parser = grammar::tuple_rule(
-            urls::authority_rule,
-            grammar::squelch(grammar::optional_rule(grammar::delim_rule(':'))),
-            urls::authority_rule);
-
-        for(core::string_view sv :
-            vm.at("connect-to").as<std::vector<std::string>>())
+        if(oc.proxy.scheme() == "http")
         {
-            auto rs = grammar::parse(sv, parser);
-            if(rs.has_error())
-                throw std::runtime_error{ "bad --connect-to option" };
-            auto [left, right] = rs.value();
-
-            auto left_host = left.encoded_host();
-            auto left_port = left.port();
-
-            if(url.encoded_host() != left_host && !left_host.empty())
-                continue;
-
-            if(effective_port(url) != left_port && !left_port.empty())
-                continue;
-
-            if(!right.encoded_host().empty())
-                url.set_encoded_host(right.encoded_host());
-
-            if(!right.port().empty())
-                url.set_port(right.port());
-
-            break;
+            co_await connect_http_proxy(oc, proto_ctx, socket, url, oc.proxy);
         }
-    }
-
-    if(vm.count("resolve"))
-    {
-        static constexpr auto parser = grammar::tuple_rule(
-            grammar::token_rule(grammar::all_chars - grammar::lut_chars(':')),
-            grammar::squelch(grammar::delim_rule(':')),
-            grammar::token_rule(grammar::digit_chars),
-            grammar::squelch(grammar::delim_rule(':')),
-            grammar::squelch(grammar::optional_rule(grammar::delim_rule('['))),
-            grammar::variant_rule(
-                urls::ipv4_address_rule,
-                urls::ipv6_address_rule),
-            grammar::squelch(grammar::optional_rule(grammar::delim_rule(']'))));
-
-        for(core::string_view sv :
-            vm.at("resolve").as<std::vector<std::string>>())
+        else if(oc.proxy.scheme() == "socks5")
         {
-            auto rs = grammar::parse(sv, parser);
-            if(rs.has_error())
-                throw std::runtime_error{ "bad --resolve option" };
-            auto [host, port, ip_address] = rs.value();
-
-            if(url.encoded_host() != host && host != "*")
-                continue;
-
-            if(effective_port(url) != port)
-                continue;
-
-            if(ip_address.index() == 0)
-                url.set_host_ipv4(get<0>(ip_address));
-            else
-                url.set_host_ipv6(get<1>(ip_address));
-
-            break;
-        }
-    }
-
-    if(vm.count("proxy"))
-    {
-        auto proxy_url = urls::parse_uri(vm.at("proxy").as<std::string>());
-
-        if(proxy_url.has_error())
-            throw system_error{ proxy_url.error(), "Failed to parse proxy" };
-
-        if(proxy_url->scheme() == "http")
-        {
-            co_await connect_http_proxy(
-                vm, http_proto_ctx, socket, url, proxy_url.value());
-        }
-        else if(proxy_url->scheme() == "socks5")
-        {
-            co_await connect_socks5_proxy(socket, url, proxy_url.value());
+            co_await connect_socks5_proxy(socket, url, oc.proxy);
         }
         else
         {
-            throw std::runtime_error{
-                "only HTTP and SOCKS5 proxies are supported"
-            };
+            throw std::runtime_error(
+                "only HTTP and SOCKS5 proxies are supported");
         }
     }
     else // no proxy
@@ -367,20 +281,20 @@ connect(
             rresults,
             [&](const error_code&, const asio::ip::tcp::endpoint& next)
             {
-                if(vm.count("ipv4") && next.address().is_v6())
+                if(oc.ipv4 && next.address().is_v6())
                     return false;
 
-                if(vm.count("ipv6") && next.address().is_v4())
+                if(oc.ipv6 && next.address().is_v4())
                     return false;
 
                 return true;
             });
     }
 
-    if(vm.count("tcp-nodelay"))
+    if(oc.tcp_nodelay)
         socket.set_option(asio::ip::tcp::no_delay{ true });
 
-    if(vm.count("no-keepalive"))
+    if(oc.nokeepalive)
         socket.set_option(asio::ip::tcp::socket::keep_alive{ false });
 
     if(url.scheme_id() == urls::scheme::https)

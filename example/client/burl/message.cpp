@@ -133,6 +133,7 @@ message::set_headers(http_proto::request& request) const
             if constexpr(!std::is_same_v<decltype(f), const std::monostate&>)
             {
                 request.set_method(f.method());
+                request.set(field::content_type, f.content_type());
 
                 boost::optional<std::size_t> content_length =
                     f.content_length();
@@ -148,8 +149,6 @@ message::set_headers(http_proto::request& request) const
                     request.set_chunked(true);
                     request.set(field::expect, "100-continue");
                 }
-
-                request.set(field::content_type, f.content_type());
             }
         },
         body_);

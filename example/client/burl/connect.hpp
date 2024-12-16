@@ -11,24 +11,23 @@
 #define BURL_CONNECT_HPP
 
 #include "any_stream.hpp"
+#include "options.hpp"
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/http_proto/context.hpp>
-#include <boost/program_options.hpp>
 #include <boost/url/url.hpp>
 
 namespace asio       = boost::asio;
 namespace http_proto = boost::http_proto;
-namespace po         = boost::program_options;
 namespace ssl        = boost::asio::ssl;
 namespace urls       = boost::urls;
 
 asio::awaitable<void>
 connect(
-    const po::variables_map& vm,
+    const operation_config& oc,
     ssl::context& ssl_ctx,
-    http_proto::context& http_proto_ctx,
+    http_proto::context& proto_ctx,
     any_stream& stream,
     urls::url url);
 

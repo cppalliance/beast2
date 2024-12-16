@@ -14,8 +14,6 @@
 #include "cookie.hpp"
 #include "file.hpp"
 #include "message.hpp"
-#include "mime_type.hpp"
-#include "multipart_form.hpp"
 #include "request.hpp"
 #include "utils.hpp"
 
@@ -28,6 +26,8 @@
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
+#include <boost/scope/scope_fail.hpp>
+#include <boost/scope/scope_success.hpp>
 #include <boost/url/encode.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/rfc/pchars.hpp>
@@ -35,8 +35,8 @@
 
 #include <cstdlib>
 
-namespace ch       = std::chrono;
 namespace http_io  = boost::http_io;
+namespace scope    = boost::scope;
 using system_error = boost::system::system_error;
 
 #ifdef BOOST_HTTP_PROTO_HAS_ZLIB
@@ -47,14 +47,13 @@ inline const bool http_proto_has_zlib = false;
 
 void
 set_target(
-    const po::variables_map& vm,
+    const operation_config& oc,
     http_proto::request& request,
     const urls::url_view& url)
 {
-    if(vm.count("request-target"))
+    if(oc.request_target)
     {
-        request.set_target(
-            vm.at("request-target").as<std::string>());
+        request.set_target(oc.request_target.value());
         return;
     }
 
@@ -69,14 +68,12 @@ set_target(
 
 struct is_redirect_result
 {
-    bool is_redirect = false;
+    bool is_redirect        = false;
     bool need_method_change = false;
 };
 
 is_redirect_result
-is_redirect(
-    const po::variables_map& vm,
-    http_proto::status status) noexcept
+is_redirect(const operation_config& oc, http_proto::status status) noexcept
 {
     // The specifications do not intend for 301 and 302
     // redirects to change the HTTP method, but most
@@ -84,16 +81,33 @@ is_redirect(
     switch(status)
     {
     case http_proto::status::moved_permanently:
-        return { true, !vm.count("post301") };
+        return { true, !oc.post301 };
     case http_proto::status::found:
-        return { true, !vm.count("post302") };
+        return { true, !oc.post302 };
     case http_proto::status::see_other:
-        return { true, !vm.count("post303") };
+        return { true, !oc.post303 };
     case http_proto::status::temporary_redirect:
     case http_proto::status::permanent_redirect:
         return { true, false };
     default:
         return { false, false };
+    }
+}
+
+bool
+is_transient_error(http_proto::status status) noexcept
+{
+    switch(status)
+    {
+    case http_proto::status::request_timeout:
+    case http_proto::status::too_many_requests:
+    case http_proto::status::internal_server_error:
+    case http_proto::status::bad_gateway:
+    case http_proto::status::service_unavailable:
+    case http_proto::status::gateway_timeout:
+        return true;
+    default:
+        return false;
     }
 }
 
@@ -133,10 +147,7 @@ redirect_url(http_proto::response_view response, const urls::url_view& referer)
 }
 
 http_proto::request
-create_request(
-    const po::variables_map& vm,
-    const message& msg,
-    const urls::url_view& url)
+create_request(const operation_config& oc, const urls::url_view& url)
 {
     using field   = http_proto::field;
     using method  = http_proto::method;
@@ -144,162 +155,143 @@ create_request(
 
     auto request = http_proto::request{};
 
-    request.set_method(vm.count("head") ? method::head : method::get);
+    request.set_method(oc.no_body ? method::head : method::get);
 
-    if(vm.count("request"))
-        request.set_method(vm.at("request").as<std::string>());
+    if(oc.customrequest)
+        request.set_method(oc.customrequest.value());
 
-    request.set_version(
-        vm.count("http1.0") ? version::http_1_0 : version::http_1_1);
+    request.set_version(oc.http10 ? version::http_1_0 : version::http_1_1);
+    set_target(oc, request, url);
 
-    set_target(vm, request, url);
-
-    request.set(field::accept, "*/*");
     request.set(field::host, url.authority().encoded_host_and_port().decode());
+    request.set(field::user_agent, oc.useragent.value_or("Boost.Http.Io"));
+    request.set(field::accept, "*/*");
 
-    msg.set_headers(request);
+    oc.msg.set_headers(request);
 
-    if(vm.count("continue-at"))
+    if(oc.resume_from)
     {
-        auto value = "bytes=" +
-            std::to_string(vm.at("continue-at").as<std::uint64_t>()) + "-";
-        request.set(field::range, value);
+        request.set(
+            field::range,
+            "bytes=" + std::to_string(oc.resume_from.value()) + "-");
     }
 
-    if(vm.count("range"))
-        request.set(field::range, "bytes=" + vm.at("range").as<std::string>());
+    if(oc.range)
+        request.set(field::range, "bytes=" + oc.range.value());
 
-    if(vm.count("user-agent"))
-    {
-        request.set(field::user_agent, vm.at("user-agent").as<std::string>());
-    }
-    else
-    {
-        request.set(field::user_agent, "Boost.Http.Io");
-    }
+    if(!oc.referer.empty())
+        request.set(field::referer, oc.referer);
 
-    if(vm.count("referer"))
-        request.set(field::referer, vm.at("referer").as<std::string>());
-
-    auto credentials = [&]()
-    {
-        if(vm.count("user"))
-            return vm.at("user").as<std::string>();
-        return url.userinfo();
-    }();
-
-    if(!credentials.empty())
+    if(auto creds = oc.userpwd.value_or(url.userinfo()); !creds.empty())
     {
         auto basic_auth = std::string{ "Basic " };
-        base64_encode(basic_auth, credentials);
+        base64_encode(basic_auth, creds);
         request.set(field::authorization, basic_auth);
     }
 
-    if(vm.count("compressed") && http_proto_has_zlib)
+    if(oc.encoding && http_proto_has_zlib)
         request.set(field::accept_encoding, "gzip, deflate");
 
-    // Set user provided headers
-    if(vm.count("header"))
-    {
-        for(core::string_view header : vm.at("header").as<std::vector<std::string>>())
-        {
-            if(auto pos = header.find(':'); pos != std::string::npos)
-            {
-                auto name  = header.substr(0, pos);
-                auto value = header.substr(pos + 1);
-                if(!value.empty())
-                    request.set(name, value);
-                else
-                    request.erase(name);
-            }
-            else if(auto pos = header.find(';'); pos != std::string::npos)
-            {
-                auto name = header.substr(0, pos);
-                request.set(name, "");
-            }
-        }
-    }
+    for(const auto& [_, name, value] : oc.headers)
+        request.set(name, value);
+
+    for(const auto& name : oc.omitheaders)
+        request.erase(name);
 
     return request;
 }
 
 asio::awaitable<http_proto::status>
 perform_request(
-    const po::variables_map& vm,
-    any_ostream& body_output,
+    const operation_config& oc,
     std::optional<any_ostream>& header_output,
-    const std::set<urls::scheme>& allowed_redirect_protos,
-    std::uint64_t max_redirects,
-    bool show_headers,
-    message msg,
     std::optional<cookie_jar>& cookie_jar,
-    core::string_view explicit_cookies,
+    core::string_view exp_cookies,
     ssl::context& ssl_ctx,
-    http_proto::context& http_proto_ctx,
-    http_proto::request request,
+    http_proto::context& proto_ctx,
     urls::url url)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto parser     = http_proto::response_parser{ http_proto_ctx };
-    auto serializer = http_proto::serializer{ http_proto_ctx };
+    auto request    = create_request(oc, url);
+    auto parser     = http_proto::response_parser{ proto_ctx };
+    auto serializer = http_proto::serializer{ proto_ctx };
 
-    auto connect_to = [&](any_stream& stream, const urls::url_view& url)
+    auto output = [&]()
+    {
+        auto path = oc.output_dir;
+
+        if(oc.remote_name)
+        {
+            auto segs = url.encoded_segments();
+            if(segs.empty() || segs.back().empty())
+                path.append("burl_response");
+            else
+                path.append(segs.back().begin(), segs.back().end());
+        }
+        else if(!oc.output.empty())
+        {
+            path /= oc.output;
+        }
+        else
+        {
+            return any_ostream{};
+        }
+
+        if(oc.create_dirs)
+            fs::create_directories(path.parent_path());
+
+        return any_ostream{ path };
+    }();
+
+    auto scope_fail = scope::make_scope_fail(
+        [&]
+        {
+            if(oc.rm_partial)
+                output.remove_file();
+        });
+
+    auto connect_to = [&](any_stream& stream,const urls::url_view& url)
         -> asio::awaitable<void>
     {
         // clean shutdown
-        if(!vm.count("proxy"))
+        if(oc.proxy.empty())
             co_await stream.async_shutdown(
-                asio::cancel_after(
-                    ch::milliseconds{ 500 }, asio::as_tuple));
-
-        auto timeout = vm.count("connect-timeout")
-            ? ch::duration_cast<ch::steady_clock::duration>(
-                ch::duration<float>(vm.at("connect-timeout").as<float>()))
-            : ch::steady_clock::duration::max();
+                asio::cancel_after(ch::milliseconds{ 500 }, asio::as_tuple));
 
         co_await asio::co_spawn(
             executor,
-            connect(vm, ssl_ctx, http_proto_ctx, stream, url),
-            asio::cancel_after(timeout));
+            connect(oc, ssl_ctx, proto_ctx, stream, url),
+            asio::cancel_after(oc.connect_timeout));
 
-        if(vm.count("limit-rate"))
-        {
-            auto limit = parse_human_readable_size(
-                vm.at("limit-rate").as<std::string>());
-            if(limit.has_error())
-                throw std::runtime_error{ "unsupported limit-rate unit" };
-            stream.write_limit(limit.value());
-            stream.read_limit(limit.value());
-        }
+        if(oc.recvpersecond)
+            stream.write_limit(oc.recvpersecond.value());
+
+        if(oc.sendpersecond)
+            stream.write_limit(oc.sendpersecond.value());
     };
 
     auto stream_headers = [&](http_proto::response_view response)
     {
-        if(show_headers)
-            body_output << response.buffer();
+        if(oc.show_headers)
+            output << response.buffer();
 
         if(header_output.has_value())
             header_output.value() << response.buffer();
     };
 
-    auto expect100_timeout = vm.count("expect100-timeout")
-        ? ch::duration_cast<ch::steady_clock::duration>(
-              ch::duration<float>(vm.at("expect100-timeout").as<float>()))
-        : ch::steady_clock::duration{ ch::seconds{ 1 } };
-
     auto set_cookies = [&](const urls::url_view& url, bool trusted)
     {
-        auto field = cookie_jar ? cookie_jar->make_field(url) : std::string{};
+        auto cookie = cookie_jar ? cookie_jar->make_field(url) : std::string{};
 
         if(trusted)
-            field.append(explicit_cookies);
+            cookie.append(exp_cookies);
 
         request.erase(field::cookie);
 
-        if(!field.empty())
-            request.set(field::cookie, field);
+        if(!cookie.empty())
+            request.set(field::cookie, cookie);
     };
 
     auto extract_cookies = [&](const urls::url_view& url)
@@ -314,32 +306,34 @@ perform_request(
     co_await connect_to(stream, url);
     parser.reset();
 
-    auto org_url = urls::url{ url };
-    auto referer = urls::url{ url };
-    bool trusted = true;
+    auto org_url   = urls::url{ url };
+    auto referer   = urls::url{ url };
+    auto trusted   = true;
+    auto maxredirs = oc.maxredirs;
+    auto msg       = oc.msg;
     for(;;)
     {
         set_cookies(url, trusted);
         msg.start_serializer(serializer, request);
         parser.start();
 
-        co_await async_request(stream, serializer, parser, expect100_timeout);
+        co_await async_request(stream, serializer, parser, oc.expect100timeout);
 
         extract_cookies(url);
         stream_headers(parser.get());
 
         auto [is_redirect, need_method_change] =
-            ::is_redirect(vm, parser.get().status());
+            ::is_redirect(oc, parser.get().status());
 
-        if(!is_redirect || !(vm.count("location") || vm.count("location-trusted")))
+        if(!is_redirect || !oc.followlocation)
             break;
 
-        if(max_redirects-- == 0)
+        if(maxredirs-- == 0)
             throw std::runtime_error{ "Maximum redirects followed" };
 
         url = redirect_url(parser.get(), referer);
 
-        if(!allowed_redirect_protos.contains(url.scheme_id()))
+        if(!oc.proto_redir.contains(url.scheme_id()))
             throw std::runtime_error{ "Protocol not supported or disabled" };
 
         if(can_reuse_connection(parser.get(), referer, url))
@@ -362,12 +356,6 @@ perform_request(
         }
         else
         {
-            // clean shutdown
-            if(!vm.count("proxy"))
-                co_await stream.async_shutdown(
-                    asio::cancel_after(
-                        ch::milliseconds{ 500 }, asio::as_tuple));
-
             co_await connect_to(stream, url);
             parser.reset();
         }
@@ -383,28 +371,33 @@ perform_request(
             msg = {}; // drop the body
         }
 
-        set_target(vm, request, url);
+        set_target(oc, request, url);
 
         trusted = (org_url.encoded_origin() == url.encoded_origin()) ||
-            vm.count("location-trusted");
+            oc.unrestricted_auth;
 
         if(!trusted)
             request.erase(field::authorization);
 
-        referer.remove_userinfo();
-        request.set(field::referer, referer);
-        request.set(field::host, url.authority().encoded_host_and_port().decode());
+        if(oc.autoreferer)
+        {
+            referer.remove_userinfo();
+            request.set(field::referer, referer);
+        }
+
+        request.set(
+            field::host, url.authority().encoded_host_and_port().decode());
 
         referer = url;
     }
 
-    if(vm.count("fail") && parser.get().status_int() >= 400)
+    if(oc.failonerror && parser.get().status_int() >= 400)
         throw std::runtime_error{
             "The requested URL returned error: " +
             std::to_string(parser.get().status_int()) };
 
     // use the server-specified Content-Disposition filename
-    if(vm.count("remote-header-name"))
+    if(oc.content_disposition)
     {
         for(auto sv : parser.get().find_all(field::content_disposition))
         {
@@ -416,11 +409,9 @@ perform_request(
                 if(filename.empty())
                     continue;
 
-                fs::path path = vm.count("output-dir")
-                    ? vm.at("output-dir").as<std::string>()
-                    : "";
+                auto path = oc.output_dir;
                 path.append(filename.begin(), filename.end());
-                body_output = any_ostream{ path };
+                output = any_ostream{ path };
                 break;
             }
         }
@@ -436,238 +427,183 @@ perform_request(
                 auto chunk = core::string_view{
                     static_cast<const char*>(cb.data()), cb.size() };
 
-                if(body_output.is_tty() &&
-                    chunk.find(char{0}) != core::string_view::npos)
+                if(output.is_tty() && chunk.find(char{ 0 }) != chunk.npos)
                 {
+                    // clang-format off
                     throw std::runtime_error{
-                        "Warning: Binary output can mess up your terminal.\n"
-                        "Warning: Use \"--output -\" to tell burl to output it to your terminal anyway, or\n"
-                        "Warning: consider \"--output <FILE>\" to save to a file.\n" };
+                        "Binary output can mess up your terminal.\n"
+                        "Use \"--output -\" to tell burl to output it to your terminal anyway, or\n"
+                        "consider \"--output <FILE>\" to save to a file." };
+                    // clang-format on
                 }
 
-                body_output << chunk;
+                output << chunk;
                 parser.consume_body(cb.size());
             }
 
             if(parser.is_complete())
                 break;
 
-            auto [ec, _] =
-                co_await http_io::async_read_some(stream, parser, asio::as_tuple);
+            auto [ec, _] = co_await http_io::async_read_some(
+                stream, parser, asio::as_tuple);
             if(ec && ec != http_proto::condition::need_more_input)
                 throw system_error{ ec };
         }
     }
 
     // clean shutdown
-    if(!vm.count("proxy"))
+    if(oc.proxy.empty())
         co_await stream.async_shutdown(
-            asio::cancel_after(
-                ch::milliseconds{ 500 }, asio::as_tuple));
-    
-    if(vm.count("fail-with-body") && parser.get().status_int() >= 400)
+            asio::cancel_after(ch::milliseconds{ 500 }, asio::as_tuple));
+
+    if(oc.failwithbody && parser.get().status_int() >= 400)
         throw std::runtime_error{
             "The requested URL returned error: " +
             std::to_string(parser.get().status_int()) };
-    
+
     co_return parser.get().status();
 };
 
-boost::optional<std::string>
-parse_data_options(const po::variables_map& vm)
-{
-    boost::optional<std::string> rs;
-
-    auto append_striped = [&](std::istream& input)
-    {
-        char ch;
-        while(input.get(ch))
-        {
-            if(ch != '\r' && ch != '\n' && ch != '\0')
-                rs->push_back(ch);
-        }
-    };
-
-    auto append_encoded = [&](core::string_view sv)
-    {
-        urls::encoding_opts opt;
-        opt.space_as_plus = true;
-        urls::encode(sv, urls::pchars, opt, urls::string_token::append_to(*rs));
-    };
-
-    auto init = [&, init = false]() mutable
-    {
-        if(std::exchange(init, true))
-            rs->push_back('&');
-        else
-            rs.emplace();
-    };
-
-    if(vm.count("data"))
-    {
-        for(core::string_view sv : vm.at("data").as<std::vector<std::string>>())
-        {
-            init();
-
-            if(sv.starts_with('@'))
-                append_striped(any_istream{ sv.substr(1) });
-            else
-                rs->append(sv);
-        }
-    }
-
-    if(vm.count("data-ascii"))
-    {
-        for(core::string_view sv :
-            vm.at("data-ascii").as<std::vector<std::string>>())
-        {
-            init();
-
-            if(sv.starts_with('@'))
-                append_striped(any_istream{ sv.substr(1) });
-            else
-                rs->append(sv);
-        }
-    }
-
-    if(vm.count("data-binary"))
-    {
-        for(core::string_view sv :
-            vm.at("data-binary").as<std::vector<std::string>>())
-        {
-            init();
-
-            if(sv.starts_with('@'))
-                any_istream{ sv.substr(1) }.append_to(*rs);
-            else
-                rs->append(sv);
-        }
-    }
-
-    if(vm.count("data-raw"))
-    {
-        for(core::string_view sv :
-            vm.at("data-raw").as<std::vector<std::string>>())
-        {
-            init();
-
-            rs->append(sv);
-        }
-    }
-
-    if(vm.count("data-urlencode"))
-    {
-        for(core::string_view sv :
-            vm.at("data-urlencode").as<std::vector<std::string>>())
-        {
-            init();
-
-            if(auto pos = sv.find('='); pos != sv.npos)
-            {
-                auto name    = sv.substr(0, pos);
-                auto content = sv.substr(pos + 1);
-                if(!name.empty())
-                {
-                    rs->append(name);
-                    rs->push_back('=');
-                }
-                append_encoded(content);
-            }
-            else if(auto pos = sv.find('@'); pos != sv.npos)
-            {
-                auto name     = sv.substr(0, pos);
-                auto filename = sv.substr(pos + 1);
-                if(!name.empty())
-                {
-                    rs->append(name);
-                    rs->push_back('=');
-                }
-                std::string tmp;
-                any_istream{ filename }.append_to(tmp);
-                append_encoded(tmp);
-            }
-            else
-            {
-                append_encoded(sv);
-            }
-        }
-    }
-
-    return rs;
-}
-
 asio::awaitable<void>
 retry(
-    const po::variables_map& vm,
+    const operation_config& oc,
     std::function<asio::awaitable<http_proto::status>()> request_task)
 {
-    auto timer = asio::steady_timer{ co_await asio::this_coro::executor };
-    auto retries = vm.count("retry") ? vm.at("retry").as<std::uint64_t>() : 0;
-    auto retry_delay = [&, backoff = ch::seconds{ 1 }]() mutable
+    auto executor = co_await asio::this_coro::executor;
+    auto timer    = asio::steady_timer{ executor };
+    auto retries  = oc.req_retry;
+    auto max_time = oc.retry_maxtime
+        ? ch::steady_clock::now() + oc.retry_maxtime.value()
+        : ch::steady_clock::time_point::max();
+
+    auto next_delay = [&, backoff = ch::seconds{ 1 }]() mutable
     {
-        if(vm.count("retry-delay"))
-            return ch::seconds{ vm.at("retry-delay").as<std::uint64_t>() };
-        auto rs = backoff;
+        if(oc.retry_delay)
+            return ch::duration_cast<ch::seconds>(oc.retry_delay.value());
         if(backoff < ch::seconds{ 10 * 60 })
             backoff *= 2;
-        return rs;
+        return backoff;
     };
-    auto retry_max_time = [&]() -> ch::steady_clock::time_point
-    {
-        if(vm.count("retry-max-time"))
-            return ch::steady_clock::now() +
-                ch::seconds{ vm.at("retry-max-time").as<std::uint64_t>() };
-        return ch::steady_clock::time_point::max();
-    }();
 
-    auto can_retry = [&]()
+    auto can_retry = [&](error_code ec)
     {
-        return retries != 0 && retry_max_time > ch::steady_clock::now();
+        if(retries == 0 || max_time < ch::steady_clock::now())
+            return false;
+
+        if(oc.retry_all_errors)
+            return true;
+
+        if(!ec)
+            return true;
+
+        if(ec == asio::error::operation_aborted)
+            return true;
+
+        if(oc.retry_connrefused && ec == asio::error::connection_refused)
+            return true;
+
+        return false;
     };
 
     for(;;)
     {
         try
         {
-            switch(co_await request_task())
-            {
-            case http_proto::status::request_timeout:
-            case http_proto::status::too_many_requests:
-            case http_proto::status::internal_server_error:
-            case http_proto::status::bad_gateway:
-            case http_proto::status::service_unavailable:
-            case http_proto::status::gateway_timeout:
-                if(!can_retry())
-                    co_return;
-                std::cerr << "Error: HTTP error" << std::endl;
+            auto status = co_await request_task();
+            if(!is_transient_error(status) || !can_retry({}))
                 break;
-            default:
-                co_return;
-            }
+            std::cerr << "HTTP error" << std::endl;
         }
-        catch(const boost::system::system_error& e)
+        catch(const system_error& e)
         {
-            if( can_retry() &&
-                (vm.count("retry-all-errors") ||
-                e.code() == asio::error::operation_aborted ||
-                (vm.count("retry-connrefused") && e.code() == asio::error::connection_refused)))
-            {
-                std::cerr << "Error: " << e.what() << std::endl;
-            }
-            else
-            {
+            if(!can_retry(e.code()))
                 throw;
-            }
+            std::cerr << e.what() << std::endl;
         }
 
-        auto delay = retry_delay();
-        std::cerr 
-            << "Will retry in " << delay << " seconds. "
-            << retries << " retries left." << std::endl;
+        auto delay = next_delay();
+        std::cerr << "Will retry in " << delay << " seconds. " << retries
+                  << " retries left." << std::endl;
         retries--;
         timer.expires_after(delay);
         co_await timer.async_wait();
     }
+}
+
+asio::awaitable<void>
+co_main(int argc, char* argv[])
+{
+    auto executor    = co_await asio::this_coro::executor;
+    auto oc          = make_operation_config(argc, argv);
+    auto proto_ctx   = http_proto::context{};
+    auto url         = oc.url_generator();
+    auto cookie_jar  = std::optional<::cookie_jar>{};
+    auto exp_cookies = std::string{};
+
+    if(oc.nobuffer)
+    {
+        std::cout.setf(std::ios::unitbuf);
+        std::cerr.setf(std::ios::unitbuf);
+    }
+
+    // parser service
+    http_proto::response_parser::config parser_cfg;
+    parser_cfg.body_limit = oc.max_filesize;
+    parser_cfg.min_buffer = 1024 * 1024;
+    if(http_proto_has_zlib)
+    {
+        parser_cfg.apply_gzip_decoder    = true;
+        parser_cfg.apply_deflate_decoder = true;
+        http_proto::zlib::install_service(proto_ctx);
+    }
+    http_proto::install_parser_service(proto_ctx, parser_cfg);
+
+    auto header_output = [&]() -> std::optional<any_ostream>
+    {
+        if(!oc.headerfile.empty())
+            return any_ostream{ oc.headerfile };
+        return std::nullopt;
+    }();
+
+    if(oc.enable_cookies)
+        cookie_jar.emplace();
+
+    for(auto& s : oc.cookies)
+    {
+        if(!exp_cookies.empty() && !exp_cookies.ends_with(';'))
+            exp_cookies.push_back(';');
+        exp_cookies.append(s);
+    }
+
+    for(auto& path : oc.cookiefiles)
+        any_istream{ path } >> cookie_jar.value();
+
+    if(cookie_jar && oc.cookiesession)
+        cookie_jar->clear_session_cookies();
+
+    auto scope_success = scope::make_scope_success(
+        [&]()
+        {
+            if(cookie_jar && !oc.cookiejar.empty())
+                any_ostream{ oc.cookiejar } << cookie_jar.value();
+        });
+
+    auto request_task = [&]()
+    {
+        return asio::co_spawn(
+            executor,
+            perform_request(
+                oc,
+                header_output,
+                cookie_jar,
+                exp_cookies,
+                oc.ssl_ctx,
+                proto_ctx,
+                url),
+            asio::cancel_after(oc.timeout, asio::use_awaitable));
+    };
+
+    co_await retry(oc, request_task);
 }
 
 int
@@ -675,634 +611,20 @@ main(int argc, char* argv[])
 {
     try
     {
-        auto odesc = po::options_description{"Options"};
-        odesc.add_options()
-            ("abstract-unix-socket",
-                po::value<std::string>()->value_name("<path>"),
-                "Connect via abstract Unix domain socket")
-            ("cacert",
-                po::value<std::string>()->value_name("<file>"),
-                "CA certificate to verify peer against")
-            ("capath",
-                po::value<std::string>()->value_name("<dir>"),
-                "CA directory to verify peer against")
-            ("cert,E",
-                po::value<std::string>()->value_name("<certificate>"),
-                "Client certificate file")
-            ("ciphers",
-                po::value<std::string>()->value_name("<list>"),
-                "SSL ciphers to use")
-            ("compressed", "Request compressed response")
-            ("connect-timeout",
-                po::value<float>()->value_name("<frac sec>"),
-                "Maximum time allowed for connection")
-            ("connect-to",
-                po::value<std::vector<std::string>>()->value_name("<H1:P1:H2:P2>"),
-                "Connect to host")
-            ("continue-at,C",
-                po::value<std::uint64_t>()->value_name("<offset>"),
-                "Resume transfer offset")
-            ("cookie,b",
-                po::value<std::vector<std::string>>()->value_name("<data|filename>"),
-                "Send cookies from string/file")
-            ("cookie-jar,c",
-                po::value<std::string>()->value_name("<filename>"),
-                "Write cookies to <filename> after operation")
-            ("create-dirs", "Create necessary local directory hierarchy")
-            ("curves",
-                po::value<std::string>()->value_name("<list>"),
-                "(EC) TLS key exchange algorithm(s) to request")
-            ("data,d",
-                po::value<std::vector<std::string>>()->value_name("<data>"),
-                "HTTP POST data")
-            ("data-ascii",
-                po::value<std::vector<std::string>>()->value_name("<data>"),
-                "HTTP POST ASCII data")
-            ("data-binary",
-                po::value<std::vector<std::string>>()->value_name("<data>"),
-                "HTTP POST binary data")
-            ("data-raw",
-                po::value<std::vector<std::string>>()->value_name("<data>"),
-                "HTTP POST data, '@' allowed")
-            ("data-urlencode",
-                po::value<std::vector<std::string>>()->value_name("<data>"),
-                "HTTP POST data URL encoded")
-            ("disallow-username-in-url", "Disallow username in URL")
-            ("dump-header,D",
-                po::value<std::string>()->value_name("<filename>"),
-                "Write the received headers to <filename>")
-            ("expect100-timeout",
-                po::value<float>()->value_name("<frac sec>"),
-                "How long to wait for 100-continue")
-            ("fail,f", "Fail fast with no output on HTTP errors")
-            ("fail-with-body", "Fail on HTTP errors but save the body")
-            ("form,F",
-                po::value<std::vector<std::string>>()->value_name("<name=content>"),
-                "Specify multipart MIME data")
-            ("form-string",
-                po::value<std::vector<std::string>>()->value_name("<name=string>"),
-                "Specify multipart MIME data")
-            ("key",
-                po::value<std::string>()->value_name("<key>"),
-                "Private key file")
-            ("get,G", "Put the post data in the URL and use GET")
-            ("head,I", "Show document info only")
-            ("header,H",
-                po::value<std::vector<std::string>>()->value_name("<header>"),
-                "Pass custom header(s) to server")
-            ("help,h", "produce help message")
-            ("http1.0", "Use HTTP 1.0")
-            ("insecure,k", "Allow insecure server connections")
-            ("ipv4,4", "Resolve names to IPv4 addresses")
-            ("ipv6,6", "Resolve names to IPv6 addresses")
-            ("json",
-                po::value<std::vector<std::string>>()->value_name("<data>"),
-                "HTTP POST JSON")
-            ("junk-session-cookies,j", "Ignore session cookies read from file")
-            ("limit-rate",
-                po::value<std::string>()->value_name("<speed>"),
-                "Limit transfer speed to RATE")
-            ("location,L", "Follow redirects")
-            ("location-trusted", "Like --location, and send auth to other hosts")
-            ("max-filesize",
-                po::value<std::string>()->value_name("<bytes>"),
-                "Maximum file size to download")
-            ("max-redirs",
-                po::value<std::int64_t>()->value_name("<num>"),
-                "Maximum number of redirects allowed")
-            ("max-time",
-                po::value<float>()->value_name("<frac sec>"),
-                "Maximum time allowed for transfer")
-            ("no-keepalive", "Disable TCP keepalive on the connection")
-            ("output,o",
-                po::value<std::string>()->value_name("<file>"),
-                "Write to file instead of stdout")
-            ("output-dir",
-                po::value<std::string>()->value_name("<dir>"),
-                "Directory to save files in")
-            ("pass",
-                po::value<std::string>()->value_name("<phrase>"),
-                "Passphrase for the private key")
-            ("post301", "Do not switch to GET after following a 301")
-            ("post302", "Do not switch to GET after following a 302")
-            ("post303", "Do not switch to GET after following a 303")
-            ("proto-redir",
-                po::value<std::vector<std::string>>()->value_name("<protocol>"),
-                "Enable/disable PROTOCOLS on redirect")
-            ("proxy,x",
-                po::value<std::string>()->value_name("<url>"),
-                "Use this proxy")
-            ("range,r",
-                po::value<std::string>()->value_name("<range>"),
-                "Retrieve only the bytes within range")
-            ("referer,e",
-                po::value<std::string>()->value_name("<url>"),
-                "Referer URL")
-            ("remote-header-name,J", "Use the header-provided filename")
-            ("remote-name,O", "Write output to a file named as the remote file")
-            ("remove-on-error", "Remove output file on errors")
-            ("request,X",
-                po::value<std::string>()->value_name("<method>"),
-                "Specify request method to use")
-            ("request-target",
-                po::value<std::string>()->value_name("<path>"),
-                "Specify the target for this request")
-            ("resolve",
-                po::value<std::vector<std::string>>()->value_name("host:port:addr"),
-                "Resolve the host+port to this address")
-            ("retry",
-                po::value<std::uint64_t>()->value_name("<num>"),
-                "Retry request if transient problems occur")
-            ("retry-all-errors", "Retry all errors (use with --retry)")
-            ("retry-connrefused", "Retry on connection refused (use with --retry)")
-            ("retry-delay",
-                po::value<std::uint64_t>()->value_name("<seconds>"),
-                "Wait time between retries")
-            ("retry-max-time",
-                po::value<std::uint64_t>()->value_name("<seconds>"),
-                "Retry only within this period")
-            ("show-headers", "Show response headers in the output")
-            ("tcp-nodelay", "Use the TCP_NODELAY option")
-            ("tls-max",
-                po::value<std::string>()->value_name("<version>"),
-                "Set maximum allowed TLS version")
-            ("tls13-ciphers",
-                po::value<std::string>()->value_name("<list>"),
-                "TLS 1.3 cipher suites to use")
-            ("tlsv1.0", "Use TLSv1.0 or greater")
-            ("tlsv1.1", "Use TLSv1.1 or greater")
-            ("tlsv1.2", "Use TLSv1.2 or greater")
-            ("tlsv1.3", "Use TLSv1.3 or greater")
-            ("include,i", "Include protocol response headers in the output")
-            ("unix-socket",
-                po::value<std::string>()->value_name("<path>"),
-                "Connect through this Unix domain socket")
-            ("upload-file,T",
-                po::value<std::string>()->value_name("<file>"),
-                "Transfer local FILE to destination")
-            ("url",
-                po::value<std::string>()->value_name("<url>"),
-                "URL to work with")
-            ("user,u",
-                po::value<std::string>()->value_name("<user:password>"),
-                "Server user and password")
-            ("user-agent,A",
-                po::value<std::string>()->value_name("<name>"),
-                "Send User-Agent <name> to server");
-
-        auto podesc = po::positional_options_description{};
-        podesc.add("url", 1);
-
-        po::variables_map vm;
-        po::store(
-            po::command_line_parser{ argc, argv }
-                .options(odesc)
-                .positional(podesc)
-                .run(),
-            vm);
-        po::notify(vm);
-
-        if(vm.count("help") || !vm.count("url"))
-        {
-            std::cerr
-                << "Usage: burl [options...] <url>\n"
-                << "Example:\n"
-                << "    burl https://www.example.com\n"
-                << "    burl -L http://httpstat.us/301\n"
-                << "    burl https://httpbin.org/post -F name=Shadi -F img=@./avatar.jpeg\n"
-                << odesc;
-            return EXIT_FAILURE;
-        }
-
-        urls::url url = [&]()
-        {
-            auto rs = normalize_and_parse_url(vm.at("url").as<std::string>());
-            if(rs.has_error())
-                throw system_error{ rs.error(), "Failed to parse URL" };
-            if(rs.value().host().empty())
-                throw std::runtime_error{ "No host part in the URL" };
-            return rs.value();
-        }();
-
-        if(vm.count("disallow-username-in-url") && url.has_userinfo())
-            throw std::runtime_error{
-                "Credentials was passed in the URL when prohibited" };
-
-        if(vm.count("fail") && vm.count("fail-with-body"))
-            throw std::runtime_error{
-                "You must select either --fail or --fail-with-body, not both." };
-
-        auto ioc            = asio::io_context{};
-        auto ssl_ctx        = ssl::context{ ssl::context::tls_client };
-        auto http_proto_ctx = http_proto::context{};
-
-        {
-            auto tls_min = 11;
-            auto tls_max = 13;
-
-            if(vm.count("tls-max"))
-            {
-                auto s = vm.at("tls-max").as<std::string>();
-                if(     s == "1.0") tls_max = 10;
-                else if(s == "1.1") tls_max = 11;
-                else if(s == "1.2") tls_max = 12;
-                else if(s == "1.3") tls_max = 13;
-                else throw std::runtime_error{ "Wrong TLS version" };
-            }
-
-            if(vm.count("tlsv1.0")) tls_min = 10;
-            if(vm.count("tlsv1.1")) tls_min = 11;
-            if(vm.count("tlsv1.2")) tls_min = 12;
-            if(vm.count("tlsv1.3")) tls_min = 13;
-
-            if(tls_min > 10                ) ssl_ctx.set_options(ssl_ctx.no_tlsv1);
-            if(tls_min > 11 || tls_max < 11) ssl_ctx.set_options(ssl_ctx.no_tlsv1_1);
-            if(tls_min > 12 || tls_max < 12) ssl_ctx.set_options(ssl_ctx.no_tlsv1_2);
-            if(tls_max < 13                ) ssl_ctx.set_options(ssl_ctx.no_tlsv1_3);
-        }
-
-        if(vm.count("insecure"))
-        {
-            ssl_ctx.set_verify_mode(ssl::verify_none);
-        }
-        else
-        {
-            if(vm.count("cacert"))
-            {
-                ssl_ctx.load_verify_file(
-                    vm.at("cacert").as<std::string>());
-            }
-            else if(vm.count("capath"))
-            {
-                ssl_ctx.add_verify_path(
-                    vm.at("capath").as<std::string>());
-            }
-            else
-            {
-                ssl_ctx.set_default_verify_paths();
-            }
-
-            ssl_ctx.set_verify_mode(ssl::verify_peer);
-        }
-
-        if(vm.count("cert"))
-        {
-            ssl_ctx.use_certificate_file(
-                vm.at("cert").as<std::string>(),
-                ssl::context::file_format::pem);
-        }
-
-        if(vm.count("ciphers"))
-        {
-            if(::SSL_CTX_set_cipher_list(
-                ssl_ctx.native_handle(),
-                vm.at("ciphers").as<std::string>().c_str()) != 1)
-            {
-                throw std::runtime_error{ "failed setting cipher list" };
-            }
-        }
-
-        if(vm.count("tls13-ciphers"))
-        {
-            if(::SSL_CTX_set_ciphersuites(
-                ssl_ctx.native_handle(),
-                vm.at("tls13-ciphers").as<std::string>().c_str()) != 1)
-            {
-                throw std::runtime_error{ "failed setting TLS 1.3 cipher suite" };
-            }
-        }
-
-        if(vm.count("curves"))
-        {
-            if(::SSL_CTX_set1_curves_list(
-                ssl_ctx.native_handle(),
-                vm.at("curves").as<std::string>().c_str()) != 1)
-            {
-                throw std::runtime_error{ "failed setting curves list" };
-            }
-        }
-
-        if(vm.count("pass"))
-        {
-            ssl_ctx.set_password_callback(
-                [&](auto, auto) { return vm.at("pass").as<std::string>(); });
-        }
-
-        if(vm.count("key"))
-        {
-            ssl_ctx.use_private_key_file(
-                vm.at("key").as<std::string>(),
-                ssl::context::file_format::pem);
-        }
-
-        {
-            http_proto::response_parser::config cfg;
-
-            cfg.body_limit = [&]()
-            {
-                if(vm.count("max-filesize"))
-                {
-                    auto limit = parse_human_readable_size(
-                        vm.at("max-filesize").as<std::string>());
-                    if(limit.has_error())
-                        throw std::runtime_error{ "unsupported max-filesize unit" };
-                    return limit.value();
-                }
-                return std::numeric_limits<std::uint64_t>::max();
-            }();
-            cfg.min_buffer = 1024 * 1024;
-            if(http_proto_has_zlib)
-            {
-                cfg.apply_gzip_decoder    = true;
-                cfg.apply_deflate_decoder = true;
-                http_proto::zlib::install_service(http_proto_ctx);
-            }
-            http_proto::install_parser_service(http_proto_ctx, cfg);
-        }
-
-        auto body_output = [&]()
-        {
-            fs::path path;
-
-            if(vm.count("remote-name"))
-            {
-                if(vm.count("output-dir"))
-                    path = vm.at("output-dir").as<std::string>();
-
-                auto segs = url.encoded_segments();
-                if(segs.empty() || segs.back().empty())
-                {
-                    path.append("burl_response");
-                }
-                else
-                {
-                    path.append(segs.back().begin(),
-                    segs.back().end());
-                }
-            }
-            else if(vm.count("output"))
-            {
-                path = vm.at("output").as<std::string>();
-            }
-            else
-            {
-                return any_ostream{};
-            }
-
-            if(vm.count("create-dirs"))
-                fs::create_directories(path.parent_path());
-
-            return any_ostream{ path };
-        }();
-
-        auto header_output = [&]() -> std::optional<any_ostream>
-        {
-            if(vm.count("dump-header"))
-                return any_ostream{
-                    fs::path{ vm.at("dump-header").as<std::string>() } };
-            return std::nullopt;
-        }();
-
-        auto msg = message{};
-
-        auto data_opt = parse_data_options(vm);
-
-        if(data_opt)
-        {
-            if(vm.count("get"))
-            {
-                urls::params_view params{ data_opt.value() };
-                url.encoded_params().append(params.begin(), params.end());
-            }
-            else
-            {
-                msg = string_body{ std::move(data_opt.value()),
-                    "application/x-www-form-urlencoded" };
-            }
-        }
-
-        if((!!data_opt +
-            !!vm.count("form") +
-            !!vm.count("json") +
-            !!vm.count("upload-file")) == 2)
-        {
-            throw std::runtime_error{
-                "You can only select one HTTP request method"};
-        }
-
-        if(vm.count("form") || vm.count("form-string"))
-        {
-            auto form = multipart_form{};
-            if(vm.count("form"))
-            {
-                for(core::string_view sv :
-                    vm.at("form").as<std::vector<std::string>>())
-                {
-                    auto [name, prefix, value, filename, type, headers] =
-                        parse_form_option(sv);
-
-                    auto is_file = false;
-
-                    if(prefix == '@' || prefix == '<')
-                    {
-                        is_file = true;
-
-                        if(!filename && prefix != '<')
-                            filename = ::filename(value);
-
-                        if(value == "-")
-                        {
-                            value.clear();
-                            any_istream{ core::string_view{"-"} }.append_to(value);
-                            is_file = false;
-                        }
-                        else if(!type)
-                        {
-                            type = mime_type(value);
-                        }
-                    }
-                    form.append(
-                        is_file,
-                        std::move(name),
-                        std::move(value),
-                        std::move(filename),
-                        std::move(type),
-                        std::move(headers));
-                }
-            }
-            if(vm.count("form-string"))
-            {
-                for(core::string_view sv :
-                    vm.at("form-string").as<std::vector<std::string>>())
-                {
-                    if(auto pos = sv.find('='); pos != sv.npos)
-                    {
-                        form.append(
-                            false,
-                            sv.substr(0, pos),
-                            sv.substr(pos + 1));
-                    }
-                    else
-                    {
-                        throw std::runtime_error{
-                            "Illegally formatted input field"
-                        };
-                    }
-                }
-            }
-            msg = std::move(form);
-        }
-
-        if(vm.count("json"))
-        {
-            std::string body;
-            for(core::string_view data :
-                vm.at("json").as<std::vector<std::string>>())
-            {
-                if(data.starts_with('@'))
-                    any_istream{ data.substr(1) }.append_to(body);
-                else
-                    body.append(data);
-            }
-            msg = string_body{ std::move(body),
-                "application/x-www-form-urlencoded" };
-        }
-
-        if(vm.count("upload-file"))
-        {
-            msg = [&]()-> message
-            {
-                auto path = vm.at("upload-file").as<std::string>();
-                if(path == "-")
-                    return stdin_body{};
-
-                // Append the filename to the URL if it
-                // doesn't already end with one
-                auto segs = url.encoded_segments();
-                if(segs.empty())
-                {
-                    segs.push_back(::filename(path));
-                }
-                else if(auto back = --segs.end(); back->empty())
-                {
-                    segs.replace(back, ::filename(path));
-                }
-
-                return file_body{ std::move(path) };
-            }();
-        }
-
-        auto cookie_jar       = std::optional<::cookie_jar>{};
-        auto explicit_cookies = std::string{};
-
-        if(vm.count("cookie") || vm.count("cookie-jar"))
-            cookie_jar.emplace();
-
-        if(vm.count("cookie"))
-        {
-            for(core::string_view option : vm.at("cookie").as<std::vector<std::string>>())
-            {
-                // empty options are allowerd and just activates cookie engine
-                if(option.find('=') != core::string_view::npos)
-                {
-                    if(!explicit_cookies.ends_with(';'))
-                        explicit_cookies.push_back(';');
-                    explicit_cookies.append(option);
-                }
-                else if(!option.empty())
-                {
-                    any_istream{ option } >> cookie_jar.value();
-                }
-            }
-        }
-
-        if(vm.count("junk-session-cookies") && cookie_jar.has_value())
-            cookie_jar->clear_session_cookies();
-
-        auto max_redirects = [&]() -> std::uint64_t
-        {
-            if(!vm.count("max-redirs"))
-                return 50; // default
-
-            auto arg = vm.at("max-redirs").as<std::int64_t>();
-            if(arg < 0)
-                return std::numeric_limits<std::uint64_t>::max();
-            return static_cast<std::uint64_t>(arg);
-        }();
-
-        bool show_headers =
-            vm.count("head") || vm.count("include") || vm.count("show-headers");
-
-        if(show_headers && vm.count("remote-header-name"))
-            throw std::runtime_error{
-                "showing headers and --remote-header-name cannot be combined" };
-
-        auto timeout = vm.count("max-time")
-            ? ch::duration_cast<ch::steady_clock::duration>(
-                ch::duration<float>(vm.at("max-time").as<float>()))
-            : ch::steady_clock::duration::max();
-
-        auto allowed_redirect_protos = [&]() -> std::set<urls::scheme>
-        {
-            if(!vm.count("proto-redir"))
-                return { urls::scheme::http, urls::scheme::https };
-
-            std::set<urls::scheme> rs;
-            for(core::string_view sv : vm.at("proto-redir").as<std::vector<std::string>>())
-            {
-                if(sv == "http")
-                    rs.emplace(urls::scheme::http);
-                if(sv == "https")
-                    rs.emplace(urls::scheme::https);
-            }
-            return rs;
-        }();
-
-        auto request_task = [&]()
-        {
-            return asio::co_spawn(
-                ioc,
-                perform_request(
-                    vm,
-                    body_output,
-                    header_output,
-                    allowed_redirect_protos,
-                    max_redirects,
-                    show_headers,
-                    msg,
-                    cookie_jar,
-                    explicit_cookies,
-                    ssl_ctx,
-                    http_proto_ctx,
-                    create_request(vm, msg, url),
-                    url),
-                asio::cancel_after(timeout, asio::use_awaitable));
-        };
-
+        auto ioc = asio::io_context{};
         asio::co_spawn(
             ioc,
-            retry(vm, request_task),
-            [&](std::exception_ptr ep)
+            co_main(argc, argv),
+            [](std::exception_ptr ep)
             {
                 if(ep)
-                {
-                    if(vm.count("remove-on-error"))
-                        body_output.remove_file();
                     std::rethrow_exception(ep);
-                }
             });
-
         ioc.run();
-
-        if(vm.count("cookie-jar"))
-        {
-            any_ostream{ fs::path{ vm.at("cookie-jar").as<std::string>() } }
-                << cookie_jar.value();
-        }
     }
-    catch(std::exception const& e)
+    catch(const std::exception& e)
     {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
