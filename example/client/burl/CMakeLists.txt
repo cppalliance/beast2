@@ -29,6 +29,7 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
         Boost::http_io
         Boost::http_proto
         Boost::program_options
+        Boost::scope
         OpenSSL::SSL
         OpenSSL::Crypto)
 
