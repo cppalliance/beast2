@@ -57,12 +57,6 @@ set_target(
         return;
     }
 
-    if(url.encoded_target().empty())
-    {
-        request.set_target("/");
-        return;
-    }
-
     request.set_target(url.encoded_target());
 }
 
@@ -153,6 +147,10 @@ create_request(const operation_config& oc, const urls::url_view& url)
     using method  = http_proto::method;
     using version = http_proto::version;
 
+    if(oc.disallow_username_in_url && url.has_userinfo())
+        throw std::runtime_error(
+            "Credentials was passed in the URL when prohibited");
+
     auto request = http_proto::request{};
 
     request.set_method(oc.no_body ? method::head : method::get);
@@ -209,20 +207,39 @@ perform_request(
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
     http_proto::context& proto_ctx,
-    urls::url url)
+    operation_config::request_info request_info)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto request    = create_request(oc, url);
     auto parser     = http_proto::response_parser{ proto_ctx };
     auto serializer = http_proto::serializer{ proto_ctx };
+
+    urls::url url = [&]()
+    {
+        auto rs = normalize_and_parse_url(request_info.url);
+        if(rs.has_error())
+            throw system_error{ rs.error(), "Failed to parse URL" };
+        if(rs.value().host().empty())
+            throw std::runtime_error{ "No host part in the URL" };
+        return rs.value();
+    }();
+
+    {
+        auto params = urls::params_view{ oc.query };
+        url.encoded_params().append(params.begin(), params.end());
+    }
+
+    if(url.path().empty())
+        url.set_path("/");
+
+    auto request = create_request(oc, url);
 
     auto output = [&]()
     {
         auto path = oc.output_dir;
 
-        if(oc.remote_name)
+        if(request_info.remotename)
         {
             auto segs = url.encoded_segments();
             if(segs.empty() || segs.back().empty())
@@ -230,9 +247,9 @@ perform_request(
             else
                 path.append(segs.back().begin(), segs.back().end());
         }
-        else if(!oc.output.empty())
+        else if(!request_info.output.empty())
         {
-            path /= oc.output;
+            path /= request_info.output;
         }
         else
         {
@@ -392,9 +409,9 @@ perform_request(
     }
 
     if(oc.failonerror && parser.get().status_int() >= 400)
-        throw std::runtime_error{
+        throw std::runtime_error(
             "The requested URL returned error: " +
-            std::to_string(parser.get().status_int()) };
+            std::to_string(parser.get().status_int()));
 
     // use the server-specified Content-Disposition filename
     if(oc.content_disposition)
@@ -457,9 +474,9 @@ perform_request(
             asio::cancel_after(ch::milliseconds{ 500 }, asio::as_tuple));
 
     if(oc.failwithbody && parser.get().status_int() >= 400)
-        throw std::runtime_error{
+        throw std::runtime_error(
             "The requested URL returned error: " +
-            std::to_string(parser.get().status_int()) };
+            std::to_string(parser.get().status_int()));
 
     co_return parser.get().status();
 };
@@ -536,7 +553,6 @@ co_main(int argc, char* argv[])
     auto executor    = co_await asio::this_coro::executor;
     auto oc          = make_operation_config(argc, argv);
     auto proto_ctx   = http_proto::context{};
-    auto url         = oc.url_generator();
     auto cookie_jar  = std::optional<::cookie_jar>{};
     auto exp_cookies = std::string{};
 
@@ -588,22 +604,25 @@ co_main(int argc, char* argv[])
                 any_ostream{ oc.cookiejar } << cookie_jar.value();
         });
 
-    auto request_task = [&]()
+    for(const auto& request_info : oc.requests)
     {
-        return asio::co_spawn(
-            executor,
-            perform_request(
-                oc,
-                header_output,
-                cookie_jar,
-                exp_cookies,
-                oc.ssl_ctx,
-                proto_ctx,
-                url),
-            asio::cancel_after(oc.timeout, asio::use_awaitable));
-    };
+        auto request_task = [&]()
+        {
+            return asio::co_spawn(
+                executor,
+                perform_request(
+                    oc,
+                    header_output,
+                    cookie_jar,
+                    exp_cookies,
+                    oc.ssl_ctx,
+                    proto_ctx,
+                    request_info),
+                asio::cancel_after(oc.timeout, asio::use_awaitable));
+        };
 
-    co_await retry(oc, request_task);
+        co_await retry(oc, request_task);
+    }
 }
 
 int

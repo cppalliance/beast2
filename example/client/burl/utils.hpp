@@ -12,9 +12,15 @@
 
 #include <boost/core/detail/string_view.hpp>
 #include <boost/optional/optional.hpp>
+#include <boost/url/url.hpp>
 
 namespace core = boost::core;
+namespace urls = boost::urls;
 
 boost::optional<std::string>
 extract_filename_form_content_disposition(core::string_view sv);
+
+boost::system::result<urls::url>
+normalize_and_parse_url(std::string str);
+
 #endif
