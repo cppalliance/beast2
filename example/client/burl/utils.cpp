@@ -123,3 +123,24 @@ extract_filename_form_content_disposition(core::string_view sv)
 
     return boost::none;
 }
+
+boost::system::result<urls::url>
+normalize_and_parse_url(std::string str)
+{
+    static constexpr auto scheme_rule = grammar::tuple_rule(
+        grammar::token_rule(grammar::alnum_chars + grammar::lut_chars("+-.")),
+        grammar::delim_rule(':'),
+        grammar::token_rule(grammar::all_chars));
+
+    const auto scheme_rs = grammar::parse(str, scheme_rule);
+
+    if(scheme_rs.has_error())
+        str.insert(0, "http://");
+
+    auto rs = urls::parse_uri(str);
+
+    if(rs.has_error())
+        return rs.error();
+
+    return urls::url{ rs.value() }.normalize();
+}

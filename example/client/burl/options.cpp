@@ -204,27 +204,6 @@ parse_human_readable_size(core::string_view sv)
     return static_cast<std::uint64_t>(
         std::stod(size) * (1ULL << 10 * unit.value_or(char{}).index()));
 }
-
-boost::system::result<urls::url>
-normalize_and_parse_url(std::string str)
-{
-    static constexpr auto scheme_rule = grammar::tuple_rule(
-        grammar::token_rule(grammar::alnum_chars + grammar::lut_chars("+-.")),
-        grammar::delim_rule(':'),
-        grammar::token_rule(grammar::all_chars));
-
-    const auto scheme_rs = grammar::parse(str, scheme_rule);
-
-    if(scheme_rs.has_error())
-        str.insert(0, "http://");
-
-    auto rs = urls::parse_uri(str);
-
-    if(rs.has_error())
-        return rs.error();
-
-    return urls::url{ rs.value() }.normalize();
-}
 } // namespace
 
 operation_config
@@ -398,7 +377,7 @@ make_operation_config(int argc, char* argv[])
             po::value<std::string>()->value_name("<file>"),
             "Transfer local FILE to destination")
         ("url",
-            po::value<std::string>()->value_name("<url>"),
+            po::value<std::vector<std::string>>()->value_name("<url>"),
             "URL to work with")
         ("user,u",
             po::value<std::string>()->value_name("<user:password>"),
@@ -409,7 +388,7 @@ make_operation_config(int argc, char* argv[])
     // clang-format on
 
     auto podesc = po::positional_options_description{};
-    podesc.add("url", 1);
+    podesc.add("url", -1);
 
     po::variables_map vm;
     po::store(
@@ -489,7 +468,7 @@ make_operation_config(int argc, char* argv[])
     set_bool(oc.followlocation, "location-trusted");
     set_bool(oc.unrestricted_auth, "location-trusted");
     set_bool(oc.nobuffer, "no-buffer");
-    set_bool(oc.remote_name, "remote-name");
+    // set_bool(oc.remote_name, "remote-name"); //TODO
 
     set_string(oc.unix_socket_path, "unix-socket");
     set_string(oc.useragent, "user-agent");
@@ -499,7 +478,7 @@ make_operation_config(int argc, char* argv[])
     set_string(oc.customrequest, "request");
     set_string(oc.headerfile, "dump-header");
     set_string(oc.range, "range");
-    set_string(oc.output, "output");
+    // set_string(oc.output, "output"); //TODO
     set_string(oc.output_dir, "output-dir");
     set_string(oc.cookiejar, "cookie-jar");
 
@@ -717,19 +696,20 @@ make_operation_config(int argc, char* argv[])
             asio::ssl::context::file_format::pem);
     }
 
-    urls::url url = [&]()
-    {
-        auto rs = normalize_and_parse_url(vm.at("url").as<std::string>());
-        if(rs.has_error())
-            throw system_error{ rs.error(), "Failed to parse URL" };
-        if(rs.value().host().empty())
-            throw std::runtime_error{ "No host part in the URL" };
-        return rs.value();
-    }();
+    for(auto s : vm.at("url").as<std::vector<std::string>>())
+        oc.requests.push_back({ std::move(s), {}, false });
 
-    if(oc.disallow_username_in_url && url.has_userinfo())
-        throw std::runtime_error(
-            "Credentials was passed in the URL when prohibited");
+    // set output method for each request
+    for(auto it = oc.requests.begin(); auto& [name, value] : vm)
+    {
+        if(it == oc.requests.end())
+            break;
+
+        if(name == "output")
+            it++->output = value.as<std::string>();
+        else if(name == "remote-name")
+            it++->remotename = true;
+    }
 
     // --data options
     boost::optional<std::string> data;
@@ -855,8 +835,10 @@ make_operation_config(int argc, char* argv[])
         {
             if(vm.contains("get"))
             {
-                urls::params_view params{ data.value() };
-                url.encoded_params().append(params.begin(), params.end());
+                auto parse_rs = urls::parse_query(data.value());
+                if(parse_rs.has_error())
+                    throw std::runtime_error{ "Invalid data encoding" };
+                oc.query = parse_rs.value().buffer();
             }
             else
             {
@@ -947,23 +929,22 @@ make_operation_config(int argc, char* argv[])
             if(path == "-")
                 return stdin_body{};
 
+            // TODO
             // Append the filename to the URL if it
             // doesn't already end with one
-            auto segs = url.encoded_segments();
-            if(segs.empty())
-            {
-                segs.push_back(::filename(path));
-            }
-            else if(auto back = --segs.end(); back->empty())
-            {
-                segs.replace(back, ::filename(path));
-            }
+            // auto segs = url.encoded_segments();
+            // if(segs.empty())
+            // {
+            //     segs.push_back(::filename(path));
+            // }
+            // else if(auto back = --segs.end(); back->empty())
+            // {
+            //     segs.replace(back, ::filename(path));
+            // }
 
             return file_body{ std::move(path) };
         }();
     }
-
-    oc.url_generator = [url]() { return url; };
 
     if(vm.contains("connect-to"))
     {

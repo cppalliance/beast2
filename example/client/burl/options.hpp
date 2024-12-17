@@ -33,6 +33,13 @@ struct operation_config
 {
     using duration_type = ch::steady_clock::duration;
 
+    struct request_info
+    {
+        std::string url;
+        fs::path output;
+        bool remotename = false;
+    };
+
     duration_type timeout          = duration_type::max();
     duration_type expect100timeout = ch::seconds{ 1 };
     duration_type connect_timeout  = duration_type::max();
@@ -77,7 +84,6 @@ struct operation_config
     bool failwithbody = false;
     bool rm_partial   = false;
     bool use_httpget  = false;
-    bool remote_name  = false;
     boost::optional<std::string> request_target;
     http_proto::fields headers;
     std::vector<std::string> omitheaders;
@@ -88,12 +94,12 @@ struct operation_config
     bool unrestricted_auth   = false;
     bool followlocation      = false;
     bool nobuffer            = false;
-    fs::path output;
     fs::path output_dir;
     boost::optional<std::string> range;
     urls::url proxy;
     boost::optional<std::string> customrequest;
-    std::function<urls::url()> url_generator;
+    std::vector<request_info> requests;
+    std::string query;
     message msg;
 };
 
