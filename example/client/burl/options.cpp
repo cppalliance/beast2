@@ -379,6 +379,9 @@ make_operation_config(int argc, char* argv[])
         ("url",
             po::value<std::vector<std::string>>()->value_name("<url>"),
             "URL to work with")
+        ("url-query",
+            po::value<std::vector<std::string>>()->value_name("<data>"),
+            "Add a URL query part")
         ("user,u",
             po::value<std::string>()->value_name("<user:password>"),
             "Server user and password")
@@ -944,6 +947,66 @@ make_operation_config(int argc, char* argv[])
 
             return file_body{ std::move(path) };
         }();
+    }
+
+    if(vm.contains("url-query"))
+    {
+        std::string query;
+
+        auto append_encoded = [&](core::string_view sv)
+        {
+            urls::encoding_opts opt;
+            opt.space_as_plus = true;
+            urls::encode(
+                sv, urls::pchars, opt, urls::string_token::append_to(query));
+        };
+
+        for(core::string_view sv :
+            vm.at("url-query").as<std::vector<std::string>>())
+        {
+            if(!query.empty())
+                query.push_back('&');
+
+            if(sv.starts_with("+"))
+            {
+                query.append(sv);
+            }
+            else if(auto pos = sv.find('='); pos != sv.npos)
+            {
+                auto name    = sv.substr(0, pos);
+                auto content = sv.substr(pos + 1);
+                if(!name.empty())
+                {
+                    query.append(name);
+                    query.push_back('=');
+                }
+                append_encoded(content);
+            }
+            else if(auto pos = sv.find('@'); pos != sv.npos)
+            {
+                auto name     = sv.substr(0, pos);
+                auto filename = sv.substr(pos + 1);
+                if(!name.empty())
+                {
+                    query.append(name);
+                    query.push_back('=');
+                }
+                std::string tmp;
+                any_istream{ filename }.append_to(tmp);
+                append_encoded(tmp);
+            }
+            else
+            {
+                append_encoded(sv);
+            }
+        }
+
+        if(!query.empty())
+        {
+            if(!oc.query.empty())
+                oc.query.push_back('&');
+            oc.query.append(query);
+        }
     }
 
     if(vm.contains("connect-to"))
