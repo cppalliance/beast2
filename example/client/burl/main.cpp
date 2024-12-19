@@ -207,7 +207,7 @@ perform_request(
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
     http_proto::context& proto_ctx,
-    operation_config::request_info request_info)
+    operation_config::request_option request_option)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
@@ -217,7 +217,7 @@ perform_request(
 
     urls::url url = [&]()
     {
-        auto rs = normalize_and_parse_url(request_info.url);
+        auto rs = normalize_and_parse_url(request_option.url);
         if(rs.has_error())
             throw system_error{ rs.error(), "Failed to parse URL" };
         if(rs.value().host().empty())
@@ -239,7 +239,7 @@ perform_request(
     {
         auto path = oc.output_dir;
 
-        if(request_info.remotename)
+        if(request_option.remotename)
         {
             auto segs = url.encoded_segments();
             if(segs.empty() || segs.back().empty())
@@ -247,9 +247,9 @@ perform_request(
             else
                 path.append(segs.back().begin(), segs.back().end());
         }
-        else if(!request_info.output.empty())
+        else if(!request_option.output.empty())
         {
-            path /= request_info.output;
+            path /= request_option.output;
         }
         else
         {
@@ -414,7 +414,7 @@ perform_request(
             std::to_string(parser.get().status_int()));
 
     // use the server-specified Content-Disposition filename
-    if(oc.content_disposition)
+    if(oc.content_disposition && request_option.remotename)
     {
         for(auto sv : parser.get().find_all(field::content_disposition))
         {
@@ -604,7 +604,7 @@ co_main(int argc, char* argv[])
                 any_ostream{ oc.cookiejar } << cookie_jar.value();
         });
 
-    for(const auto& request_info : oc.requests)
+    for(auto request_option : oc.requests)
     {
         auto request_task = [&]()
         {
@@ -617,7 +617,7 @@ co_main(int argc, char* argv[])
                     exp_cookies,
                     oc.ssl_ctx,
                     proto_ctx,
-                    request_info),
+                    request_option),
                 asio::cancel_after(oc.timeout, asio::use_awaitable));
         };
 

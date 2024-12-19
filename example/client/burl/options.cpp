@@ -311,7 +311,7 @@ make_operation_config(int argc, char* argv[])
         ("no-buffer", "Disable buffering of the output stream")
         ("no-keepalive", "Disable TCP keepalive on the connection")
         ("output,o",
-            po::value<std::string>()->value_name("<file>"),
+            po::value<std::vector<std::string>>()->value_name("<file>"),
             "Write to file instead of stdout")
         ("output-dir",
             po::value<std::string>()->value_name("<dir>"),
@@ -335,7 +335,10 @@ make_operation_config(int argc, char* argv[])
             po::value<std::string>()->value_name("<url>"),
             "Referer URL")
         ("remote-header-name,J", "Use the header-provided filename")
-        ("remote-name,O", "Write output to a file named as the remote file")
+        ("remote-name,O",
+            po::value<std::vector<bool>>()->zero_tokens(),
+            "Write output to a file named as the remote file")
+        ("remote-name-all", "Use the remote file name for all URLs")
         ("remove-on-error", "Remove output file on errors")
         ("request,X",
             po::value<std::string>()->value_name("<method>"),
@@ -393,13 +396,12 @@ make_operation_config(int argc, char* argv[])
     auto podesc = po::positional_options_description{};
     podesc.add("url", -1);
 
-    po::variables_map vm;
-    po::store(
-        po::command_line_parser{ argc, argv }
-            .options(odesc)
-            .positional(podesc)
-            .run(),
-        vm);
+    auto vm = po::variables_map{};
+    auto po = po::command_line_parser{ argc, argv }
+                  .options(odesc)
+                  .positional(podesc)
+                  .run();
+    po::store(po, vm);
     po::notify(vm);
 
     if(vm.contains("help") || !vm.contains("url"))
@@ -471,7 +473,6 @@ make_operation_config(int argc, char* argv[])
     set_bool(oc.followlocation, "location-trusted");
     set_bool(oc.unrestricted_auth, "location-trusted");
     set_bool(oc.nobuffer, "no-buffer");
-    // set_bool(oc.remote_name, "remote-name"); //TODO
 
     set_string(oc.unix_socket_path, "unix-socket");
     set_string(oc.useragent, "user-agent");
@@ -481,7 +482,6 @@ make_operation_config(int argc, char* argv[])
     set_string(oc.customrequest, "request");
     set_string(oc.headerfile, "dump-header");
     set_string(oc.range, "range");
-    // set_string(oc.output, "output"); //TODO
     set_string(oc.output_dir, "output-dir");
     set_string(oc.cookiejar, "cookie-jar");
 
@@ -700,17 +700,21 @@ make_operation_config(int argc, char* argv[])
     }
 
     for(auto s : vm.at("url").as<std::vector<std::string>>())
-        oc.requests.push_back({ std::move(s), {}, false });
+    {
+        oc.requests.push_back(
+            { std::move(s), {}, vm.contains("remote-name-all") });
+    }
 
-    // set output method for each request
-    for(auto it = oc.requests.begin(); auto& [name, value] : vm)
+    // Set output method for each request by iterating through parsed options
+    // manually (due to argument order dependency).
+    for(auto it = oc.requests.begin(); auto& option : po.options)
     {
         if(it == oc.requests.end())
             break;
 
-        if(name == "output")
-            it++->output = value.as<std::string>();
-        else if(name == "remote-name")
+        if(option.string_key == "output")
+            it++->output = option.value.at(0);
+        else if(option.string_key == "remote-name")
             it++->remotename = true;
     }
 
