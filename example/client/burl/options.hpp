@@ -33,7 +33,7 @@ struct operation_config
 {
     using duration_type = ch::steady_clock::duration;
 
-    struct request_info
+    struct request_option
     {
         std::string url;
         fs::path output;
@@ -98,7 +98,7 @@ struct operation_config
     boost::optional<std::string> range;
     urls::url proxy;
     boost::optional<std::string> customrequest;
-    std::vector<request_info> requests;
+    std::vector<request_option> requests;
     std::string query;
     message msg;
 };
