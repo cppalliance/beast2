@@ -54,6 +54,7 @@ struct operation_config
     std::uint64_t max_filesize = std::numeric_limits<std::uint64_t>::max();
     bool tcp_nodelay           = true;
     std::uint64_t req_retry    = 0;
+    std::uint16_t parallel_max = 1;
     bool retry_connrefused     = false;
     bool retry_all_errors      = false;
     bool nokeepalive           = false;
