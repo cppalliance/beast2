@@ -15,12 +15,14 @@
 #include "file.hpp"
 #include "message.hpp"
 #include "request.hpp"
+#include "task_group.hpp"
 #include "utils.hpp"
 
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/co_spawn.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/buffers.hpp>
@@ -552,6 +554,7 @@ co_main(int argc, char* argv[])
 {
     auto executor    = co_await asio::this_coro::executor;
     auto oc          = make_operation_config(argc, argv);
+    auto task_group  = ::task_group{ executor, oc.parallel_max };
     auto proto_ctx   = http_proto::context{};
     auto cookie_jar  = std::optional<::cookie_jar>{};
     auto exp_cookies = std::string{};
@@ -604,7 +607,7 @@ co_main(int argc, char* argv[])
                 any_ostream{ oc.cookiejar } << cookie_jar.value();
         });
 
-    for(auto request_option : oc.requests)
+    for(const auto& request_option : oc.requests)
     {
         auto request_task = [&]()
         {
@@ -621,8 +624,13 @@ co_main(int argc, char* argv[])
                 asio::cancel_after(oc.timeout, asio::use_awaitable));
         };
 
-        co_await retry(oc, request_task);
+        co_spawn(
+            executor,
+            retry(oc, request_task),
+            co_await task_group.async_adapt(asio::detached));
     }
+
+    co_await task_group.async_wait();
 }
 
 int

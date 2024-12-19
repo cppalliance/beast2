@@ -316,6 +316,11 @@ make_operation_config(int argc, char* argv[])
         ("output-dir",
             po::value<std::string>()->value_name("<dir>"),
             "Directory to save files in")
+        ("parallel,Z", "Perform transfers in parallel")
+        ("parallel-immediate", "Do not wait for multiplexing (with --parallel)")
+        ("parallel-max",
+            po::value<std::uint16_t>()->value_name("<num>"),
+            "Maximum concurrency for parallel transfers")
         ("pass",
             po::value<std::string>()->value_name("<phrase>"),
             "Passphrase for the private key")
@@ -536,6 +541,16 @@ make_operation_config(int argc, char* argv[])
         if(limit.has_error())
             throw std::runtime_error{ "unsupported max-filesize unit" };
         oc.max_filesize = limit.value();
+    }
+
+    if(vm.contains("parallel"))
+        oc.parallel_max = 50; // default
+
+    if(vm.contains("parallel-max"))
+    {
+        auto value = vm.at("parallel-max").as<std::uint16_t>();
+        if(value <= 300)
+            oc.parallel_max = value;
     }
 
     if(vm.contains("proto-redir"))
