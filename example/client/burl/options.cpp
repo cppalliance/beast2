@@ -10,6 +10,7 @@
 #include "options.hpp"
 #include "any_iostream.hpp"
 #include "file.hpp"
+#include "glob.hpp"
 #include "mime_type.hpp"
 
 #include <boost/asio/ssl.hpp>
@@ -281,6 +282,7 @@ make_operation_config(int argc, char* argv[])
             po::value<std::string>()->value_name("<key>"),
             "Private key file")
         ("get,G", "Put the post data in the URL and use GET")
+        ("globoff,g", "Disable URL sequences and ranges using {} and []")
         ("head,I", "Show document info only")
         ("header,H",
             po::value<std::vector<std::string>>()->value_name("<header>"),
@@ -382,7 +384,7 @@ make_operation_config(int argc, char* argv[])
             po::value<std::string>()->value_name("<path>"),
             "Connect through this Unix domain socket")
         ("upload-file,T",
-            po::value<std::string>()->value_name("<file>"),
+            po::value<std::vector<std::string>>()->value_name("<file>"),
             "Transfer local FILE to destination")
         ("url",
             po::value<std::vector<std::string>>()->value_name("<url>"),
@@ -418,6 +420,7 @@ make_operation_config(int argc, char* argv[])
            << "    burl https://www.example.com\n"
            << "    burl -L http://httpstat.us/301\n"
            << "    burl https://httpbin.org/post -F name=Shadi -F img=@./avatar.jpeg\n"
+           << "    burl \"http://example.com/archive/vol[1-4]/part{a,b,c}.html\" -o vol#1-part#2\n"
            << odesc;
         // clang-format on
         throw std::runtime_error{ ss.str() };
@@ -440,7 +443,7 @@ make_operation_config(int argc, char* argv[])
 
     auto set_string = [&](auto& out, core::string_view option)
     {
-        // effectively an OR oepration
+        // effectively an OR operation
         if(vm.contains(option))
             out = vm.at(option).as<std::string>();
     };
@@ -478,6 +481,7 @@ make_operation_config(int argc, char* argv[])
     set_bool(oc.followlocation, "location-trusted");
     set_bool(oc.unrestricted_auth, "location-trusted");
     set_bool(oc.nobuffer, "no-buffer");
+    set_bool(oc.globoff, "globoff");
 
     set_string(oc.unix_socket_path, "unix-socket");
     set_string(oc.useragent, "user-agent");
@@ -588,17 +592,18 @@ make_operation_config(int argc, char* argv[])
 
     if(vm.contains("cookie"))
     {
+        // Empty options are allowerd and just activates cookie engine.
         oc.enable_cookies = true;
+
         // If no "=" symbol is used in the argument, it is instead treated as a
-        // filename to read previously stored cookie from Empty options are.
-        // allowerd and just activates cookie engine.
+        // filename to read previously stored cookie from.
         for(core::string_view sv :
             vm.at("cookie").as<std::vector<std::string>>())
         {
             if(sv.find('=') != core::string_view::npos)
                 oc.cookies.push_back(sv);
             else if(!sv.empty())
-                oc.cookiefiles.emplace_back(sv);
+                oc.cookiefiles.emplace_back(sv.begin(), sv.end());
         }
     }
 
@@ -714,17 +719,42 @@ make_operation_config(int argc, char* argv[])
             asio::ssl::context::file_format::pem);
     }
 
-    for(auto s : vm.at("url").as<std::vector<std::string>>())
+    struct request_info
     {
-        oc.requests.push_back(
-            { std::move(s), {}, vm.contains("remote-name-all") });
+        std::function<boost::optional<glob_result>()> url_gen;
+        std::string output;
+        std::string input;
+        bool remotename;
+    };
+
+    auto requests = std::vector<request_info>{};
+
+    for(auto& s : vm.at("url").as<std::vector<std::string>>())
+    {
+        // returns url a single time, then empty optional
+        auto make_oneshot_gen = [](std::string s)
+        {
+            return [url = boost::make_optional(std::move(s))]() mutable
+            {
+                if(!url.has_value())
+                    return boost::optional<glob_result>{};
+                return boost::optional<glob_result>(
+                    { std::exchange(url, {}).value(), {} });
+            };
+        };
+
+        requests.push_back(
+            { oc.globoff ? make_oneshot_gen(s) : make_glob_generator(s),
+              {},
+              {},
+              vm.contains("remote-name-all") });
     }
 
-    // Set output method for each request by iterating through parsed options
-    // manually (due to argument order dependency).
-    for(auto it = oc.requests.begin(); auto& option : po.options)
+    // Manually iterating through parsed options to preserve
+    // the order of arguments.
+    for(auto it = requests.begin(); auto& option : po.options)
     {
-        if(it == oc.requests.end())
+        if(it == requests.end())
             break;
 
         if(option.string_key == "output")
@@ -732,6 +762,39 @@ make_operation_config(int argc, char* argv[])
         else if(option.string_key == "remote-name")
             it++->remotename = true;
     }
+
+    if(vm.contains("upload-file"))
+    {
+        for(auto it = requests.begin();
+            auto& s : vm.at("upload-file").as<std::vector<std::string>>())
+        {
+            if(it == requests.end())
+                break;
+
+            it++->input = s;
+        }
+    }
+
+    std::reverse(requests.begin(), requests.end());
+    oc.request_opt_gen = [requests]() mutable -> boost::optional<request_opt>
+    {
+        for(;;)
+        {
+            if(requests.empty())
+                return boost::none;
+
+            auto& request_info = requests.back();
+            if(auto o = request_info.url_gen())
+            {
+                return request_opt(
+                    o->result,
+                    o->interpolate(request_info.output),
+                    request_info.input,
+                    request_info.remotename);
+            }
+            requests.pop_back();
+        }
+    };
 
     // --data options
     boost::optional<std::string> data;
@@ -941,31 +1004,6 @@ make_operation_config(int argc, char* argv[])
                 body.append(sv);
         }
         oc.msg = string_body{ std::move(body), "application/json" };
-    }
-
-    if(vm.contains("upload-file"))
-    {
-        oc.msg = [&]() -> message
-        {
-            auto path = vm.at("upload-file").as<std::string>();
-            if(path == "-")
-                return stdin_body{};
-
-            // TODO
-            // Append the filename to the URL if it
-            // doesn't already end with one
-            // auto segs = url.encoded_segments();
-            // if(segs.empty())
-            // {
-            //     segs.push_back(::filename(path));
-            // }
-            // else if(auto back = --segs.end(); back->empty())
-            // {
-            //     segs.replace(back, ::filename(path));
-            // }
-
-            return file_body{ std::move(path) };
-        }();
     }
 
     if(vm.contains("url-query"))

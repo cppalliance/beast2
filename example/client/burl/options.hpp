@@ -29,16 +29,17 @@ namespace fs         = std::filesystem;
 namespace http_proto = boost::http_proto;
 namespace urls       = boost::urls;
 
+struct request_opt
+{
+    std::string url;
+    fs::path output;
+    fs::path input;
+    bool remotename = false;
+};
+
 struct operation_config
 {
     using duration_type = ch::steady_clock::duration;
-
-    struct request_option
-    {
-        std::string url;
-        fs::path output;
-        bool remotename = false;
-    };
 
     duration_type timeout          = duration_type::max();
     duration_type expect100timeout = ch::seconds{ 1 };
@@ -95,11 +96,12 @@ struct operation_config
     bool unrestricted_auth   = false;
     bool followlocation      = false;
     bool nobuffer            = false;
+    bool globoff             = false;
     fs::path output_dir;
     boost::optional<std::string> range;
     urls::url proxy;
     boost::optional<std::string> customrequest;
-    std::vector<request_option> requests;
+    std::function<boost::optional<request_opt>()> request_opt_gen;
     std::string query;
     message msg;
 };
