@@ -143,7 +143,10 @@ redirect_url(http_proto::response_view response, const urls::url_view& referer)
 }
 
 http_proto::request
-create_request(const operation_config& oc, const urls::url_view& url)
+create_request(
+    const operation_config& oc,
+    const message& msg,
+    const urls::url_view& url)
 {
     using field   = http_proto::field;
     using method  = http_proto::method;
@@ -167,7 +170,7 @@ create_request(const operation_config& oc, const urls::url_view& url)
     request.set(field::user_agent, oc.useragent.value_or("Boost.Http.Io"));
     request.set(field::accept, "*/*");
 
-    oc.msg.set_headers(request);
+    msg.set_headers(request);
 
     if(oc.resume_from)
     {
@@ -209,7 +212,8 @@ perform_request(
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
     http_proto::context& proto_ctx,
-    operation_config::request_option request_option)
+    message msg,
+    request_opt request_opt)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
@@ -219,7 +223,7 @@ perform_request(
 
     urls::url url = [&]()
     {
-        auto rs = normalize_and_parse_url(request_option.url);
+        auto rs = normalize_and_parse_url(request_opt.url);
         if(rs.has_error())
             throw system_error{ rs.error(), "Failed to parse URL" };
         if(rs.value().host().empty())
@@ -235,13 +239,37 @@ perform_request(
     if(url.path().empty())
         url.set_path("/");
 
-    auto request = create_request(oc, url);
+    if(!request_opt.input.empty())
+    {
+        msg = [&]() -> message
+        {
+            if(request_opt.input == "-")
+                return stdin_body{};
+
+            auto path = request_opt.input;
+
+            // Append filename to URL if missing
+            auto segs = url.encoded_segments();
+            if(segs.empty())
+            {
+                segs.push_back(path.filename().string());
+            }
+            else if(auto back = --segs.end(); back->empty())
+            {
+                segs.replace(back, path.filename().string());
+            }
+
+            return file_body{ path.string() };
+        }();
+    }
+
+    auto request = create_request(oc, msg, url);
 
     auto output = [&]()
     {
         auto path = oc.output_dir;
 
-        if(request_option.remotename)
+        if(request_opt.remotename)
         {
             auto segs = url.encoded_segments();
             if(segs.empty() || segs.back().empty())
@@ -249,9 +277,9 @@ perform_request(
             else
                 path.append(segs.back().begin(), segs.back().end());
         }
-        else if(!request_option.output.empty())
+        else if(!request_opt.output.empty())
         {
-            path /= request_option.output;
+            path /= request_opt.output;
         }
         else
         {
@@ -261,7 +289,7 @@ perform_request(
         if(oc.create_dirs)
             fs::create_directories(path.parent_path());
 
-        return any_ostream{ path };
+        return any_ostream{ std::move(path) };
     }();
 
     auto scope_fail = scope::make_scope_fail(
@@ -329,7 +357,6 @@ perform_request(
     auto referer   = urls::url{ url };
     auto trusted   = true;
     auto maxredirs = oc.maxredirs;
-    auto msg       = oc.msg;
     for(;;)
     {
         set_cookies(url, trusted);
@@ -416,7 +443,7 @@ perform_request(
             std::to_string(parser.get().status_int()));
 
     // use the server-specified Content-Disposition filename
-    if(oc.content_disposition && request_option.remotename)
+    if(oc.content_disposition && request_opt.remotename)
     {
         for(auto sv : parser.get().find_all(field::content_disposition))
         {
@@ -486,7 +513,7 @@ perform_request(
 asio::awaitable<void>
 retry(
     const operation_config& oc,
-    std::function<asio::awaitable<http_proto::status>()> request_task)
+    std::function<asio::awaitable<http_proto::status>()> task)
 {
     auto executor = co_await asio::this_coro::executor;
     auto timer    = asio::steady_timer{ executor };
@@ -528,16 +555,21 @@ retry(
     {
         try
         {
-            auto status = co_await request_task();
+            auto status = co_await task();
             if(!is_transient_error(status) || !can_retry({}))
                 break;
             std::cerr << "HTTP error" << std::endl;
         }
         catch(const system_error& e)
         {
-            if(!can_retry(e.code()))
-                throw;
             std::cerr << e.what() << std::endl;
+            if(!can_retry(e.code()))
+                co_return;
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+            co_return;
         }
 
         auto delay = next_delay();
@@ -607,9 +639,9 @@ co_main(int argc, char* argv[])
                 any_ostream{ oc.cookiejar } << cookie_jar.value();
         });
 
-    for(const auto& request_option : oc.requests)
+    while(auto request_opt = oc.request_opt_gen())
     {
-        auto request_task = [&]()
+        auto task = [&, request_opt]()
         {
             return asio::co_spawn(
                 executor,
@@ -620,13 +652,14 @@ co_main(int argc, char* argv[])
                     exp_cookies,
                     oc.ssl_ctx,
                     proto_ctx,
-                    request_option),
+                    oc.msg,
+                    request_opt.value()),
                 asio::cancel_after(oc.timeout, asio::use_awaitable));
         };
 
         co_spawn(
             executor,
-            retry(oc, request_task),
+            retry(oc, task),
             co_await task_group.async_adapt(asio::detached));
     }
 
