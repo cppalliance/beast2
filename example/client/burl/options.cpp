@@ -207,8 +207,8 @@ parse_human_readable_size(core::string_view sv)
 }
 } // namespace
 
-operation_config
-make_operation_config(int argc, char* argv[])
+parse_args_result
+parse_args(int argc, char* argv[])
 {
     auto odesc = po::options_description{ "Options" };
     // clang-format off
@@ -608,7 +608,7 @@ make_operation_config(int argc, char* argv[])
     }
 
     // TLS/SSL configs
-
+    auto ssl_ctx = asio::ssl::context{ asio::ssl::context::tls_client };
     {
         auto tls_min = 11;
         auto tls_max = 13;
@@ -638,40 +638,40 @@ make_operation_config(int argc, char* argv[])
             tls_min = 13;
 
         if(tls_min > 10)
-            oc.ssl_ctx.set_options(oc.ssl_ctx.no_tlsv1);
+            ssl_ctx.set_options(ssl_ctx.no_tlsv1);
         if(tls_min > 11 || tls_max < 11)
-            oc.ssl_ctx.set_options(oc.ssl_ctx.no_tlsv1_1);
+            ssl_ctx.set_options(ssl_ctx.no_tlsv1_1);
         if(tls_min > 12 || tls_max < 12)
-            oc.ssl_ctx.set_options(oc.ssl_ctx.no_tlsv1_2);
+            ssl_ctx.set_options(ssl_ctx.no_tlsv1_2);
         if(tls_max < 13)
-            oc.ssl_ctx.set_options(oc.ssl_ctx.no_tlsv1_3);
+            ssl_ctx.set_options(ssl_ctx.no_tlsv1_3);
     }
 
     if(vm.contains("insecure"))
     {
-        oc.ssl_ctx.set_verify_mode(asio::ssl::verify_none);
+        ssl_ctx.set_verify_mode(asio::ssl::verify_none);
     }
     else
     {
         if(vm.contains("cacert"))
         {
-            oc.ssl_ctx.load_verify_file(vm.at("cacert").as<std::string>());
+            ssl_ctx.load_verify_file(vm.at("cacert").as<std::string>());
         }
         else if(vm.contains("capath"))
         {
-            oc.ssl_ctx.add_verify_path(vm.at("capath").as<std::string>());
+            ssl_ctx.add_verify_path(vm.at("capath").as<std::string>());
         }
         else
         {
-            oc.ssl_ctx.set_default_verify_paths();
+            ssl_ctx.set_default_verify_paths();
         }
 
-        oc.ssl_ctx.set_verify_mode(asio::ssl::verify_peer);
+        ssl_ctx.set_verify_mode(asio::ssl::verify_peer);
     }
 
     if(vm.contains("cert"))
     {
-        oc.ssl_ctx.use_certificate_file(
+        ssl_ctx.use_certificate_file(
             vm.at("cert").as<std::string>(),
             asio::ssl::context::file_format::pem);
     }
@@ -679,7 +679,7 @@ make_operation_config(int argc, char* argv[])
     if(vm.contains("ciphers"))
     {
         if(::SSL_CTX_set_cipher_list(
-               oc.ssl_ctx.native_handle(),
+               ssl_ctx.native_handle(),
                vm.at("ciphers").as<std::string>().c_str()) != 1)
         {
             throw std::runtime_error{ "failed setting cipher list" };
@@ -689,7 +689,7 @@ make_operation_config(int argc, char* argv[])
     if(vm.contains("tls13-ciphers"))
     {
         if(::SSL_CTX_set_ciphersuites(
-               oc.ssl_ctx.native_handle(),
+               ssl_ctx.native_handle(),
                vm.at("tls13-ciphers").as<std::string>().c_str()) != 1)
         {
             throw std::runtime_error{ "failed setting TLS 1.3 cipher suite" };
@@ -699,7 +699,7 @@ make_operation_config(int argc, char* argv[])
     if(vm.contains("curves"))
     {
         if(::SSL_CTX_set1_curves_list(
-               oc.ssl_ctx.native_handle(),
+               ssl_ctx.native_handle(),
                vm.at("curves").as<std::string>().c_str()) != 1)
         {
             throw std::runtime_error{ "failed setting curves list" };
@@ -708,13 +708,13 @@ make_operation_config(int argc, char* argv[])
 
     if(vm.contains("pass"))
     {
-        oc.ssl_ctx.set_password_callback(
+        ssl_ctx.set_password_callback(
             [&](auto, auto) { return vm.at("pass").as<std::string>(); });
     }
 
     if(vm.contains("key"))
     {
-        oc.ssl_ctx.use_private_key_file(
+        ssl_ctx.use_private_key_file(
             vm.at("key").as<std::string>(),
             asio::ssl::context::file_format::pem);
     }
@@ -776,7 +776,7 @@ make_operation_config(int argc, char* argv[])
     }
 
     std::reverse(requests.begin(), requests.end());
-    oc.request_opt_gen = [requests]() mutable -> boost::optional<request_opt>
+    auto request_opt_gen = [requests]() mutable -> boost::optional<request_opt>
     {
         for(;;)
         {
@@ -1193,5 +1193,5 @@ make_operation_config(int argc, char* argv[])
         }
     }
 
-    return oc;
+    return { std::move(oc), std::move(ssl_ctx), std::move(request_opt_gen) };
 }

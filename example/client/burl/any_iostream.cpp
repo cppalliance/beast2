@@ -34,12 +34,12 @@ any_ostream::any_ostream()
 {
 }
 
-any_ostream::any_ostream(core::string_view path)
-    : any_ostream{ fs::path{ path.begin(), path.end() } }
+any_ostream::any_ostream(core::string_view path, bool append)
+    : any_ostream{ fs::path{ path.begin(), path.end() }, append }
 {
 }
 
-any_ostream::any_ostream(fs::path path)
+any_ostream::any_ostream(fs::path path, bool append)
     : path_{ std::move(path) }
 {
     if(path_ == "-")
@@ -54,7 +54,10 @@ any_ostream::any_ostream(fs::path path)
     {
         auto& f = stream_.emplace<std::ofstream>();
         f.exceptions(std::ofstream::badbit);
-        f.open(path_);
+        if (append)
+            f.open(path_, std::ofstream::app);
+        else
+            f.open(path_);
         if(!f.is_open())
             throw std::runtime_error{ "Couldn't open file" };
     }
