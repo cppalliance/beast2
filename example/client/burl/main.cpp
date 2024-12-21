@@ -125,6 +125,21 @@ can_reuse_connection(
     return true;
 }
 
+bool
+ignorebody(
+    const operation_config& oc,
+    http_proto::request_view request,
+    http_proto::response_view response) noexcept
+{
+    if(request.method() == http_proto::method::head)
+        return true;
+
+    if(oc.resume_from && !response.count(http_proto::field::content_range))
+        return true;
+
+    return false;
+}
+
 urls::url
 redirect_url(http_proto::response_view response, const urls::url_view& referer)
 {
@@ -206,7 +221,7 @@ create_request(
 
 asio::awaitable<http_proto::status>
 perform_request(
-    const operation_config& oc,
+    operation_config oc,
     std::optional<any_ostream>& header_output,
     std::optional<cookie_jar>& cookie_jar,
     core::string_view exp_cookies,
@@ -263,8 +278,6 @@ perform_request(
         }();
     }
 
-    auto request = create_request(oc, msg, url);
-
     auto output = [&]()
     {
         auto path = oc.output_dir;
@@ -286,11 +299,19 @@ perform_request(
             return any_ostream{};
         }
 
+        if(oc.resume_from_current && path != "-")
+        {
+            oc.resume_from =
+                fs::exists(path) ? fs::file_size(path) : std::uint64_t{ 0 };
+        }
+
         if(oc.create_dirs)
             fs::create_directories(path.parent_path());
 
-        return any_ostream{ std::move(path) };
+        return any_ostream{ std::move(path), oc.resume_from.has_value() };
     }();
+
+    auto request = create_request(oc, msg, url);
 
     auto scope_fail = scope::make_scope_fail(
         [&]
@@ -463,8 +484,15 @@ perform_request(
         }
     }
 
-    // stream body
-    if(request.method() != http_proto::method::head)
+    if(oc.resume_from &&
+       parser.get().status() != http_proto::status::range_not_satisfiable &&
+       parser.get().count(field::content_range) == 0)
+    {
+        throw std::runtime_error(
+            "HTTP server doesn't seem to support byte ranges. Cannot resume.");
+    }
+
+    if(!ignorebody(oc, request, parser.get()))
     {
         for(;;)
         {
@@ -584,8 +612,8 @@ retry(
 asio::awaitable<void>
 co_main(int argc, char* argv[])
 {
+    auto [oc, ssl_ctx, ropt_gen] = parse_args(argc, argv);
     auto executor    = co_await asio::this_coro::executor;
-    auto oc          = make_operation_config(argc, argv);
     auto task_group  = ::task_group{ executor, oc.parallel_max };
     auto proto_ctx   = http_proto::context{};
     auto cookie_jar  = std::optional<::cookie_jar>{};
@@ -639,9 +667,9 @@ co_main(int argc, char* argv[])
                 any_ostream{ oc.cookiejar } << cookie_jar.value();
         });
 
-    while(auto request_opt = oc.request_opt_gen())
+    while(auto ropt = ropt_gen())
     {
-        auto task = [&, request_opt]()
+        auto task = [&, ropt]()
         {
             return asio::co_spawn(
                 executor,
@@ -650,10 +678,10 @@ co_main(int argc, char* argv[])
                     header_output,
                     cookie_jar,
                     exp_cookies,
-                    oc.ssl_ctx,
+                    ssl_ctx,
                     proto_ctx,
                     oc.msg,
-                    request_opt.value()),
+                    ropt.value()),
                 asio::cancel_after(oc.timeout, asio::use_awaitable));
         };
 

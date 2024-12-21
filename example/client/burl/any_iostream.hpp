@@ -29,9 +29,9 @@ class any_ostream
 public:
     any_ostream();
 
-    any_ostream(core::string_view path);
+    any_ostream(core::string_view path, bool append = false);
 
-    any_ostream(fs::path path);
+    any_ostream(fs::path path, bool append = false);
 
     bool
     is_tty() const noexcept;

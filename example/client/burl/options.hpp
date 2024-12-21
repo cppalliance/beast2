@@ -29,14 +29,6 @@ namespace fs         = std::filesystem;
 namespace http_proto = boost::http_proto;
 namespace urls       = boost::urls;
 
-struct request_opt
-{
-    std::string url;
-    fs::path output;
-    fs::path input;
-    bool remotename = false;
-};
-
 struct operation_config
 {
     using duration_type = ch::steady_clock::duration;
@@ -67,7 +59,6 @@ struct operation_config
     fs::path unix_socket_path;
     std::function<void(urls::url&)> connect_to;
     std::function<void(urls::url&)> resolve_to;
-    asio::ssl::context ssl_ctx{ asio::ssl::context::tls_client };
     bool http10 = false;
     bool ipv4   = false;
     bool ipv6   = false;
@@ -101,12 +92,26 @@ struct operation_config
     boost::optional<std::string> range;
     urls::url proxy;
     boost::optional<std::string> customrequest;
-    std::function<boost::optional<request_opt>()> request_opt_gen;
     std::string query;
     message msg;
 };
 
-operation_config
-make_operation_config(int argc, char* argv[]);
+struct request_opt
+{
+    std::string url;
+    fs::path output;
+    fs::path input;
+    bool remotename = false;
+};
+
+struct parse_args_result
+{
+    operation_config oc;
+    asio::ssl::context ssl_ctx;
+    std::function<boost::optional<request_opt>()> ropt_gen;
+};
+
+parse_args_result
+parse_args(int argc, char* argv[]);
 
 #endif
