@@ -23,4 +23,7 @@ extract_filename_form_content_disposition(core::string_view sv);
 boost::system::result<urls::url>
 normalize_and_parse_url(std::string str);
 
+std::string
+format_size(std::uint64_t size, int width = 4);
+
 #endif

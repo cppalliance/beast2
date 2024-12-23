@@ -14,6 +14,7 @@
 #include "cookie.hpp"
 #include "file.hpp"
 #include "message.hpp"
+#include "progress_meter.hpp"
 #include "request.hpp"
 #include "task_group.hpp"
 #include "utils.hpp"
@@ -140,6 +141,14 @@ ignorebody(
     return false;
 }
 
+boost::optional<std::uint64_t>
+body_size(http_proto::response_view response)
+{
+    if(response.payload() == http_proto::payload::size)
+        return response.payload_size();
+    return boost::none;
+}
+
 urls::url
 redirect_url(http_proto::response_view response, const urls::url_view& referer)
 {
@@ -155,6 +164,59 @@ redirect_url(http_proto::response_view response, const urls::url_view& referer)
         }
     }
     throw std::runtime_error{ "Bad redirect response" };
+}
+
+asio::awaitable<void>
+report_progress(progress_meter& pm)
+{
+    auto executor = co_await asio::this_coro::executor;
+    auto timer    = asio::steady_timer{ executor };
+    auto report   = [&]()
+    {
+        std::cerr << "\r[";
+        auto pct = pm.pct();
+        for(int i = 0; i != 25; i++)
+            std::cerr << (i * 4 < pct.value_or(0) ? '#' : '-');
+        std::cerr << "] ";
+
+        if(pct)
+            std::cerr << pct.value();
+        else
+            std::cerr << '?';
+
+        std::cerr << "% | " << std::setw(7) << format_size(pm.transfered())
+                  << " of ";
+
+        if(auto total = pm.total())
+            std::cerr << format_size(total.value());
+        else
+            std::cerr << '?';
+
+        std::cerr << " | " << std::setw(7) << format_size(pm.cur_rate())
+                  << "/s | ";
+
+        auto eta = pm.eta();
+        if(eta && eta->hours() <= ch::hours{ 99 })
+            std::cerr << eta.value();
+        else
+            std::cerr << "--:--:--";
+
+        std::cerr << std::flush;
+    };
+
+    auto scope_exit = scope::make_scope_exit(
+        [&]()
+        {
+            report();
+            std::cerr << '\n';
+        });
+
+    for(;;)
+    {
+        report();
+        timer.expires_after(ch::milliseconds{ 250 });
+        co_await timer.async_wait();
+    }
 }
 
 http_proto::request
@@ -334,7 +396,7 @@ perform_request(
             asio::cancel_after(oc.connect_timeout));
 
         if(oc.recvpersecond)
-            stream.write_limit(oc.recvpersecond.value());
+            stream.read_limit(oc.recvpersecond.value());
 
         if(oc.sendpersecond)
             stream.write_limit(oc.sendpersecond.value());
@@ -492,7 +554,7 @@ perform_request(
             "HTTP server doesn't seem to support byte ranges. Cannot resume.");
     }
 
-    if(!ignorebody(oc, request, parser.get()))
+    auto stream_body = [&](progress_meter& pm) -> asio::awaitable<void>
     {
         for(;;)
         {
@@ -513,6 +575,7 @@ perform_request(
 
                 output << chunk;
                 parser.consume_body(cb.size());
+                pm.update(cb.size());
             }
 
             if(parser.is_complete())
@@ -522,6 +585,28 @@ perform_request(
                 stream, parser, asio::as_tuple);
             if(ec && ec != http_proto::condition::need_more_input)
                 throw system_error{ ec };
+        }
+    };
+
+    if(!ignorebody(oc, request, parser.get()))
+    {
+        auto pm = progress_meter{ body_size(parser.get()) };
+
+        if(output.is_tty() || oc.parallel_max > 1 || oc.noprogress)
+        {
+            co_await stream_body(pm);
+        }
+        else
+        {
+            auto [_, exp1, exp2] =
+                co_await asio::experimental::make_parallel_group(
+                    co_spawn(executor, stream_body(pm)),
+                    co_spawn(executor, report_progress(pm)))
+                    .async_wait(
+                        asio::experimental::wait_for_one(), asio::deferred);
+
+            if(exp1)
+                std::rethrow_exception(exp1);
         }
     }
 

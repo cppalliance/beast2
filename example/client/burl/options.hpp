@@ -88,6 +88,7 @@ struct operation_config
     bool followlocation      = false;
     bool nobuffer            = false;
     bool globoff             = false;
+    bool noprogress          = false;
     fs::path output_dir;
     boost::optional<std::string> range;
     urls::url proxy;

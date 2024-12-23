@@ -312,6 +312,7 @@ parse_args(int argc, char* argv[])
             "Maximum time allowed for transfer")
         ("no-buffer", "Disable buffering of the output stream")
         ("no-keepalive", "Disable TCP keepalive on the connection")
+        ("no-progress-meter", "Do not show the progress meter")
         ("output,o",
             po::value<std::vector<std::string>>()->value_name("<file>"),
             "Write to file instead of stdout")
@@ -421,6 +422,7 @@ parse_args(int argc, char* argv[])
            << "    burl -L http://httpstat.us/301\n"
            << "    burl https://httpbin.org/post -F name=Shadi -F img=@./avatar.jpeg\n"
            << "    burl \"http://example.com/archive/vol[1-4]/part{a,b,c}.html\" -o vol#1-part#2\n"
+           << "    burl https://archives.boost.io/release/1.87.0/source/boost_1_87_0.zip -OLC -\n"
            << odesc;
         // clang-format on
         throw std::runtime_error{ ss.str() };
@@ -482,6 +484,7 @@ parse_args(int argc, char* argv[])
     set_bool(oc.unrestricted_auth, "location-trusted");
     set_bool(oc.nobuffer, "no-buffer");
     set_bool(oc.globoff, "globoff");
+    set_bool(oc.noprogress, "no-progress-meter");
 
     set_string(oc.unix_socket_path, "unix-socket");
     set_string(oc.useragent, "user-agent");

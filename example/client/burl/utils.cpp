@@ -11,6 +11,10 @@
 
 #include <boost/url.hpp>
 
+#include <cmath>
+#include <iomanip>
+#include <ostream>
+
 namespace grammar  = boost::urls::grammar;
 namespace variant2 = boost::variant2;
 
@@ -21,10 +25,12 @@ struct attr_char_t
     constexpr bool
     operator()(char c) const noexcept
     {
+        // clang-format off
         return grammar::alnum_chars(c) ||
             c == '!' || c == '#' || c == '$' || c == '&' || c == '+' ||
             c == '-' || c == '.' || c == '^' || c == '_' || c == '`' ||
             c == '|' || c == '~';
+        // clang-format on
     }
 };
 
@@ -143,4 +149,24 @@ normalize_and_parse_url(std::string str)
         return rs.error();
 
     return urls::url{ rs.value() }.normalize();
+}
+
+std::string
+format_size(std::uint64_t size, int width)
+{
+    std::array units = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+
+    if(size == 0)
+        return "0 B";
+
+    auto order  = static_cast<std::size_t>(std::log2(size) / 10);
+    auto scaled = static_cast<double>(size) / std::pow(1024.0, order);
+    auto ints   = static_cast<int>(std::log10(scaled)) + 1;
+    auto fracs  = std::max(width - ints - 1, 0);
+
+    // TODO: replace ostringstream
+    std::ostringstream os;
+    os << std::fixed << std::setprecision(fracs) << scaled << " "
+       << units[order];
+    return os.str();
 }
