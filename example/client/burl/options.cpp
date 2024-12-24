@@ -141,14 +141,14 @@ parse_form_option(core::string_view sv)
     rs.value  = extract(value);
     rs.prefix = prefix.value_or(" ").at(0);
 
-    for(auto [name, value] : range)
+    for(auto [att_name, att_value] : range)
     {
-        if(name == "filename")
-            rs.filename = extract(value);
-        else if(name == "type")
-            rs.type = extract(value);
-        else if(name == "headers")
-            rs.headers.push_back(extract(value));
+        if(att_name == "filename")
+            rs.filename = extract(att_value);
+        else if(att_name == "type")
+            rs.type = extract(att_value);
+        else if(att_name == "headers")
+            rs.headers.push_back(extract(att_value));
         else
             throw std::runtime_error{ "Illegally formatted input field" };
     }
@@ -936,7 +936,7 @@ parse_args(int argc, char* argv[])
                     }
                     append_encoded(content);
                 }
-                else if(auto pos = sv.find('@'); pos != sv.npos)
+                else if(pos = sv.find('@'); pos != sv.npos)
                 {
                     auto name     = sv.substr(0, pos);
                     auto filename = sv.substr(pos + 1);
@@ -1079,7 +1079,7 @@ parse_args(int argc, char* argv[])
                 }
                 append_encoded(content);
             }
-            else if(auto pos = sv.find('@'); pos != sv.npos)
+            else if(pos = sv.find('@'); pos != sv.npos)
             {
                 auto name     = sv.substr(0, pos);
                 auto filename = sv.substr(pos + 1);
@@ -1210,7 +1210,7 @@ parse_args(int argc, char* argv[])
                 else
                     oc.omitheaders.emplace_back(name);
             }
-            else if(auto pos = sv.find(';'); pos != std::string::npos)
+            else if(pos = sv.find(';'); pos != std::string::npos)
             {
                 oc.headers.set(sv.substr(0, pos), "");
             }

@@ -65,7 +65,7 @@ public:
 
     template<class Self>
     void
-    operator()(Self&& self, error_code ec = {}, std::size_t n = {})
+    operator()(Self&& self, error_code ec = {}, std::size_t = {})
     {
         using asio::deferred;
 
@@ -96,7 +96,7 @@ public:
                     deferred(
                         [&stream     = stream_,
                          &serializer = serializer_,
-                         exp100      = exp100_.get()](error_code ec)
+                         exp100      = exp100_.get()](error_code)
                         {
                             return deferred
                                 .when(exp100->state != exp100::cancelled)
@@ -137,11 +137,11 @@ public:
     void
     operator()(
         Self&& self,
-        std::array<std::size_t, 2> completion_order,
+        std::array<std::size_t, 2>,
         error_code ec1,
-        std::size_t n1,
+        std::size_t,
         error_code ec2,
-        std::size_t n2)
+        std::size_t)
     {
         self.complete(ec1 ? ec1 : ec2);
     }

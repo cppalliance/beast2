@@ -208,32 +208,39 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
             if(!copy({ form_->storage_.data(), form_->storage_.size() - 2 }))
                 return rs;
             step_ = 1;
+            BOOST_FALLTHROUGH;
         case 1:
             if(!copy(content_disposition_))
                 return rs;
             step_ = 2;
+            BOOST_FALLTHROUGH;
         case 2:
             if(!copy(it_->name))
                 return rs;
             step_ = 3;
+            BOOST_FALLTHROUGH;
         case 3:
             if(!copy("\""))
                 return rs;
             step_ = 4;
+            BOOST_FALLTHROUGH;
         case 4:
             if(!it_->filename)
                 goto content_type;
             if(!copy(filename_))
                 return rs;
             step_ = 5;
+            BOOST_FALLTHROUGH;
         case 5:
             if(!copy(it_->filename.value()))
                 return rs;
             step_ = 6;
+            BOOST_FALLTHROUGH;
         case 6:
             if(!copy("\""))
                 return rs;
             step_ = 7;
+            BOOST_FALLTHROUGH;
         case 7:
         content_type:
             if(!it_->content_type)
@@ -241,19 +248,23 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
             if(!copy(content_type_))
                 return rs;
             step_ = 8;
+            BOOST_FALLTHROUGH;
         case 8:
             if(!copy(it_->content_type.value()))
                 return rs;
             step_ = 9;
+            BOOST_FALLTHROUGH;
         case 9:
         headers:
             if(!copy(it_->headers))
                 return rs;
             step_ = 10;
+            BOOST_FALLTHROUGH;
         case 10:
             if(!copy("\r\n\r\n"))
                 return rs;
             step_ = 11;
+            BOOST_FALLTHROUGH;
         case 11:
             if(it_->is_file)
             {
@@ -266,11 +277,12 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
                     return rs;
             }
             step_ = 12;
+            BOOST_FALLTHROUGH;
         case 12:
             if(!copy("\r\n"))
                 return rs;
-            step_ = 0;
             ++it_;
+            step_ = 0;
         }
     }
 
@@ -281,6 +293,7 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         if(!copy({ form_->storage_.data(), form_->storage_.size() }))
             return rs;
         step_ = 1;
+        BOOST_FALLTHROUGH;
     case 1:
         if(!copy("\r\n"))
             return rs;

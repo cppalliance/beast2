@@ -24,7 +24,6 @@ class any_ostream
 {
     std::variant<std::ofstream, std::ostream*> stream_;
     bool is_tty_ = false;
-    fs::path path_;
 
 public:
     any_ostream(core::string_view path, bool append = false);
@@ -33,6 +32,9 @@ public:
 
     bool
     is_tty() const noexcept;
+
+    void
+    close();
 
     operator std::ostream&();
 

@@ -97,10 +97,10 @@ connect_socks5_proxy(
         co_await asio::async_write(stream, asio::buffer(auth_req));
 
         // Authentication response
-        std::uint8_t greeting_resp[2];
-        co_await asio::async_read(stream, asio::buffer(greeting_resp));
+        std::uint8_t auth_resp[2];
+        co_await asio::async_read(stream, asio::buffer(auth_resp));
 
-        if(greeting_resp[1] != 0x00)
+        if(auth_resp[1] != 0x00)
             throw std::runtime_error{ "SOCKS5 authentication failed" };
         break;
     }
@@ -116,7 +116,7 @@ connect_socks5_proxy(
     conn_req.push_back(static_cast<std::uint8_t>(host.decoded_size()));
     host.decode({}, urls::string_token::append_to(conn_req));
 
-    std::uint16_t port = std::stoi(effective_port(url));
+    auto port = static_cast<std::uint16_t>(std::stoul(effective_port(url)));
     conn_req.push_back(static_cast<std::uint8_t>((port >> 8) & 0xFF));
     conn_req.push_back(static_cast<std::uint8_t>(port & 0xFF));
 
