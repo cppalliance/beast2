@@ -369,6 +369,7 @@ parse_args(int argc, char* argv[])
             po::value<double>()->value_name("<frac sec>"),
             "Retry only within this period")
         ("show-headers", "Show response headers in the output")
+        ("skip-existing", "Skip download if local file already exists")
         ("tcp-nodelay", "Use the TCP_NODELAY option")
         ("tls-max",
             po::value<std::string>()->value_name("<version>"),
@@ -485,6 +486,7 @@ parse_args(int argc, char* argv[])
     set_bool(oc.nobuffer, "no-buffer");
     set_bool(oc.globoff, "globoff");
     set_bool(oc.noprogress, "no-progress-meter");
+    set_bool(oc.skip_existing, "skip-existing");
 
     set_string(oc.unix_socket_path, "unix-socket");
     set_string(oc.useragent, "user-agent");

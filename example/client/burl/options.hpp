@@ -89,6 +89,8 @@ struct operation_config
     bool nobuffer            = false;
     bool globoff             = false;
     bool noprogress          = false;
+    bool skip_existing       = false;
+    bool terminal_binary_ok  = false;
     fs::path output_dir;
     boost::optional<std::string> range;
     urls::url proxy;
