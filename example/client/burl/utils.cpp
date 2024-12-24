@@ -13,7 +13,7 @@
 
 #include <cmath>
 #include <iomanip>
-#include <ostream>
+#include <sstream>
 
 namespace grammar  = boost::urls::grammar;
 namespace variant2 = boost::variant2;

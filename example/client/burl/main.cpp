@@ -21,11 +21,13 @@
 
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/awaitable.hpp>
+#include <boost/asio/bind_executor.hpp>
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
@@ -577,14 +579,13 @@ perform_request(
                     static_cast<const char*>(cb.data()), cb.size());
 
                 if(output.is_tty() && !oc.terminal_binary_ok &&
-                   chunk.find(char{ 0 }) != chunk.npos)
+                   chunk.contains('\0'))
                 {
-                    // clang-format off
-                    throw std::runtime_error{
+                    throw std::runtime_error(
                         "Binary output can mess up your terminal.\n"
-                        "Use \"--output -\" to tell burl to output it to your terminal anyway, or\n"
-                        "consider \"--output <FILE>\" to save to a file." };
-                    // clang-format on
+                        "Use \"--output -\" to tell burl to output it to your "
+                        "terminal anyway, or\n"
+                        "consider \"--output <FILE>\" to save to a file.");
                 }
 
                 output << chunk;
@@ -612,15 +613,15 @@ perform_request(
         }
         else
         {
-            auto [_, exp1, exp2] =
+            auto [order, ep1, ep2] =
                 co_await asio::experimental::make_parallel_group(
                     co_spawn(executor, stream_body(pm)),
                     co_spawn(executor, report_progress(pm)))
                     .async_wait(
-                        asio::experimental::wait_for_one(), asio::deferred);
+                        asio::experimental::wait_for_one{}, asio::deferred);
 
-            if(exp1)
-                std::rethrow_exception(exp1);
+            if(ep1)
+                std::rethrow_exception(ep1);
         }
     }
 
@@ -702,6 +703,9 @@ retry(
             co_return;
         }
 
+        if(!!(co_await asio::this_coro::cancellation_state).cancelled())
+            break;
+
         auto delay = next_delay();
         std::cerr << "Will retry in " << delay << " seconds. " << retries
                   << " retries left." << std::endl;
@@ -716,11 +720,13 @@ co_main(int argc, char* argv[])
 {
     auto [oc, ssl_ctx, ropt_gen] = parse_args(argc, argv);
 
-    auto executor    = co_await asio::this_coro::executor;
-    auto task_group  = ::task_group{ executor, oc.parallel_max };
-    auto proto_ctx   = http_proto::context{};
-    auto cookie_jar  = boost::optional<::cookie_jar>{};
-    auto exp_cookies = std::string{};
+    auto executor      = co_await asio::this_coro::executor;
+    auto cs            = co_await asio::this_coro::cancellation_state;
+    auto task_group    = ::task_group{ executor, oc.parallel_max };
+    auto proto_ctx     = http_proto::context{};
+    auto cookie_jar    = boost::optional<::cookie_jar>{};
+    auto header_output = boost::optional<any_ostream>{};
+    auto exp_cookies   = std::string{};
 
     if(oc.nobuffer)
     {
@@ -740,12 +746,8 @@ co_main(int argc, char* argv[])
     }
     http_proto::install_parser_service(proto_ctx, parser_cfg);
 
-    auto header_output = [&]() -> boost::optional<any_ostream>
-    {
-        if(!oc.headerfile.empty())
-            return any_ostream{ oc.headerfile };
-        return boost::none;
-    }();
+    if(!oc.headerfile.empty())
+        header_output.emplace(oc.headerfile);
 
     if(oc.enable_cookies)
         cookie_jar.emplace();
@@ -763,35 +765,56 @@ co_main(int argc, char* argv[])
     if(cookie_jar && oc.cookiesession)
         cookie_jar->clear_session_cookies();
 
-    auto scope_exit = scope::make_scope_exit(
-        [&]()
-        {
-            if(cookie_jar && !oc.cookiejar.empty())
-                any_ostream{ oc.cookiejar } << cookie_jar.value();
-        });
-
-    while(auto ropt = ropt_gen())
+    std::exception_ptr ep;
+    try
     {
-        auto request_task = [&, ropt = std::move(ropt)]()
+        while(auto ropt = ropt_gen())
         {
-            return perform_request(
-                oc,
-                header_output,
-                cookie_jar,
-                exp_cookies,
-                ssl_ctx,
-                proto_ctx,
-                oc.msg,
-                ropt.value());
-        };
+            auto request_task = [&, ropt = std::move(ropt)]()
+            {
+                return perform_request(
+                    oc,
+                    header_output,
+                    cookie_jar,
+                    exp_cookies,
+                    ssl_ctx,
+                    proto_ctx,
+                    oc.msg,
+                    ropt.value());
+            };
 
-        co_spawn(
-            executor,
-            retry(oc, request_task),
-            co_await task_group.async_adapt(asio::detached));
+            co_spawn(
+                executor,
+                retry(oc, std::move(request_task)),
+                co_await task_group.async_adapt(asio::detached));
+        }
+    }
+    catch(const system_error& e)
+    {
+        if(e.code() != asio::error::operation_aborted)
+            ep = std::current_exception();
+    }
+    catch(...)
+    {
+        ep = std::current_exception();
     }
 
-    co_await task_group.async_wait();
+    while(!task_group.empty())
+    {
+        if(!!cs.cancelled())
+        {
+            task_group.emit(asio::cancellation_type::terminal);
+            co_await asio::this_coro::throw_if_cancelled(false);
+        }
+
+        co_await task_group.async_join(asio::as_tuple);
+    }
+
+    if(cookie_jar && !oc.cookiejar.empty())
+        any_ostream{ oc.cookiejar } << cookie_jar.value();
+
+    if(ep)
+        std::rethrow_exception(ep);
 }
 
 int
@@ -799,15 +822,21 @@ main(int argc, char* argv[])
 {
     try
     {
-        auto ioc = asio::io_context{};
-        asio::co_spawn(
-            ioc,
-            co_main(argc, argv),
-            [](std::exception_ptr ep)
-            {
-                if(ep)
-                    std::rethrow_exception(ep);
-            });
+        auto ioc  = asio::io_context{};
+        auto sigs = asio::signal_set{ ioc, SIGINT, SIGTERM };
+
+        asio::experimental::make_parallel_group(
+            sigs.async_wait(), asio::co_spawn(ioc, co_main(argc, argv)))
+            .async_wait(
+                asio::experimental::wait_for_one{},
+                asio::bind_executor(
+                    ioc,
+                    [](auto, auto, auto, auto ep)
+                    {
+                        if(ep)
+                            std::rethrow_exception(ep);
+                    }));
+
         ioc.run();
     }
     catch(const std::exception& e)

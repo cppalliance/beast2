@@ -13,6 +13,7 @@
 #include <boost/core/detail/string_view.hpp>
 #include <boost/optional/optional.hpp>
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 
