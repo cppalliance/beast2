@@ -53,7 +53,7 @@ progress_meter::cur_rate() const
     return std::accumulate(
         window_.begin() + offset,
         offset ? window_.end() : std::prev(window_.end()),
-        0);
+        std::uint64_t{ 0 });
 }
 
 std::uint64_t
