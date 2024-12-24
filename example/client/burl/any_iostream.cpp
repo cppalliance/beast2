@@ -18,21 +18,15 @@
 namespace
 {
 bool
-is_stdout_tty()
+is_tty(FILE* stream)
 {
 #ifdef _MSC_VER
-    return _isatty(_fileno(stdout));
+    return _isatty(_fileno(stream));
 #else
-    return isatty(fileno(stdout));
+    return isatty(fileno(stream));
 #endif
 }
 } // namespace
-
-any_ostream::any_ostream()
-    : stream_{ &std::cout }
-    , is_tty_{ ::is_stdout_tty() }
-{
-}
 
 any_ostream::any_ostream(core::string_view path, bool append)
     : any_ostream{ fs::path{ path.begin(), path.end() }, append }
@@ -45,16 +39,18 @@ any_ostream::any_ostream(fs::path path, bool append)
     if(path_ == "-")
     {
         stream_.emplace<std::ostream*>(&std::cout);
+        is_tty_ = ::is_tty(stdout);
     }
     else if(path_ == "%")
     {
         stream_.emplace<std::ostream*>(&std::cerr);
+        is_tty_ = ::is_tty(stderr);
     }
     else
     {
         auto& f = stream_.emplace<std::ofstream>();
         f.exceptions(std::ofstream::badbit);
-        if (append)
+        if(append)
             f.open(path_, std::ofstream::app);
         else
             f.open(path_);
@@ -67,12 +63,6 @@ bool
 any_ostream::is_tty() const noexcept
 {
     return is_tty_;
-}
-
-bool
-any_ostream::remove_file()
-{
-    return fs::remove(path_);
 }
 
 any_ostream::
@@ -110,8 +100,8 @@ void
 any_istream::append_to(std::string& s)
 {
     s.append(
-        std::istreambuf_iterator<char>{
-            static_cast<std::istream&>(*this) }, {} );
+        std::istreambuf_iterator<char>{ static_cast<std::istream&>(*this) },
+        {});
 }
 
 any_istream::
