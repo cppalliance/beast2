@@ -34,14 +34,13 @@ any_ostream::any_ostream(core::string_view path, bool append)
 }
 
 any_ostream::any_ostream(fs::path path, bool append)
-    : path_{ std::move(path) }
 {
-    if(path_ == "-")
+    if(path == "-")
     {
         stream_.emplace<std::ostream*>(&std::cout);
         is_tty_ = ::is_tty(stdout);
     }
-    else if(path_ == "%")
+    else if(path == "%")
     {
         stream_.emplace<std::ostream*>(&std::cerr);
         is_tty_ = ::is_tty(stderr);
@@ -51,9 +50,9 @@ any_ostream::any_ostream(fs::path path, bool append)
         auto& f = stream_.emplace<std::ofstream>();
         f.exceptions(std::ofstream::badbit);
         if(append)
-            f.open(path_, std::ofstream::app);
+            f.open(path, std::ofstream::app);
         else
-            f.open(path_);
+            f.open(path);
         if(!f.is_open())
             throw std::runtime_error{ "Couldn't open file" };
     }
@@ -63,6 +62,13 @@ bool
 any_ostream::is_tty() const noexcept
 {
     return is_tty_;
+}
+
+void
+any_ostream::close()
+{
+    if(auto* s = std::get_if<std::ofstream>(&stream_))
+        s->close();
 }
 
 any_ostream::

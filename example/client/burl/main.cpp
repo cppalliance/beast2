@@ -394,7 +394,10 @@ perform_request(
         [&]
         {
             if(oc.rm_partial && output_path != "-")
+            {
+                output.close();
                 fs::remove(output_path);
+            }
         });
 
     auto connect_to = [&](any_stream& stream, const urls::url_view& url)
@@ -444,7 +447,8 @@ perform_request(
         if(!cookie_jar)
             return;
 
-        for(auto sv : parser.get().find_all(field::set_cookie))
+        auto subrange = parser.get().find_all(field::set_cookie);
+        for(auto sv : subrange)
             cookie_jar->add(url, parse_cookie(sv).value());
     };
 
@@ -543,7 +547,8 @@ perform_request(
     // use the server-specified Content-Disposition filename
     if(oc.content_disposition && request_opt.remotename)
     {
-        for(auto sv : parser.get().find_all(field::content_disposition))
+        auto subrange = parser.get().find_all(field::content_disposition);
+        for(auto sv : subrange)
         {
             auto filepath = extract_filename_form_content_disposition(sv);
             if(filepath.has_value())

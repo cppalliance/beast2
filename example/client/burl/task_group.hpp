@@ -24,8 +24,8 @@ using error_code = boost::system::error_code;
 
 class task_group
 {
-    std::uint32_t max_;
     asio::steady_timer cv_;
+    std::uint32_t max_;
     std::list<asio::cancellation_signal> css_;
 
 public:

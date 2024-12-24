@@ -11,6 +11,8 @@
 
 #include <boost/url/grammar/ci_string.hpp>
 
+namespace grammar = boost::urls::grammar;
+
 core::string_view
 mime_type(core::string_view path) noexcept
 {
@@ -22,7 +24,7 @@ mime_type(core::string_view path) noexcept
         return path.substr(pos);
     }();
 
-    namespace grammar = boost::urls::grammar;
+    // clang-format off
     if(grammar::ci_is_equal(ext, ".gif"))  return "image/gif";
     if(grammar::ci_is_equal(ext, ".jpg"))  return "image/jpeg";
     if(grammar::ci_is_equal(ext, ".jpeg")) return "image/jpeg";
@@ -33,5 +35,7 @@ mime_type(core::string_view path) noexcept
     if(grammar::ci_is_equal(ext, ".html")) return "text/html";
     if(grammar::ci_is_equal(ext, ".pdf"))  return "application/pdf";
     if(grammar::ci_is_equal(ext, ".xml"))  return "application/xml";
+    // clang-format on
+
     return "application/octet-stream";
 }

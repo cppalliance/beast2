@@ -152,14 +152,14 @@ make_glob_generator(core::string_view pattern)
                 static_cast<std::uint8_t>(low.size()),
                 std::stoull(low),
                 high,
-                step.value_or(1)));
+                step.value_or(std::uint64_t{ 1 })));
             break;
         }
         case 2:
         {
             auto [low, high, step] = get<2>(v);
-            gs.push_back(
-                make_char_gen(low.at(0), high.at(0), step.value_or(1)));
+            gs.push_back(make_char_gen(
+                low.at(0), high.at(0), step.value_or(std::uint8_t{ 1 })));
             break;
         }
         case 3:
