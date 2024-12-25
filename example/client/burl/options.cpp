@@ -14,6 +14,7 @@
 #include "mime_type.hpp"
 
 #include <boost/asio/ssl.hpp>
+#include <boost/config.hpp>
 #include <boost/program_options.hpp>
 #include <boost/url.hpp>
 
@@ -205,6 +206,37 @@ parse_human_readable_size(core::string_view sv)
     return static_cast<std::uint64_t>(
         std::stod(size) * (1ULL << 10 * unit.value_or(char{}).index()));
 }
+
+#ifdef BOOST_WINDOWS
+#include <wincrypt.h>
+
+void
+load_windows_root_certs(asio::ssl::context& ctx)
+{
+    HCERTSTORE h_store = CertOpenSystemStore(0, "ROOT");
+    if(!h_store)
+        throw std::runtime_error(
+            "Failed to open the \"ROOT\" system certificate store");
+
+    X509_STORE* x_store      = X509_STORE_new();
+    PCCERT_CONTEXT p_context = nullptr;
+    while((p_context = CertEnumCertificatesInStore(h_store, p_context)))
+    {
+        const unsigned char* in = p_context->pbCertEncoded;
+        X509* x509 = d2i_X509(nullptr, &in, p_context->cbCertEncoded);
+        if(x509)
+        {
+            X509_STORE_add_cert(x_store, x509);
+            X509_free(x509);
+        }
+    }
+
+    CertFreeCertificateContext(p_context);
+    CertCloseStore(h_store, 0);
+
+    SSL_CTX_set_cert_store(ctx.native_handle(), x_store);
+}
+#endif
 } // namespace
 
 parse_args_result
@@ -668,6 +700,9 @@ parse_args(int argc, char* argv[])
         }
         else
         {
+#ifdef BOOST_WINDOWS
+            load_windows_root_certs(ssl_ctx);
+#endif
             ssl_ctx.set_default_verify_paths();
         }
 
