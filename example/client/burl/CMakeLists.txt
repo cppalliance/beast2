@@ -33,6 +33,11 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
         OpenSSL::SSL
         OpenSSL::Crypto)
 
+    if (WIN32)
+        target_link_libraries(http_io_example_client_burl
+            crypt32)
+    endif()
+
     if (ZLIB_FOUND)
         target_link_libraries(http_io_example_client_burl
             Boost::http_proto_zlib)

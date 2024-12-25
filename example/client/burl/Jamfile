@@ -25,6 +25,7 @@ project
       <library>/boost/scope//scope
       <library>/openssl//ssl/<link>shared
       <library>/openssl//crypto/<link>shared
+      <target-os>windows:<library>crypt32
       <include>.
     ;
 
