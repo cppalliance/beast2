@@ -726,7 +726,6 @@ co_main(int argc, char* argv[])
     auto [oc, ssl_ctx, ropt_gen] = parse_args(argc, argv);
 
     auto executor      = co_await asio::this_coro::executor;
-    auto cs            = co_await asio::this_coro::cancellation_state;
     auto task_group    = ::task_group{ executor, oc.parallel_max };
     auto proto_ctx     = http_proto::context{};
     auto cookie_jar    = boost::optional<::cookie_jar>{};
@@ -804,16 +803,13 @@ co_main(int argc, char* argv[])
         ep = std::current_exception();
     }
 
-    while(!task_group.empty())
+    if(auto cs = co_await asio::this_coro::cancellation_state; !!cs.cancelled())
     {
-        if(!!cs.cancelled())
-        {
-            task_group.emit(asio::cancellation_type::terminal);
-            co_await asio::this_coro::throw_if_cancelled(false);
-        }
-
-        co_await task_group.async_join(asio::as_tuple);
+        task_group.emit(cs.cancelled());
+        cs.clear();
     }
+
+    co_await task_group.async_join();
 
     if(cookie_jar && !oc.cookiejar.empty())
         any_ostream{ oc.cookiejar } << cookie_jar.value();
