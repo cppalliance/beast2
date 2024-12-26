@@ -8,16 +8,17 @@
 //
 
 #include "multipart_form.hpp"
-#include "file.hpp"
 
 #include <boost/buffers/algorithm.hpp>
 #include <boost/buffers/buffer_copy.hpp>
 #include <boost/http_proto/file.hpp>
 #include <boost/system/system_error.hpp>
 
+#include <filesystem>
 #include <random>
 
 namespace core     = boost::core;
+namespace fs       = std::filesystem;
 using system_error = boost::system::system_error;
 
 namespace
@@ -70,7 +71,7 @@ multipart_form::append(
     boost::optional<std::string> content_type,
     std::vector<std::string> headers)
 {
-    auto size = is_file ? ::filesize(value) : value.size();
+    auto size = is_file ? fs::file_size(value) : value.size();
 
     parts_.push_back(
         { is_file,
@@ -158,9 +159,9 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
                 buffers::const_buffer{ sv.data(), sv.size() },
                 static_cast<std::size_t>(skip_)));
 
-        mb = buffers::sans_prefix(mb, copied);
+        mb        = buffers::sans_prefix(mb, copied);
         rs.bytes += copied;
-        skip_ += copied;
+        skip_    += copied;
 
         if(skip_ != sv.size())
             return false;
@@ -188,9 +189,9 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         if(rs.ec)
             return false;
 
-        mb = buffers::sans_prefix(mb, read);
+        mb        = buffers::sans_prefix(mb, read);
         rs.bytes += read;
-        skip_ += read;
+        skip_    += read;
 
         if(skip_ != size)
             return false;

@@ -12,7 +12,6 @@
 #include "base64.hpp"
 #include "connect.hpp"
 #include "cookie.hpp"
-#include "file.hpp"
 #include "message.hpp"
 #include "progress_meter.hpp"
 #include "request.hpp"
@@ -31,11 +30,9 @@
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
+#include <boost/scope/scope_exit.hpp>
 #include <boost/scope/scope_fail.hpp>
-#include <boost/scope/scope_success.hpp>
-#include <boost/url/encode.hpp>
 #include <boost/url/parse.hpp>
-#include <boost/url/rfc/pchars.hpp>
 #include <boost/url/url.hpp>
 
 #include <cstdlib>
@@ -302,21 +299,21 @@ perform_request(
 
     urls::url url = [&]()
     {
-        auto rs = normalize_and_parse_url(request_opt.url);
+        auto parse_rs = normalize_and_parse_url(request_opt.url);
 
-        if(rs.has_error())
-            throw system_error{ rs.error(), "Failed to parse URL" };
+        if(parse_rs.has_error())
+            throw system_error{ parse_rs.error(), "Failed to parse URL" };
 
-        if(rs.value().host().empty())
+        if(parse_rs->host().empty())
             throw std::runtime_error{ "No host part in the URL" };
 
         auto params = urls::params_view{ oc.query };
-        rs.value().encoded_params().append(params.begin(), params.end());
+        parse_rs->encoded_params().append(params.begin(), params.end());
 
-        if(rs.value().path().empty())
-            rs.value().set_path("/");
+        if(parse_rs->path().empty())
+            parse_rs->set_path("/");
 
-        return std::move(rs.value());
+        return std::move(parse_rs.value());
     }();
 
     if(!request_opt.input.empty())
@@ -554,13 +551,11 @@ perform_request(
             if(filepath.has_value())
             {
                 // stripp off the potential path
-                auto filename = ::filename(filepath.value());
+                auto filename = fs::path{ filepath.value() }.filename();
                 if(filename.empty())
                     continue;
 
-                auto path = oc.output_dir;
-                path.append(filename.begin(), filename.end());
-                output = any_ostream{ path };
+                output = any_ostream{ oc.output_dir / filename };
                 break;
             }
         }

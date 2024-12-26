@@ -9,7 +9,6 @@
 
 #include "options.hpp"
 #include "any_iostream.hpp"
-#include "file.hpp"
 #include "glob.hpp"
 #include "mime_type.hpp"
 
@@ -963,7 +962,7 @@ parse_args(int argc, char* argv[])
                 auto parse_rs = urls::parse_query(data.value());
                 if(parse_rs.has_error())
                     throw std::runtime_error{ "Invalid data encoding" };
-                oc.query = parse_rs.value().buffer();
+                oc.query = parse_rs->buffer();
             }
             else
             {
@@ -996,7 +995,7 @@ parse_args(int argc, char* argv[])
                     is_file = true;
 
                     if(!filename && prefix != '<')
-                        filename = ::filename(value);
+                        filename = fs::path{ value }.filename();
 
                     if(value == "-")
                     {
@@ -1066,7 +1065,8 @@ parse_args(int argc, char* argv[])
 
             if(sv.starts_with("+"))
             {
-                query.append(sv);
+                // as-is unencoded
+                query.append(sv.substr(1));
             }
             else if(auto pos = sv.find('='); pos != sv.npos)
             {
