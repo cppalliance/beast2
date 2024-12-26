@@ -7,14 +7,13 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BURL_TASK_GROUP_HPP
-#define BURL_TASK_GROUP_HPP
+#ifndef BURL_basic_task_group_HPP
+#define BURL_basic_task_group_HPP
 
-#include <boost/asio/append.hpp>
 #include <boost/asio/bind_cancellation_slot.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/consign.hpp>
-#include <boost/asio/post.hpp>
+#include <boost/asio/immediate.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #include <list>
@@ -22,23 +21,29 @@
 namespace asio   = boost::asio;
 using error_code = boost::system::error_code;
 
-class task_group
+template<typename Executor>
+class basic_task_group
 {
-    asio::steady_timer cv_;
+    asio::steady_timer::rebind_executor<Executor>::other cv_;
     std::uint32_t max_;
     std::list<asio::cancellation_signal> css_;
 
 public:
-    task_group(asio::any_io_executor exec, std::uint32_t max);
+    typedef Executor executor_type;
 
-    task_group(task_group const&) = delete;
-    task_group(task_group&&)      = delete;
+    template<typename Executor1>
+    struct rebind_executor
+    {
+        typedef basic_task_group<Executor1> other;
+    };
+
+    basic_task_group(Executor exec, std::uint32_t max);
+
+    basic_task_group(basic_task_group const&) = delete;
+    basic_task_group(basic_task_group&&)      = delete;
 
     void
     emit(asio::cancellation_type type);
-
-    bool
-    empty() const;
 
     template<typename T, typename CompletionToken = asio::deferred_t>
     auto
@@ -47,72 +52,39 @@ public:
     template<typename CompletionToken = asio::deferred_t>
     auto
     async_join(CompletionToken&& completion_token = {});
-
-private:
-    template<typename CompletionToken = asio::deferred_t>
-    auto
-    async_wait_for(std::size_t n, CompletionToken&& completion_token = {});
 };
 
-inline task_group::task_group(asio::any_io_executor exec, std::uint32_t max)
+template<typename Executor>
+basic_task_group<Executor>::basic_task_group(
+    Executor exec,
+    std::uint32_t max)
     : cv_{ std::move(exec), asio::steady_timer::time_point::max() }
     , max_{ max }
 {
 }
 
-inline void
-task_group::emit(asio::cancellation_type type)
+template<typename Executor>
+void
+basic_task_group<Executor>::emit(asio::cancellation_type type)
 {
     for(auto& cs : css_)
         cs.emit(type);
 }
 
-inline bool
-task_group::empty() const
-{
-    return css_.empty();
-}
-
-template<typename CompletionToken>
-auto
-task_group::async_wait_for(std::size_t n, CompletionToken&& completion_token)
-{
-    return asio::async_compose<CompletionToken, void(error_code)>(
-        [this, n, scheduled = false](auto&& self, error_code ec = {}) mutable
-        {
-            if(!scheduled)
-                self.reset_cancellation_state(
-                    asio::enable_total_cancellation());
-
-            if(!self.cancelled() && ec == asio::error::operation_aborted)
-                ec = {};
-
-            if(css_.size() >= n && !ec)
-            {
-                scheduled = true;
-                return cv_.async_wait(std::move(self));
-            }
-
-            if(!std::exchange(scheduled, true))
-                return asio::post(std::move(self));
-
-            self.complete(ec);
-        },
-        completion_token,
-        cv_);
-}
-
+template<typename Executor>
 template<typename T, typename CompletionToken>
 auto
-task_group::async_adapt(T&& t, CompletionToken&& completion_token)
+basic_task_group<Executor>::async_adapt(
+    T&& t,
+    CompletionToken&& completion_token)
 {
     class remover
     {
-        task_group* tg_;
+        basic_task_group* tg_;
         decltype(css_)::iterator cs_;
 
     public:
-        remover(task_group* tg, decltype(css_)::iterator cs)
+        remover(basic_task_group* tg, decltype(css_)::iterator cs)
             : tg_{ tg }
             , cs_{ cs }
         {
@@ -134,25 +106,79 @@ task_group::async_adapt(T&& t, CompletionToken&& completion_token)
         }
     };
 
-    return async_wait_for(
-        max_,
-        asio::deferred(
-            [this, t = std::move(t)](auto ec) mutable
+    auto adaptor = [this, t = std::move(t)]() mutable
+    {
+        auto cs = css_.emplace(css_.end());
+
+        return asio::bind_cancellation_slot(
+            cs->slot(), asio::consign(std::move(t), remover{ this, cs }));
+    };
+
+    return asio::
+        async_compose<CompletionToken, void(error_code, decltype(adaptor()))>(
+            [this, adaptor = std::move(adaptor), scheduled = false](
+                auto&& self, error_code ec = {}) mutable
             {
-                auto cs = css_.emplace(css_.end());
-                return asio::deferred.values(
-                    ec,
-                    asio::bind_cancellation_slot(
-                        cs->slot(),
-                        asio::consign(std::move(t), remover{ this, cs })));
-            }))(std::forward<CompletionToken>(completion_token));
+                if(!scheduled)
+                    self.reset_cancellation_state(
+                        asio::enable_total_cancellation());
+
+                if(!self.cancelled() && ec == asio::error::operation_aborted)
+                    ec = {};
+
+                if(css_.size() >= max_ && !ec)
+                {
+                    scheduled = true;
+                    return cv_.async_wait(std::move(self));
+                }
+
+                if(!std::exchange(scheduled, true))
+                    return asio::async_immediate(
+                        cv_.get_executor(), std::move(self));
+
+                self.complete(ec, adaptor());
+            },
+            completion_token,
+            cv_);
 }
 
+template<typename Executor>
 template<typename CompletionToken>
 auto
-task_group::async_join(CompletionToken&& completion_token)
+basic_task_group<Executor>::async_join(CompletionToken&& completion_token)
 {
-    return async_wait_for(1, std::forward<CompletionToken>(completion_token));
+    return asio::async_compose<CompletionToken, void(error_code)>(
+        [this, scheduled = false](auto&& self, error_code ec = {}) mutable
+        {
+            if(!scheduled)
+                self.reset_cancellation_state(
+                    asio::enable_total_cancellation());
+
+            if(ec == asio::error::operation_aborted)
+                ec.clear();
+
+            if(!!self.cancelled())
+            {
+                emit(self.cancelled());
+                self.get_cancellation_state().clear();
+            }
+
+            if(!css_.empty() && !ec)
+            {
+                scheduled = true;
+                return cv_.async_wait(std::move(self));
+            }
+
+            if(!std::exchange(scheduled, true))
+                return asio::async_immediate(
+                    cv_.get_executor(), std::move(self));
+
+            self.complete(ec);
+        },
+        completion_token,
+        cv_);
 }
+
+using task_group = basic_task_group<asio::any_io_executor>;
 
 #endif
