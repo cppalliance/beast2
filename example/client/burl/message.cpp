@@ -8,14 +8,15 @@
 //
 
 #include "message.hpp"
-#include "file.hpp"
 #include "mime_type.hpp"
 
 #include <boost/http_proto/field.hpp>
 #include <boost/system/system_error.hpp>
 
+#include <filesystem>
 #include <iostream>
 
+namespace fs       = std::filesystem;
 using system_error = boost::system::system_error;
 
 string_body::string_body(std::string body, std::string content_type)
@@ -70,7 +71,7 @@ file_body::content_type() const noexcept
 std::uint64_t
 file_body::content_length() const
 {
-    return ::filesize(path_);
+    return fs::file_size(path_);
 }
 
 http_proto::file_body

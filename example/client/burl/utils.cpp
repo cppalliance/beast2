@@ -116,7 +116,7 @@ extract_filename_form_content_disposition(core::string_view sv)
     {
         if(name == "filename" && value.has_value())
         {
-            if(value.value().index() == 0)
+            if(value->index() == 0)
             {
                 return unquote_string(variant2::get<0>(value.value()));
             }
