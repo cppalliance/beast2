@@ -302,6 +302,7 @@ parse_args(int argc, char* argv[])
             po::value<double>()->value_name("<frac sec>"),
             "How long to wait for 100-continue")
         ("fail,f", "Fail fast with no output on HTTP errors")
+        ("fail-early", "Fail on first transfer error, do not continue")
         ("fail-with-body", "Fail on HTTP errors but save the body")
         ("form,F",
             po::value<std::vector<std::string>>()->value_name("<name=content>"),
@@ -502,6 +503,7 @@ parse_args(int argc, char* argv[])
     set_bool(oc.ipv4, "ipv4");
     set_bool(oc.ipv6, "ipv6");
     set_bool(oc.failonerror, "fail");
+    set_bool(oc.failearly, "fail-early");
     set_bool(oc.failwithbody, "fail-with-body");
     set_bool(oc.rm_partial, "remove-on-error");
     set_bool(oc.use_httpget, "get");
@@ -584,13 +586,15 @@ parse_args(int argc, char* argv[])
     }
 
     if(vm.contains("parallel"))
+    {
         oc.parallel_max = 50; // default
 
-    if(vm.contains("parallel-max"))
-    {
-        auto value = vm.at("parallel-max").as<std::uint16_t>();
-        if(value <= 300)
-            oc.parallel_max = value;
+        if(vm.contains("parallel-max"))
+        {
+            auto value = vm.at("parallel-max").as<std::uint16_t>();
+            if(value > 0 && value <= 300)
+                oc.parallel_max = value;
+        }
     }
 
     if(vm.contains("proto-redir"))

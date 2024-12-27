@@ -74,6 +74,7 @@ struct operation_config
     urls::url referer;
     bool autoreferer  = false;
     bool failonerror  = false;
+    bool failearly    = false;
     bool failwithbody = false;
     bool rm_partial   = false;
     bool use_httpget  = false;

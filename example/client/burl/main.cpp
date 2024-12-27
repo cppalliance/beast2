@@ -24,6 +24,7 @@
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/experimental/channel.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -385,7 +386,7 @@ perform_request(
     if(oc.skip_existing && fs::exists(output_path))
         co_return http_proto::status::ok;
 
-    auto output     = any_ostream{ output_path, oc.resume_from.has_value() };
+    auto output     = any_ostream{ output_path, !!oc.resume_from };
     auto request    = create_request(oc, msg, url);
     auto scope_fail = scope::make_scope_fail(
         [&]
@@ -695,16 +696,16 @@ retry(
         {
             std::cerr << e.what() << std::endl;
             if(!can_retry(e.code()))
-                co_return;
+                throw;
         }
         catch(const std::exception& e)
         {
             std::cerr << e.what() << std::endl;
-            co_return;
+            throw;
         }
 
         if(!!(co_await asio::this_coro::cancellation_state).cancelled())
-            break;
+            co_return;
 
         auto delay = next_delay();
         std::cerr << "Will retry in " << delay << " seconds. " << retries
@@ -785,12 +786,20 @@ co_main(int argc, char* argv[])
             co_spawn(
                 executor,
                 retry(oc, std::move(request_task)),
-                co_await task_group.async_adapt(asio::detached));
+                co_await task_group.async_adapt(
+                    [&](auto ep)
+                    {
+                        if(ep && oc.failearly)
+                        {
+                            task_group.close();
+                            task_group.emit(asio::cancellation_type::terminal);
+                        }
+                    }));
         }
     }
     catch(const system_error& e)
     {
-        if(e.code() != asio::error::operation_aborted)
+        if(e.code().category() != task_group_category())
             ep = std::current_exception();
     }
     catch(...)
