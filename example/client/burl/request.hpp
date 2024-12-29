@@ -71,6 +71,9 @@ public:
 
         BOOST_ASIO_CORO_REENTER(c)
         {
+            self.reset_cancellation_state(
+                asio::enable_total_cancellation{});
+
             BOOST_ASIO_CORO_YIELD
             http_io::async_write(stream_, serializer_, std::move(self));
 

@@ -999,7 +999,7 @@ parse_args(int argc, char* argv[])
                     is_file = true;
 
                     if(!filename && prefix != '<')
-                        filename = fs::path{ value }.filename();
+                        filename = fs::path{ value }.filename().string();
 
                     if(value == "-")
                     {
