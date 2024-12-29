@@ -55,7 +55,7 @@ public:
 
             virtual void
             async_write_some(
-                const const_buffers_type& buffers,
+                const buffers::const_buffer_subspan& buffers,
                 asio::any_completion_handler<void(error_code, std::size_t)>
                     handler) override
             {
@@ -149,9 +149,7 @@ public:
 
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_write_some(
-                            buffers,
-                            // TODO: fix prefix algorithm
-                            // buffers::prefix(buffers, wr_remain_),
+                            buffers::prefix(buffers, wr_remain_),
                             std::move(self));
 
                         wr_remain_ -= n;
@@ -223,7 +221,7 @@ private:
 
         virtual void
         async_write_some(
-            const const_buffers_type&,
+            const buffers::const_buffer_subspan&,
             asio::any_completion_handler<void(error_code, std::size_t)>) = 0;
 
         virtual void
