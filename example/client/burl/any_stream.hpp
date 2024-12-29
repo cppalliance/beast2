@@ -139,19 +139,21 @@ public:
                 {
                     BOOST_ASIO_CORO_REENTER(c)
                     {
+                        self.reset_cancellation_state(
+                            asio::enable_total_cancellation{});
                         if(wr_remain_ == 0)
                         {
                             wr_timer.expires_after(std::chrono::seconds{ 1 });
                             BOOST_ASIO_CORO_YIELD
                             wr_timer.async_wait(std::move(self));
+                            if(ec)
+                                return self.complete(ec, n);
                             wr_remain_ = wr_limit_;
                         }
-
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_write_some(
                             buffers::prefix(buffers, wr_remain_),
                             std::move(self));
-
                         wr_remain_ -= n;
                         self.complete(ec, n);
                     }
@@ -175,19 +177,21 @@ public:
                 {
                     BOOST_ASIO_CORO_REENTER(c)
                     {
+                        self.reset_cancellation_state(
+                            asio::enable_total_cancellation{});
                         if(rd_remain_ == 0)
                         {
                             rd_timer.expires_after(std::chrono::seconds{ 1 });
                             BOOST_ASIO_CORO_YIELD
                             rd_timer.async_wait(std::move(self));
+                            if(ec)
+                                return self.complete(ec, n);
                             rd_remain_ = rd_limit_;
                         }
-
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_read_some(
                             buffers::prefix(buffers, rd_remain_),
                             std::move(self));
-
                         rd_remain_ -= n;
                         self.complete(ec, n);
                     }
