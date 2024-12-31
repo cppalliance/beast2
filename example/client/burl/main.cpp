@@ -760,7 +760,10 @@ co_main(int argc, char* argv[])
     }
 
     for(auto& path : oc.cookiefiles)
-        any_istream{ path } >> cookie_jar.value();
+    {
+        if(fs::exists(path))
+            any_istream{ path } >> cookie_jar.value();
+    }
 
     if(cookie_jar && oc.cookiesession)
         cookie_jar->clear_session_cookies();

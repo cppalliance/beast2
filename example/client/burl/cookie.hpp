@@ -17,6 +17,7 @@
 #include <iostream>
 #include <list>
 
+namespace ch   = std::chrono;
 namespace core = boost::core;
 namespace urls = boost::urls;
 
@@ -31,13 +32,14 @@ struct cookie
 
     std::string name;
     boost::optional<std::string> value;
-    boost::optional<std::chrono::system_clock::time_point> expires;
+    boost::optional<ch::system_clock::time_point> expires;
     boost::optional<std::string> domain;
     boost::optional<std::string> path;
     boost::optional<same_site_t> same_site;
     bool partitioned = false;
     bool secure      = false;
     bool http_only   = false;
+    bool tailmatch   = false;
 };
 
 boost::system::result<cookie>
@@ -45,31 +47,7 @@ parse_cookie(core::string_view sv);
 
 class cookie_jar
 {
-    struct meta_t
-    {
-        bool subdomains = true;
-
-        meta_t() = default;
-        meta_t(bool subdomains_)
-            : subdomains{ subdomains_ }
-        {
-        }
-    };
-
-    struct pair_t
-    {
-        meta_t m;
-        cookie c;
-
-        pair_t() = default;
-        pair_t(meta_t m_, cookie c_)
-            : m{ m_ }
-            , c{ c_ }
-        {
-        }
-    };
-
-    std::list<pair_t> cookies_;
+    std::list<cookie> cookies_;
 
 public:
     void
