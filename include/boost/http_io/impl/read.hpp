@@ -138,7 +138,8 @@ public:
     {
         BOOST_ASIO_CORO_REENTER(*this)
         {
-            if(pr_.is_complete())
+            pr_.parse(ec);
+            if(ec != http_proto::error::need_data)
             {
                 BOOST_ASIO_CORO_YIELD
                 {
@@ -152,11 +153,6 @@ public:
                             ec,
                             0));
                 }
-                // If the body was just set,
-                // this will transfer the
-                // body data. Otherwise,
-                // it is a no-op.
-                pr_.parse(ec);
                 goto upcall;
             }
             for(;;)
