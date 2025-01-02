@@ -132,9 +132,6 @@ ignorebody(
     http_proto::request_view request,
     http_proto::response_view response) noexcept
 {
-    if(request.method() == http_proto::method::head)
-        return true;
-
     if(oc.resume_from && !response.count(http_proto::field::content_range))
         return true;
 
@@ -461,7 +458,11 @@ perform_request(
     {
         set_cookies(url, trusted);
         msg.start_serializer(serializer, request);
-        parser.start();
+
+        if(request.method() == http_proto::method::head)
+            parser.start_head_response();
+        else
+            parser.start();
 
         co_await async_request(stream, serializer, parser, oc.expect100timeout);
 
@@ -486,18 +487,11 @@ perform_request(
         {
             // Discard the body
             // TODO: drop the connection if body is large
-            if(request.method() != http_proto::method::head)
+            while(!parser.is_complete())
             {
-                while(!parser.is_complete())
-                {
-                    parser.consume_body(
-                        buffers::buffer_size(parser.pull_body()));
-                    co_await http_io::async_read_some(stream, parser);
-                }
-            }
-            else
-            {
-                parser.reset();
+                parser.consume_body(
+                    buffers::buffer_size(parser.pull_body()));
+                co_await http_io::async_read_some(stream, parser);
             }
         }
         else
