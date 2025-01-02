@@ -12,6 +12,7 @@
 #include "base64.hpp"
 #include "connect.hpp"
 #include "cookie.hpp"
+#include "error.hpp"
 #include "message.hpp"
 #include "progress_meter.hpp"
 #include "request.hpp"
@@ -23,7 +24,6 @@
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/co_spawn.hpp>
-#include <boost/asio/detached.hpp>
 #include <boost/asio/experimental/channel.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
@@ -123,13 +123,16 @@ can_reuse_connection(
     if(response.metadata().connection.close)
         return false;
 
+    if(response.payload() == http_proto::payload::size &&
+       response.payload_size() > 1024 * 1204)
+        return false;
+
     return true;
 }
 
 bool
 ignorebody(
     const operation_config& oc,
-    http_proto::request_view request,
     http_proto::response_view response) noexcept
 {
     if(oc.resume_from && !response.count(http_proto::field::content_range))
@@ -278,6 +281,56 @@ create_request(
     return request;
 }
 
+class sink : public http_proto::sink
+{
+    progress_meter* pm_;
+    any_ostream* os_;
+    bool terminal_binary_ok_;
+
+public:
+    sink(progress_meter* pm, any_ostream* os, bool terminal_binary_ok)
+        : pm_{ pm }
+        , os_{ os }
+        , terminal_binary_ok_{ terminal_binary_ok }
+    {
+    }
+
+    results
+    on_write(buffers::const_buffer cb, bool) override
+    {
+        auto chunk =
+            core::string_view(static_cast<const char*>(cb.data()), cb.size());
+
+        if(!terminal_binary_ok_ && os_->is_tty() && chunk.contains('\0'))
+            return { error::binary_output_to_tty };
+
+        *os_ << chunk;
+        pm_->update(cb.size());
+        return { {}, cb.size() };
+    }
+};
+
+class null_sink : public http_proto::sink
+{
+    std::uint64_t limit_;
+
+public:
+    null_sink(std::uint64_t limit)
+        : limit_{ limit }
+    {
+    }
+
+    results
+    on_write(buffers::const_buffer cb, bool) override
+    {
+        if(limit_ < cb.size())
+            return { http_proto::error::body_too_large };
+
+        limit_ -= cb.size();
+        return { {}, cb.size() };
+    }
+};
+
 asio::awaitable<http_proto::status>
 perform_request(
     operation_config oc,
@@ -395,8 +448,8 @@ perform_request(
             }
         });
 
-    auto connect_to = [&](any_stream& stream, const urls::url_view& url)
-        -> asio::awaitable<void>
+    auto connect_to = [&](any_stream& stream,
+                          const urls::url_view& url) -> asio::awaitable<void>
     {
         // clean shutdown
         if(oc.proxy.empty())
@@ -485,17 +538,16 @@ perform_request(
 
         if(can_reuse_connection(parser.get(), referer, url))
         {
-            // Discard the body
-            // TODO: drop the connection if body is large
-            while(!parser.is_complete())
-            {
-                parser.consume_body(
-                    buffers::buffer_size(parser.pull_body()));
-                co_await http_io::async_read_some(stream, parser);
-            }
+            // read and discard bodies smaller than 1MB
+            parser.set_body<null_sink>(1024 * 1024);
+            auto [ec, _] =
+                co_await http_io::async_read(stream, parser, asio::as_tuple);
+            if(ec)
+                goto reconnect;
         }
         else
         {
+        reconnect:
             co_await connect_to(stream, url);
             parser.reset();
         }
@@ -564,59 +616,25 @@ perform_request(
             "HTTP server doesn't seem to support byte ranges. Cannot resume.");
     }
 
-    auto stream_body = [&](progress_meter& pm) -> asio::awaitable<void>
-    {
-        for(;;)
-        {
-            for(auto cb : parser.pull_body())
-            {
-                auto chunk = core::string_view(
-                    static_cast<const char*>(cb.data()), cb.size());
-
-                if(output.is_tty() && !oc.terminal_binary_ok &&
-                   chunk.contains('\0'))
-                {
-                    throw std::runtime_error(
-                        "Binary output can mess up your terminal.\n"
-                        "Use \"--output -\" to tell burl to output it to your "
-                        "terminal anyway, or\n"
-                        "consider \"--output <FILE>\" to save to a file.");
-                }
-
-                output << chunk;
-                parser.consume_body(cb.size());
-                pm.update(cb.size());
-            }
-
-            if(parser.is_complete())
-                break;
-
-            auto [ec, _] = co_await http_io::async_read_some(
-                stream, parser, asio::as_tuple);
-            if(ec && ec != http_proto::condition::need_more_input)
-                throw system_error{ ec };
-        }
-    };
-
-    if(!ignorebody(oc, request, parser.get()))
+    if(!ignorebody(oc, parser.get()))
     {
         auto pm = progress_meter{ body_size(parser.get()) };
+        parser.set_body<sink>(&pm, &output, oc.terminal_binary_ok);
 
         if(output.is_tty() || oc.parallel_max > 1 || oc.noprogress)
         {
-            co_await stream_body(pm);
+            co_await http_io::async_read(stream, parser);
         }
         else
         {
-            auto [order, ep1, ep2] =
+            auto [order, ec, n, ep] =
                 co_await asio::experimental::make_parallel_group(
-                    co_spawn(executor, stream_body(pm)),
+                    http_io::async_read(stream, parser),
                     co_spawn(executor, report_progress(pm)))
                     .async_wait(
                         asio::experimental::wait_for_one{}, asio::deferred);
-
-            if(ep1)
-                std::rethrow_exception(ep1);
+            if(ec)
+                throw system_error{ ec };
         }
     }
 
@@ -688,6 +706,17 @@ retry(
         }
         catch(const system_error& e)
         {
+            if(e.code() == error::binary_output_to_tty)
+            {
+                // clang-format off
+                std::cerr << 
+                    "Binary output can mess up your terminal.\n"
+                    "Use \"--output -\" to tell burl to output it to your terminal anyway, or\n"
+                    "consider \"--output <FILE>\" to save to a file." << std::endl;
+                // clang-format on
+                co_return;
+            }
+
             std::cerr << e.what() << std::endl;
             if(!can_retry(e.code()))
                 throw;
