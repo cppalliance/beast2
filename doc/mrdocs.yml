@@ -1,19 +1,18 @@
 # Input
-input:
-  # Directories that contain documented source files
-  include:
-    - ../include
-  # Patterns to filter out the source-files in the directories
-  file-patterns:
-    - '*.hpp'
 source-root: ..
+# Directories that contain documented source files
+input:
+  - ../include
+# Patterns to filter out the source-files in the directories
+file-patterns:
+  - '*.hpp'
 
 # Filters
-filters:
-  symbols:
-    exclude:
-      - 'boost::http_io::detail'
-      - 'boost::http_io::*::detail'
+include-symbols:
+  - 'boost::http_io::**'
+implementation-defined:
+  - 'boost::http_io::detail'
+  - 'boost::http_io::*::detail'
 inaccessible-members: never
 inaccessible-bases: never
 
@@ -24,5 +23,6 @@ base-url: https://www.github.com/cppalliance/http_io/blob/develop/include/
 # Style
 verbose: true
 multipage: true
+use-system-libc: true
 
-cmake: '-D BUILD_TESTING=ON'
+cmake: '-D CMAKE_CXX_STANDARD=20 -D BUILD_TESTING=ON'
