@@ -9,8 +9,5 @@ asciidoc:
 nav:
   - modules/ROOT/nav.adoc
 ext:
-  collector:
-    run:
-      command: node doc/generate-files.mjs
-    scan:
-      dir: doc/build/generated-files
+  cpp-reference:
+    config: doc/mrdocs.yml
