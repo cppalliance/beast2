@@ -123,10 +123,6 @@ can_reuse_connection(
     if(response.metadata().connection.close)
         return false;
 
-    if(response.payload() == http_proto::payload::size &&
-       response.payload_size() > 1024 * 1204)
-        return false;
-
     return true;
 }
 
@@ -310,23 +306,11 @@ public:
     }
 };
 
-class null_sink : public http_proto::sink
+struct null_sink : http_proto::sink
 {
-    std::uint64_t limit_;
-
-public:
-    null_sink(std::uint64_t limit)
-        : limit_{ limit }
-    {
-    }
-
     results
     on_write(buffers::const_buffer cb, bool) override
     {
-        if(limit_ < cb.size())
-            return { http_proto::error::body_too_large };
-
-        limit_ -= cb.size();
         return { {}, cb.size() };
     }
 };
@@ -531,6 +515,8 @@ perform_request(
         if(maxredirs-- == 0)
             throw std::runtime_error{ "Maximum redirects followed" };
 
+        // Prepare the next request to follow the redirect
+
         url = redirect_url(parser.get(), referer);
 
         if(!oc.proto_redir.contains(url.scheme_id()))
@@ -538,8 +524,10 @@ perform_request(
 
         if(can_reuse_connection(parser.get(), referer, url))
         {
-            // read and discard bodies smaller than 1MB
-            parser.set_body<null_sink>(1024 * 1024);
+            // read and discard bodies if they are <= 1MB
+            // open a new connection otherwise.
+            parser.set_body_limit(1024 * 1024);
+            parser.set_body<null_sink>();
             auto [ec, _] =
                 co_await http_io::async_read(stream, parser, asio::as_tuple);
             if(ec)
