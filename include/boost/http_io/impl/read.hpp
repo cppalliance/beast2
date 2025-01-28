@@ -139,7 +139,7 @@ public:
         BOOST_ASIO_CORO_REENTER(*this)
         {
             pr_.parse(ec);
-            if(ec != http_proto::error::need_data)
+            if(ec != http_proto::condition::need_more_input)
             {
                 BOOST_ASIO_CORO_YIELD
                 {
