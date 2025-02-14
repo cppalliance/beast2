@@ -230,7 +230,6 @@ load_windows_root_certs(asio::ssl::context& ctx)
         }
     }
 
-    CertFreeCertificateContext(p_context);
     CertCloseStore(h_store, 0);
 
     SSL_CTX_set_cert_store(ctx.native_handle(), x_store);
