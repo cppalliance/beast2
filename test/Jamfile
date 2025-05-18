@@ -4,36 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/CPPAlliance/http_io
+# Official repository: https://github.com/cppalliance/http_io
 #
 
-import testing ;
-import ac ;
-
-using openssl ;
-using zlib ;
-
-project
-    : requirements
-      $(c11-requires)
-      <library>/boost/http_proto//boost_http_proto
-      [ ac.check-library /openssl//ssl : <library>/openssl//ssl ]
-      [ ac.check-library /zlib//zlib : <library>/zlib//zlib : ]
-      [ ac.check-library /boost/http_proto//boost_http_proto_zlib : <library>/boost/http_proto//boost_http_proto_zlib : ]
-      <source>../../url/extra/test_main.cpp
-      <include>.
-      <include>../../url/extra
-      <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
-    ;
-
-local SOURCES =
-    read.cpp
-    sandbox.cpp
-    write.cpp
-    ;
-
-for local f in $(SOURCES)
-{
-    run $(f) : : : ;
-#    run $(f) : target-name $(f:B)_ ;
-}
+build-project unit ;

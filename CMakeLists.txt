@@ -1,108 +1,174 @@
 #
 # Copyright (c) 2019 Vinnie Falco (vinnie.falco@gmail.com)
+# Copyright (c) 2021 Dmitry Arkhipov (grisumbras@gmail.com)
+# Copyright (c) 2022 Alan de Freitas (alandefreitas@gmail.com)
+# Copyright (c) 2025 Mohammad Nejati
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/vinniefalco/http_io
+# Official repository: https://github.com/cppalliance/http_io
 #
 
-cmake_minimum_required(VERSION 3.8...3.16)
-
+#-------------------------------------------------
+#
+# Project
+#
+#-------------------------------------------------
+cmake_minimum_required(VERSION 3.8...3.20)
 set(BOOST_HTTP_IO_VERSION 1)
-if(BOOST_SUPERPROJECT_VERSION)
+if (BOOST_SUPERPROJECT_VERSION)
     set(BOOST_HTTP_IO_VERSION ${BOOST_SUPERPROJECT_VERSION})
-endif()
-
+endif ()
 project(boost_http_io VERSION "${BOOST_HTTP_IO_VERSION}" LANGUAGES CXX)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    include(CTest)
-    option(BOOST_HTTP_IO_BUILD_TESTS "Build boost::http_io tests" ${BUILD_TESTING})
+set(BOOST_HTTP_IO_IS_ROOT OFF)
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(BOOST_HTTP_IO_IS_ROOT ON)
-else()
-    set(BOOST_HTTP_IO_BUILD_TESTS ${BUILD_TESTING})
-    set(BOOST_HTTP_IO_IS_ROOT OFF)
-endif()
+endif ()
+set(__ignore__ ${CMAKE_C_COMPILER})
 
-include(GNUInstallDirs)
-if(BOOST_HTTP_IO_IS_ROOT)
-    set(BOOST_INCLUDE_LIBRARIES http_io http_proto program_options scope url)
-    set(BOOST_EXCLUDE_LIBRARIES http_io)
-    set(CMAKE_FOLDER Dependencies)
-    add_subdirectory(../.. Dependencies/boost EXCLUDE_FROM_ALL)
-    unset(CMAKE_FOLDER)
-    set(BOOST_HTTP_IO_BUILD_EXAMPLES ON)
-else()
-    set(BOOST_HTTP_IO_BUILD_EXAMPLES OFF)
-endif()
+#-------------------------------------------------
+#
+# Options
+#
+#-------------------------------------------------
+if (BOOST_HTTP_IO_IS_ROOT)
+    include(CTest)
+endif ()
+option(BOOST_HTTP_IO_BUILD_TESTS "Build boost::http_io tests" ${BUILD_TESTING})
+option(BOOST_HTTP_IO_BUILD_EXAMPLES "Build boost::http_io examples" ${BOOST_HTTP_IO_IS_ROOT})
 
-function(boost_http_io_setup_properties target)
-    target_compile_features(${target} PUBLIC cxx_constexpr)
-    target_compile_definitions(${target} PUBLIC BOOST_HTTP_IO_NO_LIB=1)
 
-    if(BOOST_SUPERPROJECT_VERSION)
-        target_include_directories(${target} PUBLIC "${PROJECT_SOURCE_DIR}/include")
-    else()
-        target_include_directories(${target}
-            PUBLIC
-                "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-                "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-        )
-    endif()
+# Check if environment variable BOOST_SRC_DIR is set
+if (NOT DEFINED BOOST_SRC_DIR AND DEFINED ENV{BOOST_SRC_DIR})
+    set(DEFAULT_BOOST_SRC_DIR "$ENV{BOOST_SRC_DIR}")
+else ()
+    set(DEFAULT_BOOST_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+endif ()
+set(BOOST_SRC_DIR ${DEFAULT_BOOST_SRC_DIR} CACHE STRING "Boost source dir to use when running CMake from this directory")
 
-    target_link_libraries(${target}
-        PUBLIC
-            Boost::asio
-            Boost::assert
-            Boost::config
-            Boost::http_proto
-            Boost::system
-            Boost::url
+#-------------------------------------------------
+#
+# Boost modules
+#
+#-------------------------------------------------
+# The boost super-project requires one explicit dependency per-line.
+set(BOOST_HTTP_IO_DEPENDENCIES
+    Boost::asio
+    Boost::assert
+    Boost::config
+    Boost::http_proto
+    Boost::system
+    Boost::throw_exception
     )
 
-    if(MINGW)
-      target_link_libraries(${target} PUBLIC ws2_32 wsock32)
-    endif()
-endfunction()
+foreach (BOOST_HTTP_IO_DEPENDENCY ${BOOST_HTTP_IO_DEPENDENCIES})
+    if (BOOST_HTTP_IO_DEPENDENCY MATCHES "^[ ]*Boost::([A-Za-z0-9_]+)[ ]*$")
+        list(APPEND BOOST_HTTP_IO_INCLUDE_LIBRARIES ${CMAKE_MATCH_1})
+    endif ()
+endforeach ()
+# Conditional dependencies
+if (BOOST_HTTP_IO_BUILD_TESTS)
+    set(BOOST_HTTP_IO_UNIT_TEST_LIBRARIES beast url)
+endif ()
+if (BOOST_HTTP_IO_BUILD_EXAMPLES)
+    set(BOOST_HTTP_IO_EXAMPLE_LIBRARIES program_options scope url)
+endif ()
+# Complete dependency list
+set(BOOST_INCLUDE_LIBRARIES ${BOOST_HTTP_IO_INCLUDE_LIBRARIES} ${BOOST_HTTP_IO_UNIT_TEST_LIBRARIES} ${BOOST_HTTP_IO_EXAMPLE_LIBRARIES})
+set(BOOST_EXCLUDE_LIBRARIES http_io)
 
-file(GLOB_RECURSE BOOST_HTTP_IO_HEADERS $<$<VERSION_GREATER_EQUAL:${CMAKE_VERSION},3.12>:CONFIGURE_DEPENDS>
-    include/boost/*.hpp
-    include/boost/*.ipp
-    include/boost/*.natvis
-)
+#-------------------------------------------------
+#
+# Add Boost Subdirectory
+#
+#-------------------------------------------------
+if (BOOST_HTTP_IO_IS_ROOT)
+    set(CMAKE_FOLDER Dependencies)
+    # Find absolute BOOST_SRC_DIR
+    if (NOT IS_ABSOLUTE ${BOOST_SRC_DIR})
+        set(BOOST_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${BOOST_SRC_DIR}")
+    endif ()
 
-file(GLOB_RECURSE BOOST_HTTP_IO_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
+    # Validate BOOST_SRC_DIR
+    set(BOOST_SRC_DIR_IS_VALID ON)
+    foreach (F "CMakeLists.txt" "Jamroot" "boost-build.jam" "bootstrap.sh" "libs")
+        if (NOT EXISTS "${BOOST_SRC_DIR}/${F}")
+            message(STATUS "${BOOST_SRC_DIR}/${F} does not exist. Fallback to find_package.")
+            set(BOOST_SRC_DIR_IS_VALID OFF)
+            break()
+        endif ()
+    endforeach ()
 
+    # Create Boost interface targets
+    if (BOOST_SRC_DIR_IS_VALID)
+        # From BOOST_SRC_DIR
+        if (BUILD_SHARED_LIBS)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+        endif ()
+        set(BOOST_EXCLUDE_LIBRARIES ${PROJECT_NAME})
+        set(PREV_BUILD_TESTING ${BUILD_TESTING})
+        set(BUILD_TESTING OFF CACHE BOOL "Build the tests." FORCE)
+        add_subdirectory(${BOOST_SRC_DIR} Dependencies/boost EXCLUDE_FROM_ALL)
+        set(BUILD_TESTING ${PREV_BUILD_TESTING} CACHE BOOL "Build the tests." FORCE)
+        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BOOST_SRC_DIR}/tools/cmake/include")
+    else ()
+        # From Boost Package
+        find_package(Boost REQUIRED COMPONENTS buffers http_proto program_options scope url)
+        foreach (BOOST_INCLUDE_LIBRARY ${BOOST_INCLUDE_LIBRARIES})
+            if (NOT TARGET Boost::${BOOST_INCLUDE_LIBRARY})
+                add_library(Boost::${BOOST_INCLUDE_LIBRARY} ALIAS Boost::headers)
+            endif ()
+        endforeach ()
+    endif ()
+    unset(CMAKE_FOLDER)
+endif ()
+
+#-------------------------------------------------
+#
+# Library
+#
+#-------------------------------------------------
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+file(GLOB_RECURSE BOOST_HTTP_IO_HEADERS CONFIGURE_DEPENDS include/boost/*.hpp include/boost/*.natvis)
+file(GLOB_RECURSE BOOST_HTTP_IO_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost PREFIX "" FILES ${BOOST_HTTP_IO_HEADERS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "http_io" FILES ${BOOST_HTTP_IO_SOURCES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES Jamfile)
 
-add_library(boost_http_io ${BOOST_HTTP_IO_HEADERS} ${BOOST_HTTP_IO_SOURCES} build/Jamfile)
-target_link_libraries(boost_http_io PUBLIC Threads::Threads)
+add_library(boost_http_io ${BOOST_HTTP_IO_HEADERS} ${BOOST_HTTP_IO_SOURCES})
 add_library(Boost::http_io ALIAS boost_http_io)
-boost_http_io_setup_properties(boost_http_io)
-
-target_compile_definitions(boost_http_io
-  PUBLIC
-  BOOST_HTTP_IO_NO_LIB
-)
-
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(boost_http_io PUBLIC BOOST_HTTP_IO_DYN_LINK=1)
-else()
-    target_compile_definitions(boost_http_io PUBLIC BOOST_HTTP_IO_STATIC_LINK=1)
+target_compile_features(boost_http_io PUBLIC cxx_constexpr)
+target_include_directories(boost_http_io PUBLIC "${PROJECT_SOURCE_DIR}/include")
+target_link_libraries(boost_http_io PUBLIC ${BOOST_HTTP_IO_DEPENDENCIES})
+find_package(Threads REQUIRED)
+target_link_libraries(boost_http_io PUBLIC Threads::Threads)
+if (MINGW)
+    target_link_libraries(boost_http_io PUBLIC ws2_32 wsock32)
 endif()
+target_compile_definitions(boost_http_io PUBLIC BOOST_HTTP_IO_NO_LIB)
+target_compile_definitions(boost_http_io PRIVATE BOOST_HTTP_IO_SOURCE)
+if (BUILD_SHARED_LIBS)
+    target_compile_definitions(boost_http_io PUBLIC BOOST_HTTP_IO_DYN_LINK)
+else ()
+    target_compile_definitions(boost_http_io PUBLIC BOOST_HTTP_IO_STATIC_LINK)
+endif ()
 
-if(BOOST_HTTP_IO_BUILD_TESTS)
+#-------------------------------------------------
+#
+# Tests
+#
+#-------------------------------------------------
+if (BOOST_HTTP_IO_BUILD_TESTS)
     add_subdirectory(test)
-endif()
+endif ()
 
-if(BOOST_HTTP_IO_BUILD_EXAMPLES)
-    add_subdirectory (example)
-endif()
+#-------------------------------------------------
+#
+# Examples
+#
+#-------------------------------------------------
+if (BOOST_HTTP_IO_BUILD_EXAMPLES)
+    add_subdirectory(example)
+endif ()

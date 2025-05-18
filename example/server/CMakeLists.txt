@@ -11,15 +11,15 @@ file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp
     CMakeLists.txt
     Jamfile)
 
-source_group( TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES} )
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
 
-add_executable( http_io_server_example ${PFILES} )
+add_executable(http_io_server_example ${PFILES})
 
-target_compile_definitions( http_io_server_example
+target_compile_definitions(http_io_server_example
     PRIVATE BOOST_ASIO_NO_DEPRECATED)
 
-set_property( TARGET http_io_server_example
-    PROPERTY FOLDER "examples" )
+set_property(TARGET http_io_server_example
+    PROPERTY FOLDER "examples")
 
 target_link_libraries(http_io_server_example
-    Boost::http_io)
+    boost_http_io)

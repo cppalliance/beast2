@@ -13,21 +13,21 @@
 def main(ctx):
     return generate(
         # Compilers
-        ['gcc >=5.0',
-         'clang >=3.8',
-         'msvc >=14.1',
-         'arm64-gcc latest',
-         's390x-gcc latest',
-         'apple-clang *',
-         'arm64-clang latest',
-         's390x-clang latest',
-         # 'x86-msvc latest'
-         ],
+        [
+            'gcc >=5.0',
+            'clang >=3.8',
+            'msvc >=14.1',
+            'arm64-gcc latest',
+            's390x-gcc latest',
+            # 'freebsd-gcc latest',
+            'apple-clang *',
+            'arm64-clang latest',
+            's390x-clang latest',
+            # 'x86-msvc latest'
+        ],
         # Standards
         '>=11',
         packages=['zlib1g', 'zlib1g-dev'])
 
-
-# from https://github.com/boostorg/boost-ci
-load("@boost_ci//ci/drone/:functions.star", "linux_cxx", "windows_cxx", "osx_cxx", "freebsd_cxx")
-load("@url//:.drone.star", "generate")
+# from https://github.com/cppalliance/ci-automation
+load("@ci_automation//ci/drone/:functions.star", "linux_cxx", "windows_cxx", "osx_cxx", "freebsd_cxx", "generate")

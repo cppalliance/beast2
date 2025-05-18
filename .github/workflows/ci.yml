@@ -8,7 +8,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/CPPAlliance/http_io/
+# Official repository: https://github.com/cppalliance/http_io/
 #
 
 name: CI
@@ -71,6 +71,19 @@ jobs:
             name: "MSVC 14.34: C++17-20"
             build-type: "Release"
             build-cmake: true
+
+          - compiler: "msvc"
+            version: "14.34"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            runs-on: "windows-2022"
+            b2-toolset: "msvc-14.3"
+            generator: "Visual Studio 17 2022"
+            is-latest: true
+            name: "MSVC 14.34: C++17-20 (no zlib)"
+            build-type: "Release"
+            build-cmake: true
+            skip-zlib: true
 
           - compiler: "msvc"
             version: "14.34"
@@ -155,10 +168,41 @@ jobs:
             version: "*"
             cxx: "clang++"
             cc: "clang"
-            runs-on: "macos-14"
+            runs-on: "macos-15"
             b2-toolset: "clang"
             is-latest: true
-            is-earliest: true
+            name: "Apple-Clang (macOS 15)"
+            build-type: "Release"
+            build-cmake: true
+
+          - compiler: "apple-clang"
+            version: "*"
+            cxx: "clang++"
+            cc: "clang"
+            runs-on: "macos-15"
+            b2-toolset: "clang"
+            is-latest: true
+            name: "Apple-Clang (macOS 15, ubsan)"
+            build-type: "RelWithDebInfo"
+            ubsan: true
+
+          - compiler: "apple-clang"
+            version: "*"
+            cxx: "clang++"
+            cc: "clang"
+            runs-on: "macos-15"
+            b2-toolset: "clang"
+            is-latest: true
+            name: "Apple-Clang (macOS 15, asan)"
+            build-type: "RelWithDebInfo"
+            asan: true
+
+          - compiler: "apple-clang"
+            version: "*"
+            cxx: "clang++"
+            cc: "clang"
+            runs-on: "macos-14"
+            b2-toolset: "clang"
             name: "Apple-Clang (macOS 14)"
             build-type: "Release"
             build-cmake: true
@@ -167,40 +211,153 @@ jobs:
             version: "*"
             cxx: "clang++"
             cc: "clang"
-            runs-on: "macos-14"
+            runs-on: "macos-13"
             b2-toolset: "clang"
-            is-latest: true
-            name: "Apple-Clang (macOS 14, ubsan)"
-            build-type: "RelWithDebInfo"
-            ubsan: true
-
-          - compiler: "apple-clang"
-            version: "*"
-            cxx: "clang++"
-            cc: "clang"
-            runs-on: "macos-14"
-            b2-toolset: "clang"
-            is-latest: true
-            name: "Apple-Clang (macOS 14, asan)"
-            build-type: "RelWithDebInfo"
-            asan: true
+            name: "Apple-Clang (macOS 13)"
+            build-type: "Release"
+            build-cmake: true
 
           # Linux compilers
           #
 
           - compiler: "gcc"
-            version: "13"
+            version: "14"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "gcc"
             is-latest: true
-            name: "GCC 13: C++17-20"
+            name: "GCC 14: C++17-20"
             build-type: "Release"
-            install: "cmake zlib1g-dev"
+            install: "zlib1g-dev"
             build-cmake: true
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (no zlib)"
+            build-type: "Release"
+            build-cmake: true
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (x86)"
+            x86: true
+            build-type: "Release"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (shared)"
+            shared: true
+            build-type: "Release"
+            install: "zlib1g-dev"
+            build-cmake: true
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (shared, x86)"
+            shared: true
+            x86: true
+            build-type: "Release"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+            build-cmake: true
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (asan)"
+            asan: true
+            build-type: "RelWithDebInfo"
+            install: "zlib1g-dev"
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (asan, x86)"
+            asan: true
+            x86: true
+            build-type: "RelWithDebInfo"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (ubsan)"
+            ubsan: true
+            build-type: "RelWithDebInfo"
+            install: "zlib1g-dev"
+
+          - compiler: "gcc"
+            version: "14"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "g++-14"
+            cc: "gcc-14"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
+            b2-toolset: "gcc"
+            is-latest: true
+            name: "GCC 14: C++17-20 (ubsan, x86)"
+            ubsan: true
+            x86: true
+            build-type: "RelWithDebInfo"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
 
           - compiler: "gcc"
             version: "13"
@@ -210,11 +367,9 @@ jobs:
             cc: "gcc-13"
             runs-on: "ubuntu-24.04"
             b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (x86)"
-            x86: true
+            name: "GCC 13: C++17-20"
             build-type: "Release"
-            install: "cmake gcc-13-multilib g++-13-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "13"
@@ -230,96 +385,7 @@ jobs:
             build-type: "Debug"
             cxxflags: "--coverage -fprofile-arcs -ftest-coverage"
             ccflags: "--coverage -fprofile-arcs -ftest-coverage"
-            install: "cmake lcov zlib1g-dev wget unzip"
-
-          - compiler: "gcc"
-            version: "13"
-            cxxstd: "17,20"
-            latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
-            b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (shared)"
-            shared: true
-            build-type: "Release"
-            install: "cmake zlib1g-dev"
-            build-cmake: true
-
-          - compiler: "gcc"
-            version: "13"
-            cxxstd: "17,20"
-            latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
-            b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (shared, x86)"
-            shared: true
-            x86: true
-            build-type: "Release"
-            install: "cmake gcc-13-multilib g++-13-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
-            build-cmake: true
-
-          - compiler: "gcc"
-            version: "13"
-            cxxstd: "17,20"
-            latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
-            b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (asan)"
-            asan: true
-            build-type: "RelWithDebInfo"
-            install: "cmake zlib1g-dev"
-
-          - compiler: "gcc"
-            version: "13"
-            cxxstd: "17,20"
-            latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
-            b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (asan, x86)"
-            asan: true
-            x86: true
-            build-type: "RelWithDebInfo"
-            install: "cmake gcc-13-multilib g++-13-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
-
-          - compiler: "gcc"
-            version: "13"
-            cxxstd: "17,20"
-            latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
-            b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (ubsan)"
-            ubsan: true
-            build-type: "RelWithDebInfo"
-            install: "cmake zlib1g-dev"
-
-          - compiler: "gcc"
-            version: "13"
-            cxxstd: "17,20"
-            latest-cxxstd: "20"
-            cxx: "g++-13"
-            cc: "gcc-13"
-            runs-on: "ubuntu-24.04"
-            b2-toolset: "gcc"
-            is-latest: true
-            name: "GCC 13: C++17-20 (ubsan, x86)"
-            ubsan: true
-            x86: true
-            build-type: "RelWithDebInfo"
-            install: "cmake gcc-13-multilib g++-13-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
+            install: "lcov zlib1g-dev wget unzip"
 
           - compiler: "gcc"
             version: "12"
@@ -332,6 +398,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 12: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "11"
@@ -344,6 +411,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 11: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "10"
@@ -356,6 +424,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 10: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "9"
@@ -368,6 +437,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 9: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "8"
@@ -380,6 +450,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 8: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "7"
@@ -392,6 +463,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 7: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "6"
@@ -404,6 +476,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 6: C++11-14"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "gcc"
             version: "5"
@@ -417,108 +490,128 @@ jobs:
             is-earliest: true
             name: "GCC 5: C++11"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++17-20"
+            name: "Clang 18: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev cmake"
+            install: "zlib1g-dev"
             build-cmake: true
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++17-20 (x86)"
+            name: "Clang 18: C++17-20 (x86)"
             x86: true
             build-type: "Release"
-            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386"
+            install: "gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386"
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++20 (time-trace)"
+            name: "Clang 18: C++20 (time-trace)"
             time-trace: true
             build-type: "Release"
             cxxflags: "-ftime-trace"
             ccflags: "-ftime-trace"
-            install: "cmake zlib1g-dev wget unzip"
+            install: "zlib1g-dev wget unzip"
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++17-20 (asan)"
+            name: "Clang 18: C++17-20 (asan)"
             asan: true
             build-type: "RelWithDebInfo"
-            install: "cmake zlib1g-dev"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++17-20 (asan, x86)"
+            name: "Clang 18: C++17-20 (asan, x86)"
             asan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386 libclang-rt-17-dev:i386"
+            install: "gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386"
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++17-20 (ubsan)"
+            name: "Clang 18: C++17-20 (ubsan)"
             ubsan: true
             build-type: "RelWithDebInfo"
-            install: "cmake zlib1g-dev"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
-            version: "17"
+            version: "18"
             cxxstd: "17,20"
             latest-cxxstd: "20"
-            cxx: "clang++-17"
-            cc: "clang-17"
-            runs-on: "ubuntu-24.04"
+            cxx: "clang++-18"
+            cc: "clang-18"
+            runs-on: "ubuntu-latest"
+            container: "ubuntu:24.04"
             b2-toolset: "clang"
             is-latest: true
-            name: "Clang 17: C++17-20 (ubsan, x86)"
+            name: "Clang 18: C++17-20 (ubsan, x86)"
             ubsan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "cmake gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386 libssl-dev:i386 libclang-rt-17-dev:i386"
+            install: "gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386"
+
+          - compiler: "clang"
+            version: "17"
+            cxxstd: "17,20"
+            latest-cxxstd: "20"
+            cxx: "clang++-17"
+            cc: "clang-17"
+            runs-on: "ubuntu-24.04"
+            b2-toolset: "clang"
+            name: "Clang 17: C++17-20"
+            build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "16"
@@ -527,10 +620,10 @@ jobs:
             cxx: "clang++-16"
             cc: "clang-16"
             runs-on: "ubuntu-24.04"
-            install: "cmake"
             b2-toolset: "clang"
             name: "Clang 16: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "15"
@@ -543,6 +636,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 15: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "14"
@@ -555,6 +649,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 14: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "13"
@@ -567,6 +662,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 13: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "12"
@@ -579,6 +675,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 12: C++17-20"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "11"
@@ -591,6 +688,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 11: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "10"
@@ -603,6 +701,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 10: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "9"
@@ -615,6 +714,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 9: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "8"
@@ -627,6 +727,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 8: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "7"
@@ -639,6 +740,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 7: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "6"
@@ -651,6 +753,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 6: C++14-17"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "5"
@@ -663,6 +766,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 5: C++11-14"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
             version: "4"
@@ -675,24 +779,26 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 4: C++11-14"
             build-type: "Release"
+            install: "zlib1g-dev"
 
           - compiler: "clang"
-            version: "^3.8"
+            version: "3.9"
             cxxstd: "11"
             latest-cxxstd: "11"
-            cxx: "clang++-3.8"
-            cc: "clang-3.8"
+            cxx: "clang++-3.9"
+            cc: "clang-3.9"
             runs-on: "ubuntu-latest"
-            container: "ubuntu:16.04"
+            container: "ubuntu:18.04"
             b2-toolset: "clang"
             is-earliest: true
-            name: "Clang ^3.8: C++11"
+            name: "Clang 3.9: C++11"
             build-type: "Release"
+            install: "zlib1g-dev"
 
     name: ${{ matrix.name }}
     runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)[matrix.runs-on] }}
     container:
-      image: ${{matrix.container}}
+      image: ${{ matrix.container }}
       options: --privileged
       volumes:
         - /node20217:/node20217:rw,rshared
@@ -709,14 +815,10 @@ jobs:
           tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
           ldd /__e/node20/bin/node
 
-      - name: ASLR Fix
-        if: ${{ startsWith(matrix.runs-on, 'ubuntu' )}}
-        run: sysctl vm.mmap_rnd_bits=28
-
       - name: Clone Boost.Http.Io
         uses: actions/checkout@v3
         with:
-            path: http-io-root
+          path: http-io-root
 
       - name: Clone Boost.Http.Proto
         uses: actions/checkout@v3
@@ -733,7 +835,7 @@ jobs:
           ref: develop
 
       - name: Setup C++
-        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.7
+        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.8
         id: setup-cpp
         with:
           compiler: ${{ matrix.compiler }}
@@ -742,7 +844,7 @@ jobs:
           trace-commands: true
 
       - name: Install packages
-        uses: alandefreitas/cpp-actions/package-install@v1.8.7
+        uses: alandefreitas/cpp-actions/package-install@v1.8.8
         id: package-install
         with:
           apt-get-add-architecture: 'i386'
@@ -752,16 +854,24 @@ jobs:
             build-essential
 
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.7
+        uses: alandefreitas/cpp-actions/boost-clone@v1.8.8
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
           boost-dir: boost-source
-          scan-modules-dir: http-io-root
-          scan-modules-ignore: http_io
+          cache: false
+          modules-exclude-paths: ''
+          scan-modules-dir: |
+            http-io-root
+            http-proto-root
+            buffers-root
+          scan-modules-ignore: |
+            http_io
+            http_proto
+            buffers
 
       - name: Install packages (Windows)
-        uses: alandefreitas/cpp-actions/package-install@v1.8.7
+        uses: alandefreitas/cpp-actions/package-install@v1.8.8
         if: ${{ startsWith(matrix.runs-on, 'windows') }}
         id: package-install-windows
         with:
@@ -780,16 +890,18 @@ jobs:
           triplet=${{ matrix.x86 && 'x86-windows' || 'x64-windows' }}
           addrmdl=${{ matrix.x86 && '32' || '64' }}
 
-          ls -lah "${home}/vcpkg-root/installed/${triplet}/include"
-          ls -lah "${home}/vcpkg-root/installed/${triplet}/lib"
-
-          touch user-config.jam
           echo "using zlib : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <name>zlib : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' > user-config.jam
           echo "using openssl : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <ssl-name>libssl <crypto-name>libcrypto : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
           cat user-config.jam
 
           toolchain=$(echo "$GITHUB_WORKSPACE/vcpkg-root/scripts/buildsystems/vcpkg.cmake" | sed 's/\/d\//D:\//g' )
+          cat ${toolchain}
           echo "toolchain=${toolchain}" >> $GITHUB_OUTPUT
+
+      - name: ASLR Fix
+        if: ${{ startsWith(matrix.runs-on, 'ubuntu' )}}
+        run: |
+          sysctl vm.mmap_rnd_bits=28
 
       - name: Patch Boost
         id: patch
@@ -821,17 +933,15 @@ jobs:
           echo -E "boost_root=$boost_root" >> $GITHUB_OUTPUT
 
           # Patch boost-root with workspace module
-          cp -r "$workspace_root"/buffers-root libs/buffers
-          cp -r "$workspace_root"/http-proto-root libs/http_proto
           cp -r "$workspace_root"/http-io-root "libs/$module"
-
-          python3 tools/boostdep/depinst/depinst.py buffers
-          python3 tools/boostdep/depinst/depinst.py http_proto
-          python3 tools/boostdep/depinst/depinst.py "$module"
+          cp -r "$workspace_root"/http-proto-root libs/http_proto
+          cp -r "$workspace_root"/buffers-root libs/buffers
 
       - name: Boost B2 Workflow
-        uses: alandefreitas/cpp-actions/b2-workflow@v1.7.0
+        uses: alandefreitas/cpp-actions/b2-workflow@v1.8.8
         if: ${{ !matrix.coverage && !matrix.time-trace }}
+        env:
+          ASAN_OPTIONS: ${{ (startsWith(matrix.compiler, 'apple-clang') && 'detect_invalid_pointer_pairs=0') || 'detect_invalid_pointer_pairs=2' }}
         with:
           source-dir: boost-root
           modules: http_io
@@ -849,7 +959,7 @@ jobs:
           stop-on-error: true
 
       - name: Boost CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
         if: ${{ matrix.coverage || matrix.time-trace || matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root
@@ -886,7 +996,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/.local/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Find Package Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -901,7 +1011,7 @@ jobs:
           cxxflags: ${{ matrix.cxxflags }}
           shared: ${{ matrix.shared }}
           install: false
-          cmake-version: '>=3.15'
+          cmake-version: '>=3.20'
           extra-args: |
             -D BOOST_CI_INSTALL_TEST=ON
             -D CMAKE_PREFIX_PATH=${{ steps.patch.outputs.workspace_root }}/.local
@@ -910,7 +1020,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Subdirectory Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -925,21 +1035,22 @@ jobs:
           cxxflags: ${{ matrix.cxxflags }}
           shared: ${{ matrix.shared }}
           install: false
-          cmake-version: '>=3.15'
+          cmake-version: '>=3.20'
           extra-args: -D BOOST_CI_INSTALL_TEST=OFF
           ref-source-dir: boost-root/libs/http_io/test/cmake_test
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Root Project CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.7
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}
           build-dir: __build_root_test__
+          build-target: tests
+          run-tests: true
           generator: ${{ matrix.generator }}
           generator-toolset: ${{ matrix.generator-toolset }}
           build-type: ${{ matrix.build-type }}
-          run-tests: false
           install: false
           cxxstd: ${{ matrix.latest-cxxstd }}
           cc: ${{ steps.setup-cpp.outputs.cc || matrix.cc }}
@@ -947,15 +1058,14 @@ jobs:
           cxx: ${{ steps.setup-cpp.outputs.cxx || matrix.cxx }}
           cxxflags: ${{ matrix.cxxflags }}
           shared: ${{ matrix.shared }}
-          extra-args: -D Boost_VERBOSE=ON -D BUILD_TESTING=ON -D BOOST_SRC_DIR="../boost-root"
-          cmake-version: '>=3.15'
+          cmake-version: '>=3.20'
           package: false
           package-artifact: false
           ref-source-dir: boost-root
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: FlameGraph
-        uses: alandefreitas/cpp-actions/flamegraph@v1.8.7
+        uses: alandefreitas/cpp-actions/flamegraph@v1.8.8
         if: matrix.time-trace
         with:
           source-dir: boost-root/libs/http_io
@@ -997,18 +1107,18 @@ jobs:
         shell: bash
 
     name: Changelog Summary
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)['ubuntu-22.04'] }}
     timeout-minutes: 120
 
     steps:
-      - name: Clone Boost.Http.Io
+      - name: Clone Boost.WS.Io
         uses: actions/checkout@v3
         with:
           # Avoid the common API rate limit exceeded error in boostorg by including 100 latest commits in any case
           fetch-depth: 100
 
       - name: Changelog
-        uses: alandefreitas/cpp-actions/create-changelog@v1.8.7
+        uses: alandefreitas/cpp-actions/create-changelog@v1.8.8
         with:
           thank-non-regular: ${{ startsWith(github.ref, 'refs/tags/') }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -1020,7 +1130,7 @@ jobs:
     strategy:
       matrix:
         include:
-          # - { name: Windows, os: windows-latest }
+          - { name: Windows, os: windows-latest }
           - { name: Ubuntu, os: ubuntu-latest }
           - { name: MacOS, os: macos-latest }
     name: Antora Docs (${{ matrix.name }})
@@ -1054,13 +1164,21 @@ jobs:
           ref: develop
 
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.2
+        uses: alandefreitas/cpp-actions/boost-clone@v1.8.8
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
           boost-dir: boost-source
-          scan-modules-dir: http-io-root
-          scan-modules-ignore: http_io
+          cache: false
+          modules-exclude-paths: ''
+          scan-modules-dir: |
+            http-io-root
+            http-proto-root
+            buffers-root
+          scan-modules-ignore: |
+            http_io
+            http_proto
+            buffers
 
       - name: Patch Boost
         id: patch
@@ -1093,12 +1211,8 @@ jobs:
 
           # Patch boost-root with workspace module
           cp -r "$workspace_root"/http-io-root "libs/$module"
-          cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/http-proto-root libs/http_proto
-
-          python3 tools/boostdep/depinst/depinst.py buffers
-          python3 tools/boostdep/depinst/depinst.py http_proto
-          python3 tools/boostdep/depinst/depinst.py http_io
+          cp -r "$workspace_root"/buffers-root libs/buffers
 
       - uses: actions/setup-node@v4
         with:
@@ -1131,4 +1245,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: antora-docs-${{ matrix.name }}
-          path: doc/build/site
+          path: boost-root/libs/http_io/doc/build/site

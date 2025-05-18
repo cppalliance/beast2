@@ -26,10 +26,9 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
     find_package(ZLIB)
 
     target_link_libraries(http_io_example_client_burl
-        Boost::http_io
-        Boost::http_proto
-        Boost::program_options
-        Boost::scope
+        boost_http_io
+        boost_program_options
+        boost_scope
         OpenSSL::SSL
         OpenSSL::Crypto)
 
@@ -40,6 +39,6 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
 
     if (ZLIB_FOUND)
         target_link_libraries(http_io_example_client_burl
-            Boost::http_proto_zlib)
+            boost_http_proto_zlib)
     endif()
 endif()
