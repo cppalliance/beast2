@@ -25,4 +25,4 @@ verbose: true
 multipage: true
 use-system-libc: true
 
-cmake: '-D CMAKE_CXX_STANDARD=20 -D BUILD_TESTING=ON'
+cmake: '-DCMAKE_CXX_STANDARD=20 -DBOOST_HTTP_IO_BUILD_TESTS=OFF -DBOOST_HTTP_IO_BUILD_EXAMPLES=OFF'
