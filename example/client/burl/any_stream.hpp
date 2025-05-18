@@ -16,7 +16,7 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/immediate.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/buffers/algorithm.hpp>
+#include <boost/buffers/prefix.hpp>
 #include <boost/http_proto/parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 

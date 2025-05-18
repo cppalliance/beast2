@@ -127,7 +127,7 @@ can_reuse_connection(
 }
 
 bool
-ignorebody(
+should_ignore_body(
     const operation_config& oc,
     http_proto::response_view response) noexcept
 {
@@ -604,7 +604,7 @@ perform_request(
             "HTTP server doesn't seem to support byte ranges. Cannot resume.");
     }
 
-    if(!ignorebody(oc, parser.get()))
+    if(!should_ignore_body(oc, parser.get()))
     {
         auto pm = progress_meter{ body_size(parser.get()) };
         parser.set_body<sink>(&pm, &output, oc.terminal_binary_ok);
@@ -801,7 +801,7 @@ co_main(int argc, char* argv[])
                 executor,
                 retry(oc, std::move(request_task)),
                 co_await task_group.async_adapt(
-                    [&](auto ep)
+                    [&](std::exception_ptr ep)
                     {
                         if(ep && oc.failearly)
                         {
@@ -850,7 +850,7 @@ main(int argc, char* argv[])
                 asio::experimental::wait_for_one{},
                 asio::bind_executor(
                     ioc,
-                    [](auto, auto, auto, auto ep)
+                    [](auto, auto, auto, std::exception_ptr ep)
                     {
                         if(ep)
                             std::rethrow_exception(ep);

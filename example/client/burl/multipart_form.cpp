@@ -9,8 +9,8 @@
 
 #include "multipart_form.hpp"
 
-#include <boost/buffers/algorithm.hpp>
-#include <boost/buffers/buffer_copy.hpp>
+#include <boost/buffers/copy.hpp>
+#include <boost/buffers/prefix.hpp>
 #include <boost/http_proto/file.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -153,7 +153,7 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
 
     auto copy = [&](core::string_view sv)
     {
-        auto copied = buffers::buffer_copy(
+        auto copied = buffers::copy(
             mb,
             buffers::sans_prefix(
                 buffers::const_buffer{ sv.data(), sv.size() },
