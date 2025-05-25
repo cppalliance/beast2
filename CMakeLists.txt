@@ -131,13 +131,14 @@ endif ()
 #-------------------------------------------------
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-file(GLOB_RECURSE BOOST_HTTP_IO_HEADERS CONFIGURE_DEPENDS include/boost/*.hpp include/boost/*.natvis)
+file(GLOB_RECURSE BOOST_HTTP_IO_HEADERS CONFIGURE_DEPENDS include/boost/http_io/*.hpp include/boost/*.natvis)
 file(GLOB_RECURSE BOOST_HTTP_IO_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost PREFIX "" FILES ${BOOST_HTTP_IO_HEADERS})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "http_io" FILES ${BOOST_HTTP_IO_SOURCES})
+source_group("" FILES "include/boost/http_io.hpp" "build/Jamfile")
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost/http_io PREFIX "include" FILES ${BOOST_HTTP_IO_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "src" FILES ${BOOST_HTTP_IO_SOURCES})
 
-add_library(boost_http_io ${BOOST_HTTP_IO_HEADERS} ${BOOST_HTTP_IO_SOURCES})
+add_library(boost_http_io include/boost/http_io.hpp build/Jamfile ${BOOST_HTTP_IO_HEADERS} ${BOOST_HTTP_IO_SOURCES})
 add_library(Boost::http_io ALIAS boost_http_io)
 target_compile_features(boost_http_io PUBLIC cxx_constexpr)
 target_include_directories(boost_http_io PUBLIC "${PROJECT_SOURCE_DIR}/include")

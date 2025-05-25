@@ -19,16 +19,28 @@ constant c11-requires :
     ]
     ;
 
+explicit
+    [ searched-lib ws2_32 : : <target-os>windows ] # NT
+    [ searched-lib mswsock : : <target-os>windows ] # NT
+    ;
+
 project boost/http_io
     : requirements
       $(c11-requires)
       <link>shared:<define>BOOST_HTTP_IO_DYN_LINK=1
       <link>static:<define>BOOST_HTTP_IO_STATIC_LINK=1
       <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
+      <target-os>windows,<toolset>gcc:<library>ws2_32
+      <target-os>windows,<toolset>gcc:<library>mswsock
+      <target-os>windows,<toolset>gcc-cygwin:<define>__USE_W32_SOCKETS
       <define>BOOST_HTTP_IO_SOURCE
     : usage-requirements
       <link>shared:<define>BOOST_HTTP_IO_DYN_LINK=1
       <link>static:<define>BOOST_HTTP_IO_STATIC_LINK=1
+      <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
+      <target-os>windows,<toolset>gcc:<library>ws2_32
+      <target-os>windows,<toolset>gcc:<library>mswsock
+      <target-os>windows,<toolset>gcc-cygwin:<define>__USE_W32_SOCKETS
     : source-location ../src
     ;
 

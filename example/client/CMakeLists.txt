@@ -8,3 +8,4 @@
 #
 
 add_subdirectory(burl)
+add_subdirectory(visit)

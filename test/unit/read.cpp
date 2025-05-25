@@ -10,6 +10,9 @@
 // Test that header file is self-contained.
 #include <boost/http_io/read.hpp>
 
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+
 #include "test_suite.hpp"
 
 namespace boost {
@@ -88,6 +91,12 @@ public:
     void
     testRead()
     {
+        boost::asio::io_context ioc;
+        boost::asio::post(
+            ioc.get_executor(),
+            []
+            {
+            });
     }
 
     void

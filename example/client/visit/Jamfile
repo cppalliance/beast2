@@ -1,0 +1,32 @@
+#
+# Copyright (c) 2024 Mohammad Nejati
+# Copyright (c) 2025 Vinnie Falco (vinnie dot falco at gmail dot com)
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+# Official repository: https://github.com/cppalliance/http_io
+#
+
+import ../../../../config/checks/config : requires ;
+
+using openssl ;
+import ac ;
+
+project
+    : requirements
+      $(c11-requires)
+      <library>/boost/http_proto//boost_http_proto
+      [ ac.check-library /boost/http_proto//boost_http_proto_zlib : <library>/boost/http_proto//boost_http_proto_zlib : ]
+      <library>/boost/http_io//boost_http_io
+      <library>/boost/program_options//boost_program_options
+      <library>/boost/scope//scope
+      <library>/openssl//ssl/<link>shared
+      <library>/openssl//crypto/<link>shared
+      <target-os>windows:<library>crypt32
+      <include>.
+    ;
+
+exe visit :
+    [ glob *.cpp ]
+    ;
