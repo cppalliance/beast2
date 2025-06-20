@@ -14,10 +14,10 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <boost/asio/immediate.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/result.hpp>
-#include <iterator>
+#include <boost/http_proto/serializer.hpp>
 
 namespace boost {
 namespace http_io {
@@ -54,8 +54,8 @@ public:
     void
     operator()(
         Self& self,
-        system::error_code ec,
-        std::size_t bytes_transferred,
+        system::error_code ec = {},
+        std::size_t bytes_transferred = {},
         bool do_post = false)
     {
         system::result<buffers_type> rv;
@@ -73,12 +73,8 @@ public:
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http_io::write_some_op"));
-                    asio::post(
-                        dest_.get_executor(),
-                        asio::append(
-                            std::move(self),
-                            ec,
-                            bytes_transferred));
+                    asio::async_immediate(
+                        self.get_io_executor(), std::move(self));
                 }
                 goto upcall;
             }
