@@ -16,9 +16,8 @@
 #include <boost/asio/append.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <boost/asio/immediate.hpp>
 #include <boost/assert.hpp>
-#include <type_traits>
 
 namespace boost {
 namespace http_io {
@@ -57,13 +56,9 @@ public:
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
-                        "post"));
-                    asio::post(
-                        stream_.get_executor(),
-                        asio::append(
-                            std::move(self),
-                            ec,
-                            0));
+                        "immediate"));
+                    asio::async_immediate(
+                        self.get_io_executor(), std::move(self));
                 }
                 goto upcall;
             }
@@ -145,13 +140,9 @@ public:
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
-                        "post"));
-                    asio::post(
-                        stream_.get_executor(),
-                        asio::append(
-                            std::move(self),
-                            ec,
-                            0));
+                        "immediate"));
+                    asio::async_immediate(
+                        self.get_io_executor(), std::move(self));
                 }
                 goto upcall;
             }

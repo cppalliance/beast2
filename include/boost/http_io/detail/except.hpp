@@ -11,6 +11,7 @@
 #define BOOST_HTTP_IO_DETAIL_EXCEPT_HPP
 
 #include <boost/assert/source_location.hpp>
+#include <boost/http_io/detail/config.hpp>
 
 namespace boost {
 namespace http_io {
