@@ -29,7 +29,7 @@ public:
     string_body(std::string body, std::string content_type);
 
     http_proto::method
-    method() const;
+    method() const noexcept;
 
     core::string_view
     content_type() const noexcept;
@@ -49,7 +49,7 @@ public:
     file_body(std::string path);
 
     http_proto::method
-    method() const;
+    method() const noexcept;
 
     core::string_view
     content_type() const noexcept;
@@ -72,13 +72,13 @@ public:
     };
 
     http_proto::method
-    method() const;
+    method() const noexcept;
 
     core::string_view
     content_type() const noexcept;
 
     boost::optional<std::size_t>
-    content_length() const;
+    content_length() const noexcept;
 
     source
     body() const;

@@ -1046,7 +1046,6 @@ jobs:
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}
           build-dir: __build_root_test__
-          build-target: tests
           run-tests: true
           generator: ${{ matrix.generator }}
           generator-toolset: ${{ matrix.generator-toolset }}

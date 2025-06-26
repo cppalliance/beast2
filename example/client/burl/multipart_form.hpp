@@ -56,7 +56,7 @@ public:
         std::vector<std::string> headers = {});
 
     http_proto::method
-    method() const;
+    method() const noexcept;
 
     std::string
     content_type() const;

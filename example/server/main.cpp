@@ -189,7 +189,7 @@ make_error_response(
     if(code == http_proto::status::not_found)
     {
         s += "<p>The requested URL ";
-        s += req.target_text();
+        s += req.target();
         s += " was not found on this server.</p>\n";
     }
     s += "<hr>\n";
@@ -241,16 +241,16 @@ handle_request(
 #endif
 
     // Request path must be absolute and not contain "..".
-    if( req.target_text().empty() ||
-        req.target_text()[0] != '/' ||
-        req.target_text().find("..") != core::string_view::npos)
+    if( req.target().empty() ||
+        req.target()[0] != '/' ||
+        req.target().find("..") != core::string_view::npos)
         return make_error_response(
             http_proto::status::bad_request, req, res, sr);
 
     // Build the path to the requested file
     std::string path; 
-    path_cat(path, doc_root, req.target_text());
-    if(req.target_text().back() == '/')
+    path_cat(path, doc_root, req.target());
+    if(req.target().back() == '/')
         path.append("index.html");
 
     // Attempt to open the file

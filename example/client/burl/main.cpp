@@ -753,7 +753,7 @@ co_main(int argc, char* argv[])
     {
         parser_cfg.apply_gzip_decoder    = true;
         parser_cfg.apply_deflate_decoder = true;
-        http_proto::zlib::install_service(proto_ctx);
+        http_proto::zlib::install_inflate_service(proto_ctx);
     }
     http_proto::install_parser_service(proto_ctx, parser_cfg);
 

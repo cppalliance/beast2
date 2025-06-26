@@ -26,7 +26,7 @@ string_body::string_body(std::string body, std::string content_type)
 }
 
 http_proto::method
-string_body::method() const
+string_body::method() const noexcept
 {
     return http_proto::method::post;
 }
@@ -57,7 +57,7 @@ file_body::file_body(std::string path)
 }
 
 http_proto::method
-file_body::method() const
+file_body::method() const noexcept
 {
     return http_proto::method::put;
 }
@@ -99,7 +99,7 @@ stdin_body::source::on_read(buffers::mutable_buffer mb)
 }
 
 http_proto::method
-stdin_body::method() const
+stdin_body::method() const noexcept
 {
     return http_proto::method::put;
 }
@@ -111,7 +111,7 @@ stdin_body::content_type() const noexcept
 }
 
 boost::optional<std::size_t>
-stdin_body::content_length() const
+stdin_body::content_length() const noexcept
 {
     return boost::none;
 }
