@@ -19,9 +19,10 @@ project
       <library>/boost/beast//boost_beast/<warnings-as-errors>off
       [ ac.check-library /openssl//ssl/<warnings-as-errors>off : <library>/openssl//ssl/<warnings-as-errors>off : ]
       [ ac.check-library /boost/http_proto//boost_http_proto_zlib/<warnings-as-errors>off : <library>/boost/http_proto//boost_http_proto_zlib/<warnings-as-errors>off : ]
-      <source>../../../url/extra/test_main.cpp
+      <source>../../../url/extra/test_suite/test_main.cpp
+      <source>../../../url/extra/test_suite/test_suite.cpp
       <include>.
-      <include>../../../url/extra
+      <include>../../../url/extra/test_suite
       <warnings>extra
       <warnings-as-errors>on
       <target-os>darwin,<undefined-sanitizer>norecover:<link>static

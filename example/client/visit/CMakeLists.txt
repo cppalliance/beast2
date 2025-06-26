@@ -26,8 +26,6 @@ find_package(ZLIB)
 
 target_link_libraries(http_io_example_client_visit
     boost_http_io
-    boost_program_options
-    boost_scope
     OpenSSL::SSL
     OpenSSL::Crypto)
 

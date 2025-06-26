@@ -84,7 +84,7 @@ multipart_form::append(
 }
 
 http_proto::method
-multipart_form::method() const
+multipart_form::method() const noexcept
 {
     return http_proto::method::post;
 }

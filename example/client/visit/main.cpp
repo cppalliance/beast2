@@ -61,7 +61,7 @@ struct worker
     do_resolve()
     {
         resolver.async_resolve(
-            url.encoded_host(),
+            boost::core::string_view(url.encoded_host()),
             url.scheme(),
             [&](
                 boost::system::error_code ec,
