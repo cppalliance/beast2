@@ -31,6 +31,8 @@
 #include <boost/buffers.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
+#include <boost/rts/brotli/decode.hpp>
+#include <boost/rts/zlib/inflate.hpp>
 #include <boost/scope/scope_exit.hpp>
 #include <boost/scope/scope_fail.hpp>
 #include <boost/url/parse.hpp>
@@ -42,10 +44,16 @@ namespace http_io  = boost::http_io;
 namespace scope    = boost::scope;
 using system_error = boost::system::system_error;
 
-#ifdef BOOST_HTTP_PROTO_HAS_ZLIB
-inline const bool http_proto_has_zlib = true;
+#ifdef BOOST_RTS_HAS_ZLIB
+constexpr bool rts_has_zlib = true;
 #else
-inline const bool http_proto_has_zlib = false;
+constexpr bool rts_has_zlib = false;
+#endif
+
+#ifdef BOOST_RTS_HAS_BROTLI
+constexpr bool rts_has_brotli = true;
+#else
+constexpr bool rts_has_brotli = false;
 #endif
 
 void
@@ -265,8 +273,29 @@ create_request(
         request.set(field::authorization, basic_auth);
     }
 
-    if(oc.encoding && http_proto_has_zlib)
-        request.set(field::accept_encoding, "gzip, deflate");
+    if(oc.encoding)
+    {
+        std::string value;
+
+        const auto append = [&](const char* encoding)
+        {
+            if(!value.empty())
+                value.append(", ");
+            value.append(encoding);
+        };
+
+        if constexpr(rts_has_brotli)
+            append("br");
+
+        if constexpr(rts_has_zlib)
+        {
+            append("deflate");
+            append("gzip");
+        }
+
+        if(!value.empty())
+            request.set(field::accept_encoding, value);
+    }
 
     for(const auto& [_, name, value] : oc.headers)
         request.set(name, value);
@@ -322,15 +351,15 @@ perform_request(
     boost::optional<cookie_jar>& cookie_jar,
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
-    http_proto::context& proto_ctx,
+    rts::context& rts_ctx,
     message msg,
     request_opt request_opt)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto parser     = http_proto::response_parser{ proto_ctx };
-    auto serializer = http_proto::serializer{ proto_ctx };
+    auto parser     = http_proto::response_parser{ rts_ctx };
+    auto serializer = http_proto::serializer{ rts_ctx };
 
     urls::url url = [&]()
     {
@@ -442,7 +471,7 @@ perform_request(
 
         co_await asio::co_spawn(
             executor,
-            connect(oc, ssl_ctx, proto_ctx, stream, url),
+            connect(oc, ssl_ctx, rts_ctx, stream, url),
             asio::cancel_after(oc.connect_timeout));
 
         if(oc.recvpersecond)
@@ -734,7 +763,7 @@ co_main(int argc, char* argv[])
 
     auto executor      = co_await asio::this_coro::executor;
     auto task_group    = ::task_group{ executor, oc.parallel_max };
-    auto proto_ctx     = http_proto::context{};
+    auto rts_ctx       = rts::context{};
     auto cookie_jar    = boost::optional<::cookie_jar>{};
     auto header_output = boost::optional<any_ostream>{};
     auto exp_cookies   = std::string{};
@@ -746,16 +775,30 @@ co_main(int argc, char* argv[])
     }
 
     // parser service
-    http_proto::response_parser::config parser_cfg;
-    parser_cfg.body_limit = oc.max_filesize;
-    parser_cfg.min_buffer = 1024 * 1024;
-    if(http_proto_has_zlib)
     {
-        parser_cfg.apply_gzip_decoder    = true;
-        parser_cfg.apply_deflate_decoder = true;
-        http_proto::zlib::install_inflate_service(proto_ctx);
+        http_proto::response_parser::config cfg;
+        cfg.body_limit = oc.max_filesize;
+        cfg.min_buffer = 1024 * 1024;
+        if constexpr(rts_has_brotli)
+        {
+            cfg.apply_brotli_decoder  = true;
+            rts::brotli::install_decode_service(rts_ctx);
+        }
+        if constexpr(rts_has_zlib)
+        {
+            cfg.apply_deflate_decoder = true;
+            cfg.apply_gzip_decoder    = true;
+            rts::zlib::install_inflate_service(rts_ctx);
+        }
+        http_proto::install_parser_service(rts_ctx, cfg);
     }
-    http_proto::install_parser_service(proto_ctx, parser_cfg);
+
+    // serializer service
+    {
+        http_proto::serializer::config cfg;
+        cfg.payload_buffer = 1024 * 1024;
+        http_proto::install_serializer_service(rts_ctx, cfg);
+    }
 
     if(!oc.headerfile.empty())
         header_output.emplace(oc.headerfile);
@@ -792,7 +835,7 @@ co_main(int argc, char* argv[])
                     cookie_jar,
                     exp_cookies,
                     ssl_ctx,
-                    proto_ctx,
+                    rts_ctx,
                     oc.msg,
                     ropt.value());
             };

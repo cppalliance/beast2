@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2019 Vinnie Falco (vinnie.falco@gmail.com)
+# Copyright (c) 2025 Mohammad Nejati
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -7,24 +8,13 @@
 # Official repository: https://github.com/CPPAlliance/http_proto
 #
 
-import testing ;
-import ac ;
-
-using zlib ;
-
 project
     : requirements
-      $(c11-requires)
-      #<library>/boost/filesystem//boost_filesystem/<warnings>off
-      <library>/boost/http_proto//boost_http_proto
       <library>/boost/http_io//boost_http_io
-      [ ac.check-library /zlib//zlib : <library>/zlib//zlib : ]
-      [ ac.check-library /boost/http_proto//boost_http_proto_zlib : <library>/boost/http_proto//boost_http_proto_zlib : ]
+      <library>/boost/url//boost_url
       <include>.
-      <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
     ;
 
 exe server :
-    main.cpp
-    server.cpp
+    [ glob *.cpp ]
     ;

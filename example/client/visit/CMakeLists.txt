@@ -21,20 +21,6 @@ target_compile_definitions(http_io_example_client_visit
 set_property(TARGET http_io_example_client_visit
     PROPERTY FOLDER "examples")
 
-find_package(OpenSSL REQUIRED)
-find_package(ZLIB)
-
 target_link_libraries(http_io_example_client_visit
     boost_http_io
-    OpenSSL::SSL
-    OpenSSL::Crypto)
-
-if (WIN32)
-    target_link_libraries(http_io_example_client_visit
-        crypt32)
-endif()
-
-if (ZLIB_FOUND)
-    target_link_libraries(http_io_example_client_visit
-        boost_http_proto_zlib)
-endif()
+    boost_url)

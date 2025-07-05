@@ -41,10 +41,13 @@ set ZLIB_SOURCE=!BOOST_ROOT!\zlib-src
 REM Customizations
 cd
 pushd !BOOST_ROOT!\libs
-git clone https://github.com/CPPAlliance/buffers -b !BOOST_BRANCH! --depth 1
+git clone https://github.com/cppalliance/buffers -b !BOOST_BRANCH! --depth 1
 popd
 pushd !BOOST_ROOT!\libs
-git clone https://github.com/CPPAlliance/http_proto -b !BOOST_BRANCH! --depth 1
+git clone https://github.com/cppalliance/rts -b !BOOST_BRANCH! --depth 1
+popd
+pushd !BOOST_ROOT!\libs
+git clone https://github.com/cppalliance/http_proto -b !BOOST_BRANCH! --depth 1
 popd
 
 echo '==================================> COMPILE'

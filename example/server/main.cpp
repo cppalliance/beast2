@@ -15,6 +15,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
+#include <boost/rts.hpp>
 #include <boost/url.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <functional>
@@ -29,6 +30,7 @@ namespace io = boost::http_io;
 namespace urls = boost::urls;
 namespace asio = boost::asio;
 namespace core = boost::core;
+namespace rts = boost::rts;
 namespace http_proto = boost::http_proto;
 using namespace std::placeholders;
 using tcp = boost::asio::ip::tcp;
@@ -362,7 +364,7 @@ public:
         , sock_(srv.make_executor())
         , doc_root_(doc_root)
         , pr_(ac_.context())
-        , sr_(ac_.context(), 65536)
+        , sr_(ac_.context())
         , id_(ac_.next_id())
     {
     }
@@ -550,10 +552,14 @@ int main(int argc, char* argv[])
 
         file_handler fh(doc_root);
 
-        http_proto::context ctx;
+        rts::context ctx;
         {
             http_proto::request_parser::config cfg;
             http_proto::install_parser_service(ctx, cfg);
+        }
+        {
+            http_proto::serializer::config cfg;
+            http_proto::install_serializer_service(ctx, cfg);
         }
 
         server srv;
