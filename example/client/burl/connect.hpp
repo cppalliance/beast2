@@ -15,11 +15,11 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/context.hpp>
-#include <boost/http_proto/context.hpp>
+#include <boost/rts/context.hpp>
 #include <boost/url/url.hpp>
 
 namespace asio       = boost::asio;
-namespace http_proto = boost::http_proto;
+namespace rts        = boost::rts;
 namespace ssl        = boost::asio::ssl;
 namespace urls       = boost::urls;
 
@@ -27,7 +27,7 @@ asio::awaitable<void>
 connect(
     const operation_config& oc,
     ssl::context& ssl_ctx,
-    http_proto::context& proto_ctx,
+    rts::context& rts_ctx,
     any_stream& stream,
     urls::url url);
 

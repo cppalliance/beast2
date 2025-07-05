@@ -22,4 +22,5 @@ set_property(TARGET http_io_server_example
     PROPERTY FOLDER "examples")
 
 target_link_libraries(http_io_server_example
-    boost_http_io)
+    boost_http_io
+    boost_url)

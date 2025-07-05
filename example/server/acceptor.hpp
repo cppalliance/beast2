@@ -13,7 +13,7 @@
 #include "fixed_array.hpp"
 #include "server.hpp"
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/http_proto/context.hpp>
+#include <boost/rts/context.hpp>
 #include <string>
 
 template< class Executor >
@@ -32,7 +32,7 @@ public:
 private:
     server& srv_;
     acceptor_type sock_;
-    boost::http_proto::context& ctx_;
+    boost::rts::context& ctx_;
     std::size_t id_ = 0;
     fixed_array< worker< executor_type > > wv_;
 
@@ -40,7 +40,7 @@ public:
     acceptor(
         server& srv,
         boost::asio::ip::tcp::endpoint ep,
-        boost::http_proto::context& ctx,
+        boost::rts::context& ctx,
         std::size_t num_workers,
         std::string const& doc_root)
         : srv_(srv)
@@ -68,7 +68,7 @@ public:
         return sock_;
     }
 
-    boost::http_proto::context&
+    boost::rts::context&
     context() const noexcept
     {
         return ctx_;

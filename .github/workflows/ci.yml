@@ -61,14 +61,14 @@ jobs:
           #
 
           - compiler: "msvc"
-            version: "14.34"
+            version: "14.42"
             cxxstd: "17,20"
             latest-cxxstd: "20"
             runs-on: "windows-2022"
-            b2-toolset: "msvc-14.3"
+            b2-toolset: "msvc-14.4"
             generator: "Visual Studio 17 2022"
             is-latest: true
-            name: "MSVC 14.34: C++17-20"
+            name: "MSVC 14.42: C++17-20"
             build-type: "Release"
             build-cmake: true
 
@@ -80,10 +80,9 @@ jobs:
             b2-toolset: "msvc-14.3"
             generator: "Visual Studio 17 2022"
             is-latest: true
-            name: "MSVC 14.34: C++17-20 (no zlib)"
+            name: "MSVC 14.34: C++17-20"
             build-type: "Release"
             build-cmake: true
-            skip-zlib: true
 
           - compiler: "msvc"
             version: "14.34"
@@ -109,17 +108,6 @@ jobs:
             shared: true
             build-type: "Release"
             build-cmake: true
-
-          - compiler: "msvc"
-            version: "14.29"
-            cxxstd: "14,17"
-            latest-cxxstd: "17"
-            runs-on: "windows-2019"
-            b2-toolset: "msvc-14.2"
-            generator: "Visual Studio 16 2019"
-            is-earliest: true
-            name: "MSVC 14.29: C++14-17"
-            build-type: "Release"
 
           - compiler: "clang-cl"
             version: "*"
@@ -232,7 +220,7 @@ jobs:
             is-latest: true
             name: "GCC 14: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
             build-cmake: true
 
           - compiler: "gcc"
@@ -262,7 +250,7 @@ jobs:
             name: "GCC 14: C++17-20 (x86)"
             x86: true
             build-type: "Release"
-            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
 
           - compiler: "gcc"
             version: "14"
@@ -277,7 +265,7 @@ jobs:
             name: "GCC 14: C++17-20 (shared)"
             shared: true
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
             build-cmake: true
 
           - compiler: "gcc"
@@ -294,7 +282,7 @@ jobs:
             shared: true
             x86: true
             build-type: "Release"
-            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
             build-cmake: true
 
           - compiler: "gcc"
@@ -310,7 +298,7 @@ jobs:
             name: "GCC 14: C++17-20 (asan)"
             asan: true
             build-type: "RelWithDebInfo"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "14"
@@ -326,7 +314,7 @@ jobs:
             asan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
 
           - compiler: "gcc"
             version: "14"
@@ -341,7 +329,7 @@ jobs:
             name: "GCC 14: C++17-20 (ubsan)"
             ubsan: true
             build-type: "RelWithDebInfo"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "14"
@@ -357,7 +345,7 @@ jobs:
             ubsan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "gcc-14-multilib g++-14-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-14-multilib g++-14-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
 
           - compiler: "gcc"
             version: "13"
@@ -369,7 +357,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 13: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "13"
@@ -385,7 +373,7 @@ jobs:
             build-type: "Debug"
             cxxflags: "--coverage -fprofile-arcs -ftest-coverage"
             ccflags: "--coverage -fprofile-arcs -ftest-coverage"
-            install: "lcov zlib1g-dev wget unzip"
+            install: "lcov zlib1g-dev libbrotli-dev wget unzip"
 
           - compiler: "gcc"
             version: "12"
@@ -398,7 +386,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 12: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "11"
@@ -411,7 +399,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 11: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "10"
@@ -424,7 +412,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 10: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "9"
@@ -437,7 +425,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 9: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "8"
@@ -450,7 +438,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 8: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "7"
@@ -463,7 +451,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 7: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "6"
@@ -476,7 +464,7 @@ jobs:
             b2-toolset: "gcc"
             name: "GCC 6: C++11-14"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "gcc"
             version: "5"
@@ -490,7 +478,7 @@ jobs:
             is-earliest: true
             name: "GCC 5: C++11"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "18"
@@ -504,7 +492,7 @@ jobs:
             is-latest: true
             name: "Clang 18: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
             build-cmake: true
 
           - compiler: "clang"
@@ -520,7 +508,7 @@ jobs:
             name: "Clang 18: C++17-20 (x86)"
             x86: true
             build-type: "Release"
-            install: "gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-multilib g++-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
 
           - compiler: "clang"
             version: "18"
@@ -537,7 +525,7 @@ jobs:
             build-type: "Release"
             cxxflags: "-ftime-trace"
             ccflags: "-ftime-trace"
-            install: "zlib1g-dev wget unzip"
+            install: "zlib1g-dev libbrotli-dev wget unzip"
 
           - compiler: "clang"
             version: "18"
@@ -552,7 +540,7 @@ jobs:
             name: "Clang 18: C++17-20 (asan)"
             asan: true
             build-type: "RelWithDebInfo"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "18"
@@ -568,7 +556,7 @@ jobs:
             asan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-multilib g++-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
 
           - compiler: "clang"
             version: "18"
@@ -583,7 +571,7 @@ jobs:
             name: "Clang 18: C++17-20 (ubsan)"
             ubsan: true
             build-type: "RelWithDebInfo"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "18"
@@ -599,7 +587,7 @@ jobs:
             ubsan: true
             x86: true
             build-type: "RelWithDebInfo"
-            install: "gcc-multilib g++-multilib zlib1g-dev zlib1g-dev:i386"
+            install: "gcc-multilib g++-multilib zlib1g-dev libbrotli-dev zlib1g-dev:i386 libbrotli-dev:i386"
 
           - compiler: "clang"
             version: "17"
@@ -611,7 +599,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 17: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "16"
@@ -623,7 +611,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 16: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "15"
@@ -636,7 +624,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 15: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "14"
@@ -649,7 +637,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 14: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "13"
@@ -662,7 +650,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 13: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "12"
@@ -675,7 +663,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 12: C++17-20"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "11"
@@ -688,7 +676,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 11: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "10"
@@ -701,7 +689,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 10: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "9"
@@ -714,7 +702,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 9: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "8"
@@ -727,7 +715,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 8: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "7"
@@ -740,7 +728,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 7: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "6"
@@ -753,7 +741,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 6: C++14-17"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "5"
@@ -766,7 +754,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 5: C++11-14"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "4"
@@ -779,7 +767,7 @@ jobs:
             b2-toolset: "clang"
             name: "Clang 4: C++11-14"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
           - compiler: "clang"
             version: "3.9"
@@ -793,7 +781,7 @@ jobs:
             is-earliest: true
             name: "Clang 3.9: C++11"
             build-type: "Release"
-            install: "zlib1g-dev"
+            install: "zlib1g-dev libbrotli-dev"
 
     name: ${{ matrix.name }}
     runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)[matrix.runs-on] }}
@@ -834,8 +822,15 @@ jobs:
           repository: cppalliance/buffers
           ref: develop
 
+      - name: Clone Boost.RunTimeServices
+        uses: actions/checkout@v3
+        with:
+          path: rts-root
+          repository: cppalliance/rts
+          ref: develop
+
       - name: Setup C++
-        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.8
+        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.10
         id: setup-cpp
         with:
           compiler: ${{ matrix.compiler }}
@@ -844,7 +839,7 @@ jobs:
           trace-commands: true
 
       - name: Install packages
-        uses: alandefreitas/cpp-actions/package-install@v1.8.8
+        uses: alandefreitas/cpp-actions/package-install@v1.8.10
         id: package-install
         with:
           apt-get-add-architecture: 'i386'
@@ -854,7 +849,7 @@ jobs:
             build-essential
 
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.8
+        uses: alandefreitas/cpp-actions/boost-clone@v1.8.10
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
@@ -865,19 +860,21 @@ jobs:
             http-io-root
             http-proto-root
             buffers-root
+            rts-root
           scan-modules-ignore: |
             http_io
             http_proto
             buffers
+            rts
 
-      - name: Install packages (Windows)
-        uses: alandefreitas/cpp-actions/package-install@v1.8.8
+      - name: Install Packages (Windows)
+        uses: alandefreitas/cpp-actions/package-install@v1.8.10
         if: ${{ startsWith(matrix.runs-on, 'windows') }}
         id: package-install-windows
         with:
-          vcpkg: "zlib,openssl"
+          vcpkg: zlib brotli openssl
           vcpkg-dir: vcpkg-root
-          vcpkg-triplet: ${{ matrix.x86 && 'x86-windows' || 'x64-windows' }}
+          vcpkg-triplet: ${{ matrix.x86 && 'x86-windows-static' || 'x64-windows' }}
 
       - name: Patch user-config.jam (Windows)
         id: patch-user-config
@@ -887,15 +884,19 @@ jobs:
           set -xe
           home=$(pwd)
 
-          triplet=${{ matrix.x86 && 'x86-windows' || 'x64-windows' }}
+          triplet=${{ matrix.x86 && 'x86-windows-static' || 'x64-windows' }}
           addrmdl=${{ matrix.x86 && '32' || '64' }}
 
-          echo "using zlib : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <name>zlib : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' > user-config.jam
-          echo "using openssl : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <ssl-name>libssl <crypto-name>libcrypto : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
+          # This is temporary until we move rts/build/brotli.jam to boost/tools/build
+          echo "import-search ${home}/boost-root/libs/rts/build ;" | sed 's/\/d\//D:\//g' >> user-config.jam
+
+          echo "using zlib    : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <dll-path>\"${home}/vcpkg-root/installed/${triplet}/bin\" <name>zlib                              : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
+          echo "using brotli  : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <dll-path>\"${home}/vcpkg-root/installed/${triplet}/bin\"                                         : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
+          echo "using openssl : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <dll-path>\"${home}/vcpkg-root/installed/${triplet}/bin\" <ssl-name>libssl <crypto-name>libcrypto : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
+
           cat user-config.jam
 
           toolchain=$(echo "$GITHUB_WORKSPACE/vcpkg-root/scripts/buildsystems/vcpkg.cmake" | sed 's/\/d\//D:\//g' )
-          cat ${toolchain}
           echo "toolchain=${toolchain}" >> $GITHUB_OUTPUT
 
       - name: ASLR Fix
@@ -936,9 +937,10 @@ jobs:
           cp -r "$workspace_root"/http-io-root "libs/$module"
           cp -r "$workspace_root"/http-proto-root libs/http_proto
           cp -r "$workspace_root"/buffers-root libs/buffers
+          cp -r "$workspace_root"/rts-root libs/rts
 
       - name: Boost B2 Workflow
-        uses: alandefreitas/cpp-actions/b2-workflow@v1.8.8
+        uses: alandefreitas/cpp-actions/b2-workflow@v1.8.10
         if: ${{ !matrix.coverage && !matrix.time-trace }}
         env:
           ASAN_OPTIONS: ${{ (startsWith(matrix.compiler, 'apple-clang') && 'detect_invalid_pointer_pairs=0') || 'detect_invalid_pointer_pairs=2' }}
@@ -959,7 +961,7 @@ jobs:
           stop-on-error: true
 
       - name: Boost CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
         if: ${{ matrix.coverage || matrix.time-trace || matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root
@@ -996,7 +998,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/.local/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Find Package Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -1020,7 +1022,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Subdirectory Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -1041,7 +1043,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Root Project CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.8
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}
@@ -1064,7 +1066,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: FlameGraph
-        uses: alandefreitas/cpp-actions/flamegraph@v1.8.8
+        uses: alandefreitas/cpp-actions/flamegraph@v1.8.10
         if: matrix.time-trace
         with:
           source-dir: boost-root/libs/http_io
@@ -1110,14 +1112,14 @@ jobs:
     timeout-minutes: 120
 
     steps:
-      - name: Clone Boost.WS.Io
+      - name: Clone Boost.Http.Io
         uses: actions/checkout@v3
         with:
           # Avoid the common API rate limit exceeded error in boostorg by including 100 latest commits in any case
           fetch-depth: 100
 
       - name: Changelog
-        uses: alandefreitas/cpp-actions/create-changelog@v1.8.8
+        uses: alandefreitas/cpp-actions/create-changelog@v1.8.10
         with:
           thank-non-regular: ${{ startsWith(github.ref, 'refs/tags/') }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -1162,8 +1164,15 @@ jobs:
           repository: cppalliance/buffers
           ref: develop
 
+      - name: Clone Boost.RunTimeServices
+        uses: actions/checkout@v3
+        with:
+          path: rts-root
+          repository: cppalliance/rts
+          ref: develop
+
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.8
+        uses: alandefreitas/cpp-actions/boost-clone@v1.8.10
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
@@ -1174,10 +1183,12 @@ jobs:
             http-io-root
             http-proto-root
             buffers-root
+            rts-root
           scan-modules-ignore: |
             http_io
             http_proto
             buffers
+            rts
 
       - name: Patch Boost
         id: patch
@@ -1212,6 +1223,7 @@ jobs:
           cp -r "$workspace_root"/http-io-root "libs/$module"
           cp -r "$workspace_root"/http-proto-root libs/http_proto
           cp -r "$workspace_root"/buffers-root libs/buffers
+          cp -r "$workspace_root"/rts-root libs/rts
 
       - uses: actions/setup-node@v4
         with:

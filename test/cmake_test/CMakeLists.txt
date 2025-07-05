@@ -29,7 +29,6 @@ else()
     http_proto
     system
     throw_exception
-    url
 
     # Secondary dependencies
 
@@ -37,44 +36,46 @@ else()
     context
     date_time
     buffers
-    container_hash
     core
-    mp11
+    rts
     static_assert
     type_traits
+    url
     winapi
     variant2
-    optional
-    describe
+    mp11
     pool
     predef
     smart_ptr
-    exception
-    move
-    utility
     algorithm
     io
     lexical_cast
     numeric/conversion
     range
     tokenizer
+    utility
+    container_hash
+    optional
     array
     bind
     concept_check
+    exception
     function
     iterator
     mpl
     regex
     tuple
     unordered
+    describe
     container
-    integer
     conversion
     preprocessor
+    integer
     detail
     intrusive
-    function_types
+    move
     fusion
+    function_types
     functional
     typeof
   )

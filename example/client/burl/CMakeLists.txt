@@ -23,22 +23,25 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
         PROPERTY FOLDER "examples")
 
     find_package(OpenSSL REQUIRED)
-    find_package(ZLIB)
 
     target_link_libraries(http_io_example_client_burl
         boost_http_io
+        boost_url
         boost_program_options
         boost_scope
         OpenSSL::SSL
         OpenSSL::Crypto)
 
     if (WIN32)
-        target_link_libraries(http_io_example_client_burl
-            crypt32)
+        target_link_libraries(http_io_example_client_burl crypt32)
     endif()
 
-    if (ZLIB_FOUND)
-        target_link_libraries(http_io_example_client_burl
-            boost_http_proto_zlib)
+    if (TARGET boost_rts_zlib)
+        target_link_libraries(http_io_example_client_burl boost_rts_zlib)
     endif()
+
+    if (TARGET boost_rts_brotli)
+        target_link_libraries(http_io_example_client_burl boost_rts_brotli)
+    endif()
+
 endif()

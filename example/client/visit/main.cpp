@@ -13,9 +13,9 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/core/detail/string_view.hpp>
-#include <boost/http_proto/context.hpp>
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/response_parser.hpp>
+#include <boost/rts/context.hpp>
 #include <boost/url/url_view.hpp>
 
 struct worker
@@ -36,7 +36,7 @@ struct worker
     explicit
     worker(
         executor_type ex,
-        boost::http_proto::context& ctx)
+        boost::rts::context& ctx)
         : sock(ex)
         , resolver(ex)
         , pr(ctx)
@@ -128,7 +128,7 @@ struct worker
 int
 main(int argc, char* argv[])
 {
-    boost::http_proto::context ctx;
+    boost::rts::context ctx;
     boost::http_proto::parser::config_base cfg;
     boost::http_proto::install_parser_service(ctx, cfg);
 
