@@ -142,7 +142,7 @@ public:
                         __FILE__, __LINE__,
                         "immediate"));
                     asio::async_immediate(
-                        self.get_io_executor(), std::move(self));
+                        self.get_io_executor(), asio::append(std::move(self), ec));
                 }
                 goto upcall;
             }
