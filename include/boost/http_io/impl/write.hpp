@@ -45,18 +45,10 @@ public:
 
     template<class Self>
     void
-    operator()(Self& self)
-    {
-        (*this)(self, {}, 0, true);
-    }
-
-    template<class Self>
-    void
     operator()(
         Self& self,
         system::error_code ec = {},
-        std::size_t bytes_transferred = {},
-        bool do_post = false)
+        std::size_t bytes_transferred = {})
     {
         system::result<buffers_type> rv;
 
@@ -66,15 +58,13 @@ public:
             if(! rv)
             {
                 ec = rv.error();
-                if(! do_post)
-                    goto upcall;
                 BOOST_ASIO_CORO_YIELD
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http_io::write_some_op"));
                     asio::async_immediate(
-                        self.get_io_executor(), std::move(self));
+                        self.get_io_executor(), asio::append(std::move(self), ec));
                 }
                 goto upcall;
             }
