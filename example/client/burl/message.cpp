@@ -74,7 +74,7 @@ file_body::content_length() const
     return fs::file_size(path_);
 }
 
-http_proto::file_body
+http_proto::file_source
 file_body::body() const
 {
     http_proto::file file;
@@ -83,7 +83,7 @@ file_body::body() const
     if(ec)
         throw system_error{ ec };
 
-    return http_proto::file_body{ std::move(file), content_length() };
+    return http_proto::file_source{ std::move(file), content_length() };
 }
 
 // -----------------------------------------------------------------------------

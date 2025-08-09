@@ -275,7 +275,7 @@ handle_request(
         res.append(
             http_proto::field::content_type, mt);
 
-        sr.start<http_proto::file_body>(
+        sr.start<http_proto::file_source>(
             res, std::move(f), size);
         return;
     }
