@@ -12,7 +12,7 @@
 
 #include "multipart_form.hpp"
 
-#include <boost/http_proto/file_body.hpp>
+#include <boost/http_proto/file_source.hpp>
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/serializer.hpp>
 
@@ -57,7 +57,7 @@ public:
     std::uint64_t
     content_length() const;
 
-    http_proto::file_body
+    http_proto::file_source
     body() const;
 };
 
