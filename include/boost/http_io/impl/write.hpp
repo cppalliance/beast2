@@ -62,9 +62,11 @@ public:
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
-                        "http_io::write_some_op"));
+                        "immediate"));
+                    auto io_ex = self.get_io_executor();
                     asio::async_immediate(
-                        self.get_io_executor(), asio::append(std::move(self), ec));
+                        io_ex,
+                        asio::append(std::move(self), ec));
                 }
                 goto upcall;
             }
