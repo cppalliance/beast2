@@ -14,6 +14,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto.hpp>
@@ -212,6 +213,8 @@ perform_tls_handshake(ssl::context& ssl_ctx, Socket socket, std::string host)
     if(!SSL_set_tlsext_host_name(ssl_stream.native_handle(), host.c_str()))
         throw system_error{ static_cast<int>(::ERR_get_error()),
                             asio::error::get_ssl_category() };
+
+    ssl_stream.set_verify_callback(ssl::host_name_verification(host));
 
     co_await ssl_stream.async_handshake(ssl::stream_base::client);
     co_return ssl_stream;
