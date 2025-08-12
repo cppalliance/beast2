@@ -44,4 +44,11 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
         target_link_libraries(http_io_example_client_burl boost_rts_brotli)
     endif()
 
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    find_package(Libpsl)
+    if (Libpsl_FOUND)
+        target_link_libraries(http_io_example_client_burl Libpsl::Libpsl)
+        target_compile_definitions(http_io_example_client_burl PRIVATE BURL_HAS_LIBPSL)
+    endif ()
+
 endif()

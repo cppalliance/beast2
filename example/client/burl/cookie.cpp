@@ -15,6 +15,10 @@
 #include <iomanip>
 #include <sstream>
 
+#ifdef BURL_HAS_LIBPSL
+#include <libpsl.h>
+#endif
+
 namespace grammar = boost::urls::grammar;
 
 namespace
@@ -116,6 +120,56 @@ parse_date(core::string_view sv)
 
     return ch::system_clock::from_time_t(std::mktime(&tm));
 }
+
+boost::system::result<cookie>
+parse_netscape_cookie(core::string_view sv)
+{
+    static constexpr auto field_chars =
+        grammar::all_chars - grammar::lut_chars{ "\t" };
+
+    static constexpr auto netscape_parser = grammar::tuple_rule(
+        grammar::optional_rule(grammar::literal_rule("#HttpOnly_")),
+        grammar::token_rule(field_chars),
+        grammar::squelch(grammar::delim_rule('\t')),
+        grammar::variant_rule(
+            grammar::literal_rule("FALSE"), grammar::literal_rule("TRUE")),
+        grammar::squelch(grammar::delim_rule('\t')),
+        grammar::token_rule(field_chars),
+        grammar::squelch(grammar::delim_rule('\t')),
+        grammar::variant_rule(
+            grammar::literal_rule("FALSE"), grammar::literal_rule("TRUE")),
+        grammar::squelch(grammar::delim_rule('\t')),
+        grammar::unsigned_rule<std::uint32_t>(),
+        grammar::squelch(grammar::delim_rule('\t')),
+        grammar::token_rule(field_chars),
+        grammar::squelch(grammar::delim_rule('\t')),
+        grammar::token_rule(field_chars));
+
+    const auto parse_rs = grammar::parse(sv, netscape_parser);
+
+    if(parse_rs.has_error())
+        return parse_rs.error();
+
+    auto epoch_to_expiry = [](std::uint32_t epoch)
+        -> boost::optional<std::chrono::system_clock::time_point>
+    {
+        if(epoch == 0)
+            return boost::none;
+
+        return ch::system_clock::from_time_t(static_cast<std::time_t>(epoch));
+    };
+
+    auto rs      = cookie{};
+    rs.http_only = std::get<0>(*parse_rs).has_value();
+    rs.domain    = std::get<1>(*parse_rs);
+    rs.tailmatch = std::get<2>(*parse_rs).index();
+    rs.path      = std::get<3>(*parse_rs);
+    rs.secure    = std::get<4>(*parse_rs).index();
+    rs.expires   = epoch_to_expiry(std::get<5>(*parse_rs));
+    rs.name      = std::get<6>(*parse_rs);
+    rs.value     = std::get<7>(*parse_rs);
+    return rs;
+}
 } // namespace
 
 boost::system::result<cookie>
@@ -162,6 +216,7 @@ parse_cookie(core::string_view sv)
                 return grammar::error::invalid;
             // Convert to expiry date
             // TODO: replace std::stoll
+            // TODO: check for overflow
             rs.expires =
                 ch::system_clock::now() + ch::seconds{ std::stoll(*value) };
         }
@@ -226,67 +281,29 @@ parse_cookie(core::string_view sv)
     return rs;
 }
 
-boost::system::result<cookie>
-parse_netscape_cookie(core::string_view sv)
-{
-    static constexpr auto field_chars =
-        grammar::all_chars - grammar::lut_chars{ "\t" };
-
-    static constexpr auto netscape_parser = grammar::tuple_rule(
-        grammar::optional_rule(grammar::literal_rule("#HttpOnly_")),
-        grammar::token_rule(field_chars),
-        grammar::squelch(grammar::delim_rule('\t')),
-        grammar::variant_rule(
-            grammar::literal_rule("FALSE"), grammar::literal_rule("TRUE")),
-        grammar::squelch(grammar::delim_rule('\t')),
-        grammar::token_rule(field_chars),
-        grammar::squelch(grammar::delim_rule('\t')),
-        grammar::variant_rule(
-            grammar::literal_rule("FALSE"), grammar::literal_rule("TRUE")),
-        grammar::squelch(grammar::delim_rule('\t')),
-        grammar::unsigned_rule<std::uint32_t>(),
-        grammar::squelch(grammar::delim_rule('\t')),
-        grammar::token_rule(field_chars),
-        grammar::squelch(grammar::delim_rule('\t')),
-        grammar::token_rule(field_chars));
-
-    const auto parse_rs = grammar::parse(sv, netscape_parser);
-
-    if(parse_rs.has_error())
-        return parse_rs.error();
-
-    auto epoch_to_expiry = [](std::uint32_t epoch)
-        -> boost::optional<std::chrono::system_clock::time_point>
-    {
-        if(epoch == 0)
-            return boost::none;
-
-        return ch::system_clock::from_time_t(static_cast<std::time_t>(epoch));
-    };
-
-    auto rs      = cookie{};
-    rs.http_only = std::get<0>(*parse_rs).has_value();
-    rs.domain    = std::get<1>(*parse_rs);
-    rs.tailmatch = std::get<2>(*parse_rs).index();
-    rs.path      = std::get<3>(*parse_rs);
-    rs.secure    = std::get<4>(*parse_rs).index();
-    rs.expires   = epoch_to_expiry(std::get<5>(*parse_rs));
-    rs.name      = std::get<6>(*parse_rs);
-    rs.value     = std::get<7>(*parse_rs);
-    return rs;
-}
-
 void
 cookie_jar::add(const urls::url_view& url, cookie c)
 {
     if(c.domain.has_value())
     {
+#ifdef BURL_HAS_LIBPSL
+        std::string host = url.host();
+        for(auto& c : host)
+            c = grammar::to_lower(c);
+
+        std::string domain = c.domain.value();
+        for(auto& c : domain)
+            c = grammar::to_lower(c);
+
+        if(psl_is_cookie_domain_acceptable(
+            psl_builtin(), host.c_str(), domain.c_str()))
+            return;
+#endif
         c.tailmatch = true;
-        // TODO: Verify with the current URL and Public Suffix List
     }
     else
     {
-        c.domain.emplace(url.encoded_host());
+        c.domain.emplace(url.host());
     }
 
     if(!c.path.has_value())
