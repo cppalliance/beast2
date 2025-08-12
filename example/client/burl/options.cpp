@@ -319,7 +319,8 @@ parse_args(int argc, char* argv[])
             po::value<std::vector<std::string>>()->value_name("<header>"),
             "Pass custom header(s) to server")
         ("help,h", "produce help message")
-        ("http1.0", "Use HTTP 1.0")
+        ("http1.0,0", "Use HTTP 1.0")
+        ("http1.1", "Use HTTP 1.1")
         ("insecure,k", "Allow insecure server connections")
         ("ipv4,4", "Resolve names to IPv4 addresses")
         ("ipv6,6", "Resolve names to IPv6 addresses")
@@ -499,6 +500,7 @@ parse_args(int argc, char* argv[])
     set_bool(oc.post302, "post302");
     set_bool(oc.post303, "post303");
     set_bool(oc.http10, "http1.0");
+    set_bool(oc.http11, "http1.1");
     set_bool(oc.ipv4, "ipv4");
     set_bool(oc.ipv6, "ipv6");
     set_bool(oc.failonerror, "fail");
