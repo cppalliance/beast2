@@ -60,6 +60,7 @@ struct operation_config
     std::function<void(urls::url&)> connect_to;
     std::function<void(urls::url&)> resolve_to;
     bool http10 = false;
+    bool http11 = true;
     bool ipv4   = false;
     bool ipv6   = false;
     boost::optional<std::string> useragent;
