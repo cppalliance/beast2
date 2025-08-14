@@ -8,4 +8,5 @@
 #
 
 build-project burl ;
+build-project get ;
 build-project visit ;
