@@ -335,15 +335,6 @@ public:
     }
 };
 
-struct null_sink : http_proto::sink
-{
-    results
-    on_write(buffers::const_buffer cb, bool) override
-    {
-        return { {}, cb.size() };
-    }
-};
-
 asio::awaitable<http_proto::status>
 perform_request(
     operation_config oc,
@@ -553,10 +544,9 @@ perform_request(
 
         if(can_reuse_connection(parser.get(), referer, url))
         {
-            // read and discard bodies if they are <= 1MB
-            // open a new connection otherwise.
-            parser.set_body_limit(1024 * 1024);
-            parser.set_body<null_sink>();
+            // Read and discard bodies if they are <= 32KB
+            // Open a new connection otherwise.
+            parser.set_body_limit(32 * 1024);
             auto [ec, _] =
                 co_await http_io::async_read(stream, parser, asio::as_tuple);
             if(ec)

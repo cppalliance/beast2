@@ -7,5 +7,11 @@
 # Official repository: https://github.com/cppalliance/http_io
 #
 
-add_subdirectory(burl)
+find_package(OpenSSL)
+
 add_subdirectory(visit)
+
+if (OPENSSL_FOUND)
+    add_subdirectory(burl)
+    add_subdirectory(get)
+endif ()

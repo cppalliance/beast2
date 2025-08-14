@@ -1,0 +1,27 @@
+#
+# Copyright (c) 2025 Mohammad Nejati
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+# Official repository: https://github.com/cppalliance/http_io
+#
+
+using openssl ;
+import ac ;
+
+project
+    : requirements
+      <library>/boost/http_io//boost_http_io
+      [ ac.check-library /boost/rts//boost_rts_zlib : <library>/boost/rts//boost_rts_zlib : ]
+      [ ac.check-library /boost/rts//boost_rts_brotli : <library>/boost/rts//boost_rts_brotli : ]
+      <library>/boost/url//boost_url
+      <library>/openssl//ssl/<link>shared
+      <library>/openssl//crypto/<link>shared
+      <target-os>windows:<library>crypt32
+      <include>.
+    ;
+
+exe get :
+    [ glob *.cpp ]
+    ;
