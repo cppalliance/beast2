@@ -1,0 +1,39 @@
+#
+# Copyright (c) 2025 Mohammad Nejati
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+# Official repository: https://github.com/cppalliance/http_io
+#
+
+import ../../../../config/checks/config : requires ;
+
+using openssl ;
+import ac ;
+
+project
+    : requirements
+      <library>/boost/http_io//boost_http_io
+      <library>/boost/url//boost_url
+      <library>/boost/json//boost_json
+      <library>/boost/multiprecision//boost_multiprecision
+      <library>/openssl//ssl/<link>shared
+      <library>/openssl//crypto/<link>shared
+      <target-os>windows:<library>crypt32
+      <include>.
+    ;
+
+exe cpp11 :
+    cpp11.cpp
+    [ glob lib/*.cpp ]
+    ;
+
+exe cpp20 :
+    cpp20.cpp
+    [ glob lib/*.cpp ]
+    : requirements
+      [ requires
+        cxx20_hdr_coroutine
+      ]
+    ;

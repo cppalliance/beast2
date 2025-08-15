@@ -72,7 +72,7 @@ if (BOOST_HTTP_IO_BUILD_TESTS)
     set(BOOST_HTTP_IO_UNIT_TEST_LIBRARIES beast url)
 endif ()
 if (BOOST_HTTP_IO_BUILD_EXAMPLES)
-    set(BOOST_HTTP_IO_EXAMPLE_LIBRARIES program_options scope url)
+    set(BOOST_HTTP_IO_EXAMPLE_LIBRARIES json program_options scope url multiprecision)
 endif ()
 # Complete dependency list
 set(BOOST_INCLUDE_LIBRARIES ${BOOST_HTTP_IO_INCLUDE_LIBRARIES} ${BOOST_HTTP_IO_UNIT_TEST_LIBRARIES} ${BOOST_HTTP_IO_EXAMPLE_LIBRARIES})

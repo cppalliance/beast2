@@ -1,6 +1,13 @@
-#include <boost/asio/append.hpp>
+//
+// Copyright (c) 2025 Mohammad Nejati
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+// Official repository: https://github.com/cppalliance/http_io
+//
+
 #include <boost/asio/connect.hpp>
-#include <boost/asio/detached.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/host_name_verification.hpp>
@@ -437,7 +444,7 @@ main(int argc, char* argv[])
     // required configuration services
     rts::context rts_ctx;
 
-    // Install Parser service
+    // Install parser service
     {
         http_proto::response_parser::config cfg;
         cfg.body_limit = std::uint64_t(-1);
