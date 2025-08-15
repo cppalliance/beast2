@@ -8,5 +8,6 @@
 #
 
 build-project burl ;
+build-project jsonrpc ;
 build-project get ;
 build-project visit ;
