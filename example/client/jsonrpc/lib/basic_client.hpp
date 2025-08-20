@@ -10,6 +10,7 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_BASIC_CLIENT_HPP
 #define BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_BASIC_CLIENT_HPP
 
+#include "detail/converts_to.hpp"
 #include "error.hpp"
 #include "method.hpp"
 
@@ -20,7 +21,9 @@
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/http_proto/string_body.hpp>
-#include <boost/json.hpp>
+#include <boost/json/parse.hpp>
+#include <boost/json/value.hpp>
+#include <boost/json/value_to.hpp>
 #include <boost/rts/context_fwd.hpp>
 #include <boost/url/url_view.hpp>
 
@@ -33,7 +36,6 @@ class basic_client
     boost::http_proto::serializer sr_;
     boost::http_proto::response_parser pr_;
     boost::http_proto::request req_;
-    boost::json::parser jpr_;
     std::uint64_t id_ = 0;
 public:
     /// The type of the next layer.
@@ -198,7 +200,11 @@ private:
             constexpr auto deferred = boost::asio::deferred;
             if(e.code())
                 return deferred.values(std::move(e), Return{});
-            // TODO: avoid extra copy
+
+            // avoid extra copies when possible
+            if(auto* o = detail::converts_to<Return>(v))
+                return deferred.values(std::move(e), std::move(*o));
+
             auto o = boost::json::try_value_to<Return>(v);
             if(o.has_error())
                 return deferred.values(error(o.error()), Return{});
