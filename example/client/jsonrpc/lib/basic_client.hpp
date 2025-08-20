@@ -13,6 +13,7 @@
 #include "error.hpp"
 #include "method.hpp"
 
+#include <boost/asio/any_completion_handler.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/http_io.hpp>
 #include <boost/http_proto/parser.hpp>
@@ -34,10 +35,6 @@ class basic_client
     boost::http_proto::request req_;
     boost::json::parser jpr_;
     std::uint64_t id_ = 0;
-
-    template<typename Return>
-    class request_op;
-
 public:
     /// The type of the next layer.
     using next_layer_type =
@@ -90,61 +87,268 @@ public:
         return req_;
     }
 
+    class invoker_base
+    {
+    protected:
+        basic_client* self_;
+        boost::core::string_view method_;
+    public:
+        invoker_base(
+            basic_client* self,
+            boost::core::string_view method)
+            : self_(self)
+            , method_(method)
+        {
+        }
+    };
+
     template<typename Signature>
-    struct invoker;
+    class invoker;
 
+    /** Calls a remote procedure that takes no parameters.
+
+        @tparam Return the return type of procedure.
+    */
     template<typename Return>
-    struct invoker<Return()>
+    class invoker<Return()> : public invoker_base
     {
-        method<Return()> m;
-        basic_client& c;
-
+    public:
+        using invoker_base::invoker_base;
         template<
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
                 CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
         BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
         operator()(
-            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
+            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
+        {
+            return this->self_->async_request(
+                this->method_,
+                {},
+                boost::asio::deferred(transform<Return>{})) | std::move(token);
+        }
     };
 
+    /** Calls a remote procedure with positional parameters (array).
+
+        @tparam Return the return type of procedure.
+    */
     template<typename Return>
-    struct invoker<Return(boost::json::array)>
+    class invoker<Return(boost::json::array)>
+        : public invoker_base
     {
-        method<Return(boost::json::array)> m;
-        basic_client& c;
+    public:
+        using invoker_base::invoker_base;
 
         template<
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
                 CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
         BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
         operator()(
-            const boost::json::array& params,
-            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
+            boost::json::array params,
+            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
+        {
+            return this->self_->async_request(
+                this->method_,
+                std::move(params),
+                boost::asio::deferred(transform<Return>{})) | std::move(token);
+        }
     };
 
+    /** Calls a remote procedure with named parameters (object).
+
+        @tparam Return the return type of procedure.
+    */
     template<typename Return>
-    struct invoker<Return(boost::json::object)>
+    class invoker<Return(boost::json::object)>
+        : public invoker_base
     {
-        method<Return(boost::json::object)> m;
-        basic_client& c;
+    public:
+        using invoker_base::invoker_base;
 
         template<
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
                 CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
         BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
         operator()(
-            const boost::json::object& params,
-            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
+            boost::json::object params,
+            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
+        {
+            return this->self_->async_request(
+                this->method_,
+                std::move(params),
+                boost::asio::deferred(transform<Return>{})) | std::move(token);
+        }
     };
 
     template<typename Signature>
     invoker<Signature>
     operator[](method<Signature> m) noexcept
     {
-        return { m, *this };
+        return { this, m.name };
     }
 
 private:
+    template<typename Return>
+    class transform
+    {
+    public:
+        boost::asio::deferred_values<error, Return>
+        operator()(error e, boost::json::value v)
+        {
+            constexpr auto deferred = boost::asio::deferred;
+            if(e.code())
+                return deferred.values(std::move(e), Return{});
+            // TODO: avoid extra copy
+            auto o = boost::json::try_value_to<Return>(v);
+            if(o.has_error())
+                return deferred.values(error(o.error()), Return{});
+            return deferred.values(std::move(e), std::move(*o));
+        }
+    };
+
+    class request_op
+        : public boost::asio::coroutine
+    {
+        basic_client& c_;
+        std::string body_;
+        std::uint64_t id_;
+
+    public:
+        request_op(
+            basic_client& c,
+            std::string body,
+            std::uint64_t id) noexcept
+            : c_(c)
+            , body_(std::move(body))
+            , id_(id)
+        {
+        }
+
+        template<class Self>
+        void
+        operator()(
+            Self& self,
+            boost::system::error_code ec = {},
+            std::size_t = 0)
+        {
+            if(ec)
+                return self.complete(ec, {});
+
+            BOOST_ASIO_CORO_REENTER(*this)
+            {
+                c_.req_.set_payload_size(body_.size());
+                c_.sr_.template start<
+                    boost::http_proto::string_body>(
+                        c_.req_, std::move(body_));
+
+                BOOST_ASIO_CORO_YIELD
+                boost::http_io::async_write(
+                    c_.stream_, c_.sr_, std::move(self));
+
+                c_.pr_.start();
+                BOOST_ASIO_CORO_YIELD
+                boost::http_io::async_read_header(
+                    c_.stream_, c_.pr_, std::move(self));
+
+                BOOST_ASIO_CORO_YIELD
+                boost::http_io::async_read(
+                    c_.stream_, c_.pr_, std::move(self));
+
+                {
+                    auto body = boost::json::parse(c_.pr_.body(), ec);
+                    if(ec || !body.is_object())
+                        return self.complete({ errc::invalid_response }, {});
+                    auto& obj = body.get_object();
+                    auto* ver = obj.if_contains("jsonrpc");
+                    auto* err = obj.if_contains("error");
+                    auto* res = obj.if_contains("result");
+                    auto* id  = obj.if_contains("id");
+                    if(!ver || *ver != "2.0")
+                        return self.complete({ errc::version_error }, {});
+                    if(!id || *id != id_)
+                        return self.complete({ errc::id_mismatch }, {});
+                    if(err && err->is_object())
+                    {
+                        auto* code = err->get_object().if_contains("code");
+                        if(!code || !code->is_int64())
+                            return self.complete({ errc::invalid_response }, {});
+                        switch (code->get_int64())
+                        {
+                        case -32700: ec = errc::parse_error;      break;
+                        case -32600: ec = errc::invalid_request;  break;
+                        case -32601: ec = errc::method_not_found; break;
+                        case -32602: ec = errc::invalid_params;   break;
+                        case -32603: ec = errc::internal_error;   break;
+                        default:     ec = errc::server_error;     break;
+                        }
+                        return self.complete({ ec, std::move(err->get_object()) }, {});
+                    }
+                    else if(res)
+                    {
+                        return self.complete({}, std::move(*res));
+                    }
+                    self.complete({ errc::invalid_response }, {});
+                }
+            }
+        }
+    };
+
+    class initiate_async_request
+    {
+        basic_client* self_;
+
+    public:
+        initiate_async_request(basic_client* self) noexcept
+            : self_(self)
+        {
+        }
+
+        using executor_type = typename basic_client::executor_type;
+
+        executor_type
+        get_executor() noexcept
+        {
+            return self_->get_executor();
+        }
+
+        void
+        operator()(
+            boost::asio::any_completion_handler<void(error, boost::json::value)> handler,
+            boost::core::string_view method,
+            boost::json::value params)
+        {
+            auto id = self_->next_id();
+            boost::asio::async_compose<
+                decltype(handler),
+                void(error, boost::json::value)>(
+                    basic_client::request_op(*self_, self_->make_body(method, params, id), id),
+                    handler,
+                    self_->stream_);
+        }
+    };
+
+    template<typename CompletionToken>
+    auto
+    async_request(
+        boost::core::string_view method,
+        boost::json::value params,
+        CompletionToken&& token)
+        -> decltype(boost::asio::async_initiate<
+            CompletionToken, void(error, boost::json::value)>(
+                initiate_async_request(this),
+                token,
+                method,
+                std::move(params))
+        )
+    {
+        return boost::asio::async_initiate<
+            CompletionToken, void(error, boost::json::value)>(
+                initiate_async_request(this),
+                token,
+                method,
+                std::move(params));
+    }
+
     std::uint64_t
     next_id() noexcept
     {
@@ -169,158 +373,6 @@ private:
                 params.storage()));
     }
 };
-
-template<class Stream>
-template<typename Return>
-class basic_client<Stream>::request_op
-    : public boost::asio::coroutine
-{
-    basic_client& c_;
-    std::string body_;
-    std::uint64_t id_;
-
-public:
-    request_op(
-        basic_client& c,
-        std::string body,
-        std::uint64_t id) noexcept
-        : c_(c)
-        , body_(std::move(body))
-        , id_(id)
-    {
-    }
-
-    template<class Self>
-    void
-    operator()(
-        Self& self,
-        boost::system::error_code ec = {},
-        std::size_t = 0)
-    {
-        if(ec)
-            return self.complete(ec, {});
-
-        BOOST_ASIO_CORO_REENTER(*this)
-        {
-            c_.req_.set_payload_size(body_.size());
-            c_.sr_.template start<
-                boost::http_proto::string_body>(
-                    c_.req_, std::move(body_));
-
-            BOOST_ASIO_CORO_YIELD
-            boost::http_io::async_write(
-                c_.stream_, c_.sr_, std::move(self));
-
-            c_.pr_.start();
-            BOOST_ASIO_CORO_YIELD
-            boost::http_io::async_read_header(
-                c_.stream_, c_.pr_, std::move(self));
-
-            BOOST_ASIO_CORO_YIELD
-            boost::http_io::async_read(
-                c_.stream_, c_.pr_, std::move(self));
-
-            {
-                auto body = boost::json::parse(c_.pr_.body(), ec);
-                if(ec || !body.is_object())
-                    return self.complete({ errc::invalid_response }, {});
-                auto& obj = body.as_object();
-                auto* ver = obj.if_contains("jsonrpc");
-                auto* err = obj.if_contains("error");
-                auto* res = obj.if_contains("result");
-                auto* id  = obj.if_contains("id");
-                if(!ver || *ver != "2.0")
-                    return self.complete({ errc::version_error }, {});
-                if(!id || *id != id_)
-                    return self.complete({ errc::id_mismatch }, {});
-                if(err && err->is_object())
-                {
-                    auto* code = err->as_object().if_contains("code");
-                    if(!code || !code->is_int64())
-                        return self.complete({ errc::invalid_response }, {});
-                    switch (code->as_int64())
-                    {
-                    case -32700: ec = errc::parse_error;      break;
-                    case -32600: ec = errc::invalid_request;  break;
-                    case -32601: ec = errc::method_not_found; break;
-                    case -32602: ec = errc::invalid_params;   break;
-                    case -32603: ec = errc::internal_error;   break;
-                    default:     ec = errc::server_error;     break;
-                    }
-                    return self.complete({ ec, std::move(err->as_object()) }, {});
-                }
-                else if(res)
-                {
-                    // TODO: avoid extra copy
-                    return self.complete({}, boost::json::value_to<Return>(*res));
-                }
-                self.complete({ errc::invalid_response }, {});
-            }
-        }
-    }
-};
-
-template<class Stream>
-template<typename Return>
-template<
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
-        CompletionToken>
-BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
-basic_client<Stream>::
-invoker<Return()>::
-operator()(
-    CompletionToken&& token)
-{
-    auto id = c.next_id();
-    return boost::asio::async_compose<
-        CompletionToken,
-        void(error, Return)>(
-            basic_client::request_op<Return>(c, c.make_body(m.name, {}, id), id),
-            token,
-            c.stream_);
-}
-
-template<class Stream>
-template<typename Return>
-template<
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
-        CompletionToken>
-BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
-basic_client<Stream>::
-invoker<Return(boost::json::array)>::
-operator()(
-    const boost::json::array& params,
-    CompletionToken&& token)
-{
-    auto id = c.next_id();
-    return boost::asio::async_compose<
-        CompletionToken,
-        void(error, Return)>(
-            basic_client::request_op<Return>(c, c.make_body(m.name, params, id), id),
-            token,
-            c.stream_);
-}
-
-template<class Stream>
-template<typename Return>
-template<
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
-        CompletionToken>
-BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
-basic_client<Stream>::
-invoker<Return(boost::json::object)>::
-operator()(
-    const boost::json::object& params,
-    CompletionToken&& token)
-{
-    auto id = c.next_id();
-    return boost::asio::async_compose<
-        CompletionToken,
-        void(error, Return)>(
-            basic_client::request_op<Return>(c, c.make_body(m.name, params, id), id),
-            token,
-            c.stream_);
-}
 
 } // jsonrpc
 
