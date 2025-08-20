@@ -72,7 +72,6 @@ struct disposition_traits<jsonrpc::error>
     static void
     throw_exception(const jsonrpc::error& e)
     {
-        // if(e.code() != jsonrpc::errc::server_error)
         if(e.object().empty())
             return BOOST_THROW_EXCEPTION(system::system_error(e.code()));
 
@@ -86,7 +85,6 @@ struct disposition_traits<jsonrpc::error>
         if(!e.code())
             return nullptr;
 
-        // if(e.code() != jsonrpc::errc::server_error)
         if(e.object().empty())
             return std::make_exception_ptr(system::system_error(e.code()));
 

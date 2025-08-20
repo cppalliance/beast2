@@ -193,9 +193,9 @@ private:
     void
     fail(const jsonrpc::error& error)
     {
-        std::cerr
-            << error.object() << " "
-            << error.code().what() << "\n";
+        if(!error.object().empty())
+            std::cerr << error.object() << " ";
+        std::cerr << error.code().what() << "\n";
     }
 };
 
