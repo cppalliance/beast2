@@ -26,6 +26,7 @@
 
 namespace jsonrpc {
 
+/// A JSON-RPC 2.0 client.
 class client
 {
     std::unique_ptr<any_stream> stream_;
@@ -47,49 +48,70 @@ public:
     using next_layer_type = any_stream;
 
     /// The type of the executor associated with the object.
-    using executor_type = typename next_layer_type::executor_type;
+    using executor_type = typename any_stream::executor_type;
 
+    /** Constructor.
+
+        Constructs a client capable of connecting to
+        an HTTP or HTTPS endpoint.
+    */ 
     client(
         boost::urls::url endpoint,
         const boost::rts::context& rts_ctx,
         boost::asio::any_io_executor exec,
         boost::asio::ssl::context& ssl_ctx);
 
+    /** Constructor.
+
+        Constructs a client using the supplied
+        @ref any_stream instance.
+    */ 
     client(
         boost::urls::url endpoint,
         const boost::rts::context& rts_ctx,
         std::unique_ptr<any_stream> stream);
 
+    /// Get the executor associated with the object.
     executor_type
     get_executor() noexcept
     {
         return stream_->get_executor();
     }
 
+    /// Get a reference to the next layer.
     next_layer_type&
     next_layer() noexcept
     {
         return *stream_;
     }
 
+    /// Get a reference to the next layer.
     next_layer_type const&
     next_layer() const noexcept
     {
         return *stream_;
     }
 
+    /// Return the endpoint that the client is configured with.
     boost::urls::url_view
     endpoint() const noexcept
     {
         return endpoint_;
     }
 
+    /** Return a reference to the fields container of the HTTP
+        request message.
+
+        This function can be used to customize HTTP headers, for
+        example, to add the required credentials.
+    */
     boost::http_proto::fields_base&
     http_fields()
     {
         return req_;
     }
 
+    /// Connect to the endpoint.
     template<
         BOOST_ASIO_COMPLETION_TOKEN_FOR(void(boost::system::error_code))
             CompletionToken = boost::asio::deferred_t>
@@ -103,6 +125,7 @@ public:
                 this);
     }
 
+    /// Shutdown the stream.
     template<
         BOOST_ASIO_COMPLETION_TOKEN_FOR(void(boost::system::error_code))
             CompletionToken = boost::asio::deferred_t>
@@ -119,7 +142,7 @@ public:
     template<typename Signature>
     class invoker;
 
-    /** Calls a remote procedure that takes no parameters.
+    /** Call a remote procedure that takes no parameters.
 
         Instances of this type are returned from @ref operator[].
 
@@ -131,6 +154,14 @@ public:
         using invoker_base::invoker_base;
     public:
 
+        /** Call a remote procedure that takes no parameters.
+
+            The result type depends on the signature of the @ref method object
+            used to instantiate the invoker.
+
+            @param token The completion token used to produce a completion
+            handler, which will be invoked when the call completes.
+        */
         template<
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
                 CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
@@ -145,7 +176,7 @@ public:
         }
     };
 
-    /** Calls a remote procedure with positional parameters (as an array).
+    /** Call a remote procedure with positional parameters (array).
 
         Instances of this type are returned from @ref operator[].
 
@@ -157,6 +188,17 @@ public:
         using invoker_base::invoker_base;
     public:
 
+        /** Call a remote procedure with positional parameters (array).
+
+            The result type depends on the signature of the @ref method object
+            used to instantiate the invoker. 
+
+            @param params A JSON array containing the positional parameters to
+            use when calling the server method.
+
+            @param token The completion token used to produce a completion
+            handler, which will be invoked when the call completes.
+        */
         template<
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
                 CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
@@ -172,7 +214,7 @@ public:
         }
     };
 
-    /** Calls a remote procedure with named parameters (as an object).
+    /** Call a remote procedure with named parameters (object).
 
         Instances of this type are returned from @ref operator[].
 
@@ -184,6 +226,17 @@ public:
         using invoker_base::invoker_base;
     public:
 
+        /** Call a remote procedure with named parameters (object).
+
+            The result type depends on the signature of the @ref method object
+            used to instantiate the invoker. 
+
+            @param params A JSON object containing the named parameters to use
+            when calling the server method.
+
+            @param token The completion token used to produce a completion
+            handler, which will be invoked when the call completes.
+        */
         template<
             BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
                 CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
@@ -199,6 +252,20 @@ public:
         }
     };
 
+    /** Return an @ref invoker instance that can be used to asynchronously
+        invoke the specified method.
+
+        Example:
+        @code
+        client[method_a]({ "param1", "param2" }, completion_token);
+        @endcode
+
+        @return An @ref invoker capable of asynchronously calling the specified
+        method.
+
+        @param m The @ref method object containing the name and signature of the
+        remote procedure.
+    */
     template<typename Signature>
     invoker<Signature>
     operator[](method<Signature> m) noexcept
