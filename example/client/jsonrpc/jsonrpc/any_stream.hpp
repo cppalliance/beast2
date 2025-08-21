@@ -17,6 +17,7 @@
 
 namespace jsonrpc {
 
+/// Interface for a stream that can be used with @ref client.
 class any_stream
 {
 public:

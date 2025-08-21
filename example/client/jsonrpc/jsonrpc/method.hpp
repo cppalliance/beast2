@@ -14,9 +14,20 @@
 
 namespace jsonrpc {
 
+/** Containin the name and signature of a remote
+    procedure.
+
+    @par Example:
+    @code
+    method<json::string()> web3_clientVersion = "web3_clientVersion";
+    @endcode
+
+    @tparam Signature The signature of the method.
+*/
 template<typename Signature>
 struct method;
 
+/// @copydoc method
 template<typename Return>
 struct method<Return()>
 {
@@ -29,6 +40,7 @@ struct method<Return()>
     }
 };
 
+/// @copydoc method
 template<typename Return, typename Param>
 struct method<Return(Param)>
 {

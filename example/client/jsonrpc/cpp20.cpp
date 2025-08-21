@@ -95,6 +95,19 @@ co_main(
         << std::setprecision(3) << dec_float(to_int(gas_price)) / dec_float("1e10")
         << " GWEI\n";
 
+    // Get ETH/USD price from a Chainlink oracle
+    auto eth_usd = co_await client[eth_call](
+        {
+            {
+                {"to", "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419"}, // ETH/USD price feed
+                {"data", "0x50d25bcd"} // latestRoundData() selector
+            },
+            "latest"
+        });
+    std::cout
+        << "ETH/USD:      "
+        << std::fixed << dec_float(to_int(eth_usd)) / dec_float("1e8") << '\n';
+
     // Gracefully close the stream
     auto [ec] = co_await client.async_shutdown(asio::as_tuple);
     if(ec && ec != asio::ssl::error::stream_truncated)
@@ -105,14 +118,15 @@ co_main(
 Sample output:
 
 web3 client:  "erigon/3.0.4/linux-amd64/go1.23.9"
-Block number: 23175159
-Block hash:   "0xd476f0a0dd29be4d63bc737937f6c40b024906f1a864ee38aa1a03f91ce55efd"
-Block size:   87166 Bytes
-Timestamp:    1755606983
-Transactions: 176
+Block number: 23189485
+Block hash:   "0xc42ff6625921df3a09495cbea3353ab6e60167319d2c64cedfdd265b7af0a738"
+Block size:   132074 Bytes
+Timestamp:    1755779639
+Transactions: 259
 Balance:      180774.35501503312 ETH
 Gas estimate: 21000
-Gas price:    0.0337 GWEI
+Gas price:    0.039 GWEI
+ETH/USD:      4280.746
 */
 
 int

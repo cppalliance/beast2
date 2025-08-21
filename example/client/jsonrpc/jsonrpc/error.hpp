@@ -18,6 +18,10 @@
 
 namespace jsonrpc {
 
+/** An error type that encapsulates both an error code
+    and an optional JSON object containing additional error
+    details as provided by the server.
+*/
 class error
 {
     boost::system::error_code ec_;
@@ -43,12 +47,16 @@ public:
         return *this;
     }
 
+    /// Return the error code
     const boost::system::error_code&
     code() const noexcept
     {
         return ec_;
     }
 
+    /** Return an optional JSON object containing additional
+        error details as provided by the server.
+    */
     const boost::json::object&
     object() const noexcept
     {
