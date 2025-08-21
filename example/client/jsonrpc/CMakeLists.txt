@@ -13,7 +13,7 @@ file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
 
-file(GLOB_RECURSE LIBFILES CONFIGURE_DEPENDS lib/*.cpp lib/*.hpp Jamfile)
+file(GLOB_RECURSE LIBFILES CONFIGURE_DEPENDS jsonrpc/*.cpp jsonrpc/*.hpp Jamfile)
 add_library(http_io_example_client_jsonrpc_lib STATIC ${LIBFILES})
 
 target_compile_definitions(http_io_example_client_jsonrpc_lib
@@ -37,7 +37,7 @@ if (WIN32)
     target_link_libraries(http_io_example_client_jsonrpc_lib PUBLIC crypt32)
 endif()
 
-add_executable(http_io_example_client_jsonrpc_cpp11 cpp11.cpp methods.hpp Jamfile)
+add_executable(http_io_example_client_jsonrpc_cpp11 cpp11.cpp eth_methods.hpp Jamfile)
 target_link_libraries(http_io_example_client_jsonrpc_cpp11
     PRIVATE
     http_io_example_client_jsonrpc_lib)
@@ -45,7 +45,7 @@ target_link_libraries(http_io_example_client_jsonrpc_cpp11
         PROPERTY FOLDER "examples")
 
 if (CMAKE_CXX_STANDARD EQUAL 20)
-    add_executable(http_io_example_client_jsonrpc_cpp20 cpp20.cpp methods.hpp Jamfile)
+    add_executable(http_io_example_client_jsonrpc_cpp20 cpp20.cpp eth_methods.hpp Jamfile)
     target_link_libraries(http_io_example_client_jsonrpc_cpp20
         PRIVATE
         http_io_example_client_jsonrpc_lib)

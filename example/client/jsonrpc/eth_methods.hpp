@@ -10,7 +10,7 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_METHODS_HPP
 #define BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_METHODS_HPP
 
-#include "lib/method.hpp"
+#include "jsonrpc/method.hpp"
 
 #include <boost/json/array.hpp>
 #include <boost/json/string.hpp>
@@ -20,7 +20,7 @@ template<typename Signature>
 using method = jsonrpc::method<Signature>;
 
 /// Ethereum JSON-RPC endpoint methods
-namespace methods
+namespace eth_methods
 {
 BOOST_INLINE_CONSTEXPR method<json::string()> web3_clientVersion = "web3_clientVersion";
 BOOST_INLINE_CONSTEXPR method<json::string(json::array)> web3_sha3 = "web3_sha3";

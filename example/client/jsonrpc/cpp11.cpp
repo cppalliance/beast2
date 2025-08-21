@@ -7,8 +7,9 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#include "lib/client.hpp"
-#include "methods.hpp"
+#include "jsonrpc/client.hpp"
+
+#include "eth_methods.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/rts/context.hpp>
@@ -19,8 +20,8 @@
 using namespace boost;
 using namespace std::placeholders;
 
-// Ethereum JSON-RPC methods
-using namespace methods;
+// Bring Ethereum methods into scope
+using namespace eth_methods;
 
 class session
 {
@@ -32,10 +33,10 @@ public:
         asio::ssl::context& ssl_ctx,
         const rts::context& rts_ctx)
         : client_(
-              urls::url("https://ethereum.publicnode.com"),
-              rts_ctx,
-              ioc.get_executor(),
-              ssl_ctx)
+            urls::url("https://ethereum.publicnode.com"),
+            rts_ctx,
+            ioc.get_executor(),
+            ssl_ctx)
     {
     }
 
@@ -58,7 +59,7 @@ private:
         if(ec)
             return fail(ec, "connect");
 
-        // Ethereum node's client software and version
+        // Get Ethereum node client software and version
         client_[web3_clientVersion](
             std::bind(&session::on_clientVersion, this, _1, _2));
     }

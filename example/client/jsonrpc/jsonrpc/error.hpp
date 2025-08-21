@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_ERROR_HPP
-#define BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_ERROR_HPP
+#ifndef JSONRPC_ERROR_HPP
+#define JSONRPC_ERROR_HPP
 
 #include "errc.hpp"
 
