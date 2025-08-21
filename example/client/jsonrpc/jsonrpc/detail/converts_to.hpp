@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_DETAIL_CONVERTS_TO_HPP
-#define BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_DETAIL_CONVERTS_TO_HPP
+#ifndef JSONRPC_DETAIL_CONVERTS_TO_HPP
+#define JSONRPC_DETAIL_CONVERTS_TO_HPP
 
 #include <boost/json/value.hpp>
 

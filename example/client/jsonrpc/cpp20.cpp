@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#include "lib/client.hpp"
-#include "methods.hpp"
+#include "jsonrpc/client.hpp"
+#include "eth_methods.hpp"
 
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/awaitable.hpp>
@@ -42,10 +42,10 @@ co_main(
     // Connect to the endpoint
     co_await client.async_connect();
 
-    // Ethereum JSON-RPC endpoint methods
-    using namespace methods;
+    // Bring Ethereum methods into scope
+    using namespace eth_methods;
 
-    // Ethereum node's client software and version
+    // Get Ethereum node client software and version
     std::cout
         << "web3 client:  "
         << co_await client[web3_clientVersion]() << '\n';

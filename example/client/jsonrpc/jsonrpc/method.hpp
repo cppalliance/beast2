@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_METHOD_HPP
-#define BOOST_HTTP_IO_EXAMPLE_CLIENT_JSONRPC_LIB_METHOD_HPP
+#ifndef JSONRPC_METHOD_HPP
+#define JSONRPC_METHOD_HPP
 
 #include <boost/core/detail/string_view.hpp>
 
