@@ -60,7 +60,8 @@ private:
             return fail(ec, "connect");
 
         // Get Ethereum node client software and version
-        client_[web3_clientVersion](
+        client_.async_call(
+            web3_clientVersion,
             std::bind(&session::on_clientVersion, this, _1, _2));
     }
 
@@ -76,7 +77,8 @@ private:
             << version << '\n';
 
         // Get the latest block number
-        client_[eth_blockNumber](
+        client_.async_call(
+            eth_blockNumber,
             std::bind(&session::on_blockNumber, this, _1, _2));
     }
 
@@ -90,9 +92,10 @@ private:
         std::cout
             << "Block height: "
             << block_num << '\n';
-        
+
         // Get block details
-        client_[eth_getBlockByNumber](
+        client_.async_call(
+            eth_getBlockByNumber,
             { block_num, false },
             std::bind(&session::on_getBlockByNumber, this, _1, _2));
     }
@@ -110,7 +113,8 @@ private:
         std::cout<< "Transactions: " << block["transactions"].as_array().size() << '\n';
 
         // Get account balance
-        client_[eth_getBalance](
+        client_.async_call(
+            eth_getBalance,
             {
                 "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
                 block["number"]
@@ -128,9 +132,10 @@ private:
         std::cout
             << "Balance:      "
             << balance << '\n';
-        
+
         // Estimate gas for a transfer
-        client_[eth_estimateGas](
+        client_.async_call(
+            eth_estimateGas,
             {
                 json::object
                 {
@@ -152,9 +157,10 @@ private:
         std::cout
             << "Gas estimate: "
             << gas_estimate << '\n';
-    
+
         // Get the current gas price
-        client_[eth_gasPrice](
+        client_.async_call(
+            eth_gasPrice,
             std::bind(&session::on_gasPrice, this, _1, _2));
     }
 
@@ -194,8 +200,8 @@ private:
     void
     fail(const jsonrpc::error& error)
     {
-        if(!error.object().empty())
-            std::cerr << error.object() << " ";
+        if(!error.info().empty())
+            std::cerr << error.info() << " ";
         std::cerr << error.code().what() << "\n";
     }
 };

@@ -16,6 +16,8 @@
 #include "error.hpp"
 #include "method.hpp"
 
+#include <boost/asio/compose.hpp>
+#include <boost/asio/deferred.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/response_parser.hpp>
@@ -35,13 +37,6 @@ class client
     boost::http_proto::response_parser pr_;
     boost::http_proto::request req_;
     std::uint64_t id_ = 0;
-    struct invoker_base
-    {
-        friend client;
-        client* self_;
-        boost::core::string_view method_;
-        invoker_base(client*, boost::core::string_view);
-    };
 
 public:
     /// The type of the next layer.
@@ -139,162 +134,127 @@ public:
                 this);
     }
 
-    template<typename Signature>
-    class invoker;
-
     /** Call a remote procedure that takes no parameters.
 
-        Instances of this type are returned from @ref operator[].
+        The result type depends on the signature of the passed @ref method.
 
-        @tparam Return The return type of the procedure.
+        @param m The @ref method object that contains the name
+        and signature of the remote procedure.
+
+        @param token The completion token used to produce a completion
+        handler, which will be invoked when the call completes.
     */
-    template<typename Return>
-    class invoker<Return()> : invoker_base
+    template<
+        typename Return,
+        BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
+            CompletionToken = boost::asio::deferred_t>
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
+    async_call(
+        method<Return()> method,
+        CompletionToken&& token = {})
     {
-        using invoker_base::invoker_base;
-    public:
-
-        /** Call a remote procedure that takes no parameters.
-
-            The result type depends on the signature of the @ref method object
-            used to instantiate the invoker.
-
-            @param token The completion token used to produce a completion
-            handler, which will be invoked when the call completes.
-        */
-        template<
-            BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
-                CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-        BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
-        operator()(
-            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
-        {
-            return this->self_->async_request(
-                this->method_,
-                {},
-                boost::asio::deferred(transform<Return>{})) | std::move(token);
-        }
-    };
+        return async_call_impl<Return>(method.name, {}, std::move(token));
+    }
 
     /** Call a remote procedure with positional parameters (array).
 
-        Instances of this type are returned from @ref operator[].
+        The result type depends on the signature of the passed @ref method.
 
-        @tparam Return The return type of the procedure.
+        @param m The @ref method object that contains the name
+        and signature of the remote procedure.
+
+        @param params A JSON array containing the positional parameters
+        to be used when calling the server method.
+
+        @param token The completion token used to produce a completion
+        handler, which will be invoked when the call completes.
     */
-    template<typename Return>
-    class invoker<Return(boost::json::array)> : invoker_base
+    template<
+        typename Return,
+        BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
+            CompletionToken = boost::asio::deferred_t>
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
+    async_call(
+        method<Return(boost::json::array)> method,
+        boost::json::array params,
+        CompletionToken&& token = {})
     {
-        using invoker_base::invoker_base;
-    public:
-
-        /** Call a remote procedure with positional parameters (array).
-
-            The result type depends on the signature of the @ref method object
-            used to instantiate the invoker. 
-
-            @param params A JSON array containing the positional parameters to
-            use when calling the server method.
-
-            @param token The completion token used to produce a completion
-            handler, which will be invoked when the call completes.
-        */
-        template<
-            BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
-                CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-        BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
-        operator()(
-            boost::json::array params,
-            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
-        {
-            return this->self_->async_request(
-                this->method_,
-                std::move(params),
-                boost::asio::deferred(transform<Return>{})) | std::move(token);
-        }
-    };
+        return async_call_impl<Return>(
+            method.name, std::move(params), std::move(token));
+    }
 
     /** Call a remote procedure with named parameters (object).
 
-        Instances of this type are returned from @ref operator[].
+        The result type depends on the signature of the passed @ref method.
 
-        @tparam Return The return type of the procedure.
+        @param m The @ref method object that contains the name
+        and signature of the remote procedure.
+
+        @param params A JSON object containing the named parameters
+        to be used when calling the server method.
+
+        @param token The completion token used to produce a completion
+        handler, which will be invoked when the call completes.
     */
-    template<typename Return>
-    class invoker<Return(boost::json::object)>: invoker_base
+    template<
+        typename Return,
+        BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
+            CompletionToken = boost::asio::deferred_t>
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
+    async_call(
+        method<Return(boost::json::object)> method,
+        boost::json::object params,
+        CompletionToken&& token = {})
     {
-        using invoker_base::invoker_base;
-    public:
-
-        /** Call a remote procedure with named parameters (object).
-
-            The result type depends on the signature of the @ref method object
-            used to instantiate the invoker. 
-
-            @param params A JSON object containing the named parameters to use
-            when calling the server method.
-
-            @param token The completion token used to produce a completion
-            handler, which will be invoked when the call completes.
-        */
-        template<
-            BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error, Return))
-                CompletionToken BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-        BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
-        operator()(
-            boost::json::object params,
-            CompletionToken&& token BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type))
-        {
-            return this->self_->async_request(
-                this->method_,
-                std::move(params),
-                boost::asio::deferred(transform<Return>{})) | std::move(token);
-        }
-    };
-
-    /** Return an @ref invoker instance that can be used to asynchronously
-        invoke the specified method.
-
-        Example:
-        @code
-        client[method_a]({ "param1", "param2" }, completion_token);
-        @endcode
-
-        @return An @ref invoker capable of asynchronously calling the specified
-        method.
-
-        @param m The @ref method object containing the name and signature of the
-        remote procedure.
-    */
-    template<typename Signature>
-    invoker<Signature>
-    operator[](method<Signature> m) noexcept
-    {
-        return { this, m.name };
+        return async_call_impl<Return>(
+            method.name, std::move(params), std::move(token));
     }
 
 private:
     class request_op;
 
     template<typename Return>
-    class transform
+    class request_and_transform_op
     {
+        client& client_;
+        boost::core::string_view method_;
+        boost::json::value params_;
+
     public:
-        boost::asio::deferred_values<error, Return>
-        operator()(error e, boost::json::value v)
+        request_and_transform_op(
+            client& client,
+            boost::core::string_view method,
+            boost::json::value params)
+            : client_(client)
+            , method_(method)
+            , params_(std::move(params))
         {
-            constexpr auto deferred = boost::asio::deferred;
+        }
+
+        template<typename Self>
+        void
+        operator()(Self&& self)
+        {
+            client_.async_call_impl(
+                std::move(self), method_, std::move(params_));
+        }
+
+        template<typename Self>
+        void
+        operator()(Self&& self, error e, boost::json::value v)
+        {
             if(e.code())
-                return deferred.values(std::move(e), Return{});
+                return self.complete(std::move(e), {});
 
             // avoid extra copies when possible
             if(auto* o = detail::converts_to<Return>(v))
-                return deferred.values(std::move(e), std::move(*o));
+                return self.complete(std::move(e), std::move(*o));
 
             auto o = boost::json::try_value_to<Return>(v);
             if(o.has_error())
-                return deferred.values(error(o.error()), Return{});
-            return deferred.values(std::move(e), std::move(*o));
+                return self.complete(o.error(), {});
+
+            self.complete(std::move(e), std::move(*o));
         }
     };
 
@@ -325,51 +285,22 @@ private:
         }
     };
 
-    class initiate_async_request : public detail::initiation_base
-    {
-    public:
-        using detail::initiation_base::initiation_base;
-
-        template<typename Handler>
-        void
-        operator()(
-            Handler&& handler,
-            boost::core::string_view method,
-            boost::json::value params,
-            client* self)
-        {
-            self->async_request_impl(
-                std::move(handler), method, std::move(params));
-        }
-    };
-
-    void async_request_impl(
+    void async_call_impl(
         boost::asio::any_completion_handler<void(error, boost::json::value)> handler,
         boost::core::string_view method,
         boost::json::value params);
 
-    template<typename CompletionToken>
-    auto
-    async_request(
+    template<typename Return, typename CompletionToken>
+    BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void(error, Return))
+    async_call_impl(
         boost::core::string_view method,
         boost::json::value params,
         CompletionToken&& token)
-        -> decltype(boost::asio::async_initiate<
-            CompletionToken, void(error, boost::json::value)>(
-                initiate_async_request(get_executor()),
-                token,
-                method,
-                std::move(params),
-                this)
-        )
     {
-        return boost::asio::async_initiate<
-            CompletionToken, void(error, boost::json::value)>(
-                initiate_async_request(get_executor()),
-                token,
-                method,
-                std::move(params),
-                this);
+        return boost::asio::async_compose<CompletionToken, void(error, Return)>(
+            request_and_transform_op<Return>(*this, method, std::move(params)),
+            token,
+            stream_->get_executor());
     }
 
     std::uint64_t

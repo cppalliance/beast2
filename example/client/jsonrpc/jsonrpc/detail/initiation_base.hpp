@@ -25,6 +25,7 @@ struct initiation_base
     }
 
     using executor_type = boost::asio::any_io_executor;
+
     const executor_type&
     get_executor() const noexcept
     {

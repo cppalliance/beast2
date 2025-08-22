@@ -48,16 +48,16 @@ co_main(
     // Get Ethereum node client software and version
     std::cout
         << "web3 client:  "
-        << co_await client[web3_clientVersion]() << '\n';
+        << co_await client.async_call(web3_clientVersion) << '\n';
 
     // Get the latest block number
-    auto block_num = co_await client[eth_blockNumber]();
+    auto block_num = co_await client.async_call(eth_blockNumber);
     std::cout
         << "Block number: "
         << to_int(block_num) << '\n';
 
     // Get block details
-    auto block = co_await client[eth_getBlockByNumber]({ block_num, false });
+    auto block = co_await client.async_call(eth_getBlockByNumber, { block_num, false });
     std::cout<< "Block hash:   " << block["hash"] << '\n';
     std::cout<< "Block size:   " << to_int(block["size"].as_string()) << " Bytes\n";
     std::cout<< "Timestamp:    " << to_int(block["timestamp"].as_string()) << '\n';
@@ -68,14 +68,16 @@ co_main(
     auto addr2 = "0x281055afc982d96fab65b3a49cac8b878184cb16";
 
     // Get account balance
-    auto balance = co_await client[eth_getBalance]({ addr1, block_num });
+    auto balance = co_await client.async_call(eth_getBalance, { addr1, block_num });
+
     std::cout
         << "Balance:      "
         << std::setprecision(18) << dec_float(to_int(balance)) / dec_float("1e18")
         << " ETH\n";
 
     // Estimate gas for a transfer
-    auto gas_estimate = co_await client[eth_estimateGas](
+    auto gas_estimate = co_await client.async_call(
+        eth_estimateGas,
         {
             json::object
             {
@@ -89,14 +91,15 @@ co_main(
         << to_int(gas_estimate) << '\n';
 
     // Get the current gas price
-    auto gas_price = co_await client[eth_gasPrice]();
+    auto gas_price = co_await client.async_call(eth_gasPrice);
     std::cout
         << "Gas price:    "
         << std::setprecision(3) << dec_float(to_int(gas_price)) / dec_float("1e10")
         << " GWEI\n";
 
     // Get ETH/USD price from a Chainlink oracle
-    auto eth_usd = co_await client[eth_call](
+    auto eth_usd = co_await client.async_call(
+        eth_call,
         {
             {
                 {"to", "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419"}, // ETH/USD price feed

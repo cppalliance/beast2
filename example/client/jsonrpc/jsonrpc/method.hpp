@@ -14,8 +14,7 @@
 
 namespace jsonrpc {
 
-/** Containin the name and signature of a remote
-    procedure.
+/** Contains the name and signature of a remote procedure.
 
     @par Example:
     @code

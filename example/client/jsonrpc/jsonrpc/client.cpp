@@ -73,7 +73,7 @@ public:
         else
         {
             asio::async_compose<decltype(handler), void(system::error_code)>(
-                shutdown_op{ stream_.next_layer() },
+                tcp_shutdown_op{ stream_.next_layer() },
                 handler,
                 stream_);
         }
@@ -188,28 +188,34 @@ private:
         }
     };
 
-    class shutdown_op
+    class tcp_shutdown_op
     {
         asio::ip::tcp::socket& socket_;
-        bool init_ = false;
 
     public:
-        shutdown_op(asio::ip::tcp::socket& socket)
+        tcp_shutdown_op(asio::ip::tcp::socket& socket)
             : socket_(socket)
         {
         }
 
         template<typename Self>
         void
-        operator()(Self&& self, system::error_code ec = {})
+        operator()(Self&& self)
         {
-            if(init_)
-                return self.complete(ec);
-            init_ = true;
-            socket_.close(ec);
+            system::error_code ec;
+            socket_.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+            if(!ec)
+                socket_.close(ec);
             asio::async_immediate(
                 socket_.get_executor(),
                 asio::append(std::move(self), ec));
+        }
+
+        template<typename Self>
+        void
+        operator()(Self&& self, system::error_code ec)
+        {
+            self.complete(ec);
         }
     };
 };
@@ -321,16 +327,6 @@ public:
     }
 };
 
-client::
-invoker_base::
-invoker_base(
-    client* self,
-    boost::core::string_view method)
-    : self_(self)
-    , method_(method)
-{
-}
-
 // ----------------------------------------------
 
 client::
@@ -369,7 +365,7 @@ client(
 
 void 
 client::
-async_request_impl(
+async_call_impl(
     asio::any_completion_handler<void(error, json::value)> handler,
     core::string_view method,
     json::value params)

@@ -20,19 +20,19 @@ namespace jsonrpc {
 
 /** An error type that encapsulates both an error code
     and an optional JSON object containing additional error
-    details as provided by the server.
+    information as provided by the server.
 */
-class error
+class error 
 {
     boost::system::error_code ec_;
-    boost::json::object object_;
+    boost::json::object info_;
 
 public:
     error(
         boost::system::error_code ec,
-        boost::json::object object = {}) noexcept
+        boost::json::object info = {}) noexcept
         : ec_(ec)
-        , object_(std::move(object))
+        , info_(std::move(info))
     {
     }
 
@@ -43,7 +43,7 @@ public:
     operator=(error&& other) noexcept
     {
         ec_ = std::move(other.ec_);
-        object_ = std::move(other.object_);
+        info_ = std::move(other.info_);
         return *this;
     }
 
@@ -55,12 +55,12 @@ public:
     }
 
     /** Return an optional JSON object containing additional
-        error details as provided by the server.
+        error information as provided by the server.
     */
     const boost::json::object&
-    object() const noexcept
+    info() const noexcept
     {
-        return object_;
+        return info_;
     }
 };
 
@@ -80,11 +80,11 @@ struct disposition_traits<jsonrpc::error>
     static void
     throw_exception(const jsonrpc::error& e)
     {
-        if(e.object().empty())
+        if(e.info().empty())
             return BOOST_THROW_EXCEPTION(system::system_error(e.code()));
 
         BOOST_THROW_EXCEPTION(
-            system::system_error(e.code(), json::serialize(e.object())));
+            system::system_error(e.code(), json::serialize(e.info())));
     }
 
     static std::exception_ptr
@@ -93,11 +93,11 @@ struct disposition_traits<jsonrpc::error>
         if(!e.code())
             return nullptr;
 
-        if(e.object().empty())
+        if(e.info().empty())
             return std::make_exception_ptr(system::system_error(e.code()));
 
         return std::make_exception_ptr(
-            system::system_error(e.code(), json::serialize(e.object())));
+            system::system_error(e.code(), json::serialize(e.info())));
     }
 };
 } // asio
