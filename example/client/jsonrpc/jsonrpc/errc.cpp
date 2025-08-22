@@ -35,8 +35,12 @@ message(
 {
     switch (static_cast<errc>(code))
     {
+    case errc::version_error:
+        return "The response object is not JSON-RPC version 2.0";
+    case errc::id_mismatch:
+        return "The response object has a different ID than the request";
     case errc::invalid_response:
-        return "The JSON received is not a valid Response object";
+        return "The received body does not contain a valid response object";
     case errc::parse_error:
         return "Invalid JSON was received by the server";
     case errc::invalid_request:

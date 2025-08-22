@@ -24,7 +24,7 @@ enum class errc
     /// The response object has a different ID than the request.
     id_mismatch,
 
-    /// The HTTP body is not a valid response object.
+    /// The received body does not contain a valid response object.
     invalid_response,
 
     /// Invalid JSON was received by the server.
