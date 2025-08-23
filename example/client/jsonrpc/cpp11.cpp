@@ -12,7 +12,9 @@
 #include "eth_methods.hpp"
 
 #include <boost/asio/io_context.hpp>
+#include <boost/rts/brotli/decode.hpp>
 #include <boost/rts/context.hpp>
+#include <boost/rts/zlib/inflate.hpp>
 
 #include <functional>
 #include <iostream>
@@ -239,6 +241,15 @@ main(int, char*[])
         {
             http_proto::response_parser::config cfg;
             cfg.min_buffer = 64 * 1024;
+        #ifdef BOOST_RTS_HAS_BROTLI
+            cfg.apply_brotli_decoder  = true;
+            rts::brotli::install_decode_service(rts_ctx);
+        #endif
+        #ifdef BOOST_RTS_HAS_ZLIB
+            cfg.apply_deflate_decoder = true;
+            cfg.apply_gzip_decoder    = true;
+            rts::zlib::install_inflate_service(rts_ctx);
+        #endif
             http_proto::install_parser_service(rts_ctx, cfg);
         }
 
