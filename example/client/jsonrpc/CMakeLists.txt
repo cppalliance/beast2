@@ -37,18 +37,32 @@ if (WIN32)
     target_link_libraries(http_io_example_client_jsonrpc_lib PUBLIC crypt32)
 endif()
 
+# CPP11 Example
 add_executable(http_io_example_client_jsonrpc_cpp11 cpp11.cpp eth_methods.hpp Jamfile)
+set_property(TARGET http_io_example_client_jsonrpc_cpp11
+    PROPERTY FOLDER "examples")
 target_link_libraries(http_io_example_client_jsonrpc_cpp11
     PRIVATE
     http_io_example_client_jsonrpc_lib)
-    set_property(TARGET http_io_example_client_jsonrpc_cpp11
-        PROPERTY FOLDER "examples")
+if (TARGET boost_rts_zlib)
+    target_link_libraries(http_io_example_client_jsonrpc_cpp11 PRIVATE boost_rts_zlib)
+endif()
+if (TARGET boost_rts_brotli)
+    target_link_libraries(http_io_example_client_jsonrpc_cpp11 PRIVATE boost_rts_brotli)
+endif()
 
+# CPP20 Example
 if (CMAKE_CXX_STANDARD EQUAL 20)
     add_executable(http_io_example_client_jsonrpc_cpp20 cpp20.cpp eth_methods.hpp Jamfile)
+    set_property(TARGET http_io_example_client_jsonrpc_cpp20
+        PROPERTY FOLDER "examples")
     target_link_libraries(http_io_example_client_jsonrpc_cpp20
         PRIVATE
         http_io_example_client_jsonrpc_lib)
-    set_property(TARGET http_io_example_client_jsonrpc_cpp20
-        PROPERTY FOLDER "examples")
+    if (TARGET boost_rts_zlib)
+        target_link_libraries(http_io_example_client_jsonrpc_cpp20 PRIVATE boost_rts_zlib)
+    endif()
+    if (TARGET boost_rts_brotli)
+        target_link_libraries(http_io_example_client_jsonrpc_cpp20 PRIVATE boost_rts_brotli)
+    endif()
 endif ()

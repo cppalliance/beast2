@@ -20,6 +20,9 @@
 #include <boost/http_io.hpp>
 #include <boost/http_proto/string_body.hpp>
 #include <boost/json/parse.hpp>
+#include <boost/rts/brotli/decode.hpp>
+#include <boost/rts/context.hpp>
+#include <boost/rts/zlib/inflate.hpp>
 #include <boost/url/url_view.hpp>
 
 using namespace boost;
@@ -354,12 +357,21 @@ client(
     , req_(http_proto::method::post, "/")
 {
     using field = http_proto::field;
+
     if(!endpoint_.encoded_target().empty())
         req_.set_target(endpoint_.encoded_target());
-    req_.set(field::host, endpoint_.encoded_host_and_port().decode());
-    req_.set(field::content_type, "application/json");
-    req_.set(field::accept, "application/json");
-    req_.set(field::user_agent, "Boost.Http.Io");
+
+    req_.append(field::host, endpoint_.encoded_host_and_port().decode());
+    req_.append(field::content_type, "application/json");
+    req_.append(field::accept, "application/json");
+    req_.append(field::user_agent, "Boost.Http.Io");
+
+    if(rts_ctx.has_service<rts::brotli::decode_service>())
+        req_.append(field::accept_encoding, "br");
+
+    if(rts_ctx.has_service<rts::zlib::inflate_service>())
+        req_.append(field::accept_encoding, "deflate, gzip");
+
     pr_.reset();
 }
 

@@ -75,10 +75,10 @@ public:
 
         // Enable compression
     #ifdef BOOST_RTS_HAS_BROTLI
-        req_.set(field::accept_encoding, "br");
+        req_.append(field::accept_encoding, "br");
     #endif
     #ifdef BOOST_RTS_HAS_ZLIB
-        req_.set(field::accept_encoding, "deflate, gzip");
+        req_.append(field::accept_encoding, "deflate, gzip");
     #endif
 
         // Keep original URL for possible redirect
