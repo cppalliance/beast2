@@ -223,6 +223,33 @@ private:
     };
 };
 
+class json_sink : public http_proto::sink
+{
+    json::stream_parser& jpr_;
+
+public:
+    json_sink(json::stream_parser& jpr)
+        : jpr_(jpr)
+    {
+    }
+
+private:
+    results
+    on_write(
+        buffers::const_buffer b,
+        bool more) override
+    {
+        results ret;
+        ret.bytes = jpr_.write(
+            static_cast<const char*>(b.data()),
+            b.size(),
+            ret.ec);
+        if(!ret.ec && !more)
+            jpr_.finish(ret.ec);
+        return ret;
+    }
+};
+
 } //namespace
 
 // ----------------------------------------------
@@ -287,12 +314,13 @@ public:
             http_io::async_read_header(
                 *c_.stream_, c_.pr_, std::move(self));
 
+            c_.pr_.set_body<json_sink>(c_.jpr_);
             BOOST_ASIO_CORO_YIELD
             http_io::async_read(
                 *c_.stream_, c_.pr_, std::move(self));
 
             {
-                auto body = json::parse(c_.pr_.body(), ec);
+                auto body = c_.jpr_.release();
                 if(ec || !body.is_object())
                     return self.complete({ errc::invalid_response }, {});
                 auto& obj = body.get_object();
