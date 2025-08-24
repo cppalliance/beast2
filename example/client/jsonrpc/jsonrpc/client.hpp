@@ -22,6 +22,7 @@
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/response_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
+#include <boost/json/stream_parser.hpp>
 #include <boost/json/value_to.hpp>
 #include <boost/rts/context_fwd.hpp>
 #include <boost/url/url.hpp>
@@ -36,6 +37,7 @@ class client
     boost::http_proto::serializer sr_;
     boost::http_proto::response_parser pr_;
     boost::http_proto::request req_;
+    boost::json::stream_parser jpr_;
     std::uint64_t id_ = 0;
 
 public:

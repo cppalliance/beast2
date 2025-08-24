@@ -254,8 +254,7 @@ main(int, char*[])
         }
 
         // Install serializer service with default configuration
-        http_proto::serializer::config cfg;
-        http_proto::install_serializer_service(rts_ctx, cfg);
+        http_proto::install_serializer_service(rts_ctx, {});
 
         // Root certificates used for verification
         ssl_ctx.set_default_verify_paths();
