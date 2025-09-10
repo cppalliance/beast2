@@ -13,6 +13,7 @@ project
       <library>/boost/http_io//boost_http_io
       <library>/boost/url//boost_url
       <include>.
+      <define>BOOST_ASIO_NO_DEPRECATED
     ;
 
 exe visit :

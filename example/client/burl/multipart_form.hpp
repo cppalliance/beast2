@@ -10,7 +10,7 @@
 #ifndef BURL_MULTIPART_FORM_HPP
 #define BURL_MULTIPART_FORM_HPP
 
-#include <boost/buffers/mutable_buffer.hpp>
+#include <boost/buffers/buffer.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <boost/http_proto/method.hpp>
 #include <boost/http_proto/source.hpp>

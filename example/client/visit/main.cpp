@@ -61,8 +61,13 @@ struct worker
     do_resolve()
     {
         resolver.async_resolve(
-            boost::core::string_view(url.encoded_host()),
+        #if !defined(BOOST_NO_CXX17_HDR_STRING_VIEW)
+            url.encoded_host(),
             url.scheme(),
+        #else
+            static_cast<std::string>(url.encoded_host()),
+            static_cast<std::string>(url.scheme()),
+        #endif
             [&](
                 boost::system::error_code ec,
                 resolver_type::results_type results)
