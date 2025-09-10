@@ -11,8 +11,8 @@
 #define JSONRPC_ANY_STREAM_HPP
 
 #include <boost/asio/any_completion_handler.hpp>
-#include <boost/buffers/const_buffer_span.hpp>
-#include <boost/buffers/mutable_buffer_span.hpp>
+#include <boost/buffers/buffer.hpp>
+#include <boost/core/span.hpp>
 #include <boost/url/url_view.hpp>
 
 namespace jsonrpc {
@@ -33,12 +33,12 @@ public:
 
     virtual void
     async_write_some(
-        const boost::buffers::const_buffer_subspan&,
+        const boost::span<boost::buffers::const_buffer const>&,
         boost::asio::any_completion_handler<void(boost::system::error_code, std::size_t)>) = 0;
 
     virtual void
     async_read_some(
-        const boost::buffers::mutable_buffer_subspan&,
+        const boost::span<boost::buffers::mutable_buffer const>&,
         boost::asio::any_completion_handler<void(boost::system::error_code, std::size_t)>) = 0;
 
     virtual void

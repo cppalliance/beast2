@@ -84,7 +84,7 @@ public:
 
     void
     async_write_some(
-        const buffers::const_buffer_subspan& buffers,
+        const boost::span<boost::buffers::const_buffer const>& buffers,
         asio::any_completion_handler<void(system::error_code, std::size_t)>
             handler) override
     {
@@ -96,7 +96,7 @@ public:
 
     void
     async_read_some(
-        const buffers::mutable_buffer_subspan& buffers,
+        const boost::span<boost::buffers::mutable_buffer const>& buffers,
         asio::any_completion_handler<void(system::error_code, std::size_t)>
             handler) override
     {
@@ -250,6 +250,33 @@ private:
     }
 };
 
+class json_source : public http_proto::source
+{
+    json::serializer& jsr_;
+    json::value v_;
+
+public:
+    json_source(json::serializer& jsr, json::value v)
+        : jsr_(jsr)
+        , v_(std::move(v))
+    {
+        jsr_.reset(&v_);
+    }
+
+private:
+    results
+    on_read(
+        buffers::mutable_buffer b) override
+    {
+        results ret;
+        ret.bytes = jsr_.read(
+            static_cast<char*>(b.data()),
+            b.size()).size();
+        ret.finished = jsr_.done();
+        return ret;
+    }
+};
+
 } //namespace
 
 // ----------------------------------------------
@@ -288,21 +315,17 @@ public:
         {
             {
                 auto sp = params_.storage();
-                auto body = json::serialize(
-                    json::object
+                json::object value(
                     {
-                        {
-                            { "jsonrpc", "2.0" },
-                            { "method", method_ },
-                            { "params", std::move(params_)},
-                            { "id", id_ }
-                        },
-                        sp
-                    });
-                c_.req_.set_payload_size(body.size());
-                c_.sr_.template start<
-                    http_proto::string_body>(
-                        c_.req_, std::move(body));
+                        { "jsonrpc", "2.0" },
+                        { "method", method_ },
+                        { "params", std::move(params_)},
+                        { "id", id_ }
+                    },
+                    sp);
+                c_.req_.set_chunked(true);
+                c_.sr_.template start<json_source>(
+                    c_.req_, c_.jsr_, std::move(value));
             }
 
             BOOST_ASIO_CORO_YIELD
@@ -330,8 +353,6 @@ public:
                 auto* id  = obj.if_contains("id");
                 if(!ver || *ver != "2.0")
                     return self.complete({ errc::version_error }, {});
-                if(!id || *id != id_)
-                    return self.complete({ errc::id_mismatch }, {});
                 if(err && err->is_object())
                 {
                     auto* code = err->get_object().if_contains("code");
@@ -350,6 +371,9 @@ public:
                 }
                 else if(res)
                 {
+                    if(!id || *id != id_)
+                        return self.complete({ errc::id_mismatch }, {});
+
                     return self.complete({}, std::move(*res));
                 }
                 self.complete({ errc::invalid_response }, {});

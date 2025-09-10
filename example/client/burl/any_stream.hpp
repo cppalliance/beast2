@@ -16,7 +16,8 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/immediate.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/buffers/prefix.hpp>
+#include <boost/buffers/slice.hpp>
+#include <boost/core/span.hpp>
 #include <boost/http_proto/parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 
@@ -55,7 +56,7 @@ public:
 
             virtual void
             async_write_some(
-                const buffers::const_buffer_subspan& buffers,
+                const buffers::slice_of<boost::span<buffers::const_buffer const>>& buffers,
                 asio::any_completion_handler<void(error_code, std::size_t)>
                     handler) override
             {
@@ -64,7 +65,7 @@ public:
 
             virtual void
             async_read_some(
-                const buffers::mutable_buffer_subspan& buffers,
+                const buffers::slice_of<boost::span<buffers::mutable_buffer const>>& buffers,
                 asio::any_completion_handler<void(error_code, std::size_t)>
                     handler) override
             {
@@ -152,7 +153,7 @@ public:
                         }
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_write_some(
-                            buffers::prefix(buffers, wr_remain_),
+                            prefix(buffers, wr_remain_),
                             std::move(self));
                         wr_remain_ -= n;
                         self.complete(ec, n);
@@ -190,7 +191,7 @@ public:
                         }
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_read_some(
-                            buffers::prefix(buffers, rd_remain_),
+                            prefix(buffers, rd_remain_),
                             std::move(self));
                         rd_remain_ -= n;
                         self.complete(ec, n);
@@ -225,12 +226,12 @@ private:
 
         virtual void
         async_write_some(
-            const buffers::const_buffer_subspan&,
+            const buffers::slice_of<boost::span<buffers::const_buffer const>>&,
             asio::any_completion_handler<void(error_code, std::size_t)>) = 0;
 
         virtual void
         async_read_some(
-            const buffers::mutable_buffer_subspan&,
+            const buffers::slice_of<boost::span<buffers::mutable_buffer const>>&,
             asio::any_completion_handler<void(error_code, std::size_t)>) = 0;
 
         virtual void async_shutdown(
@@ -238,6 +239,30 @@ private:
 
         virtual ~base() = default;
     };
+
+    static
+    buffers::slice_of<
+        boost::span<buffers::const_buffer const>>
+    prefix(
+        buffers::slice_of<
+            boost::span<buffers::const_buffer const>> bs,
+        std::size_t n)
+    {
+        buffers::keep_front(bs, n);
+        return bs;
+    }
+
+    static
+    buffers::slice_of<
+        boost::span<buffers::mutable_buffer const>>
+    prefix(
+        buffers::slice_of<boost::span<
+            buffers::mutable_buffer const>> bs,
+        std::size_t n)
+    {
+        buffers::keep_front(bs, n);
+        return bs;
+    }
 
     std::unique_ptr<base> stream_;
     asio::steady_timer rd_timer;

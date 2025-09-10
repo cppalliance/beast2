@@ -10,7 +10,7 @@
 #include "multipart_form.hpp"
 
 #include <boost/buffers/copy.hpp>
-#include <boost/buffers/prefix.hpp>
+#include <boost/buffers/slice.hpp>
 #include <boost/http_proto/file.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -153,13 +153,12 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
 
     auto copy = [&](core::string_view sv)
     {
-        auto copied = buffers::copy(
-            mb,
-            buffers::sans_prefix(
-                buffers::const_buffer{ sv.data(), sv.size() },
-                static_cast<std::size_t>(skip_)));
+        buffers::const_buffer source(sv.data(), sv.size());
+        buffers::trim_front(mb, static_cast<std::size_t>(skip_));
 
-        mb        = buffers::sans_prefix(mb, copied);
+        auto copied = buffers::copy(mb, source);
+
+        buffers::trim_front(mb, copied);
         rs.bytes += copied;
         skip_    += copied;
 
@@ -189,7 +188,7 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         if(rs.ec)
             return false;
 
-        mb        = buffers::sans_prefix(mb, read);
+        buffers::trim_front(mb, read);
         rs.bytes += read;
         skip_    += read;
 

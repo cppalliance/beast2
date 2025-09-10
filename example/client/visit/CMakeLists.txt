@@ -16,7 +16,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
 add_executable(http_io_example_client_visit ${PFILES})
 
 target_compile_definitions(http_io_example_client_visit
-    PRIVATE BOOST_ASIO_NO_DEPRECATED)
+    PRIVATE
+    BOOST_ASIO_NO_DEPRECATED)
 
 set_property(TARGET http_io_example_client_visit
     PROPERTY FOLDER "examples")
