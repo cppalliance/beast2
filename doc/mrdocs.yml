@@ -18,11 +18,12 @@ inaccessible-bases: never
 
 # Generator
 generate: adoc
-base-url: https://www.github.com/cppalliance/http_io/blob/develop/include/
+base-url: https://www.github.com/cppalliance/http_io/blob/develop/
 
 # Style
 verbose: true
 multipage: true
 use-system-libc: true
+use-system-stdlib: true
 
 cmake: '-DCMAKE_CXX_STANDARD=20 -DBOOST_HTTP_IO_BUILD_TESTS=OFF -DBOOST_HTTP_IO_BUILD_EXAMPLES=OFF'

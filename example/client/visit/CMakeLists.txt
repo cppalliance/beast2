@@ -23,5 +23,5 @@ set_property(TARGET http_io_example_client_visit
     PROPERTY FOLDER "examples")
 
 target_link_libraries(http_io_example_client_visit
-    boost_http_io
-    boost_url)
+    Boost::http_io
+    Boost::url)

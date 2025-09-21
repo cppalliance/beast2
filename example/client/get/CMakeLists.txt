@@ -24,8 +24,8 @@ set_property(TARGET http_io_example_client_get
 find_package(OpenSSL REQUIRED)
 
 target_link_libraries(http_io_example_client_get
-    boost_http_io
-    boost_url
+    Boost::http_io
+    Boost::url
     OpenSSL::SSL
     OpenSSL::Crypto)
 
@@ -33,10 +33,10 @@ if (WIN32)
     target_link_libraries(http_io_example_client_get crypt32)
 endif()
 
-if (TARGET boost_rts_zlib)
-    target_link_libraries(http_io_example_client_get boost_rts_zlib)
+if (TARGET Boost::rts_zlib)
+    target_link_libraries(http_io_example_client_get Boost::rts_zlib)
 endif()
 
-if (TARGET boost_rts_brotli)
-    target_link_libraries(http_io_example_client_get boost_rts_brotli)
+if (TARGET Boost::rts_brotli)
+    target_link_libraries(http_io_example_client_get Boost::rts_brotli)
 endif()

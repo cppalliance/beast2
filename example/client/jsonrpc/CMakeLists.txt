@@ -26,10 +26,10 @@ find_package(OpenSSL REQUIRED)
 
 target_link_libraries(http_io_example_client_jsonrpc_lib
     PUBLIC
-    boost_http_io
-    boost_url
-    boost_json
-    boost_multiprecision
+    Boost::http_io
+    Boost::url
+    Boost::json
+    Boost::multiprecision
     OpenSSL::SSL
     OpenSSL::Crypto)
 
@@ -44,11 +44,11 @@ set_property(TARGET http_io_example_client_jsonrpc_cpp11
 target_link_libraries(http_io_example_client_jsonrpc_cpp11
     PRIVATE
     http_io_example_client_jsonrpc_lib)
-if (TARGET boost_rts_zlib)
-    target_link_libraries(http_io_example_client_jsonrpc_cpp11 PRIVATE boost_rts_zlib)
+if (TARGET Boost::rts_zlib)
+    target_link_libraries(http_io_example_client_jsonrpc_cpp11 PRIVATE Boost::rts_zlib)
 endif()
-if (TARGET boost_rts_brotli)
-    target_link_libraries(http_io_example_client_jsonrpc_cpp11 PRIVATE boost_rts_brotli)
+if (TARGET Boost::rts_brotli)
+    target_link_libraries(http_io_example_client_jsonrpc_cpp11 PRIVATE Boost::rts_brotli)
 endif()
 
 # CPP20 Example
@@ -59,10 +59,10 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
     target_link_libraries(http_io_example_client_jsonrpc_cpp20
         PRIVATE
         http_io_example_client_jsonrpc_lib)
-    if (TARGET boost_rts_zlib)
-        target_link_libraries(http_io_example_client_jsonrpc_cpp20 PRIVATE boost_rts_zlib)
+    if (TARGET Boost::rts_zlib)
+        target_link_libraries(http_io_example_client_jsonrpc_cpp20 PRIVATE Boost::rts_zlib)
     endif()
-    if (TARGET boost_rts_brotli)
-        target_link_libraries(http_io_example_client_jsonrpc_cpp20 PRIVATE boost_rts_brotli)
+    if (TARGET Boost::rts_brotli)
+        target_link_libraries(http_io_example_client_jsonrpc_cpp20 PRIVATE Boost::rts_brotli)
     endif()
 endif ()
