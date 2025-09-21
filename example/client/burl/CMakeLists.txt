@@ -25,10 +25,10 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
     find_package(OpenSSL REQUIRED)
 
     target_link_libraries(http_io_example_client_burl
-        boost_http_io
-        boost_url
-        boost_program_options
-        boost_scope
+        Boost::http_io
+        Boost::url
+        Boost::program_options
+        Boost::scope
         OpenSSL::SSL
         OpenSSL::Crypto)
 
@@ -36,12 +36,12 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
         target_link_libraries(http_io_example_client_burl crypt32)
     endif()
 
-    if (TARGET boost_rts_zlib)
-        target_link_libraries(http_io_example_client_burl boost_rts_zlib)
+    if (TARGET Boost::rts_zlib)
+        target_link_libraries(http_io_example_client_burl Boost::rts_zlib)
     endif()
 
-    if (TARGET boost_rts_brotli)
-        target_link_libraries(http_io_example_client_burl boost_rts_brotli)
+    if (TARGET Boost::rts_brotli)
+        target_link_libraries(http_io_example_client_burl Boost::rts_brotli)
     endif()
 
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

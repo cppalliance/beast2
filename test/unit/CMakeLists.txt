@@ -26,8 +26,8 @@ add_executable(boost_http_io_tests ${PFILES} ${EXTRAFILES})
 target_include_directories(boost_http_io_tests PRIVATE . ../../../url/extra/test_suite)
 target_link_libraries(boost_http_io_tests PRIVATE
     OpenSSL::SSL
-    boost_beast
-    boost_http_io
+    Boost::beast
+    Boost::http_io
     )
 
 add_test(NAME boost_http_io_tests COMMAND boost_http_io_tests)
