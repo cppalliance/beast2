@@ -4,16 +4,74 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/CPPAlliance/http_io
+// Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef FIXED_ARRAY_HPP
-#define FIXED_ARRAY_HPP
+#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_FIXED_ARRAY_HPP
+#define BOOST_HTTP_IO_EXAMPLE_SERVER_FIXED_ARRAY_HPP
 
+#include <boost/core/span.hpp>
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
+#include <new>
+#include <stdexcept>
 
+template<class T>
+class fixed_array;
+
+/** A type-erased fixed_array
+*/
+class any_fixed_array
+{
+public:
+    ~any_fixed_array()
+    {
+        destroy_(this);
+    }
+
+    template<class T>
+    any_fixed_array(
+            fixed_array<T>&& v) noexcept
+        : t_(v.t_)
+        , n_(v.n_)
+        , cap_(v.cap_)
+        , destroy_(&destroy<T>)
+    {
+        v.t_ = nullptr;
+        v.n_ = 0;
+        v.cap_ = 0;
+    }
+
+    template<class T>
+    boost::span<T>
+    to_span() noexcept
+    {
+        return { reinterpret_cast<T*>(t_), n_ };
+    }
+
+private:
+    template<class T>
+    friend class fixed_array;
+
+    template<class T>
+    static void destroy(any_fixed_array* p)
+    {
+        fixed_array<T> v(*p);
+    }
+
+    void* t_ = nullptr;
+    std::size_t n_;
+    std::size_t cap_;
+    void(*destroy_)(any_fixed_array*);
+};
+
+/** An append-only array with a fixed capacity
+
+    This container is used to hold elements which
+    are all constructed at once, where the elements
+    do not require move constructability or assignability.
+*/
 template<class T>
 class fixed_array
 {
@@ -27,9 +85,18 @@ class fixed_array
 #endif
 
     T* t_ = nullptr;
-    std::size_t n_ = 0;
+    std::size_t n_;
+    std::size_t cap_;
 
-    fixed_array() = default;
+    friend class any_fixed_array;
+
+    fixed_array(
+        any_fixed_array& v) noexcept
+        : t_(reinterpret_cast<T*>(v.t_))
+        , n_(v.n_)
+        , cap_(v.cap_)
+    {
+    }
 
 public:
     using value_type = T;
@@ -42,34 +109,86 @@ public:
     using difference_type = std::ptrdiff_t;
     using size_type = std::size_t;
 
-    template<class... Args>
-    explicit
-    fixed_array(
-        std::size_t N,
-        Args&&... args)
-        : fixed_array()
-    {
-        t_ = std::allocator<T>{}.allocate(N);
-        while(n_ < N)
-        {
-            ::new(&t_[n_]) T(args...);
-            ++n_;
-        }
-    }
-
     ~fixed_array()
     {
         if(! t_)
             return;
-        for(auto n = n_; n--;)
-            t_[n].~T();
-        std::allocator<T>{}.deallocate(t_, n_);
+        while(n_--)
+            t_[n_].~T();
+        std::allocator<T>{}.deallocate(t_, cap_);
+    }
+
+    /** Constructor
+
+        The moved-from object will have zero
+        capacity and zero size.
+    */
+    fixed_array(fixed_array&& other) noexcept
+    {
+        t_ = other.t_;
+        n_ = other.n_;
+        cap_ = other.cap_;
+        other.t_ = nullptr;
+        other.n_ = 0;
+        other.cap_ = 0;
+    }
+
+    /** Constructor
+
+        The array will have the specified capacity.
+
+        @par Postconditions
+        ```
+        size() == 0 &&  capacity() == cap
+        ```
+    */
+    explicit
+    fixed_array(std::size_t cap)
+        : t_(std::allocator<T>{}.allocate(cap))
+        , n_(0)
+        , cap_(cap)
+    {
+    }
+
+    std::size_t
+    capacity() const noexcept
+    {
+        return cap_;
     }
 
     std::size_t
     size() const noexcept
     {
         return n_;
+    }
+
+    bool
+    is_full() const noexcept
+    {
+        return n_ >= cap_;
+    }
+
+    template<class... Args>
+    T& append(Args&&... args)
+    {
+        if(is_full())
+            throw std::out_of_range("full");
+        auto p = t_ + n_;
+        ::new(p) T(std::forward<Args>(args)...);
+        ++n_;
+        return *p;
+    }
+
+    const_iterator
+    begin() const noexcept
+    {
+        return t_;
+    }
+
+    const_iterator
+    end() const noexcept
+    {
+        return t_ + n_;
     }
 
     iterator
@@ -82,20 +201,6 @@ public:
     end() noexcept
     {
         return t_ + n_;
-    }
-
-    const_iterator
-    begin() const noexcept
-    {
-        return const_cast<
-            T const*>(t_);
-    }
-
-    const_iterator
-    end() const noexcept
-    {
-        return const_cast<
-            T const*>(t_) + n_;
     }
 };
 
