@@ -145,7 +145,7 @@ public:
 
     void
     operator()(
-        http_proto::request_view const& req,
+        http_proto::request_base const& req,
         http_proto::response& res,
         http_proto::serializer& sr) const
     {
@@ -162,7 +162,7 @@ private:
 void
 make_error_response(
     http_proto::status code,
-    http_proto::request_view const& req,
+    http_proto::request_base const& req,
     http_proto::response& res,
     http_proto::serializer& sr)
 {
@@ -223,7 +223,7 @@ make_error_response(
 void
 handle_request(
     core::string_view doc_root,
-    http_proto::request_view const& req,
+    http_proto::request_base const& req,
     http_proto::response& res,
     http_proto::serializer& sr)
 {
@@ -290,7 +290,7 @@ handle_request(
 
 void
 service_unavailable(
-    http_proto::request_view const& req,
+    http_proto::request_base const& req,
     http_proto::response& res,
     http_proto::serializer& sr)
 {

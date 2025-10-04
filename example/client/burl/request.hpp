@@ -17,7 +17,6 @@
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/write.hpp>
 #include <boost/http_proto/response_parser.hpp>
-#include <boost/http_proto/response_view.hpp>
 #include <boost/http_proto/serializer.hpp>
 
 #include <chrono>

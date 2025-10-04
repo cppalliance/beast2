@@ -153,7 +153,7 @@ public:
                         }
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_write_some(
-                            prefix(buffers, wr_remain_),
+                            buffers::prefix(buffers, wr_remain_),
                             std::move(self));
                         wr_remain_ -= n;
                         self.complete(ec, n);
@@ -191,7 +191,7 @@ public:
                         }
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_read_some(
-                            prefix(buffers, rd_remain_),
+                            buffers::prefix(buffers, rd_remain_),
                             std::move(self));
                         rd_remain_ -= n;
                         self.complete(ec, n);
@@ -239,30 +239,6 @@ private:
 
         virtual ~base() = default;
     };
-
-    static
-    buffers::slice_of<
-        boost::span<buffers::const_buffer const>>
-    prefix(
-        buffers::slice_of<
-            boost::span<buffers::const_buffer const>> bs,
-        std::size_t n)
-    {
-        buffers::keep_front(bs, n);
-        return bs;
-    }
-
-    static
-    buffers::slice_of<
-        boost::span<buffers::mutable_buffer const>>
-    prefix(
-        buffers::slice_of<boost::span<
-            buffers::mutable_buffer const>> bs,
-        std::size_t n)
-    {
-        buffers::keep_front(bs, n);
-        return bs;
-    }
 
     std::unique_ptr<base> stream_;
     asio::steady_timer rd_timer;
