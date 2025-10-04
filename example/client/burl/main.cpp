@@ -118,7 +118,7 @@ is_transient_error(http_proto::status status) noexcept
 
 bool
 can_reuse_connection(
-    http_proto::response_view response,
+    http_proto::response_base const& response,
     const urls::url_view& a,
     const urls::url_view& b) noexcept
 {
@@ -137,7 +137,7 @@ can_reuse_connection(
 bool
 should_ignore_body(
     const operation_config& oc,
-    http_proto::response_view response) noexcept
+    http_proto::response_base const& response) noexcept
 {
     if(oc.resume_from && !response.count(http_proto::field::content_range))
         return true;
@@ -146,7 +146,7 @@ should_ignore_body(
 }
 
 boost::optional<std::uint64_t>
-body_size(http_proto::response_view response)
+body_size(http_proto::response_base const& response)
 {
     if(response.payload() == http_proto::payload::size)
         return response.payload_size();
@@ -154,7 +154,9 @@ body_size(http_proto::response_view response)
 }
 
 urls::url
-redirect_url(http_proto::response_view response, const urls::url_view& referer)
+redirect_url(
+    http_proto::response_base const& response,
+    const urls::url_view& referer)
 {
     auto it = response.find(http_proto::field::location);
     if(it != response.end())
@@ -472,7 +474,7 @@ perform_request(
             stream.write_limit(oc.sendpersecond.value());
     };
 
-    auto stream_headers = [&](http_proto::response_view response)
+    auto stream_headers = [&](http_proto::response_base const& response)
     {
         if(oc.show_headers)
             output << response.buffer();

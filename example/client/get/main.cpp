@@ -251,7 +251,7 @@ private:
 
     void
     on_redirect_response(
-        http_proto::response_view response)
+        http_proto::response_base const& response)
     {
         using field = http_proto::field;
 
@@ -390,7 +390,7 @@ private:
     static
     bool
     can_reuse_connection(
-        http_proto::response_view response,
+        http_proto::response_base const& response,
         urls::url_view a,
         urls::url_view b) noexcept
     {
