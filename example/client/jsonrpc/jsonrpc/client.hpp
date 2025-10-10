@@ -221,26 +221,22 @@ private:
     class request_and_transform_op
     {
         client& client_;
-        boost::core::string_view method_;
-        boost::json::value params_;
 
     public:
-        request_and_transform_op(
-            client& client,
-            boost::core::string_view method,
-            boost::json::value params)
-            : client_(client)
-            , method_(method)
-            , params_(std::move(params))
+        request_and_transform_op(client& c) noexcept
+            : client_(c)
         {
         }
 
         template<typename Self>
         void
-        operator()(Self&& self)
+        operator()(
+            Self&& self,
+            boost::core::string_view method,
+            boost::json::value params)
         {
             client_.async_call_impl(
-                std::move(self), method_, std::move(params_));
+                std::move(self), method, std::move(params));
         }
 
         template<typename Self>
@@ -301,10 +297,13 @@ private:
         boost::json::value params,
         CompletionToken&& token)
     {
-        return boost::asio::async_compose<CompletionToken, void(error, Return)>(
-            request_and_transform_op<Return>(*this, method, std::move(params)),
+        return boost::asio::async_initiate<CompletionToken, void(error, Return)>(
+            boost::asio::composed<void(error, Return)>(
+                request_and_transform_op<Return>(*this),
+                *stream_),
             token,
-            stream_->get_executor());
+            method,
+            std::move(params));
     }
 
     std::uint64_t

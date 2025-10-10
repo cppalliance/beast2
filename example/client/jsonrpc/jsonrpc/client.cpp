@@ -284,21 +284,38 @@ private:
 class client::request_op
     : public asio::coroutine
 {
-    client& c_;
-    core::string_view method_;
-    json::value params_;
+    client& client_;
     std::uint64_t id_;
 
 public:
-    request_op(
-        client& c,
-        core::string_view method,
-        json::value params) noexcept
-        : c_(c)
-        , method_(method)
-        , params_(std::move(params))
+    request_op(client& c) noexcept
+        : client_(c)
         , id_(c.next_id())
     {
+    }
+
+    template<typename Self>
+    void
+    operator()(
+        Self&& self,
+        boost::core::string_view method,
+        boost::json::value params)
+    {
+        auto sp = params.storage();
+        json::object value(
+            {
+                { "jsonrpc", "2.0" },
+                { "method", method },
+                { "params", std::move(params)},
+                { "id", id_ }
+            },
+            sp);
+        client_.req_.set_chunked(true);
+        client_.sr_.start<json_source>(
+            client_.req_, client_.jsr_, std::move(value));
+
+        http_io::async_write(
+            *client_.stream_, client_.sr_, std::move(self));
     }
 
     template<class Self>
@@ -313,38 +330,19 @@ public:
 
         BOOST_ASIO_CORO_REENTER(*this)
         {
-            {
-                auto sp = params_.storage();
-                json::object value(
-                    {
-                        { "jsonrpc", "2.0" },
-                        { "method", method_ },
-                        { "params", std::move(params_)},
-                        { "id", id_ }
-                    },
-                    sp);
-                c_.req_.set_chunked(true);
-                c_.sr_.template start<json_source>(
-                    c_.req_, c_.jsr_, std::move(value));
-            }
-
-            BOOST_ASIO_CORO_YIELD
-            http_io::async_write(
-                *c_.stream_, c_.sr_, std::move(self));
-
-            c_.pr_.start();
+            client_.pr_.start();
             BOOST_ASIO_CORO_YIELD
             http_io::async_read_header(
-                *c_.stream_, c_.pr_, std::move(self));
+                *client_.stream_, client_.pr_, std::move(self));
 
-            c_.pr_.set_body<json_sink>(c_.jpr_);
+            client_.pr_.set_body<json_sink>(client_.jpr_);
             BOOST_ASIO_CORO_YIELD
             http_io::async_read(
-                *c_.stream_, c_.pr_, std::move(self));
+                *client_.stream_, client_.pr_, std::move(self));
 
             {
-                auto body = c_.jpr_.release();
-                if(ec || !body.is_object())
+                auto body = client_.jpr_.release();
+                if(!body.is_object())
                     return self.complete({ errc::invalid_response }, {});
                 auto& obj = body.get_object();
                 auto* ver = obj.if_contains("jsonrpc");
@@ -434,12 +432,13 @@ async_call_impl(
     core::string_view method,
     json::value params)
 {
-    asio::async_compose<
-        decltype(handler),
-        void(error, json::value)>(
-            client::request_op(*this, method, std::move(params)),
-            handler,
-            get_executor());
+    return boost::asio::async_initiate<decltype(handler), void(error, json::value)>(
+        boost::asio::composed<void(error, json::value)>(
+            client::request_op(*this),
+            *stream_),
+        handler,
+        method,
+        std::move(params));
 }
 
 } // jsonrpc
