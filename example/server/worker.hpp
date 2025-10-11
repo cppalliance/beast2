@@ -23,10 +23,16 @@
 #include <stddef.h>
 #include <string>
 
-#include <boost/asio/ip/tcp.hpp> // VFALCO REMOVE
 #include <functional> // for _1
 
 namespace boost {
+
+namespace asio {
+namespace ip {
+class tcp; // forward declaration
+} // ip
+} // asio
+
 namespace http_io {
 
 void
@@ -37,25 +43,17 @@ service_unavailable(
 
 template<
     class Executor,
-    class Executor1 = Executor>
+    class Executor1 = Executor,
+    class Protocol = asio::ip::tcp
+>
 class worker
 {
-private:
-    // order of destruction matters here
-    asio_server& srv_;
-    section sect_;
-    boost::asio::basic_socket_acceptor<
-        boost::asio::ip::tcp, Executor1>* pa_ = nullptr;
-    boost::asio::basic_stream_socket<
-        boost::asio::ip::tcp, Executor> sock_;
-    boost::asio::ip::tcp::endpoint ep_;
-    std::string const& doc_root_;
-    http_proto::request_parser pr_;
-    http_proto::response res_;
-    http_proto::serializer sr_;
-    std::size_t id_ = 0;
-
 public:
+    using acceptor_type =
+        asio::basic_socket_acceptor<Protocol, Executor>;
+    using executor_type = Executor;
+    using protocol_type = Protocol;
+
     worker(
         asio_server& srv,
         std::string const& doc_root)
@@ -74,8 +72,7 @@ public:
         or the worker is destroyed, whichever comes first.
     */
     void
-    run(boost::asio::basic_socket_acceptor<
-        boost::asio::ip::tcp, Executor1>& acc)
+    run(acceptor_type& acc)
     {
         pa_ = &acc;
         do_accept();
@@ -84,7 +81,7 @@ public:
     void
     stop()
     {
-        boost::system::error_code ec;
+        system::error_code ec;
         sock_.cancel(ec);
     }
 
@@ -97,7 +94,7 @@ private:
     void
     fail(
         std::string what,
-        boost::system::error_code ec)
+        system::error_code ec)
     {
         if( ec == asio::error::operation_aborted )
             return;
@@ -120,7 +117,7 @@ private:
     do_accept()
     {
         // Clean up any previous connection.
-        boost::system::error_code ec;
+        system::error_code ec;
         sock_.close(ec);
         pr_.reset();
 
@@ -130,7 +127,7 @@ private:
     }
 
     void
-    on_accept(boost::system::error_code ec)
+    on_accept(system::error_code ec)
     {
         if( ec.failed() )
         {
@@ -159,7 +156,7 @@ private:
         pr_.start();
 
         using namespace std::placeholders;
-        boost::http_io::async_read_header(
+        http_io::async_read_header(
             sock_,
             pr_,
             std::bind(&worker::on_read_header,
@@ -188,7 +185,7 @@ private:
         }
 
         using namespace std::placeholders;
-        boost::http_io::async_read(sock_, pr_, std::bind(
+        http_io::async_read(sock_, pr_, std::bind(
             &worker::on_read_body, this, _1, _2));
     }
 
@@ -259,6 +256,20 @@ private:
 
         do_accept();
     }
+
+private:
+    // order of destruction matters here
+    asio_server& srv_;
+    section sect_;
+    boost::asio::basic_socket_acceptor<
+        boost::asio::ip::tcp, Executor1>* pa_ = nullptr;
+    asio::basic_stream_socket<Protocol, Executor> sock_;
+    typename Protocol::endpoint ep_;
+    std::string const& doc_root_;
+    http_proto::request_parser pr_;
+    http_proto::response res_;
+    http_proto::serializer sr_;
+    std::size_t id_ = 0;
 };
 
 } // http_io
