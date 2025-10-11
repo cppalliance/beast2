@@ -16,6 +16,19 @@
 #include <type_traits>
 #include <vector>
 
+namespace boost {
+namespace http_io {
+
+// VFALCO UGH There's no where proper to put this!
+namespace detail {
+template<class Base, class Derived>
+using derived_from = std::integral_constant<bool,
+    std::is_base_of<Base, Derived>::value &&
+    std::is_convertible<
+        Derived const volatile*,
+        Base const volatile*>::value>;
+} // detail
+
 /** A generic server interface
 
     In this model a server contains zero or more parts, where each part
@@ -63,10 +76,11 @@ public:
         return services_;
     }
 
-    /** Construct a new server part
-    */
-    template<class Part, class... Args>
-    friend Part& new_part(server&, Args&&... args);
+    void
+    install(std::unique_ptr<part> p)
+    {
+        v_.emplace_back(std::move(p));
+    }
 
 protected:
     boost::rts::context services_;
@@ -76,11 +90,18 @@ protected:
     bool is_stopped_ = false;
 };
 
-template<class Part, class... Args>
-Part&
-new_part(
-    server& srv,
-    Args&&... args)
+/** Construct a new server part
+*/
+template<
+    class Part,
+    class Server,
+    class... Args>
+auto
+emplace_part(
+    Server& srv,
+    Args&&... args) -> Part&
+        // VFALCO I couldn't get this to work and I'm also not sure I want it to
+        //typename std::enable_if<detail::derived_from<server::part, Server>::value, Part&>::type
 {
     static_assert(
         std::is_convertible<Part*, server::part*>::value,
@@ -89,7 +110,7 @@ new_part(
     auto p = std::unique_ptr<Part>(new Part(
         srv, std::forward<Args>(args)...));
     auto& part = *p;
-    srv.v_.emplace_back(std::move(p));
+    srv.install(std::move(p));
     return part;
 }
 
@@ -143,5 +164,8 @@ struct actions
     virtual void close() = 0;
     virtual void fail() = 0;
 };
+
+} // http_io
+} // boost
 
 #endif

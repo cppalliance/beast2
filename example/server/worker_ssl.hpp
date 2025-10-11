@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_HPP
+#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_SSL_HPP
+#define BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_SSL_HPP
 
 #include "asio_server.hpp"
 #include "handler.hpp"
@@ -20,6 +20,8 @@
 #include <boost/http_proto/serializer.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
+#include <boost/asio/ssl/context.hpp>
+#include <boost/asio/ssl/stream.hpp>
 #include <stddef.h>
 #include <string>
 
@@ -35,18 +37,12 @@ class tcp; // forward declaration
 
 namespace http_io {
 
-void
-service_unavailable(
-    http_proto::request_base const& req,
-    http_proto::response& res,
-    http_proto::serializer& sr);
-
 template<
     class Executor,
     class Executor1 = Executor,
     class Protocol = asio::ip::tcp
 >
-class worker
+class worker_ssl
 {
 public:
     using executor_type = Executor;
@@ -58,23 +54,22 @@ public:
 
     using socket_type =
         asio::basic_stream_socket<Protocol, Executor>;
+    
+    using stream_type = asio::ssl::stream<socket_type>;
 
-    using stream_type =
-        asio::basic_stream_socket<Protocol, Executor>;
-
-    template<
-        class Executor_
+    template<class Executor_
         , class = typename std::enable_if<std::is_constructible<Executor, Executor_>::value>::type
     >
-    worker(
+    worker_ssl(
         asio_server& srv,
         acceptor_type& acc,
         Executor_ const& ex,
-        core::string_view doc_root
-        )
+        asio::ssl::context& ssl_ctx,
+        std::string const& doc_root)
         : srv_(srv)
         , acc_(acc)
-        , sock_(ex)
+        , ssl_ctx_(ssl_ctx)
+        , stream_(ex, ssl_ctx)
         , doc_root_(doc_root)
         , pr_(srv.services())
         , sr_(srv.services())
@@ -97,7 +92,7 @@ public:
     stop()
     {
         system::error_code ec;
-        sock_.cancel(ec);
+        stream_.next_layer().cancel(ec);
     }
 
 private:
@@ -116,7 +111,7 @@ private:
 
         if( ec == asio::error::eof )
         {
-            sock_.shutdown(
+            stream_.next_layer().shutdown(
                 asio::socket_base::shutdown_send, ec);
             return;
         }
@@ -132,17 +127,54 @@ private:
     do_accept()
     {
         // Clean up any previous connection.
-        system::error_code ec;
-        sock_.close(ec);
-        pr_.reset();
+        {
+            system::error_code ec;
+            stream_.next_layer().close(ec);
+            pr_.reset();
+
+            // asio::ssl::stream has an internal state which cannot be reset.
+            // In order to perform the handshake again, we destroy the old
+            // object and assign a new one, in a way that preserves the
+            // original socket to avoid churning file handles.
+            //
+            stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
+        }
 
         using namespace std::placeholders;
-        acc_.async_accept( sock_, ep_,
-            std::bind(&worker::on_accept, this, _1));
+        acc_.async_accept( stream_.next_layer(), ep_,
+            std::bind(&worker_ssl::on_accept, this, _1));
     }
 
     void
-    on_accept(system::error_code ec)
+    on_accept(system::error_code const& ec)
+    {
+        if( ec.failed() )
+        {
+            if( ec == asio::error::operation_aborted )
+            {
+                // worker is canceled, exit the I/O loop
+                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
+                return;
+            }
+
+            // happens periodically, usually harmless
+            LOG_DBG(sect_, id(), "async_accept ", ec.message());
+            return do_accept();
+        }
+
+        // Request must be fully processed within 60 seconds.
+        //request_deadline_.expires_after(
+            //std::chrono::seconds(60));
+
+        using namespace std::placeholders;
+        stream_.async_handshake(
+            asio::ssl::stream_base::server,
+            std::bind(&worker_ssl::on_handshake, this, _1));
+    }
+
+    void
+    on_handshake(
+        system::error_code const& ec)
     {
         if( ec.failed() )
         {
@@ -172,9 +204,9 @@ private:
 
         using namespace std::placeholders;
         http_io::async_read_header(
-            sock_,
+            stream_,
             pr_,
-            std::bind(&worker::on_read_header,
+            std::bind(&worker_ssl::on_read_header,
                 this, _1, _2));
     }
 
@@ -200,8 +232,8 @@ private:
         }
 
         using namespace std::placeholders;
-        http_io::async_read(sock_, pr_, std::bind(
-            &worker::on_read_body, this, _1, _2));
+        http_io::async_read(stream_, pr_, std::bind(
+            &worker_ssl::on_read_body, this, _1, _2));
     }
 
     void
@@ -227,12 +259,12 @@ private:
 
         res_.clear();
 
-        if(! srv_.is_stopping())
-            handle_https_redirect({ pr_.get(), res_, sr_, srv_.is_stopping() });
+        handle_request(doc_root_,
+            { pr_.get(), res_, sr_, srv_.is_stopping() });
 
         using namespace std::placeholders;
-        http_io::async_write(sock_, sr_, std::bind(
-            &worker::on_write, this, _1, _2));
+        http_io::async_write(stream_, sr_, std::bind(
+            &worker_ssl::on_write, this, _1, _2));
     }
 
     void
@@ -264,10 +296,11 @@ private:
 
 private:
     // order of destruction matters here
+    section sect_;
     asio_server& srv_;
     acceptor_type& acc_;
-    section sect_;
-    socket_type sock_;
+    asio::ssl::context& ssl_ctx_;
+    stream_type stream_;
     typename Protocol::endpoint ep_;
     std::string doc_root_;
     http_proto::request_parser pr_;

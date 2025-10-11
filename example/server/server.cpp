@@ -10,6 +10,12 @@
 #include "server.hpp"
 #include <functional>
 
+namespace boost {
+namespace http_io {
+
 server::part::~part() = default;
 
 server::server() = default;
+
+} // http_io
+} // boost

@@ -16,6 +16,7 @@
 #include <memory>
 #include <new>
 #include <stdexcept>
+#include <utility>
 
 template<class T>
 class fixed_array;
@@ -25,29 +26,97 @@ class fixed_array;
 class any_fixed_array
 {
 public:
+    /** Destructor
+
+        All elements are destroyed in reverse order.
+    */
     ~any_fixed_array()
     {
-        destroy_(this);
+        if(t_)
+            destroy_(this);
     }
 
+    /** Constructor
+    */
+    any_fixed_array() = default;
+
+    /** Constructor
+
+        Ownership of all elements in the moved-from object is transferred.
+    */
+    any_fixed_array(
+        any_fixed_array&& other) noexcept
+        : any_fixed_array()
+    {
+        swap(*this, other);
+    }
+
+    /** Constructor
+
+        Ownership of all elements in the moved-from object is transferred.
+
+        @par Postconditions
+        @code
+        other.size() == 0 && other.capacity() == 0
+        @endcode
+    */
     template<class T>
     any_fixed_array(
-            fixed_array<T>&& v) noexcept
-        : t_(v.t_)
-        , n_(v.n_)
-        , cap_(v.cap_)
+        fixed_array<T>&& other) noexcept
+        : t_(other.t_)
+        , n_(other.n_)
+        , cap_(other.cap_)
         , destroy_(&destroy<T>)
     {
-        v.t_ = nullptr;
-        v.n_ = 0;
-        v.cap_ = 0;
+        other.t_ = nullptr;
+        other.n_ = 0;
+        other.cap_ = 0;
     }
 
+    /** Constructor
+
+        Ownership of all elements in the moved-from object is transferred.
+
+        @par Postconditions
+        @code
+        other.size() == 0 && other.capacity() == 0
+        @endcode
+    */
+    any_fixed_array&
+    operator=(
+        any_fixed_array&& other) noexcept
+    {
+        any_fixed_array temp;
+        swap(*this, temp);
+        swap(other, *this);
+        return *this;
+    }
+
+    /** Return a typed span of elements
+
+        This function returns the span of elements contained in the array.
+        The specified type `T` must match the type of element used
+        to construct the array, or else the behavior is undefined.
+
+        @tparam T The type of element used to construct the array.
+    */
     template<class T>
     boost::span<T>
     to_span() noexcept
     {
         return { reinterpret_cast<T*>(t_), n_ };
+    }
+
+    /** Swap objects
+    */
+    friend void swap(
+        any_fixed_array& a0,
+        any_fixed_array& a1) noexcept
+    {
+        std::swap(a0.t_, a1.t_);
+        std::swap(a0.n_, a1.n_);
+        std::swap(a0.cap_, a1.cap_);
+        std::swap(a0.destroy_, a1.destroy_);
     }
 
 private:
@@ -61,10 +130,12 @@ private:
     }
 
     void* t_ = nullptr;
-    std::size_t n_;
-    std::size_t cap_;
-    void(*destroy_)(any_fixed_array*);
+    std::size_t n_ = 0;
+    std::size_t cap_ = 0;
+    void(*destroy_)(any_fixed_array*) = 0;
 };
+
+//------------------------------------------------
 
 /** An append-only array with a fixed capacity
 
@@ -75,29 +146,6 @@ private:
 template<class T>
 class fixed_array
 {
-#if 0
-//#if __cplusplus < 201703L // gcc nonconforming
-    static_assert(
-        alignof(T) <=
-            alignof(std::max_align_t),
-        "T must not be overaligned");
-//#endif
-#endif
-
-    T* t_ = nullptr;
-    std::size_t n_;
-    std::size_t cap_;
-
-    friend class any_fixed_array;
-
-    fixed_array(
-        any_fixed_array& v) noexcept
-        : t_(reinterpret_cast<T*>(v.t_))
-        , n_(v.n_)
-        , cap_(v.cap_)
-    {
-    }
-
 public:
     using value_type = T;
     using reference = T&;
@@ -202,6 +250,31 @@ public:
     {
         return t_ + n_;
     }
+
+private:
+#if 0
+//#if __cplusplus < 201703L // gcc nonconforming
+    static_assert(
+        alignof(T) <=
+            alignof(std::max_align_t),
+        "T must not be overaligned");
+//#endif
+#endif
+
+    T* t_ = nullptr;
+    std::size_t n_;
+    std::size_t cap_;
+
+    friend class any_fixed_array;
+
+    fixed_array(
+        any_fixed_array& v) noexcept
+        : t_(reinterpret_cast<T*>(v.t_))
+        , n_(v.n_)
+        , cap_(v.cap_)
+    {
+    }
+
 };
 
 #endif

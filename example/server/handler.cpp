@@ -11,25 +11,114 @@
 #include <boost/http_proto/file_source.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/string_body.hpp>
+#include <boost/url/url.hpp>
 #include <boost/url/authority_view.hpp>
 #include <boost/url/grammar/ci_string.hpp>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
+#include <iostream>
+
+namespace boost {
+
+/// Returns the current system time formatted as an HTTP-date per RFC 9110 §5.6.7.
+/// Example: "Sat, 11 Oct 2025 02:12:34 GMT"
+std::string
+make_http_date()
+{
+    using namespace std;
+
+    // Get current time in UTC
+    std::time_t t = std::time(nullptr);
+    std::tm tm_utc{};
+#if defined(_WIN32)
+    gmtime_s(&tm_utc, &t);
+#else
+    gmtime_r(&t, &tm_utc);
+#endif
+
+    char const* wkday[] = {
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+    };
+    char const* month[] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+
+    // Format strictly according to RFC 9110 (fixed-width, English locale)
+    char buf[30];
+    std::snprintf(
+        buf, sizeof(buf),
+        "%s, %02d %s %04d %02d:%02d:%02d GMT",
+        wkday[tm_utc.tm_wday],
+        tm_utc.tm_mday,
+        month[tm_utc.tm_mon],
+        tm_utc.tm_year + 1900,
+        tm_utc.tm_hour,
+        tm_utc.tm_min,
+        tm_utc.tm_sec);
+
+    return std::string(buf);
+}
+
+//------------------------------------------------
+
+static
+void
+prepare_error(
+    http_proto::response& res,
+    std::string& body,
+    http_proto::status code,
+    http_proto::request_base const& req)
+{
+    res.set_start_line(code, req.version());
+    res.append(http_proto::field::server, "boost");
+    res.append(http_proto::field::date, make_http_date());
+    res.append(http_proto::field::cache_control, "no-store");
+    res.append(http_proto::field::content_type, "text/html");
+    res.append(http_proto::field::content_language, "en");
+
+    // format the numeric code followed by the reason string
+    auto title = std::to_string(
+        static_cast<std::underlying_type<
+            http_proto::status>::type>(code));
+    title.push_back(' ');
+    title.append( res.reason() );
+
+    std::ostringstream ss;
+    ss <<
+        "<HTML>"
+        "<HEAD>"
+        "<TITLE>" << title << "</TITLE>"
+        "</HEAD>\n"
+        "<BODY>"
+        "<H1>" << title << "</H1>"
+        "</BODY>"
+        "</HTML>"
+        ;
+    body = ss.str();
+}
+
+//------------------------------------------------
 
 // Return a reasonable mime type based on the extension of a file.
-boost::core::string_view
+core::string_view
 get_extension(
-    boost::core::string_view path) noexcept
+    core::string_view path) noexcept
 {
     auto const pos = path.rfind(".");
-    if( pos == boost::core::string_view::npos)
-        return boost::core::string_view();
+    if( pos == core::string_view::npos)
+        return core::string_view();
     return path.substr(pos);
 }
 
-boost::core::string_view
+core::string_view
 mime_type(
-    boost::core::string_view path)
+    core::string_view path)
 {
-    using boost::urls::grammar::ci_is_equal;
+    using urls::grammar::ci_is_equal;
     auto ext = get_extension(path);
     if(ci_is_equal(ext, ".htm"))  return "text/html";
     if(ci_is_equal(ext, ".html")) return "text/html";
@@ -60,8 +149,8 @@ mime_type(
 void
 path_cat(
     std::string& result,
-    boost::core::string_view base,
-    boost::core::string_view path)
+    core::string_view base,
+    core::string_view path)
 {
     if(base.empty())
     {
@@ -90,14 +179,18 @@ path_cat(
 
 void
 make_error_response(
-    boost::http_proto::status code,
-    boost::http_proto::request_base const& req,
-    boost::http_proto::response& res,
-    boost::http_proto::serializer& sr)
+    http_proto::status code,
+    http_proto::request_base const& req,
+    http_proto::response& res,
+    http_proto::serializer& sr)
 {
-    auto rv = boost::urls::parse_authority(
-        req.value_or(boost::http_proto::field::host, ""));
-    boost::core::string_view host;
+    std::string body;
+    prepare_error(res, body, code, req);
+    res.set_payload_size(body.size());
+#if 0
+    auto rv = urls::parse_authority(
+        req.value_or(http_proto::field::host, ""));
+    core::string_view host;
     if(rv.has_value())
         host = rv->buffer();
     else
@@ -109,15 +202,15 @@ make_error_response(
     s += "<title>";
         s += std::to_string(static_cast<
             std::underlying_type<
-                boost::http_proto::status>::type>(code));
+                http_proto::status>::type>(code));
         s += " ";
-        s += boost::http_proto::obsolete_reason(code);
+        s += http_proto::obsolete_reason(code);
         s += "</title>\n";
     s += "</head><body>\n";
     s += "<h1>";
-        s += boost::http_proto::obsolete_reason(code);
+        s += http_proto::obsolete_reason(code);
         s += "</h1>\n";
-    if(code == boost::http_proto::status::not_found)
+    if(code == http_proto::status::not_found)
     {
         s += "<p>The requested URL ";
         s += req.target();
@@ -130,20 +223,67 @@ make_error_response(
         s += rv->port();
         s += "</address>\n";
     s += "</body></html>\n";
-
     res.set_start_line(code, res.version());
     res.set_keep_alive(req.keep_alive());
     res.set_payload_size(s.size());
-    res.append(boost::http_proto::field::content_type,
+    res.append(http_proto::field::content_type,
         "text/html; charset=iso-8859-1");
-    res.append(boost::http_proto::field::date,
+    res.append(http_proto::field::date,
         "Mon, 12 Dec 2022 03:26:32 GMT");
-    res.append(boost::http_proto::field::server,
+    res.append(http_proto::field::server,
         "Boost.Http.IO/1.0b (Win10)");
+#endif
+
+    sr.start(res, http_proto::string_body(
+        std::move(body)));
+}
+
+void
+service_unavailable(
+    http_proto::response& res,
+    http_proto::serializer& sr,
+    http_proto::request_base const& req)
+{
+    auto const code = http_proto::status::service_unavailable;
+    auto rv = urls::parse_authority( req.value_or( http_proto::field::host, "" ) );
+    core::string_view host;
+    if(rv.has_value())
+        host = rv->buffer();
+    else
+        host = "";
+
+    std::string s;
+    s  = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n";
+    s += "<html><head>\n";
+    s += "<title>";
+        s += std::to_string(static_cast<
+            std::underlying_type<
+                http_proto::status>::type>(code));
+        s += " ";
+        s += http_proto::obsolete_reason(code);
+        s += "</title>\n";
+    s += "</head><body>\n";
+    s += "<h1>";
+        s += http_proto::obsolete_reason(code);
+        s += "</h1>\n";
+    s += "<hr>\n";
+    s += "<address>Boost.Http.IO/1.0b (Win10) Server at ";
+        s += rv->host_address();
+        s += " Port ";
+        s += rv->port();
+        s += "</address>\n";
+    s += "</body></html>\n";
+
+    res.set_start_line(code, res.version());
+    res.set_keep_alive(false);
+    res.set_payload_size(s.size());
+    res.append(http_proto::field::content_type, "text/html; charset=iso-8859-1");
+    //res.append(http_proto::field::date, "Mon, 12 Dec 2022 03:26:32 GMT" );
+    res.append(http_proto::field::server, "Boost.Http.Io");
 
     sr.start(
         res,
-        boost::http_proto::string_body(
+        http_proto::string_body(
             std::move(s)));
 }
 
@@ -151,11 +291,13 @@ make_error_response(
 
 void
 handle_request(
-    boost::core::string_view doc_root,
-    boost::http_proto::request_base const& req,
-    boost::http_proto::response& res,
-    boost::http_proto::serializer& sr)
+    core::string_view doc_root,
+    work_params const& params)
 {
+    if(params.is_shutting_down)
+        return service_unavailable(
+            params.res, params.sr, params.req);
+
 #if 0
     // Returns a server error response
     auto const server_error =
@@ -172,45 +314,82 @@ handle_request(
 #endif
 
     // Request path must be absolute and not contain "..".
-    if( req.target().empty() ||
-        req.target()[0] != '/' ||
-        req.target().find("..") != boost::core::string_view::npos)
-        return make_error_response(
-            boost::http_proto::status::bad_request, req, res, sr);
+    if( params.req.target().empty() ||
+        params.req.target()[0] != '/' ||
+        params.req.target().find("..") != core::string_view::npos)
+        return make_error_response(http_proto::status::bad_request,
+            params.req, params.res, params.sr);
 
     // Build the path to the requested file
     std::string path; 
-    path_cat(path, doc_root, req.target());
-    if(req.target().back() == '/')
+    path_cat(path, doc_root, params.req.target());
+    if(params.req.target().back() == '/')
         path.append("index.html");
 
     // Attempt to open the file
-    boost::system::error_code ec;
-    boost::http_proto::file f;
+    system::error_code ec;
+    http_proto::file f;
     std::uint64_t size = 0;
-    f.open(path.c_str(), boost::http_proto::file_mode::scan, ec);
+    f.open(path.c_str(), http_proto::file_mode::scan, ec);
     if(! ec.failed())
         size = f.size(ec);
     if(! ec.failed())
     {
-        res.set_start_line(
-            boost::http_proto::status::ok,
-            req.version());
-        res.set(boost::http_proto::field::server, "Boost");
-        res.set_keep_alive(req.keep_alive());
-        res.set_payload_size(size);
+        params.res.set_start_line(
+            http_proto::status::ok,
+            params.req.version());
+        params.res.set(http_proto::field::server, "Boost");
+        params.res.set_keep_alive(params.req.keep_alive());
+        params.res.set_payload_size(size);
 
         auto mt = mime_type(get_extension(path));
-        res.append(
-            boost::http_proto::field::content_type, mt);
+        params.res.append(
+            http_proto::field::content_type, mt);
 
-        sr.start<boost::http_proto::file_source>(
-            res, std::move(f), size);
+        params.sr.start<http_proto::file_source>(
+            params.res, std::move(f), size);
         return;
     }
 
+    if(ec == system::errc::no_such_file_or_directory)
+        return make_error_response(
+            http_proto::status::not_found,
+                params.req, params.res, params.sr);
+
     // ec.message()?
     return make_error_response(
-        boost::http_proto::status::internal_server_error,
-            req, res, sr);
+        http_proto::status::internal_server_error,
+            params.req, params.res, params.sr);
 }
+
+void
+handle_https_redirect(
+    work_params const& params)
+{
+    if(params.is_shutting_down)
+        return service_unavailable(
+            params.res, params.sr, params.req);
+
+    std::string body;
+    prepare_error(params.res, body,
+        http_proto::status::moved_permanently, params.req);
+    urls::url u1(params.req.target());
+    u1.set_scheme_id(urls::scheme::https);
+    u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
+    params.res.append(http_proto::field::location, u1.buffer());
+    params.sr.start(params.res,
+        http_proto::string_body( std::move(body)));
+}
+
+//------------------------------------------------
+
+void
+file_work_handler::
+on_request(
+    work_params const& params) const
+{
+    handle_request(doc_root_, params);
+}
+
+} // boost
+

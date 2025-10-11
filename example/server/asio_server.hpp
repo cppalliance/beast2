@@ -15,13 +15,16 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 
+namespace boost {
+namespace http_io {
+
 /** A server using Boost.Asio's I/O model
 */
 class asio_server : public server
 {
 public:
     using executor_type =
-        boost::asio::io_context::executor_type;
+        asio::io_context::executor_type;
 
     executor_type
     get_executor() noexcept
@@ -34,15 +37,18 @@ public:
     void stop();
 
 private:
-    void on_signal(boost::system::error_code const&, int);
-    void on_timer(boost::system::error_code const&);
+    void on_signal(system::error_code const&, int);
+    void on_timer(system::error_code const&);
 
-    boost::asio::io_context ioc_;
-    boost::asio::signal_set sigs_;
-    boost::asio::basic_waitable_timer<
+    asio::io_context ioc_;
+    asio::signal_set sigs_;
+    asio::basic_waitable_timer<
         std::chrono::steady_clock,
-        boost::asio::wait_traits<std::chrono::steady_clock>,
+        asio::wait_traits<std::chrono::steady_clock>,
         executor_type> timer_;
 };
+
+} // http_io
+} // boost
 
 #endif

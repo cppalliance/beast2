@@ -9,6 +9,9 @@
 
 #include "asio_server.hpp"
 
+namespace boost {
+namespace http_io {
+
 asio_server::
 asio_server()
     : ioc_(1)
@@ -97,3 +100,6 @@ on_timer(
         // log?
     }
 }
+
+} // http_io
+} // boost

@@ -68,11 +68,12 @@ public:
         @param ex The executor to use when constructing the listening port
         @param workers An array of workers used to accept connections
     */
+#if 0
     template<class Executor1, class Worker
         ,typename = std::enable_if<std::is_constructible<Executor, Executor1>::value>
     >
     listening_port(
-        server& srv,
+        asio_server& srv,
         fixed_array<Worker>&& workers,
         endpoint_type ep,
         Executor1 const& ex,
@@ -85,6 +86,19 @@ public:
     {
         // the workers are type-erased here to avoid
         // having too many class template parameters.
+    }
+#endif
+    template<class Executor1
+        ,typename = std::enable_if<std::is_constructible<Executor, Executor1>::value>
+    >
+    listening_port(
+        asio_server& srv,
+        endpoint_type ep,
+        Executor1 const& ex,
+        bool reuse_addr = true)
+        : srv_(srv)
+        , sock_(ex, ep, reuse_addr)
+    {
     }
 
     socket_type&
@@ -107,12 +121,23 @@ public:
         (this->*stop_)();
     }
 
+    template<
+        class Worker,
+        class Executor_,
+        class Protocol_,
+        class... Args >
+    friend void
+    emplace(
+        listening_port<Executor_, Protocol_>& lp,
+        std::size_t n,
+        Args&&... args);
+
 private:
     template<class T>
     void run_impl()
     {
         for(auto& w : wv_.to_span<T>())
-            w.run(sock_);
+            w.run();
     }
 
     template<class T>
@@ -124,12 +149,38 @@ private:
 
     using mf_t = void(listening_port::*)();
 
-    server& srv_;
+    asio_server& srv_;
     socket_type sock_;
     any_fixed_array wv_;
     mf_t run_;
     mf_t stop_;
 };
+
+//------------------------------------------------
+
+template<
+    class Worker,
+    class Executor,
+    class Protocol,
+    class... Args >
+void
+emplace(
+    listening_port<Executor, Protocol>& lp,
+    std::size_t n,
+    Args&&... args)
+{
+    using lp_type = listening_port<Executor, Protocol>;
+
+    fixed_array<Worker> v(n);
+    while(! v.is_full())
+        v.append(
+            lp.srv_,
+            lp.sock_,
+            std::forward<Args>(args)...);
+    lp.wv_ = std::move(v);
+    lp.run_  = &listening_port<Executor, Protocol>::template run_impl<Worker>;
+    lp.stop_ = &listening_port<Executor, Protocol>::template stop_impl<Worker>;
+}
 
 } // http_io
 } // boost
