@@ -20,6 +20,7 @@
 #include <boost/http_proto/serializer.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
+#include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <stddef.h>
 #include <string>
@@ -50,16 +51,24 @@ template<
 class worker_ssl
 {
 public:
-    using acceptor_type =
-        asio::basic_socket_acceptor<Protocol, Executor>;
     using executor_type = Executor;
+
     using protocol_type = Protocol;
+
+    using acceptor_type =
+        asio::basic_socket_acceptor<Protocol, Executor1>;
+
+    using socket_type =
+        asio::basic_stream_socket<Protocol, Executor>;
+    
+    using stream_type = asio::ssl::stream<socket_type>;
 
     worker_ssl(
         asio_server& srv,
+        asio::ssl::context& ssl_ctx,
         std::string const& doc_root)
         : srv_(srv)
-        , sock_(srv.get_executor())
+        , stream_(srv.get_executor(), ssl_ctx)
         , doc_root_(doc_root)
         , pr_(srv.services())
         , sr_(srv.services())
@@ -83,7 +92,7 @@ public:
     stop()
     {
         system::error_code ec;
-        sock_.cancel(ec);
+        stream_.next_layer().cancel(ec);
     }
 
 private:
@@ -102,7 +111,7 @@ private:
 
         if( ec == asio::error::eof )
         {
-            sock_.shutdown(
+            stream_.next_layer().shutdown(
                 asio::socket_base::shutdown_send, ec);
             return;
         }
@@ -119,17 +128,18 @@ private:
     {
         // Clean up any previous connection.
         system::error_code ec;
-        sock_.close(ec);
+        stream_.next_layer().close(ec);
         pr_.reset();
 
         using namespace std::placeholders;
-        pa_->async_accept( sock_, ep_,
-            std::bind(&worker::on_accept, this, _1));
+        pa_->async_accept( stream_.next_layer(), ep_,
+            std::bind(&worker_ssl::on_accept, this, _1));
     }
 
     void
     on_accept(system::error_code ec)
     {
+#if 0
         if( ec.failed() )
         {
             if( ec == asio::error::operation_aborted )
@@ -148,7 +158,14 @@ private:
         //request_deadline_.expires_after(
             //std::chrono::seconds(60));
 
-        do_read();
+        do_handshake();
+#endif
+    }
+
+#if 0
+    void
+    do_handshake()
+    {
     }
 
     void
@@ -257,14 +274,14 @@ private:
 
         do_accept();
     }
+#endif
 
 private:
     // order of destruction matters here
     asio_server& srv_;
     section sect_;
-    boost::asio::basic_socket_acceptor<
-        boost::asio::ip::tcp, Executor1>* pa_ = nullptr;
-    asio::basic_stream_socket<Protocol, Executor> sock_;
+    acceptor_type* pa_ = nullptr;
+    stream_type stream_;
     typename Protocol::endpoint ep_;
     std::string const& doc_root_;
     http_proto::request_parser pr_;

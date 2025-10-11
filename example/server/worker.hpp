@@ -49,10 +49,18 @@ template<
 class worker
 {
 public:
-    using acceptor_type =
-        asio::basic_socket_acceptor<Protocol, Executor>;
     using executor_type = Executor;
+
     using protocol_type = Protocol;
+
+    using acceptor_type =
+        asio::basic_socket_acceptor<Protocol, Executor1>;
+
+    using socket_type =
+        asio::basic_stream_socket<Protocol, Executor>;
+
+    using stream_type =
+        asio::basic_stream_socket<Protocol, Executor>;
 
     worker(
         asio_server& srv,
@@ -261,9 +269,8 @@ private:
     // order of destruction matters here
     asio_server& srv_;
     section sect_;
-    boost::asio::basic_socket_acceptor<
-        boost::asio::ip::tcp, Executor1>* pa_ = nullptr;
-    asio::basic_stream_socket<Protocol, Executor> sock_;
+    acceptor_type* pa_ = nullptr;
+    socket_type sock_;
     typename Protocol::endpoint ep_;
     std::string const& doc_root_;
     http_proto::request_parser pr_;

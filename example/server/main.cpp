@@ -8,6 +8,7 @@
 //
 
 #include "asio_server.hpp"
+#include "certificate.hpp"
 #include "fixed_array.hpp"
 #include "listening_port.hpp"
 #include "worker.hpp"
@@ -46,6 +47,20 @@ int server_main( int argc, char* argv[] )
 
         asio_server srv;
 
+        // The asio::ssl::context holds the certificates and
+        // various states needed for the OpenSSL stream implementation.
+        asio::ssl::context ssl_ctx(asio::ssl::context::tlsv12);
+
+        // This loads a self-signed certificate. You MUST replace this with your
+        // own certificate signed by a well-known Trusted Certificate Authority.
+        // For testing, you can import the file examples/beast-test-CA.crt into
+        // your browser or operating system's trusted certificate store in order
+        // for the browser to not give constant warnings when connecting to
+        // the server via HTTPS.
+        //
+        load_server_certificate(ssl_ctx);
+
+        // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
         {
             http_proto::request_parser::config cfg;
             http_proto::install_parser_service(srv.services(), cfg);
@@ -55,18 +70,56 @@ int server_main( int argc, char* argv[] )
             http_proto::install_serializer_service(srv.services(), cfg);
         }
 
+        // Add the listening ports and workers
+
         {
-            // Create the workers and construct the port
+            // An unencrypted public listening port. This just always redirects to https
+            //
             fixed_array<worker<executor_type>> wv(num_workers);
             while(! wv.is_full())
                 wv.append(srv, doc_root);
-            new_part<boost::http_io::listening_port<executor_type>>(
+            new_part<listening_port<executor_type>>(
                 srv,
                 std::move(wv),
                 asio::ip::tcp::endpoint(addr, port),
                 srv.get_executor(),
                 reuse_addr);
         }
+
+#if 0
+        {
+            // An unencrypted, private listening port.
+            // This is only accessible via a loopback address, and
+            // it has a limited number of workers. It allows access
+            // to privileged targets such as the server admin page.
+            //
+            fixed_array<worker<executor_type>> wv(16);
+            while(! wv.is_full())
+                wv.append(srv, doc_root);
+            new_part<listening_port<executor_type>>(
+                srv,
+                std::move(wv),
+                asio::ip::tcp::endpoint(
+                    asio::ip::make_address_v4("127.0.0.1"), 80),
+                srv.get_executor(),
+                reuse_addr);
+        }
+#endif
+#if 0
+        {
+            // A secure SSL public listening port
+            //
+            fixed_array<worker_ssl<executor_type>> wv(num_workers);
+            while(! wv.is_full())
+                wv.append(srv, ssl_ctx, doc_root);
+            new_part<listening_port<executor_type>>(
+                srv,
+                std::move(wv),
+                asio::ip::tcp::endpoint(addr, 443),
+                srv.get_executor(),
+                reuse_addr);
+        }
+#endif
 
         srv.run();
     }
