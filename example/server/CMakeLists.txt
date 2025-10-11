@@ -21,6 +21,10 @@ target_compile_definitions(http_io_server_example
 set_property(TARGET http_io_server_example
     PROPERTY FOLDER "examples")
 
+find_package(OpenSSL REQUIRED)
 target_link_libraries(http_io_server_example
     Boost::http_io
-    Boost::url)
+    Boost::url
+    OpenSSL::SSL
+    OpenSSL::Crypto
+    )

@@ -11,6 +11,7 @@
 #include "fixed_array.hpp"
 #include "listening_port.hpp"
 #include "worker.hpp"
+#include "worker_ssl.hpp"
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
