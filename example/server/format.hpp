@@ -10,6 +10,18 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_FORMAT_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_FORMAT_HPP
 
+//
+// Format string support utility for server example.
+//
+// This header provides conditional compilation support for modern C++ formatting:
+// - Uses std::format (via std::vformat) when C++20 is available
+// - Falls back to fmtlib if <fmt/core.h> is available
+// - Provides no formatting if neither is available (uses legacy stringstream)
+//
+// This allows the server example to benefit from format string support
+// when available without requiring it as a hard dependency.
+//
+
 #include <string>
 
 // Check for C++20 std::format support

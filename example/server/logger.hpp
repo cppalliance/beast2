@@ -14,6 +14,23 @@
 #include <boost/core/detail/string_view.hpp>
 #include <sstream>
 
+//
+// Simple logging facility with support for modern C++ formatting.
+//
+// When std::format (C++20) or fmtlib is available, the logger supports
+// format strings:
+//
+//   section log;
+//   LOG_INF(log, "Request from {} for {}", client_ip, path);
+//
+// Otherwise, it falls back to the legacy variadic template API:
+//
+//   section log;
+//   LOG_INF(log, "Request from ", client_ip, " for ", path);
+//
+// Both styles work regardless of which formatting backend is used.
+//
+
 struct section
 {
     int threshold() const noexcept { return 0; }

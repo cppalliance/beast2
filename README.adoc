@@ -26,6 +26,25 @@
 
 == boost.http_io
 
+=== Optional Dependencies
+
+The examples can optionally use https://github.com/fmtlib/fmt[fmtlib] for improved formatting support:
+
+* When C++20 is available: Uses `std::format` automatically
+* When fmtlib is available: Uses `fmt::format` as fallback
+* Otherwise: Uses `std::stringstream` for formatting
+
+To enable fmtlib support:
+
+```bash
+# With vcpkg
+vcpkg install fmt
+cmake -DCMAKE_TOOLCHAIN_FILE=path/to/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+
+# Or let CMake find system-installed fmtlib
+cmake ..
+```
+
 === Visual Studio Solution
 
 ```cpp
