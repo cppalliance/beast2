@@ -52,28 +52,42 @@ private:
     void write(int, boost::core::string_view);
 };
 
+#ifndef LOG_AT_LEVEL
 #define LOG_AT_LEVEL(sect, level, ...) \
     do { \
         if(level >= sect.threshold()) \
             sect.format(level, __VA_ARGS__); \
     } while(false)
+#endif
 
 /// Log at trace level
+#ifndef LOG_TRC
 #define LOG_TRC(sect, ...) LOG_AT_LEVEL(sect, 0, __VA_ARGS__)
+#endif
 
 /// Log at debug level
+#ifndef LOG_DBG
 #define LOG_DBG(sect, ...) LOG_AT_LEVEL(sect, 1, __VA_ARGS__)
+#endif
 
 /// Log at info level (normal)
+#ifndef LOG_INF
 #define LOG_INF(sect, ...) LOG_AT_LEVEL(sect, 2, __VA_ARGS__)
+#endif
 
 /// Log at warning level
+#ifndef LOG_WRN
 #define LOG_WRN(sect, ...) LOG_AT_LEVEL(sect, 3, __VA_ARGS__)
+#endif
 
 /// Log at error level
+#ifndef LOG_ERR
 #define LOG_ERR(sect, ...) LOG_AT_LEVEL(sect, 4, __VA_ARGS__)
+#endif
 
 /// Log at fatal level
+#ifndef LOG_FTL
 #define LOG_FTL(sect, ...) LOG_AT_LEVEL(sect, 5, __VA_ARGS__)
+#endif
 
 #endif
