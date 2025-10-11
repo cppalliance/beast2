@@ -15,6 +15,15 @@
 #include <iomanip>
 #include <sstream>
 
+// Check for C++20 std::format support
+#if __cplusplus >= 202002L && __has_include(<format>)
+    #include <format>
+    #define BURL_HAS_STD_FORMAT
+#elif __has_include(<fmt/core.h>)
+    #include <fmt/core.h>
+    #define BURL_HAS_FMT
+#endif
+
 namespace grammar  = boost::urls::grammar;
 namespace variant2 = boost::variant2;
 
@@ -164,9 +173,15 @@ format_size(std::uint64_t size, int width)
     auto ints   = static_cast<int>(std::log10(scaled)) + 1;
     auto fracs  = std::max(width - ints - 1, 0);
 
-    // TODO: replace ostringstream
+#if defined(BURL_HAS_STD_FORMAT)
+    return std::format("{:.{}f} {}", scaled, fracs, units[order]);
+#elif defined(BURL_HAS_FMT)
+    return fmt::format("{:.{}f} {}", scaled, fracs, units[order]);
+#else
+    // Fallback to ostringstream
     std::ostringstream os;
     os << std::fixed << std::setprecision(fracs) << scaled << " "
        << units[order];
     return os.str();
+#endif
 }

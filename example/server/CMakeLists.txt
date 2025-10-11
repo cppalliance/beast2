@@ -24,3 +24,10 @@ set_property(TARGET http_io_server_example
 target_link_libraries(http_io_server_example
     Boost::http_io
     Boost::url)
+
+# Optional: Try to find and link fmtlib for better formatting support
+find_package(fmt QUIET)
+if (fmt_FOUND)
+    target_link_libraries(http_io_server_example fmt::fmt)
+    message(STATUS "Server example: Using fmtlib for formatting")
+endif()

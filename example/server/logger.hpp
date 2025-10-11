@@ -10,6 +10,7 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_LOG_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_LOG_HPP
 
+#include "format.hpp"
 #include <boost/core/detail/string_view.hpp>
 #include <sstream>
 
@@ -17,6 +18,15 @@ struct section
 {
     int threshold() const noexcept { return 0; }
 
+#if defined(BOOST_HTTP_IO_HAS_STD_FORMAT) || defined(BOOST_HTTP_IO_HAS_FMT)
+    // Format string version when std::format or fmtlib is available
+    template<class... Args>
+    void format(int level, std::string_view fmt, Args const&... args)
+    {
+        write(level, detail::format(fmt, args...));
+    }
+#else
+    // Legacy variadic template version for fallback
     template<class... Args>
     void format(int level, Args const&... args)
     {
@@ -48,6 +58,9 @@ private:
     {
         os << t;
     }
+
+public:
+#endif
 
     void write(int, boost::core::string_view);
 };
