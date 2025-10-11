@@ -62,11 +62,15 @@ public:
     using stream_type =
         asio::basic_stream_socket<Protocol, Executor>;
 
+    template<class Executor_
+        , typename = std::enable_if<std::is_constructible<Executor, Executor_>::value>::type
+    >
     worker(
         asio_server& srv,
+        Executor_ const& ex,
         std::string const& doc_root)
         : srv_(srv)
-        , sock_(srv.get_executor())
+        , sock_(ex)
         , doc_root_(doc_root)
         , pr_(srv.services())
         , sr_(srv.services())

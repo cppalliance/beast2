@@ -63,12 +63,16 @@ public:
     
     using stream_type = asio::ssl::stream<socket_type>;
 
+    template<class Executor_
+        , typename = std::enable_if<std::is_constructible<Executor, Executor_>::value>::type
+    >
     worker_ssl(
         asio_server& srv,
+        Executor_ const& ex,
         asio::ssl::context& ssl_ctx,
         std::string const& doc_root)
         : srv_(srv)
-        , stream_(srv.get_executor(), ssl_ctx)
+        , stream_(ex, ssl_ctx)
         , doc_root_(doc_root)
         , pr_(srv.services())
         , sr_(srv.services())
@@ -139,6 +143,7 @@ private:
     void
     on_accept(system::error_code ec)
     {
+        (void)ec;
 #if 0
         if( ec.failed() )
         {

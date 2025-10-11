@@ -77,7 +77,7 @@ int server_main( int argc, char* argv[] )
             //
             fixed_array<worker<executor_type>> wv(num_workers);
             while(! wv.is_full())
-                wv.append(srv, doc_root);
+                wv.append(srv, srv.get_executor(), doc_root);
             new_part<listening_port<executor_type>>(
                 srv,
                 std::move(wv),
@@ -95,7 +95,7 @@ int server_main( int argc, char* argv[] )
             //
             fixed_array<worker<executor_type>> wv(16);
             while(! wv.is_full())
-                wv.append(srv, doc_root);
+                wv.append(srv, srv.get_executor(), doc_root);
             new_part<listening_port<executor_type>>(
                 srv,
                 std::move(wv),
@@ -105,13 +105,12 @@ int server_main( int argc, char* argv[] )
                 reuse_addr);
         }
 #endif
-#if 0
         {
             // A secure SSL public listening port
             //
             fixed_array<worker_ssl<executor_type>> wv(num_workers);
             while(! wv.is_full())
-                wv.append(srv, ssl_ctx, doc_root);
+                wv.append(srv, srv.get_executor(), ssl_ctx, doc_root);
             new_part<listening_port<executor_type>>(
                 srv,
                 std::move(wv),
@@ -119,7 +118,6 @@ int server_main( int argc, char* argv[] )
                 srv.get_executor(),
                 reuse_addr);
         }
-#endif
 
         srv.run();
     }
