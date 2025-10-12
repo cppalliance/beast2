@@ -10,12 +10,17 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_HANDLER_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_HANDLER_HPP
 
+#include <boost/http_io/detail/config.hpp>
+#include <boost/http_io/server/router.hpp>
 #include <boost/http_proto/request_base.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/core/detail/string_view.hpp>
 
 namespace boost {
+namespace http_io {
+
+//------------------------------------------------
 
 struct work_params
 {
@@ -25,53 +30,46 @@ struct work_params
     bool is_shutting_down;
 };
 
-void
-handle_request(
-    core::string_view doc_root,
-    work_params const& params);
+struct responder
+{
+    virtual ~responder();
+    virtual void on_complete(
+        work_params const& params) = 0;
+};
 
-void
-handle_https_redirect(
-    work_params const& params);
+using router_type = router<responder>;
 
 //------------------------------------------------
 
-/** A handler which serves files from a specified root path
-*/
-class file_work_handler
+class https_redirect_responder : public router_type::factory
 {
 public:
-    explicit
-    file_work_handler(
+    void operator()(router_type::handler& dest) const override;
+
+private:
+    class handler;
+};
+
+//------------------------------------------------
+
+class file_responder : public router_type::factory
+{
+public:
+    file_responder(
         core::string_view doc_root)
         : doc_root_(doc_root)
     {
     }
 
-    template<class AsyncStream>
-    void on_request_header(
-        AsyncStream& stream,
-        work_params const& params) const
-    {
-    }
-
-    template<class AsyncStream>
-    void on_request(
-        AsyncStream& stream,
-        work_params const& params) const
-    {
-        return on_request(params);
-    }
-
-    void on_request(
-        work_params const& params) const;
+    void operator()(router_type::handler& dest) const override;
 
 private:
-    core::string_view doc_root_;
+    class handler;
+
+    std::string doc_root_;
 };
 
-//------------------------------------------------
-
+} // http_io
 } // boost
 
 #endif

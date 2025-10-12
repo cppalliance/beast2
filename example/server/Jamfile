@@ -29,6 +29,7 @@ project
       <target-os>windows:<library>gdi32
       <target-os>windows:<library>user32
       <include>.
+      <include>../include
     ;
 
 exe server :

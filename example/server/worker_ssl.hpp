@@ -13,6 +13,7 @@
 #include "asio_server.hpp"
 #include "handler.hpp"
 #include "logger.hpp"
+#include <boost/http_io/server/router.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/write.hpp>
 #include <boost/http_proto/request_parser.hpp>
@@ -57,7 +58,8 @@ public:
     
     using stream_type = asio::ssl::stream<socket_type>;
 
-    template<class Executor_
+    template<
+        class Executor_
         , class = typename std::enable_if<std::is_constructible<Executor, Executor_>::value>::type
     >
     worker_ssl(
@@ -65,15 +67,15 @@ public:
         acceptor_type& acc,
         Executor_ const& ex,
         asio::ssl::context& ssl_ctx,
-        std::string const& doc_root)
+        router_type& rr)
         : srv_(srv)
         , acc_(acc)
         , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
-        , doc_root_(doc_root)
         , pr_(srv.services())
         , sr_(srv.services())
         , id_(srv.make_unique_id())
+        , rr_(rr)
     {
     }
 
@@ -131,6 +133,7 @@ private:
             system::error_code ec;
             stream_.next_layer().close(ec);
             pr_.reset();
+            rh_.reset();
 
             // asio::ssl::stream has an internal state which cannot be reset.
             // In order to perform the handshake again, we destroy the old
@@ -231,6 +234,19 @@ private:
             return do_accept();
         }
 
+        // find the route
+        auto found = rr_.find(rh_,
+            pr_.get().method(), pr_.get().target());
+
+        if(! found)
+        {
+            // errors here are usually recoverable
+            LOG_DBG(sect_, id(), "no route");
+            return do_accept();
+        }
+
+        //rh_->on_header(...);
+
         using namespace std::placeholders;
         http_io::async_read(stream_, pr_, std::bind(
             &worker_ssl::on_read_body, this, _1, _2));
@@ -259,8 +275,7 @@ private:
 
         res_.clear();
 
-        handle_request(doc_root_,
-            { pr_.get(), res_, sr_, srv_.is_stopping() });
+        rh_->on_complete({ pr_.get(), res_, sr_, srv_.is_stopping() });
 
         using namespace std::placeholders;
         http_io::async_write(stream_, sr_, std::bind(
@@ -302,11 +317,12 @@ private:
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
     typename Protocol::endpoint ep_;
-    std::string doc_root_;
     http_proto::request_parser pr_;
     http_proto::response res_;
     http_proto::serializer sr_;
     std::size_t id_ = 0;
+    router_type& rr_;
+    router_type::handler rh_;
 };
 
 } // http_io

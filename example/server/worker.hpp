@@ -15,6 +15,7 @@
 #include "logger.hpp"
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/write.hpp>
+#include <boost/http_io/server/router.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -34,12 +35,6 @@ class tcp; // forward declaration
 } // asio
 
 namespace http_io {
-
-void
-service_unavailable(
-    http_proto::request_base const& req,
-    http_proto::response& res,
-    http_proto::serializer& sr);
 
 template<
     class Executor,
@@ -70,15 +65,14 @@ public:
         asio_server& srv,
         acceptor_type& acc,
         Executor_ const& ex,
-        core::string_view doc_root
-        )
+        router_type& rr)
         : srv_(srv)
         , acc_(acc)
         , sock_(ex)
-        , doc_root_(doc_root)
         , pr_(srv.services())
         , sr_(srv.services())
         , id_(srv.make_unique_id())
+        , rr_(rr)
     {
     }
 
@@ -132,9 +126,12 @@ private:
     do_accept()
     {
         // Clean up any previous connection.
-        system::error_code ec;
-        sock_.close(ec);
-        pr_.reset();
+        {
+            system::error_code ec;
+            sock_.close(ec);
+            pr_.reset();
+            rh_.reset();
+        }
 
         using namespace std::placeholders;
         acc_.async_accept( sock_, ep_,
@@ -199,6 +196,19 @@ private:
             return do_accept();
         }
 
+        // find the route
+        auto found = rr_.find(rh_,
+            pr_.get().method(), pr_.get().target());
+
+        if(! found)
+        {
+            // errors here are usually recoverable
+            LOG_DBG(sect_, id(), "no route");
+            return do_accept();
+        }
+
+        //rh_->on_header(...);
+
         using namespace std::placeholders;
         http_io::async_read(sock_, pr_, std::bind(
             &worker::on_read_body, this, _1, _2));
@@ -227,8 +237,7 @@ private:
 
         res_.clear();
 
-        if(! srv_.is_stopping())
-            handle_https_redirect({ pr_.get(), res_, sr_, srv_.is_stopping() });
+        rh_->on_complete({ pr_.get(), res_, sr_, srv_.is_stopping() });
 
         using namespace std::placeholders;
         http_io::async_write(sock_, sr_, std::bind(
@@ -269,11 +278,12 @@ private:
     section sect_;
     socket_type sock_;
     typename Protocol::endpoint ep_;
-    std::string doc_root_;
     http_proto::request_parser pr_;
     http_proto::response res_;
     http_proto::serializer sr_;
     std::size_t id_ = 0;
+    router_type& rr_;
+    router_type::handler rh_;
 };
 
 } // http_io

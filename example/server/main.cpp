@@ -16,6 +16,11 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
+#include <boost/rts/brotli/decode.hpp>
+#include <boost/rts/brotli/encode.hpp>
+#include <boost/rts/zlib/deflate.hpp>
+#include <boost/rts/zlib/inflate.hpp>
+
 #include <functional>
 #include <iostream>
 
@@ -39,6 +44,7 @@ int server_main( int argc, char* argv[] )
 
         auto const addr = asio::ip::make_address(argv[1]);
         unsigned short const port = static_cast<unsigned short>(std::atoi(argv[2]));
+        (void)port;
         std::string const doc_root = argv[3];
         std::size_t num_workers = std::atoi(argv[4]);
         bool reuse_addr = true; // VFALCO this could come from the command line
@@ -46,6 +52,15 @@ int server_main( int argc, char* argv[] )
         using executor_type = asio_server::executor_type;
 
         asio_server srv;
+
+        #ifdef BOOST_RTS_HAS_BROTLI
+        rts::brotli::install_decode_service(srv.services());
+        rts::brotli::install_encode_service(srv.services());
+        #endif
+        #ifdef BOOST_RTS_HAS_ZLIB
+        rts::zlib::install_deflate_service(srv.services());
+        rts::zlib::install_inflate_service(srv.services());
+        #endif
 
         // The asio::ssl::context holds the certificates and
         // various states needed for the OpenSSL stream implementation.
@@ -70,28 +85,19 @@ int server_main( int argc, char* argv[] )
             http_proto::install_serializer_service(srv.services(), cfg);
         }
 
-        // Add the listening ports and workers
+        // Create the routes
+        // VFALCO this is a hacky WIP
+        router_type rr0;
+        rr0.get<https_redirect_responder>("/*splat");
+        router_type rr;
+        rr.get<file_responder>("/*splat", doc_root);
 
-#if 0
+        //
+        // Add the listening ports and workers
+        //
+
         {
-            // An unencrypted public listening port. This just always redirects to https
-            //
-            fixed_array<worker<executor_type>> wv(num_workers);
-            while(! wv.is_full())
-                wv.append(srv, srv.get_executor(), doc_root);
-            new_part<listening_port<executor_type>>(
-                srv,
-                std::move(wv),
-                asio::ip::tcp::endpoint(addr, 80),
-                srv.get_executor(),
-                reuse_addr);
-        }
-#endif
-        {
-            // An unencrypted, private listening port.
-            // This is only accessible via a loopback address, and
-            // it has a limited number of workers. It allows access
-            // to privileged targets such as the server admin page.
+            // plain (no https) port that does https redirect
             //
             auto& lp = emplace_part<listening_port<executor_type>>(
                 srv,
@@ -99,11 +105,11 @@ int server_main( int argc, char* argv[] )
                     asio::ip::make_address_v4("127.0.0.1"), 80),
                 srv.get_executor(),
                 reuse_addr);
-            emplace<worker<executor_type>>(
+            emplace_workers<worker<executor_type>>(
                 lp,
                 16, // small number of workers
                 srv.get_executor(),
-                doc_root);
+                rr0);
         }
         {
             // A secure SSL public listening port
@@ -113,12 +119,12 @@ int server_main( int argc, char* argv[] )
                 asio::ip::tcp::endpoint(addr, 443),
                 srv.get_executor(),
                 reuse_addr);
-            emplace<worker_ssl<executor_type>>(
+            emplace_workers<worker_ssl<executor_type>>(
                 lp,
                 num_workers,
                 srv.get_executor(),
                 ssl_ctx,
-                doc_root);
+                rr);
         }
 
         srv.run();

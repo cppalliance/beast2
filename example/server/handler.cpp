@@ -22,9 +22,15 @@
 #include <iostream>
 
 namespace boost {
+namespace http_io {
+
+responder::~responder() = default;
+
+//------------------------------------------------
 
 /// Returns the current system time formatted as an HTTP-date per RFC 9110 §5.6.7.
 /// Example: "Sat, 11 Oct 2025 02:12:34 GMT"
+static
 std::string
 make_http_date()
 {
@@ -104,6 +110,7 @@ prepare_error(
 //------------------------------------------------
 
 // Return a reasonable mime type based on the extension of a file.
+static
 core::string_view
 get_extension(
     core::string_view path) noexcept
@@ -114,6 +121,7 @@ get_extension(
     return path.substr(pos);
 }
 
+static
 core::string_view
 mime_type(
     core::string_view path)
@@ -146,6 +154,7 @@ mime_type(
 
 // Append an HTTP rel-path to a local filesystem path.
 // The returned path is normalized for the platform.
+static
 void
 path_cat(
     std::string& result,
@@ -177,6 +186,7 @@ path_cat(
 
 //------------------------------------------------
 
+static
 void
 make_error_response(
     http_proto::status code,
@@ -238,6 +248,7 @@ make_error_response(
         std::move(body)));
 }
 
+static
 void
 service_unavailable(
     http_proto::response& res,
@@ -289,107 +300,128 @@ service_unavailable(
 
 //------------------------------------------------
 
-void
-handle_request(
-    core::string_view doc_root,
-    work_params const& params)
+class file_responder::handler
+    : public responder
 {
-    if(params.is_shutting_down)
-        return service_unavailable(
-            params.res, params.sr, params.req);
-
-#if 0
-    // Returns a server error response
-    auto const server_error =
-    [&req](beast::string_view what)
+public:
+    explicit handler(
+        core::string_view doc_root)
+        : doc_root_(doc_root)
     {
-        http::response<http::string_body> res{http::status::internal_server_error, req.version()};
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "text/html");
-        res.keep_alive(req.keep_alive());
-        res.body() = "An error occurred: '" + std::string(what) + "'";
-        res.prepare_payload();
-        return res;
-    };
-#endif
-
-    // Request path must be absolute and not contain "..".
-    if( params.req.target().empty() ||
-        params.req.target()[0] != '/' ||
-        params.req.target().find("..") != core::string_view::npos)
-        return make_error_response(http_proto::status::bad_request,
-            params.req, params.res, params.sr);
-
-    // Build the path to the requested file
-    std::string path; 
-    path_cat(path, doc_root, params.req.target());
-    if(params.req.target().back() == '/')
-        path.append("index.html");
-
-    // Attempt to open the file
-    system::error_code ec;
-    http_proto::file f;
-    std::uint64_t size = 0;
-    f.open(path.c_str(), http_proto::file_mode::scan, ec);
-    if(! ec.failed())
-        size = f.size(ec);
-    if(! ec.failed())
-    {
-        params.res.set_start_line(
-            http_proto::status::ok,
-            params.req.version());
-        params.res.set(http_proto::field::server, "Boost");
-        params.res.set_keep_alive(params.req.keep_alive());
-        params.res.set_payload_size(size);
-
-        auto mt = mime_type(get_extension(path));
-        params.res.append(
-            http_proto::field::content_type, mt);
-
-        params.sr.start<http_proto::file_source>(
-            params.res, std::move(f), size);
-        return;
     }
 
-    if(ec == system::errc::no_such_file_or_directory)
-        return make_error_response(
-            http_proto::status::not_found,
+    void on_complete(work_params const& params) override
+    {
+        if(params.is_shutting_down)
+            return service_unavailable(
+                params.res, params.sr, params.req);
+
+    #if 0
+        // Returns a server error response
+        auto const server_error =
+        [&req](beast::string_view what)
+        {
+            http::response<http::string_body> res{http::status::internal_server_error, req.version()};
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, "text/html");
+            res.keep_alive(req.keep_alive());
+            res.body() = "An error occurred: '" + std::string(what) + "'";
+            res.prepare_payload();
+            return res;
+        };
+    #endif
+
+        // Request path must be absolute and not contain "..".
+        if( params.req.target().empty() ||
+            params.req.target()[0] != '/' ||
+            params.req.target().find("..") != core::string_view::npos)
+            return make_error_response(http_proto::status::bad_request,
                 params.req, params.res, params.sr);
 
-    // ec.message()?
-    return make_error_response(
-        http_proto::status::internal_server_error,
-            params.req, params.res, params.sr);
-}
+        // Build the path to the requested file
+        std::string path; 
+        path_cat(path, doc_root_, params.req.target());
+        if(params.req.target().back() == '/')
+            path.append("index.html");
+
+        // Attempt to open the file
+        system::error_code ec;
+        http_proto::file f;
+        std::uint64_t size = 0;
+        f.open(path.c_str(), http_proto::file_mode::scan, ec);
+        if(! ec.failed())
+            size = f.size(ec);
+        if(! ec.failed())
+        {
+            params.res.set_start_line(
+                http_proto::status::ok,
+                params.req.version());
+            params.res.set(http_proto::field::server, "Boost");
+            params.res.set_keep_alive(params.req.keep_alive());
+            params.res.set_payload_size(size);
+
+            auto mt = mime_type(get_extension(path));
+            params.res.append(
+                http_proto::field::content_type, mt);
+
+            params.sr.start<http_proto::file_source>(
+                params.res, std::move(f), size);
+            return;
+        }
+
+        if(ec == system::errc::no_such_file_or_directory)
+            return make_error_response(
+                http_proto::status::not_found,
+                    params.req, params.res, params.sr);
+
+        // ec.message()?
+        return make_error_response(
+            http_proto::status::internal_server_error,
+                params.req, params.res, params.sr);
+    }
+
+private:
+    core::string_view doc_root_;
+};
 
 void
-handle_https_redirect(
-    work_params const& params)
+file_responder::
+operator()(router_type::handler& dest) const
 {
-    if(params.is_shutting_down)
-        return service_unavailable(
-            params.res, params.sr, params.req);
-
-    std::string body;
-    prepare_error(params.res, body,
-        http_proto::status::moved_permanently, params.req);
-    urls::url u1(params.req.target());
-    u1.set_scheme_id(urls::scheme::https);
-    u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
-    params.res.append(http_proto::field::location, u1.buffer());
-    params.sr.start(params.res,
-        http_proto::string_body( std::move(body)));
+    dest.emplace<handler>(doc_root_);
 }
 
 //------------------------------------------------
 
-void
-file_work_handler::
-on_request(
-    work_params const& params) const
+class https_redirect_responder::handler
+    : public responder
 {
-    handle_request(doc_root_, params);
+public:
+    void on_complete(work_params const& params) override
+    {
+        if(params.is_shutting_down)
+            return service_unavailable(
+                params.res, params.sr, params.req);
+
+        std::string body;
+        prepare_error(params.res, body,
+            http_proto::status::moved_permanently, params.req);
+        urls::url u1(params.req.target());
+        u1.set_scheme_id(urls::scheme::https);
+        u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
+        params.res.append(http_proto::field::location, u1.buffer());
+        params.sr.start(params.res,
+            http_proto::string_body( std::move(body)));
+    }
+};
+
+void
+https_redirect_responder::
+operator()(router_type::handler& dest) const
+{
+    dest.emplace<handler>();
 }
 
+} // http_io
 } // boost
 

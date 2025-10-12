@@ -66,28 +66,8 @@ public:
         @param srv The server associated with this listening port
         @param ep The endpoint to bind the listening port to
         @param ex The executor to use when constructing the listening port
-        @param workers An array of workers used to accept connections
+        @param reuse_addr Whether the reuse_address option should be set
     */
-#if 0
-    template<class Executor1, class Worker
-        ,typename = std::enable_if<std::is_constructible<Executor, Executor1>::value>
-    >
-    listening_port(
-        asio_server& srv,
-        fixed_array<Worker>&& workers,
-        endpoint_type ep,
-        Executor1 const& ex,
-        bool reuse_addr = true)
-        : srv_(srv)
-        , sock_(ex, ep, reuse_addr)
-        , wv_(std::move(workers))
-        , run_(&listening_port::run_impl<Worker>)
-        , stop_(&listening_port::stop_impl<Worker>)
-    {
-        // the workers are type-erased here to avoid
-        // having too many class template parameters.
-    }
-#endif
     template<class Executor1
         ,typename = std::enable_if<std::is_constructible<Executor, Executor1>::value>
     >
@@ -99,6 +79,12 @@ public:
         : srv_(srv)
         , sock_(ex, ep, reuse_addr)
     {
+    }
+
+    asio_server&
+    server() const noexcept
+    {
+        return srv_;
     }
 
     socket_type&
@@ -121,16 +107,15 @@ public:
         (this->*stop_)();
     }
 
-    template<
-        class Worker,
-        class Executor_,
-        class Protocol_,
-        class... Args >
-    friend void
-    emplace(
-        listening_port<Executor_, Protocol_>& lp,
-        std::size_t n,
-        Args&&... args);
+    template<class Worker>
+    void
+    emplace_workers(
+        fixed_array<Worker> v)
+    {
+        wv_ = std::move(v);
+        run_  = &listening_port::template run_impl<Worker>;
+        stop_ = &listening_port::template stop_impl<Worker>;
+    }
 
 private:
     template<class T>
@@ -164,7 +149,7 @@ template<
     class Protocol,
     class... Args >
 void
-emplace(
+emplace_workers(
     listening_port<Executor, Protocol>& lp,
     std::size_t n,
     Args&&... args)
@@ -174,12 +159,10 @@ emplace(
     fixed_array<Worker> v(n);
     while(! v.is_full())
         v.append(
-            lp.srv_,
-            lp.sock_,
+            lp.server(),
+            lp.socket(),
             std::forward<Args>(args)...);
-    lp.wv_ = std::move(v);
-    lp.run_  = &listening_port<Executor, Protocol>::template run_impl<Worker>;
-    lp.stop_ = &listening_port<Executor, Protocol>::template stop_impl<Worker>;
+    lp.emplace_workers(std::move(v));
 }
 
 } // http_io
