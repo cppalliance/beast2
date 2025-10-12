@@ -87,9 +87,9 @@ public:
                 return self.complete(ec);
 
             // TODO: use associated allocator
-            exp100_.reset(new exp100(
+            exp100_.reset(new exp100{
                 exp100::awaiting,
-                asio::steady_timer{ stream_.get_executor() }));
+                asio::steady_timer{ stream_.get_executor() } });
             exp100_->timer.expires_after(exp100_timeout_);
 
             BOOST_ASIO_CORO_YIELD

@@ -12,21 +12,31 @@ import ../../../../config/checks/config : requires ;
 using openssl ;
 import ac ;
 
+lib advapi32 ;
+lib crypt32 ;
+lib gdi32 ;
+lib user32 ;
+
 project
     : requirements
       [ requires
         cxx20_hdr_concepts
+        cxx20_hdr_format
       ]
       <library>/boost/http_io//boost_http_io
       [ ac.check-library /boost/rts//boost_rts_zlib : <library>/boost/rts//boost_rts_zlib : ]
       [ ac.check-library /boost/rts//boost_rts_brotli : <library>/boost/rts//boost_rts_brotli : ]
+      [ ac.check-library /openssl//ssl : <library>/openssl//ssl/<link>shared : <build>no ]
+      [ ac.check-library /openssl//crypto : <library>/openssl//crypto/<link>shared : <build>no ]
+      <target-os>windows:<library>advapi32
+      <target-os>windows:<library>crypt32
+      <target-os>windows:<library>gdi32
+      <target-os>windows:<library>user32
       <library>/boost/url//boost_url
       <library>/boost/program_options//boost_program_options
       <library>/boost/scope//boost_scope
-      <library>/openssl//ssl/<link>shared
-      <library>/openssl//crypto/<link>shared
-      <target-os>windows:<library>crypt32
       <include>.
+      <link>shared:<define>BOOST_PROGRAM_OPTIONS_DYN_LINK=1 # workaround Jamfile issue in program_options
     ;
 
 exe burl :
