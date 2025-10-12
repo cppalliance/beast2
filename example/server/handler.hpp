@@ -15,11 +15,21 @@
 #include <boost/http_proto/serializer.hpp>
 #include <boost/core/detail/string_view.hpp>
 
+namespace boost {
+
 void
 handle_request(
-    boost::core::string_view doc_root,
-    boost::http_proto::request_base const& req,
-    boost::http_proto::response& res,
-    boost::http_proto::serializer& sr);
+    core::string_view doc_root,
+    http_proto::request_base const& req,
+    http_proto::response& res,
+    http_proto::serializer& sr);
+
+void
+handle_https_redirect(
+    http_proto::request_base const& req,
+    http_proto::response& res,
+    http_proto::serializer& sr);
+
+} // boost
 
 #endif

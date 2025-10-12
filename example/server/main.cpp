@@ -72,6 +72,7 @@ int server_main( int argc, char* argv[] )
 
         // Add the listening ports and workers
 
+#if 0
         {
             // An unencrypted public listening port. This just always redirects to https
             //
@@ -85,7 +86,7 @@ int server_main( int argc, char* argv[] )
                 srv.get_executor(),
                 reuse_addr);
         }
-
+#endif
 #if 0
         {
             // An unencrypted, private listening port.

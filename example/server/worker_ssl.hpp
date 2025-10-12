@@ -72,6 +72,7 @@ public:
         asio::ssl::context& ssl_ctx,
         std::string const& doc_root)
         : srv_(srv)
+        , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
         , doc_root_(doc_root)
         , pr_(srv.services())
@@ -131,9 +132,18 @@ private:
     do_accept()
     {
         // Clean up any previous connection.
-        system::error_code ec;
-        stream_.next_layer().close(ec);
-        pr_.reset();
+        {
+            system::error_code ec;
+            stream_.next_layer().close(ec);
+            pr_.reset();
+
+            // asio::ssl::stream has an internal state which cannot be reset.
+            // In order to perform the handshake again, we destroy the old
+            // object and assign a new one, in a way that preserves the
+            // original socket to avoid churning file handles.
+            //
+            stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
+        }
 
         using namespace std::placeholders;
         pa_->async_accept( stream_.next_layer(), ep_,
@@ -141,10 +151,8 @@ private:
     }
 
     void
-    on_accept(system::error_code ec)
+    on_accept(system::error_code const& ec)
     {
-        (void)ec;
-#if 0
         if( ec.failed() )
         {
             if( ec == asio::error::operation_aborted )
@@ -163,14 +171,35 @@ private:
         //request_deadline_.expires_after(
             //std::chrono::seconds(60));
 
-        do_handshake();
-#endif
+        using namespace std::placeholders;
+        stream_.async_handshake(
+            asio::ssl::stream_base::server,
+            std::bind(&worker_ssl::on_handshake, this, _1));
     }
 
-#if 0
     void
-    do_handshake()
+    on_handshake(
+        system::error_code const& ec)
     {
+        if( ec.failed() )
+        {
+            if( ec == asio::error::operation_aborted )
+            {
+                // worker is canceled, exit the I/O loop
+                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
+                return;
+            }
+
+            // happens periodically, usually harmless
+            LOG_DBG(sect_, id(), "async_accept ", ec.message());
+            return do_accept();
+        }
+
+        // Request must be fully processed within 60 seconds.
+        //request_deadline_.expires_after(
+            //std::chrono::seconds(60));
+
+        do_read();
     }
 
     void
@@ -180,15 +209,15 @@ private:
 
         using namespace std::placeholders;
         http_io::async_read_header(
-            sock_,
+            stream_,
             pr_,
-            std::bind(&worker::on_read_header,
+            std::bind(&worker_ssl::on_read_header,
                 this, _1, _2));
     }
 
     void
     on_read_header(
-        boost::system::error_code ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -208,13 +237,13 @@ private:
         }
 
         using namespace std::placeholders;
-        http_io::async_read(sock_, pr_, std::bind(
-            &worker::on_read_body, this, _1, _2));
+        http_io::async_read(stream_, pr_, std::bind(
+            &worker_ssl::on_read_body, this, _1, _2));
     }
 
     void
     on_read_body(
-        boost::system::error_code ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -249,13 +278,13 @@ private:
         }
 
         using namespace std::placeholders;
-        boost::http_io::async_write(sock_, sr_, std::bind(
-            &worker::on_write, this, _1, _2));
+        http_io::async_write(stream_, sr_, std::bind(
+            &worker_ssl::on_write, this, _1, _2));
     }
 
     void
     on_write(
-        boost::system::error_code ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -279,12 +308,12 @@ private:
 
         do_accept();
     }
-#endif
 
 private:
     // order of destruction matters here
-    asio_server& srv_;
     section sect_;
+    asio_server& srv_;
+    asio::ssl::context& ssl_ctx_;
     acceptor_type* pa_ = nullptr;
     stream_type stream_;
     typename Protocol::endpoint ep_;

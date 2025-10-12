@@ -177,7 +177,7 @@ private:
 
     void
     on_read_header(
-        boost::system::error_code ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -203,7 +203,7 @@ private:
 
     void
     on_read_body(
-        boost::system::error_code ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -238,13 +238,13 @@ private:
         }
 
         using namespace std::placeholders;
-        boost::http_io::async_write(sock_, sr_, std::bind(
+        http_io::async_write(sock_, sr_, std::bind(
             &worker::on_write, this, _1, _2));
     }
 
     void
     on_write(
-        boost::system::error_code ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;

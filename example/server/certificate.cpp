@@ -9,106 +9,129 @@
 
 #include "certificate.hpp"
 #include <string>
+#include <utility>
 
 namespace boost {
 namespace http_io {
 
 void
 load_server_certificate(
-    boost::asio::ssl::context& ctx)
+    asio::ssl::context& ctx)
 {
-    /*
-        The certificate was generated from bash on Ubuntu (OpenSSL 1.1.1f) using:
+/*
+    Using Windows with OpenSSL version "1.1.1s  1 Nov 2022"
 
-        openssl dhparam -out dh.pem 2048
-        openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 10000 -out cert.pem -subj "/C=US/ST=CA/L=Los Angeles/O=Beast/CN=www.example.com"
-    */
+    1. Generate a Root CA
 
-    std::string const cert =
-        "-----BEGIN CERTIFICATE-----\n"
-        "MIIDlTCCAn2gAwIBAgIUOLxr3q7Wd/pto1+2MsW4fdRheCIwDQYJKoZIhvcNAQEL\n"
-        "BQAwWjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMRQwEgYDVQQHDAtMb3MgQW5n\n"
-        "ZWxlczEOMAwGA1UECgwFQmVhc3QxGDAWBgNVBAMMD3d3dy5leGFtcGxlLmNvbTAe\n"
-        "Fw0yMTA3MDYwMTQ5MjVaFw00ODExMjEwMTQ5MjVaMFoxCzAJBgNVBAYTAlVTMQsw\n"
-        "CQYDVQQIDAJDQTEUMBIGA1UEBwwLTG9zIEFuZ2VsZXMxDjAMBgNVBAoMBUJlYXN0\n"
-        "MRgwFgYDVQQDDA93d3cuZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IB\n"
-        "DwAwggEKAoIBAQCz0GwgnxSBhygxBdhTHGx5LDLIJSuIDJ6nMwZFvAjdhLnB/vOT\n"
-        "Lppr5MKxqQHEpYdyDYGD1noBoz4TiIRj5JapChMgx58NLq5QyXkHV/ONT7yi8x05\n"
-        "P41c2F9pBEnUwUxIUG1Cb6AN0cZWF/wSMOZ0w3DoBhnl1sdQfQiS25MTK6x4tATm\n"
-        "Wm9SJc2lsjWptbyIN6hFXLYPXTwnYzCLvv1EK6Ft7tMPc/FcJpd/wYHgl8shDmY7\n"
-        "rV+AiGTxUU35V0AzpJlmvct5aJV/5vSRRLwT9qLZSddE9zy/0rovC5GML6S7BUC4\n"
-        "lIzJ8yxzOzSStBPxvdrOobSSNlRZIlE7gnyNAgMBAAGjUzBRMB0GA1UdDgQWBBR+\n"
-        "dYtY9zmFSw9GYpEXC1iJKHC0/jAfBgNVHSMEGDAWgBR+dYtY9zmFSw9GYpEXC1iJ\n"
-        "KHC0/jAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBzKrsiYywl\n"
-        "RKeB2LbddgSf7ahiQMXCZpAjZeJikIoEmx+AmjQk1bam+M7WfpRAMnCKooU+Utp5\n"
-        "TwtijjnJydkZHFR6UH6oCWm8RsUVxruao/B0UFRlD8q+ZxGd4fGTdLg/ztmA+9oC\n"
-        "EmrcQNdz/KIxJj/fRB3j9GM4lkdaIju47V998Z619E/6pt7GWcAySm1faPB0X4fL\n"
-        "FJ6iYR2r/kJLoppPqL0EE49uwyYQ1dKhXS2hk+IIfA9mBn8eAFb/0435A2fXutds\n"
-        "qhvwIOmAObCzcoKkz3sChbk4ToUTqbC0TmFAXI5Upz1wnADzjpbJrpegCA3pmvhT\n"
-        "7356drqnCGY9\n"
-        "-----END CERTIFICATE-----\n";
+        openssl genrsa -out rootCA.key 4096
+        openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 10000 -out rootCA.pem -subj "//CN=Boost Test Root CA"
 
-    std::string const key =
-        "-----BEGIN PRIVATE KEY-----\n"
-        "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCz0GwgnxSBhygx\n"
-        "BdhTHGx5LDLIJSuIDJ6nMwZFvAjdhLnB/vOTLppr5MKxqQHEpYdyDYGD1noBoz4T\n"
-        "iIRj5JapChMgx58NLq5QyXkHV/ONT7yi8x05P41c2F9pBEnUwUxIUG1Cb6AN0cZW\n"
-        "F/wSMOZ0w3DoBhnl1sdQfQiS25MTK6x4tATmWm9SJc2lsjWptbyIN6hFXLYPXTwn\n"
-        "YzCLvv1EK6Ft7tMPc/FcJpd/wYHgl8shDmY7rV+AiGTxUU35V0AzpJlmvct5aJV/\n"
-        "5vSRRLwT9qLZSddE9zy/0rovC5GML6S7BUC4lIzJ8yxzOzSStBPxvdrOobSSNlRZ\n"
-        "IlE7gnyNAgMBAAECggEAY0RorQmldGx9D7M+XYOPjsWLs1px0cXFwGA20kCgVEp1\n"
-        "kleBeHt93JqJsTKwOzN2tswl9/ZrnIPWPUpcbBlB40ggjzQk5k4jBY50Nk2jsxuV\n"
-        "9A9qzrP7AoqhAYTQjZe42SMtbkPZhEeOyvCqxBAi6csLhcv4eB4+In0kQo7dfvLs\n"
-        "Xu/3WhSsuAWqdD9EGnhD3n+hVTtgiasRe9318/3R9DzP+IokoQGOtXm+1dsfP0mV\n"
-        "8XGzQHBpUtJNn0yi6SC4kGEQuKkX33zORlSnZgT5VBLofNgra0THd7x3atOx1lbr\n"
-        "V0QizvCdBa6j6FwhOQwW8UwgOCnUbWXl/Xn4OaofMQKBgQDdRXSMyys7qUMe4SYM\n"
-        "Mdawj+rjv0Hg98/xORuXKEISh2snJGKEwV7L0vCn468n+sM19z62Axz+lvOUH8Qr\n"
-        "hLkBNqJvtIP+b0ljRjem78K4a4qIqUlpejpRLw6a/+44L76pMJXrYg3zdBfwzfwu\n"
-        "b9NXdwHzWoNuj4v36teGP6xOUwKBgQDQCT52XX96NseNC6HeK5BgWYYjjxmhksHi\n"
-        "stjzPJKySWXZqJpHfXI8qpOd0Sd1FHB+q1s3hand9c+Rxs762OXlqA9Q4i+4qEYZ\n"
-        "qhyRkTsl+2BhgzxmoqGd5gsVT7KV8XqtuHWLmetNEi+7+mGSFf2iNFnonKlvT1JX\n"
-        "4OQZC7ntnwKBgH/ORFmmaFxXkfteFLnqd5UYK5ZMvGKTALrWP4d5q2BEc7HyJC2F\n"
-        "+5lDR9nRezRedS7QlppPBgpPanXeO1LfoHSA+CYJYEwwP3Vl83Mq/Y/EHgp9rXeN\n"
-        "L+4AfjEtLo2pljjnZVDGHETIg6OFdunjkXDtvmSvnUbZBwG11bMnSAEdAoGBAKFw\n"
-        "qwJb6FNFM3JnNoQctnuuvYPWxwM1yjRMqkOIHCczAlD4oFEeLoqZrNhpuP8Ij4wd\n"
-        "GjpqBbpzyVLNP043B6FC3C/edz4Lh+resjDczVPaUZ8aosLbLiREoxE0udfWf2dU\n"
-        "oBNnrMwwcs6jrRga7Kr1iVgUSwBQRAxiP2CYUv7tAoGBAKdPdekPNP/rCnHkKIkj\n"
-        "o13pr+LJ8t+15vVzZNHwPHUWiYXFhG8Ivx7rqLQSPGcuPhNss3bg1RJiZAUvF6fd\n"
-        "e6QS4EZM9dhhlO2FmPQCJMrRVDXaV+9TcJZXCbclQnzzBus9pwZZyw4Anxo0vmir\n"
-        "nOMOU6XI4lO9Xge/QDEN4Y2R\n"
-        "-----END PRIVATE KEY-----\n";
+    2. Create a Server Key
 
+        openssl genrsa -out server.key 2048
+*/
+    using keypair = std::pair<std::string, std::string>;
+
+    // certificates for SSL listening ports
+    keypair const certs[] = {
+{
+/*  Create a Signed Server Certificate with the Test Root CA
+
+    openssl req -new -key server.key -out server.csr -subj "//CN=localhost"
+    openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 10000 -sha256 -extfile san.cnf
+*/
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIID2TCCAcGgAwIBAgIURQ6waOrVlt/YykIgwb+46o0UtCUwDQYJKoZIhvcNAQEL\n"
+    "BQAwHTEbMBkGA1UEAwwSQm9vc3QgVGVzdCBSb290IENBMCAXDTI1MTAxMjAxMjIx\n"
+    "N1oYDzIwNTMwMjI3MDEyMjE3WjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwggEiMA0G\n"
+    "CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDkHGuSplDQrW5f0JJwUK9UivHZMkE5\n"
+    "CDEThsUwjrqubofLpR49EzfAcBRWWQ1R0QmzK2sKnKQnku4IliFyitw/OAHsJrr4\n"
+    "c3OHXfpOOwtd4Kg3BP3P3oeAsO+IELrQIsJp/mrjOJKtBVTZ8kl5ZYrf94fEMivn\n"
+    "JnZ+neb2kPiSPTnAtFSBVSQc9aHU7Wg1gtQkUuEIkjUBvPzxGKi0m3nuZfUDJpev\n"
+    "2OB7fRftIPjiqZ/1n1k2CYLqLMBIXAeeYAjBgzM0x4UG3SW7jlPeoDI34XQ7dYxQ\n"
+    "K5jjs3OhoLs5x0za1sZ7MXkDRAqO5Cgeg3kNb5VlhjVzR8Njtapx4mXtAgMBAAGj\n"
+    "GDAWMBQGA1UdEQQNMAuCCWxvY2FsaG9zdDANBgkqhkiG9w0BAQsFAAOCAgEAjEHn\n"
+    "AIfxiYXWBsVPtYsRbHzWYoNSIWGkzwauMaDPDGzeMV1ajKV1dBp8NHKBg/jlKdaQ\n"
+    "vGiKHLlPwSGRlDIyyglG1qsH7unQHV0w+cCh19Uoc0gtv9q4zTUuyDhk8eufIdEr\n"
+    "1SPNMIqJQ47A2KrYo31rd+HxnyoCit1fM8SUWwM0tLaoEM3iTF33LI5CBkT2VPbv\n"
+    "qJL/68qQFDeTIUGQJjPK9rs/cElqsweVfWF+O2Mn9wA9aJyc5+0jsOGrfADO/cI1\n"
+    "OA1HXgawSQjXKST74aprd0gBxACXrG+wA1G6NNsawp80xjADSTyCfNxtQVvY1W2n\n"
+    "9kJuionCnDUnhqEOnhnZdq1XikoOYMRJP0BxFHX8SNbxmJouJRWvusmh91lAgbQv\n"
+    "JVXlHcEQGYMIYIr5y6dLlZ55SamC9aK3vO+q8s9AEYZO4OTUi2WQ2bfrxcn3vI/0\n"
+    "UzLh8LzE1A2OT5Gin0jWKbeKpqXH2RAfgaEAf1bzDA92xMEjVGBrBoXagvUOGzMG\n"
+    "cDcj4WHzcO6BWENPkRZ2JNNIxIZRK/wr9Mw/q/Yu9iDNVw4XOEx+iGjh1cRHy1FH\n"
+    "VuS/N5CQCBnmhDKYrZ3Lz+D/l0CGc30A1jjfvlrDiE4k9NyrV8wVHqmO73vivAvW\n"
+    "hYG9wLo13LnWG9JrtT8Drl/H0YbuL4C46n/mua8=\n"
+    "-----END CERTIFICATE-----\n",
+
+    "-----BEGIN RSA PRIVATE KEY-----\n"
+    "MIIEpgIBAAKCAQEA5BxrkqZQ0K1uX9CScFCvVIrx2TJBOQgxE4bFMI66rm6Hy6Ue\n"
+    "PRM3wHAUVlkNUdEJsytrCpykJ5LuCJYhcorcPzgB7Ca6+HNzh136TjsLXeCoNwT9\n"
+    "z96HgLDviBC60CLCaf5q4ziSrQVU2fJJeWWK3/eHxDIr5yZ2fp3m9pD4kj05wLRU\n"
+    "gVUkHPWh1O1oNYLUJFLhCJI1Abz88RiotJt57mX1AyaXr9jge30X7SD44qmf9Z9Z\n"
+    "NgmC6izASFwHnmAIwYMzNMeFBt0lu45T3qAyN+F0O3WMUCuY47NzoaC7OcdM2tbG\n"
+    "ezF5A0QKjuQoHoN5DW+VZYY1c0fDY7WqceJl7QIDAQABAoIBAQCfXyvZPdHgugsP\n"
+    "bk2hov2cd6cZNH9VNV/0YIiMsGvFSvwdT7OcwDyHesb6vSUNMJsyTvduZppZ+9HK\n"
+    "tfmQaWwPzzWopDalNyRUQ1iKJ759TGS6bAZYoQTS6MuxqN6cZGyoWVScg/4WXE84\n"
+    "JosnAcbRS8PTU6pQyRKoy/F9+zNwF30B0GwQpNwEZMX7QvPQPoUIcurE8HmP7NhB\n"
+    "fuZn/af6q9N+D56fOaD7Rg4kdtBMa0cv4mKojaq3ymx5RK8ccPTDiXC0idg7uRVC\n"
+    "13sFf9H46Z7kIimyhPUrwTapMyrx1kjQNZa97YYBAHGfLwRoYsGu5XMWIXKDkZHz\n"
+    "Bt2U92iBAoGBAPJRdRqoHdZIe42rq1kEpIis4Eitn4idjuW6D8kgzPU8IT7UreT/\n"
+    "eS5c7ThnbwI3B966pHWzAPMiktc3sXQUIXlBy1vu1A6paqU+HpA9pbwB3tHfLsgm\n"
+    "akabqfv/nWpzKJt5kLlbNOkkCvJ8FvotyeCCrdCeip+q6d8NZc7s9YQZAoGBAPD9\n"
+    "m5nUHKR7tcE8SNc9pcBp1AoILuhp9XbUgP2YkePO8KfnHPUSU5LIT0c1sasm1k/w\n"
+    "ehpaqirjSAjYkjKQTfwj4SVP9LAlCb5kz0rhZJqdiQUtSK3oPIDzcXfutgZjRbyX\n"
+    "vR9r3a2DLoYJ/IxuajyvICImKSMHEySnCoxaEgr1AoGBALI2VGC5edAp2Kx1r/w1\n"
+    "HOjj88Of5a+s6PZtY8SxGevWQEEcW5QKi84cS97qu0quvFwDeoaRksY+DC66aAkN\n"
+    "8Rxj1jMTr+Pkl2lWCVZd8HEYEw7ZDGfpUMoDG/4YnWY3sYq+2kBoIr7AYki6GJAA\n"
+    "cvNqSHkg0KTjJ0ODb/fCcEKpAoGBALUX3rXaDywLSqnLA3G7gbL108E2JQnBlhOV\n"
+    "3Ni0rezitTV3FuuSufqzS9/XGYvjw2iO7TKgrv9Li/YZyML2baPr0mSXkOhM7OWG\n"
+    "G7/JYDBP8YdSYCtPOSgtyDa3y1FBiEYQQK48AHlC+tL+7ikZT/wKHbuLsZ4A0wHY\n"
+    "BLUzehuBAoGBAMC9mGnaYU4D9PjCqC96MyEnZjdpf5eGByx5GhV6O6kEx0wJbjPc\n"
+    "kq+QAn1cp1tVjPcNfOK62LxV5E5t4eCv/Su5dmQHWGVDZBrdug5osyLFaFZA8Lw/\n"
+    "GKCs22hqgjPqSrGnCXMV6bZkwvy3cmxNkWuEiiA67PYyc6aFpTcOj8fi\n"
+    "-----END RSA PRIVATE KEY-----\n"
+}
+    };
+
+/*  More secure Diffie-Helman parameters
+
+    openssl dhparam -out dh.pem 2048
+*/
     std::string const dh =
-        "-----BEGIN DH PARAMETERS-----\n"
-        "MIIBCAKCAQEArzQc5mpm0Fs8yahDeySj31JZlwEphUdZ9StM2D8+Fo7TMduGtSi+\n"
-        "/HRWVwHcTFAgrxVdm+dl474mOUqqaz4MpzIb6+6OVfWHbQJmXPepZKyu4LgUPvY/\n"
-        "4q3/iDMjIS0fLOu/bLuObwU5ccZmDgfhmz1GanRlTQOiYRty3FiOATWZBRh6uv4u\n"
-        "tff4A9Bm3V9tLx9S6djq31w31Gl7OQhryodW28kc16t9TvO1BzcV3HjRPwpe701X\n"
-        "oEEZdnZWANkkpR/m/pfgdmGPU66S2sXMHgsliViQWpDCYeehrvFRHEdR9NV+XJfC\n"
-        "QMUk26jPTIVTLfXmmwU0u8vUkpR7LQKkwwIBAg==\n"
-        "-----END DH PARAMETERS-----\n";
+    "-----BEGIN DH PARAMETERS-----\n"
+    "MIIBCAKCAQEAu7R9qRNtiuayUH9FLFIIQJ9GmhKpdL/gcLG8+5/6x+RN+cgPwQgQ\n"
+    "FYqTtIHRgINxtxdZqUxnrcg6jbW13r7b8A7uWURsrW5T3Hy68v4SFY5F+c/a97m+\n"
+    "LyUHW12iwCqZPlwdl4Zvb/uAtrn3xjvl3Buea4nGPAlTlHVKR1OH8IuWPnxUvjXp\n"
+    "slcI5c20LQ3Z2znM3csLNGkgiGKIPLCb9Sq8Zx1+gCDQk9DjDC4K8ELDqvbwDz8m\n"
+    "760pgC5eQ0z1lgmxvRVgPZOx9twwO1/VhpISpGnb7vihEb+06jQtXZIC3LrANfhe\n"
+    "bnbac08nYv9yt7Caf2Zfy1UDvkeLtPYs2wIBAg==\n"
+    "-----END DH PARAMETERS-----\n";
     
     ctx.set_password_callback(
         [](std::size_t,
-            boost::asio::ssl::context_base::password_purpose)
+            asio::ssl::context_base::password_purpose)
         {
             return "test";
         });
 
     ctx.set_options(
-        boost::asio::ssl::context::default_workarounds |
-        boost::asio::ssl::context::no_sslv2 |
-        boost::asio::ssl::context::single_dh_use);
+        asio::ssl::context::default_workarounds |
+        asio::ssl::context::no_sslv2 |
+        asio::ssl::context::single_dh_use);
 
-    ctx.use_certificate_chain(
-        boost::asio::buffer(cert.data(), cert.size()));
+    for(auto const& t : certs)
+    {
+        ctx.use_certificate_chain(asio::buffer(t.first));
 
-    ctx.use_private_key(
-        boost::asio::buffer(key.data(), key.size()),
-        boost::asio::ssl::context::file_format::pem);
+        // use_private_key applies to the last inserted certificate,
+        // see: https://linux.die.net/man/3/ssl_ctx_use_privatekey
+        //
+        ctx.use_private_key(asio::buffer(t.second),
+            asio::ssl::context::file_format::pem);
+    }
 
-    ctx.use_tmp_dh(
-        boost::asio::buffer(dh.data(), dh.size()));
+    ctx.use_tmp_dh(asio::buffer(dh));
 }
 
 } // http_io
