@@ -30,7 +30,7 @@ enum class task_group_errc
 template<typename Executor>
 class basic_task_group
 {
-    asio::steady_timer::rebind_executor<Executor>::other cv_;
+    typename asio::steady_timer::rebind_executor<Executor>::other cv_;
     std::uint32_t max_;
     std::list<asio::cancellation_signal> css_;
 

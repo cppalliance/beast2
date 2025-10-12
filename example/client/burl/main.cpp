@@ -751,7 +751,10 @@ retry(
 asio::awaitable<void>
 co_main(int argc, char* argv[])
 {
-    auto [oc, ssl_ctx, ropt_gen] = parse_args(argc, argv);
+    auto args_rs       = parse_args(argc, argv);
+    auto& oc           = args_rs.oc;
+    auto& ropt_gen     = args_rs.ropt_gen;
+    auto& ssl_ctx      = args_rs.ssl_ctx;
 
     auto executor      = co_await asio::this_coro::executor;
     auto task_group    = ::task_group{ executor, oc.parallel_max };

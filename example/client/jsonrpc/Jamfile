@@ -12,15 +12,24 @@ import ../../../../config/checks/config : requires ;
 using openssl ;
 import ac ;
 
+lib advapi32 ;
+lib crypt32 ;
+lib gdi32 ;
+lib user32 ;
+
 project
     : requirements
       <library>/boost/http_io//boost_http_io
-      <library>/boost/url//boost_url
+      [ ac.check-library /boost/rts//boost_rts_zlib : <library>/boost/rts//boost_rts_zlib : ]
+      [ ac.check-library /boost/rts//boost_rts_brotli : <library>/boost/rts//boost_rts_brotli : ]
+      [ ac.check-library /openssl//ssl : <library>/openssl//ssl/<link>shared : <build>no ]
+      [ ac.check-library /openssl//crypto : <library>/openssl//crypto/<link>shared : <build>no ]
+      <target-os>windows:<library>advapi32
+      <target-os>windows:<library>crypt32
+      <target-os>windows:<library>gdi32
+      <target-os>windows:<library>user32      <library>/boost/url//boost_url
       <library>/boost/json//boost_json
       <library>/boost/multiprecision//boost_multiprecision
-      <library>/openssl//ssl/<link>shared
-      <library>/openssl//crypto/<link>shared
-      <target-os>windows:<library>crypt32
       <include>.
     ;
 

@@ -28,3 +28,15 @@ target_link_libraries(http_io_server_example
     OpenSSL::SSL
     OpenSSL::Crypto
     )
+
+if (WIN32)
+    target_link_libraries(http_io_server_example crypt32)
+endif()
+
+if (TARGET Boost::rts_zlib)
+    target_link_libraries(http_io_server_example Boost::rts_zlib)
+endif()
+
+if (TARGET Boost::rts_brotli)
+    target_link_libraries(http_io_server_example Boost::rts_brotli)
+endif()
