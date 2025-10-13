@@ -8,10 +8,18 @@
 # Official repository: https://github.com/CPPAlliance/http_proto
 #
 
+import ac ;
+
+# Optional fmtlib library support
+# If fmtlib is available, link against it for better formatting
+lib fmt : : <name>fmt <search>/usr/local/lib <search>/usr/lib ;
+explicit fmt ;
+
 project
     : requirements
       <library>/boost/http_io//boost_http_io
       <library>/boost/url//boost_url
+      [ ac.check-library fmt : <library>fmt : ]
       <include>.
     ;
 

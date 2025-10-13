@@ -12,6 +12,11 @@ import ../../../../config/checks/config : requires ;
 using openssl ;
 import ac ;
 
+# Optional fmtlib library support
+# If fmtlib is available, link against it for better formatting
+lib fmt : : <name>fmt <search>/usr/local/lib <search>/usr/lib ;
+explicit fmt ;
+
 project
     : requirements
       [ requires
@@ -20,6 +25,7 @@ project
       <library>/boost/http_io//boost_http_io
       [ ac.check-library /boost/rts//boost_rts_zlib : <library>/boost/rts//boost_rts_zlib : ]
       [ ac.check-library /boost/rts//boost_rts_brotli : <library>/boost/rts//boost_rts_brotli : ]
+      [ ac.check-library fmt : <library>fmt : ]
       <library>/boost/url//boost_url
       <library>/boost/program_options//boost_program_options
       <library>/boost/scope//boost_scope
