@@ -43,7 +43,8 @@ template<
     class Executor1 = Executor,
     class Protocol = asio::ip::tcp
 >
-class worker_ssl
+class worker_ssl : public http_responder<
+    worker_ssl<Executor, Executor1, Protocol>>
 {
 public:
     using executor_type = Executor;
@@ -68,15 +69,17 @@ public:
         Executor_ const& ex,
         asio::ssl::context& ssl_ctx,
         router_type& rr)
-        : srv_(srv)
+        : http_responder<worker_ssl>(srv, rr)
         , acc_(acc)
         , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
-        , pr_(srv.services())
-        , sr_(srv.services())
-        , id_(srv.make_unique_id())
-        , rr_(rr)
     {
+    }
+
+    stream_type&
+    stream() noexcept
+    {
+        return stream_;
     }
 
     /** Run the worker I/O loop
@@ -97,12 +100,28 @@ public:
         stream_.next_layer().cancel(ec);
     }
 
-private:
-    std::string id() const
+    void
+    do_accept()
     {
-        return std::string("[") + std::to_string(id_) + "] ";
+        // Clean up any previous connection.
+        {
+            system::error_code ec;
+            stream_.next_layer().close(ec);
+
+            // asio::ssl::stream has an internal state which cannot be reset.
+            // In order to perform the handshake again, we destroy the old
+            // object and assign a new one, in a way that preserves the
+            // original socket to avoid churning file handles.
+            //
+            stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
+        }
+
+        using namespace std::placeholders;
+        acc_.async_accept( stream_.next_layer(), ep_,
+            std::bind(&worker_ssl::on_accept, this, _1));
     }
 
+private:
     void
     fail(
         std::string what,
@@ -126,29 +145,6 @@ private:
     }
 
     void
-    do_accept()
-    {
-        // Clean up any previous connection.
-        {
-            system::error_code ec;
-            stream_.next_layer().close(ec);
-            pr_.reset();
-            rh_.reset();
-
-            // asio::ssl::stream has an internal state which cannot be reset.
-            // In order to perform the handshake again, we destroy the old
-            // object and assign a new one, in a way that preserves the
-            // original socket to avoid churning file handles.
-            //
-            stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
-        }
-
-        using namespace std::placeholders;
-        acc_.async_accept( stream_.next_layer(), ep_,
-            std::bind(&worker_ssl::on_accept, this, _1));
-    }
-
-    void
     on_accept(system::error_code const& ec)
     {
         if( ec.failed() )
@@ -156,12 +152,12 @@ private:
             if( ec == asio::error::operation_aborted )
             {
                 // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
+                LOG_TRC(this->sect_, this->id(), "async_accept, error::operation_aborted");
                 return;
             }
 
             // happens periodically, usually harmless
-            LOG_DBG(sect_, id(), "async_accept ", ec.message());
+            LOG_DBG(this->sect_, this->id(), "async_accept ", ec.message());
             return do_accept();
         }
 
@@ -184,12 +180,12 @@ private:
             if( ec == asio::error::operation_aborted )
             {
                 // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
+                LOG_TRC(this->sect_, this->id(), "async_accept, error::operation_aborted");
                 return;
             }
 
             // happens periodically, usually harmless
-            LOG_DBG(sect_, id(), "async_accept ", ec.message());
+            LOG_DBG(this->sect_, this->id(), "async_accept ", ec.message());
             return do_accept();
         }
 
@@ -197,132 +193,15 @@ private:
         //request_deadline_.expires_after(
             //std::chrono::seconds(60));
 
-        do_read();
-    }
-
-    void
-    do_read()
-    {
-        pr_.start();
-
-        using namespace std::placeholders;
-        http_io::async_read_header(
-            stream_,
-            pr_,
-            std::bind(&worker_ssl::on_read_header,
-                this, _1, _2));
-    }
-
-    void
-    on_read_header(
-        system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if(ec.failed())
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_read_header ", ec.message());
-            return do_accept();
-        }
-
-        // find the route
-        auto found = rr_.find(rh_,
-            pr_.get().method(), pr_.get().target());
-
-        if(! found)
-        {
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "no route");
-            return do_accept();
-        }
-
-        //rh_->on_header(...);
-
-        using namespace std::placeholders;
-        http_io::async_read(stream_, pr_, std::bind(
-            &worker_ssl::on_read_body, this, _1, _2));
-    }
-
-    void
-    on_read_body(
-        system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_read, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_read ", ec.message());
-            return do_accept();
-        }
-
-        res_.clear();
-
-        rh_->on_complete({ pr_.get(), res_, sr_, srv_.is_stopping() });
-
-        using namespace std::placeholders;
-        http_io::async_write(stream_, sr_, std::bind(
-            &worker_ssl::on_write, this, _1, _2));
-    }
-
-    void
-    on_write(
-        system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_write, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_write ", ec.message());
-            return do_accept();
-        }
-
-        if(res_.keep_alive())
-            return do_read();
-
-        do_accept();
+        this->do_read_request();
     }
 
 private:
     // order of destruction matters here
-    section sect_;
-    asio_server& srv_;
     acceptor_type& acc_;
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
     typename Protocol::endpoint ep_;
-    http_proto::request_parser pr_;
-    http_proto::response res_;
-    http_proto::serializer sr_;
-    std::size_t id_ = 0;
-    router_type& rr_;
-    router_type::handler rh_;
 };
 
 } // http_io

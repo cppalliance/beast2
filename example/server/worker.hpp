@@ -12,13 +12,8 @@
 
 #include "asio_server.hpp"
 #include "handler.hpp"
+#include "http_responder.hpp"
 #include "logger.hpp"
-#include <boost/http_io/read.hpp>
-#include <boost/http_io/write.hpp>
-#include <boost/http_io/server/router.hpp>
-#include <boost/http_proto/request_parser.hpp>
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/serializer.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <stddef.h>
@@ -36,12 +31,14 @@ class tcp; // forward declaration
 
 namespace http_io {
 
+//------------------------------------------------
+
 template<
     class Executor,
     class Executor1 = Executor,
     class Protocol = asio::ip::tcp
 >
-class worker
+class worker : public http_responder<worker<Executor, Executor1, Protocol>>
 {
 public:
     using executor_type = Executor;
@@ -66,14 +63,16 @@ public:
         acceptor_type& acc,
         Executor_ const& ex,
         router_type& rr)
-        : srv_(srv)
+        : http_responder<worker>(srv, rr)
         , acc_(acc)
         , sock_(ex)
-        , pr_(srv.services())
-        , sr_(srv.services())
-        , id_(srv.make_unique_id())
-        , rr_(rr)
     {
+    }
+
+    stream_type&
+    stream() noexcept
+    {
+        return sock_;
     }
 
     /** Run the worker I/O loop
@@ -94,12 +93,21 @@ public:
         sock_.cancel(ec);
     }
 
-private:
-    std::string id() const
+    void
+    do_accept()
     {
-        return std::string("[") + std::to_string(id_) + "] ";
+        // Clean up any previous connection.
+        {
+            system::error_code ec;
+            sock_.close(ec);
+        }
+
+        using namespace std::placeholders;
+        acc_.async_accept( sock_, ep_,
+            std::bind(&worker::on_accept, this, _1));
     }
 
+private:
     void
     fail(
         std::string what,
@@ -123,22 +131,6 @@ private:
     }
 
     void
-    do_accept()
-    {
-        // Clean up any previous connection.
-        {
-            system::error_code ec;
-            sock_.close(ec);
-            pr_.reset();
-            rh_.reset();
-        }
-
-        using namespace std::placeholders;
-        acc_.async_accept( sock_, ep_,
-            std::bind(&worker::on_accept, this, _1));
-    }
-
-    void
     on_accept(system::error_code ec)
     {
         if( ec.failed() )
@@ -146,12 +138,12 @@ private:
             if( ec == asio::error::operation_aborted )
             {
                 // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
+                LOG_TRC(this->sect_, this->id(), "async_accept, error::operation_aborted");
                 return;
             }
 
             // happens periodically, usually harmless
-            LOG_DBG(sect_, id(), "async_accept ", ec.message());
+            LOG_DBG(this->sect_, this->id(), "async_accept ", ec.message());
             return do_accept();
         }
 
@@ -159,131 +151,15 @@ private:
         //request_deadline_.expires_after(
             //std::chrono::seconds(60));
 
-        do_read();
-    }
-
-    void
-    do_read()
-    {
-        pr_.start();
-
-        using namespace std::placeholders;
-        http_io::async_read_header(
-            sock_,
-            pr_,
-            std::bind(&worker::on_read_header,
-                this, _1, _2));
-    }
-
-    void
-    on_read_header(
-        system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if(ec.failed())
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_read_header ", ec.message());
-            return do_accept();
-        }
-
-        // find the route
-        auto found = rr_.find(rh_,
-            pr_.get().method(), pr_.get().target());
-
-        if(! found)
-        {
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "no route");
-            return do_accept();
-        }
-
-        //rh_->on_header(...);
-
-        using namespace std::placeholders;
-        http_io::async_read(sock_, pr_, std::bind(
-            &worker::on_read_body, this, _1, _2));
-    }
-
-    void
-    on_read_body(
-        system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_read, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_read ", ec.message());
-            return do_accept();
-        }
-
-        res_.clear();
-
-        rh_->on_complete({ pr_.get(), res_, sr_, srv_.is_stopping() });
-
-        using namespace std::placeholders;
-        http_io::async_write(sock_, sr_, std::bind(
-            &worker::on_write, this, _1, _2));
-    }
-
-    void
-    on_write(
-        system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_write, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_write ", ec.message());
-            return do_accept();
-        }
-
-        if(res_.keep_alive())
-            return do_read();
-
-        do_accept();
+        this->do_read_request();
     }
 
 private:
     // order of destruction matters here
-    asio_server& srv_;
     acceptor_type& acc_;
     section sect_;
     socket_type sock_;
     typename Protocol::endpoint ep_;
-    http_proto::request_parser pr_;
-    http_proto::response res_;
-    http_proto::serializer sr_;
-    std::size_t id_ = 0;
-    router_type& rr_;
-    router_type::handler rh_;
 };
 
 } // http_io
