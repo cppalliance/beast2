@@ -10,6 +10,7 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_HANDLER_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_HANDLER_HPP
 
+#include "http_params.hpp"
 #include <boost/http_io/detail/config.hpp>
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_proto/request_base.hpp>
@@ -20,52 +21,28 @@
 namespace boost {
 namespace http_io {
 
-//------------------------------------------------
-
-struct work_params
-{
-    http_proto::request_base const& req;
-    http_proto::response& res;
-    http_proto::serializer& sr;
-    bool is_shutting_down;
-};
-
-struct responder
-{
-    virtual ~responder();
-    virtual void on_complete(
-        work_params const& params) = 0;
-};
-
-using router_type = router<responder>;
+using router_type = router<http_params>;
 
 //------------------------------------------------
 
-class https_redirect_responder : public router_type::factory
+struct https_redirect_responder
 {
-public:
-    void operator()(router_type::handler& dest) const override;
-
-private:
-    class handler;
+    void operator()(http_params&) const;
 };
 
 //------------------------------------------------
 
-class file_responder : public router_type::factory
+struct file_responder
 {
-public:
     file_responder(
         core::string_view doc_root)
         : doc_root_(doc_root)
     {
     }
 
-    void operator()(router_type::handler& dest) const override;
+    void operator()(http_params&) const;
 
 private:
-    class handler;
-
     std::string doc_root_;
 };
 

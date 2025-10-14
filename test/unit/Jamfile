@@ -33,7 +33,9 @@ project
     ;
 
 local SOURCES =
+    beast.cpp
     buffer.cpp
+    client.cpp
     read.cpp
     sandbox.cpp
     write.cpp
@@ -42,5 +44,4 @@ local SOURCES =
 for local f in $(SOURCES)
 {
     run $(f) : : : ;
-#    run $(f) : target-name $(f:B)_ ;
 }

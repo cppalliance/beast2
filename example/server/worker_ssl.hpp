@@ -90,6 +90,9 @@ public:
     void
     run()
     {
+        // VFALCO Without this, run() on different workers cannot be called concurrently
+        //asio::dispatch(stream_.get_executor(), std::bind(&worker_ssl::do_accept0, this));
+
         do_accept();
     }
 

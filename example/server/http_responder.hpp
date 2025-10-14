@@ -90,18 +90,6 @@ private:
             return self().do_accept();
         }
 
-        // find the route
-        auto found = rr_.find(rh_,
-            pr_.get().method(), pr_.get().target());
-
-        if(! found)
-        {
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "no route");
-            reset();
-            return self().do_accept();
-        }
-
         using namespace std::placeholders;
         http_io::async_read(self().stream(), pr_, std::bind(
             &http_responder::on_read_body, this, _1, _2));
@@ -130,7 +118,23 @@ private:
             return self().do_accept();
         }
 
-        rh_->on_complete({ pr_.get(), res_, sr_, srv_.is_stopping() });
+        // find the route
+        auto found = rr_.invoke(
+            pr_.get().method(),
+            pr_.get().target(),
+            http_params{
+                pr_.get(),
+                res_,
+                sr_,
+                srv_.is_stopping()});
+
+        if(! found)
+        {
+            // errors here are usually recoverable
+            LOG_DBG(sect_, id(), "no route");
+            reset();
+            return self().do_accept();
+        }
 
         using namespace std::placeholders;
         http_io::async_write(self().stream(), sr_, std::bind(
@@ -170,7 +174,6 @@ private:
     void
     reset()
     {
-        rh_.reset();
         pr_.reset();
         sr_.reset();
         res_.clear();
@@ -202,7 +205,6 @@ protected:
 
 private:
     router_type& rr_;
-    router_type::handler rh_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;

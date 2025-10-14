@@ -12,14 +12,12 @@
 #include <map>
 #include <functional>
 #include <regex>
-#include <string>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace boost {
 namespace http_io {
-
 
 // Exception for path parsing errors (inherits from std::runtime_error)
 class PathError : public std::runtime_error {
@@ -35,9 +33,6 @@ public:
           }()),
           originalPath(path) {}
 };
-
-// Enum for the different token types in a parsed path pattern
-enum class TokenType { Text, Param, Wildcard, Group };
 
 // Structure representing a token in the parsed pattern
 struct Token {
@@ -499,6 +494,64 @@ private:
         routes_.push_back(std::move(route));
     }
 };
+
+//------------------------------------------------
+
+namespace detail {
+
+struct router_base::entry
+{
+    http_proto::method method;
+    std::regex regex;
+    std::vector< std::pair<
+        std::string, TokenType> > keys;
+    std::vector<std::unique_ptr<handler>> v;
+};
+
+struct router_base::impl
+{
+    std::vector<entry> v;
+};
+
+router_base::handler::~handler() = default;
+
+router_base::
+router_base()
+    : impl_(std::make_shared<impl>())
+{
+}
+
+void
+router_base::
+insert(
+    http_proto::method method,
+    core::string_view path,
+    std::unique_ptr<handler> h)
+{
+    std::vector<std::unique_ptr<handler>> vh;
+    vh.emplace_back(std::move(h));
+
+    auto result = pathToRegexp(path);
+    impl_->v.emplace_back(entry{
+        method,
+        result.regex,
+        result.keys,
+        std::move(vh)});
+}
+
+void
+router_base::
+invoke_impl(
+    http_proto::method method,
+    core::string_view path,
+    void* param) const
+{
+    (void)method;
+    (void)path;
+    impl_->v.front().v.front()->operator()(param);
+}
+
+} // detail
 
 } // http_io
 } // boost
