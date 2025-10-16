@@ -77,81 +77,68 @@ public:
 
     /** Run the worker I/O loop
 
-        The worker will continue to run until stop is called
-        or the worker is destroyed, whichever comes first.
+        The worker will continue to run until
+        @ref stop is called or the worker is destroyed.
     */
-    void
-    run()
+    void run()
     {
         do_accept();
     }
 
-    void
-    stop()
+    /** Stop the worker
+
+        Any outstanding I/O is canceled.
+    */
+    void stop()
     {
         system::error_code ec;
         sock_.cancel(ec);
     }
 
-    void
-    do_accept()
+    /** Called when the connected session is ended
+    */
+    void do_close()
     {
-        // Clean up any previous connection.
+        system::error_code ec;
+        sock_.shutdown(asio::socket_base::shutdown_both, ec);
+        // error ignored
+
+        return do_accept();
+    }
+
+    void do_failed(
+        core::string_view s, system::error_code const& ec)
+    {
+        if(ec == asio::error::operation_aborted)
         {
-            system::error_code ec;
-            sock_.close(ec);
+            LOG_TRC(sect_, this->id(), " ", s, ": operation aborted");
+            // this means the worker was stopped, don't submit new work
+            return;
         }
 
-        using namespace std::placeholders;
-        acc_.async_accept( sock_, ep_,
-            std::bind(&worker::on_accept, this, _1));
+        LOG_DBG(sect_, this->id(), " ", s, ": ", ec.message());
+        return do_accept();
     }
 
 private:
-    void
-    fail(
-        std::string what,
-        system::error_code ec)
+    void do_accept()
     {
-        if( ec == asio::error::operation_aborted )
-            return;
-
-        if( ec == asio::error::eof )
-        {
-            sock_.shutdown(
-                asio::socket_base::shutdown_send, ec);
-            return;
-        }
-
-    #ifdef LOGGING
-        std::cerr <<
-            what << "[" << id_ << "]: " <<
-            ec.message() << "\n";
-    #endif
+        system::error_code ec;
+        sock_.close(ec); // error ignored
+        
+        acc_.async_accept(sock_, ep_, call_mf(
+            &worker::on_accept, this));
     }
 
-    void
-    on_accept(system::error_code ec)
+    void on_accept(system::error_code const& ec)
     {
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(this->sect_, this->id(), "async_accept, error::operation_aborted");
-                return;
-            }
-
-            // happens periodically, usually harmless
-            LOG_DBG(this->sect_, this->id(), "async_accept ", ec.message());
-            return do_accept();
-        }
+        if(ec.failed())
+            return do_failed("worker::on_accept", ec);
 
         // Request must be fully processed within 60 seconds.
         //request_deadline_.expires_after(
             //std::chrono::seconds(60));
-
-        this->do_read_request();
+        this->do_start();
     }
 
 private:

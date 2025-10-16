@@ -7,8 +7,7 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#include "server.hpp"
-#include <functional>
+#include <boost/http_io/server/server.hpp>
 
 namespace boost {
 namespace http_io {

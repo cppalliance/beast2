@@ -13,6 +13,7 @@
 #include <boost/config.hpp>
 
 namespace boost {
+namespace http_io {
 
 # if (defined(BOOST_HTTP_IO_DYN_LINK) || defined(BOOST_ALL_DYN_LINK)) && !defined(BOOST_HTTP_IO_STATIC_LINK)
 #  if defined(BOOST_HTTP_IO_SOURCE)
@@ -35,19 +36,6 @@ namespace boost {
 #  include <boost/config/auto_link.hpp>
 # endif
 
-/*
-// lift grammar into our namespace
-namespace urls {
-namespace grammar {}
-}
-namespace http_proto {
-namespace grammar = ::boost::urls::grammar;
-} // http_proto
-*/
-
-namespace http_proto {}
-namespace http_io {
-namespace http_proto = ::boost::http_proto;
 } // http_io
 } // boost
 

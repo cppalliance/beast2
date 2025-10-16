@@ -39,6 +39,7 @@ local SOURCES =
     read.cpp
     sandbox.cpp
     write.cpp
+    server/fixed_array.cpp
     ;
 
 for local f in $(SOURCES)

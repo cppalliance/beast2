@@ -10,7 +10,7 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_ASIO_SERVER_HPP
 #define BOOST_HTTP_IO_EXAMPLE_ASIO_SERVER_HPP
 
-#include "server.hpp"
+#include <boost/http_io/server/server.hpp>
 #include <boost/asio/basic_waitable_timer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>

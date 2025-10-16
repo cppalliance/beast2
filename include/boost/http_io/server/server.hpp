@@ -7,9 +7,11 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_HPP
+#ifndef BOOST_HTTP_IO_SERVER_SERVER_HPP
+#define BOOST_HTTP_IO_SERVER_SERVER_HPP
 
+#include <boost/http_io/detail/config.hpp>
+//#include <boost/http_io/detail/type_traits.hpp>
 #include <boost/rts/context.hpp>
 #include <atomic>
 #include <memory>
@@ -18,16 +20,6 @@
 
 namespace boost {
 namespace http_io {
-
-// VFALCO UGH There's no where proper to put this!
-namespace detail {
-template<class Base, class Derived>
-using derived_from = std::integral_constant<bool,
-    std::is_base_of<Base, Derived>::value &&
-    std::is_convertible<
-        Derived const volatile*,
-        Base const volatile*>::value>;
-} // detail
 
 /** A generic server interface
 
@@ -70,7 +62,7 @@ public:
         return ++id_;
     }
 
-    boost::rts::context&
+    rts::context&
     services()
     {
         return services_;
@@ -83,7 +75,7 @@ public:
     }
 
 protected:
-    boost::rts::context services_;
+    rts::context services_;
     std::atomic<std::size_t> id_{0};
     std::vector<std::unique_ptr<part>> v_;
     bool is_stopping_ = false;

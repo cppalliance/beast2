@@ -9,17 +9,17 @@
 
 #include "asio_server.hpp"
 #include "certificate.hpp"
-#include "fixed_array.hpp"
 #include "listening_port.hpp"
 #include "worker.hpp"
 #include "worker_ssl.hpp"
-#include <boost/asio/ip/tcp.hpp>
+#include <boost/http_io/server/ports.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/rts/brotli/decode.hpp>
 #include <boost/rts/brotli/encode.hpp>
 #include <boost/rts/zlib/deflate.hpp>
 #include <boost/rts/zlib/inflate.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
 #include <functional>
 #include <iostream>
@@ -92,10 +92,22 @@ int server_main( int argc, char* argv[] )
         router_type rr;
         rr.get<file_responder>("/*splat", doc_root);
 
+        auto& vp = emplace_part<ports<executor_type>>(srv,
+            srv.get_executor(),
+            1,
+            num_workers,
+            of_type<worker_ssl<executor_type>>,
+            srv,
+            srv.get_executor(),
+            ssl_ctx,
+            rr);
+        vp.emplace(asio::ip::tcp::endpoint(addr, 443), reuse_addr);
+        vp.emplace(asio::ip::tcp::endpoint(addr, 5050), reuse_addr);
+
         //
         // Add the listening ports and workers
         //
-
+#if 0
         {
             // plain (no https) port that does https redirect
             //
@@ -126,6 +138,7 @@ int server_main( int argc, char* argv[] )
                 ssl_ctx,
                 rr);
         }
+#endif
 
         srv.run();
     }

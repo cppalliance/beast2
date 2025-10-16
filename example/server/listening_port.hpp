@@ -10,8 +10,8 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_LISTENING_PORT_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_LISTENING_PORT_HPP
 
-#include "fixed_array.hpp"
-#include "server.hpp"
+#include <boost/http_io/server/server.hpp>
+#include <boost/http_io/server/fixed_array.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <type_traits>
 
@@ -156,7 +156,7 @@ emplace_workers(
 {
     fixed_array<Worker> v(n);
     while(! v.is_full())
-        v.append(
+        v.emplace_back(
             lp.server(),
             lp.socket(),
             std::forward<Args>(args)...);

@@ -13,6 +13,9 @@
 #include "asio_server.hpp"
 #include "handler.hpp"
 #include "logger.hpp"
+#include <boost/http_io/server/any_lambda.hpp>
+#include <boost/http_io/server/call_mf.hpp>
+#include <boost/http_io/server/ports.hpp>
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/ssl_stream.hpp>
@@ -41,19 +44,15 @@ namespace http_io {
 
 template<
     class Executor,
-    class Executor1 = Executor,
     class Protocol = asio::ip::tcp
 >
 class worker_ssl : public http_responder<
-    worker_ssl<Executor, Executor1, Protocol>>
+    worker_ssl<Executor, Protocol>>
 {
 public:
     using executor_type = Executor;
 
     using protocol_type = Protocol;
-
-    using acceptor_type =
-        asio::basic_socket_acceptor<Protocol, Executor1>;
 
     using socket_type =
         asio::basic_stream_socket<Protocol, Executor>;
@@ -61,17 +60,19 @@ public:
     using stream_type = ssl_stream<socket_type>;
 
     template<
-        class Executor_
-        , class = typename std::enable_if<std::is_constructible<Executor, Executor_>::value>::type
+        class Executor0,
+        class = typename std::enable_if<std::is_constructible<Executor, Executor0>::value>::type
     >
     worker_ssl(
+        std::size_t index,
+        any_lambda<void(std::size_t)> do_idle,
         asio_server& srv,
-        acceptor_type& acc,
-        Executor_ const& ex,
+        Executor0 const& ex,
         asio::ssl::context& ssl_ctx,
         router_type& rr)
         : http_responder<worker_ssl>(srv, rr)
-        , acc_(acc)
+        , index_(index)
+        , do_idle_(std::move(do_idle))
         , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
     {
@@ -83,30 +84,21 @@ public:
         return stream_.stream();
     }
 
-    /** Run the worker I/O loop
-
-        The worker will continue to run until stop is called
-        or the worker is destroyed, whichever comes first.
+    /** Cancel all outstanding I/O
     */
-    void
-    run()
-    {
-        // VFALCO Without this, run() on different workers cannot be called concurrently
-        //asio::dispatch(stream_.get_executor(), std::bind(&worker_ssl::do_accept0, this));
-
-        do_accept();
-    }
-
-    void
-    stop()
+    void cancel()
     {
         system::error_code ec;
         stream_.next_layer().cancel(ec);
     }
 
-    void
-    do_accept()
+    template<class Executor1>
+    void do_accept(
+        asio::basic_socket_acceptor<Protocol, Executor1>& acc,
+        any_lambda<void()> do_accepted)
     {
+        do_accepted_ = do_accepted;
+
         // Clean up any previous connection.
         {
             system::error_code ec;
@@ -120,50 +112,39 @@ public:
             stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
         }
 
-        using namespace std::placeholders;
-        acc_.async_accept( stream_.next_layer(), ep_,
-            std::bind(&worker_ssl::on_accept, this, _1));
+        acc.async_accept(stream_.next_layer(), ep_,
+            call_mf(&worker_ssl::on_accept, this));
+    }
+
+    /** Called when the connected session is ended
+    */
+    void do_close()
+    {
+        stream_.stream().async_shutdown(call_mf(
+            &worker_ssl::on_shutdown, this));
+    }
+
+    void do_failed(
+        core::string_view s, system::error_code const& ec)
+    {
+        if(ec == asio::error::operation_aborted)
+        {
+            LOG_TRC(this->sect_, this->id(), " ", s, ": ", ec.message());
+            // this means the worker was stopped, don't submit new work
+            return;
+        }
+
+        LOG_DBG(this->sect_, this->id(), " ", s, ": ", ec.message());
+        return do_idle();
     }
 
 private:
-    void
-    fail(
-        std::string what,
-        system::error_code ec)
+    void on_accept(system::error_code const& ec)
     {
-        if( ec == asio::error::operation_aborted )
-            return;
+        do_accepted_();
 
-        if( ec == asio::error::eof )
-        {
-            stream_.next_layer().shutdown(
-                asio::socket_base::shutdown_send, ec);
-            return;
-        }
-
-    #ifdef LOGGING
-        std::cerr <<
-            what << "[" << id_ << "]: " <<
-            ec.message() << "\n";
-    #endif
-    }
-
-    void
-    on_accept(system::error_code const& ec)
-    {
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(this->sect_, this->id(), "async_accept, error::operation_aborted");
-                return;
-            }
-
-            // happens periodically, usually harmless
-            LOG_DBG(this->sect_, this->id(), "async_accept ", ec.message());
-            return do_accept();
-        }
+        if(ec.failed())
+            return do_failed("worker_ssl::on_accept", ec);
 
         // Request must be fully processed within 60 seconds.
         //request_deadline_.expires_after(
@@ -176,34 +157,39 @@ private:
             std::bind(&worker_ssl::on_handshake, this, _1));
     }
 
-    void
-    on_handshake(
+    void on_handshake(
         system::error_code const& ec)
     {
-        if( ec.failed() )
-        {
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(this->sect_, this->id(), "async_accept, error::operation_aborted");
-                return;
-            }
-
-            // happens periodically, usually harmless
-            LOG_DBG(this->sect_, this->id(), "async_accept ", ec.message());
-            return do_accept();
-        }
+        if(ec.failed())
+            return do_failed("worker_ssl::on_handshake", ec);
 
         // Request must be fully processed within 60 seconds.
         //request_deadline_.expires_after(
             //std::chrono::seconds(60));
+        this->do_start();
+    }
 
-        this->do_read_request();
+    void on_shutdown(system::error_code ec)
+    {
+        if(ec.failed())
+            return do_failed("worker_ssl::on_shutdown", ec);
+
+        stream_.next_layer().shutdown(asio::socket_base::shutdown_both, ec);
+        // error ignored
+
+        return do_idle();
+    }
+
+    void do_idle()
+    {
+        do_idle_(index_);
     }
 
 private:
     // order of destruction matters here
-    acceptor_type& acc_;
+    std::size_t index_;
+    any_lambda<void(std::size_t)> do_idle_;
+    any_lambda<void()> do_accepted_;
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
     typename Protocol::endpoint ep_;

@@ -17,20 +17,13 @@
 #include <boost/http_io/detail/config.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/write.hpp>
+#include <boost/http_io/server/call_mf.hpp>
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
-#include <functional> // for _1
 
 namespace boost {
-
-namespace asio {
-namespace ip {
-class tcp; // forward declaration
-} // ip
-} // asio
-
 namespace http_io {
 
 //------------------------------------------------
@@ -50,73 +43,37 @@ public:
         , pr_(srv_.services())
         , sr_(srv_.services())
     {
-        pr_.reset();
     }
 
-    void
-    do_read_request()
-    {
-        pr_.start();
+    /** Start a new HTTP session
 
-        using namespace std::placeholders;
-        http_io::async_read_header(
-            self().stream(),
-            pr_,
-            std::bind(&http_responder::on_read_header,
-                this, _1, _2));
+        The stream must be in a connected,
+        correct state for a new session.
+    */
+    void do_start()
+    {
+        pr_.reset();
+        do_read();
     }
 
 private:
-    void
-    on_read_header(
+    void do_read()
+    {
+        pr_.start();
+        http_io::async_read(self().stream(), pr_,
+            call_mf(&http_responder::on_read, this));
+    }
+
+    void on_read(
         system::error_code const& ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
 
         if(ec.failed())
-        {
-            reset();
+            return self().do_failed("http_responder::on_read", ec);
 
-            if( ec == asio::error::operation_aborted )
-            {
-                LOG_TRC(sect_, id(), "async_accept, error::operation_aborted");
-                // worker is canceled, exit the I/O loop
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_read_header ", ec.message());
-            return self().do_accept();
-        }
-
-        using namespace std::placeholders;
-        http_io::async_read(self().stream(), pr_, std::bind(
-            &http_responder::on_read_body, this, _1, _2));
-    }
-
-    void
-    on_read_body(
-        system::error_code const& ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if( ec.failed() )
-        {
-            reset();
-
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_read, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_read ", ec.message());
-            return self().do_accept();
-        }
+        BOOST_ASSERT(pr_.is_complete());
 
         // find the route
         auto found = rr_.invoke(
@@ -127,59 +84,46 @@ private:
                 res_,
                 sr_,
                 srv_.is_stopping()});
+        BOOST_ASSERT(found);
+        (void)found;
 
-        if(! found)
-        {
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "no route");
-            reset();
-            return self().do_accept();
-        }
-
-        using namespace std::placeholders;
-        http_io::async_write(self().stream(), sr_, std::bind(
-            &http_responder::on_write, this, _1, _2));
+        http_io::async_write(self().stream(), sr_,
+            call_mf(&http_responder::on_write, this));
     }
 
-    void
-    on_write(
+    void on_write(
         system::error_code const& ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
 
-        if( ec.failed() )
-        {
-            reset();
+        if(ec.failed())
+            return self().do_failed("http_responder::on_write", ec);
 
-            if( ec == asio::error::operation_aborted )
-            {
-                // worker is canceled, exit the I/O loop
-                LOG_TRC(sect_, id(), "async_write, error::operation_aborted");
-                return;
-            }
-
-            // errors here are usually recoverable
-            LOG_DBG(sect_, id(), "async_write ", ec.message());
-            return self().do_accept();
-        }
+        BOOST_ASSERT(sr_.is_done());
 
         if(res_.keep_alive())
-            return do_read_request();
+            return do_read();
 
-        reset();
-        return self().do_accept();
-    }
-
-    void
-    reset()
-    {
+        // tidy up lingering objects
         pr_.reset();
         sr_.reset();
         res_.clear();
+
+        return self().do_close();
     }
 
-private:
+    void on_failed(
+        core::string_view s, system::error_code const& ec)
+    {
+        // tidy up lingering objects
+        pr_.reset();
+        sr_.reset();
+        res_.clear();
+
+        self().do_failed(s, ec);
+    }
+
     Derived&
     self() noexcept
     {
