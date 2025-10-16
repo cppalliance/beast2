@@ -32,6 +32,7 @@ project
     ;
 
 local SOURCES =
+    body_read_stream.cpp
     buffer.cpp
     read.cpp
     sandbox.cpp
