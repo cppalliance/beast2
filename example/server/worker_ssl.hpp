@@ -15,6 +15,7 @@
 #include "logger.hpp"
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_io/read.hpp>
+#include <boost/http_io/ssl_stream.hpp>
 #include <boost/http_io/write.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
@@ -57,7 +58,7 @@ public:
     using socket_type =
         asio::basic_stream_socket<Protocol, Executor>;
     
-    using stream_type = asio::ssl::stream<socket_type>;
+    using stream_type = ssl_stream<socket_type>;
 
     template<
         class Executor_
@@ -76,10 +77,10 @@ public:
     {
     }
 
-    stream_type&
+    typename ssl_stream<socket_type>::ssl_stream_type&
     stream() noexcept
     {
-        return stream_;
+        return stream_.stream();
     }
 
     /** Run the worker I/O loop
@@ -169,7 +170,8 @@ private:
             //std::chrono::seconds(60));
 
         using namespace std::placeholders;
-        stream_.async_handshake(
+        stream_.set_ssl(true);
+        stream_.stream().async_handshake(
             asio::ssl::stream_base::server,
             std::bind(&worker_ssl::on_handshake, this, _1));
     }
