@@ -17,6 +17,29 @@
 namespace boost {
 namespace http_io {
 
+namespace detail {
+// Primary template
+template<class>
+struct result_of;
+
+// Partial specialization for callable types
+template<class F, class... Args>
+struct result_of<F(Args...)>
+{
+private:
+    template<class G, class... A>
+    static auto test(int) -> decltype(std::declval<G>()(std::declval<A>()...));
+
+    template<class, class...>
+    static void test(...);
+
+public:
+    using type = decltype(test<F, Args...>(0));
+};
+template<class T>
+using result_of_t = typename result_of<T>::type;
+} // detail
+
 template<class T, class MemFn>
 class call_mf_impl
 {
@@ -31,7 +54,7 @@ public:
 
     template<class... Args>
     auto operator()(Args&&... args) const
-        -> typename std::result_of<MemFn(T*, Args&&...)>::type
+        -> detail::result_of_t<MemFn(T*, Args&&...)>
     {
         return (obj_->*memfn_)(std::forward<Args>(args)...);
     }
