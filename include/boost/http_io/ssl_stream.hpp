@@ -92,7 +92,7 @@ public:
         is_ssl_ = ssl;
     }
 
-    void is_ssl() const noexcept
+    bool is_ssl() const noexcept
     {
         return is_ssl_;
     }

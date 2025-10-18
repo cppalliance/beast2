@@ -52,7 +52,7 @@ make_http_date()
     };
 
     // Format strictly according to RFC 9110 (fixed-width, English locale)
-    char buf[30];
+    char buf[40];
     std::snprintf(
         buf, sizeof(buf),
         "%s, %02d %s %04d %02d:%02d:%02d GMT",

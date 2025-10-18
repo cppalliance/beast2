@@ -154,8 +154,6 @@ emplace_workers(
     std::size_t n,
     Args&&... args)
 {
-    using lp_type = listening_port<Executor, Protocol>;
-
     fixed_array<Worker> v(n);
     while(! v.is_full())
         v.append(
