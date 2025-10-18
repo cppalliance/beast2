@@ -12,25 +12,16 @@
 
 #include "asio_server.hpp"
 #include "handler.hpp"
-#include "logger.hpp"
-#include <boost/http_io/server/any_lambda.hpp>
 #include <boost/http_io/server/call_mf.hpp>
+#include <boost/http_io/server/logger.hpp>
 #include <boost/http_io/server/ports.hpp>
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/ssl_stream.hpp>
-#include <boost/http_io/write.hpp>
-#include <boost/http_proto/request_parser.hpp>
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/serializer.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <stddef.h>
-#include <string>
-
-#include <functional> // for _1
 
 namespace boost {
 
@@ -51,12 +42,9 @@ class worker_ssl : public http_responder<
 {
 public:
     using executor_type = Executor;
-
     using protocol_type = Protocol;
-
     using socket_type =
         asio::basic_stream_socket<Protocol, Executor>;
-    
     using stream_type = ssl_stream<socket_type>;
 
     template<
@@ -64,18 +52,27 @@ public:
         class = typename std::enable_if<std::is_constructible<Executor, Executor0>::value>::type
     >
     worker_ssl(
-        std::size_t index,
-        any_lambda<void(std::size_t)> do_idle,
+        ports_base& pb,
         asio_server& srv,
         Executor0 const& ex,
         asio::ssl::context& ssl_ctx,
         router_type& rr)
         : http_responder<worker_ssl>(srv, rr)
-        , index_(index)
-        , do_idle_(std::move(do_idle))
+        , pb_(pb)
         , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
     {
+    }
+
+    socket_type& socket() noexcept
+    {
+        return stream_.next_layer();
+    }
+
+    typename Protocol::endpoint&
+    endpoint() noexcept
+    {
+        return ep_;
     }
 
     typename ssl_stream<socket_type>::ssl_stream_type&
@@ -83,6 +80,8 @@ public:
     {
         return stream_.stream();
     }
+
+    //--------------------------------------------
 
     /** Cancel all outstanding I/O
     */
@@ -92,64 +91,12 @@ public:
         stream_.next_layer().cancel(ec);
     }
 
-    template<class Executor1>
-    void do_accept(
-        asio::basic_socket_acceptor<Protocol, Executor1>& acc,
-        any_lambda<void()> do_accepted)
+    //--------------------------------------------
+
+    // Called when an incoming connection is accepted
+    void on_accept()
     {
-        do_accepted_ = do_accepted;
-
-        // Clean up any previous connection.
-        {
-            system::error_code ec;
-            stream_.next_layer().close(ec);
-
-            // asio::ssl::stream has an internal state which cannot be reset.
-            // In order to perform the handshake again, we destroy the old
-            // object and assign a new one, in a way that preserves the
-            // original socket to avoid churning file handles.
-            //
-            stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
-        }
-
-        acc.async_accept(stream_.next_layer(), ep_,
-            call_mf(&worker_ssl::on_accept, this));
-    }
-
-    /** Called when the connected session is ended
-    */
-    void do_close()
-    {
-        stream_.stream().async_shutdown(call_mf(
-            &worker_ssl::on_shutdown, this));
-    }
-
-    void do_failed(
-        core::string_view s, system::error_code const& ec)
-    {
-        if(ec == asio::error::operation_aborted)
-        {
-            LOG_TRC(this->sect_, this->id(), " ", s, ": ", ec.message());
-            // this means the worker was stopped, don't submit new work
-            return;
-        }
-
-        LOG_DBG(this->sect_, this->id(), " ", s, ": ", ec.message());
-        return do_idle();
-    }
-
-private:
-    void on_accept(system::error_code const& ec)
-    {
-        do_accepted_();
-
-        if(ec.failed())
-            return do_failed("worker_ssl::on_accept", ec);
-
-        // Request must be fully processed within 60 seconds.
-        //request_deadline_.expires_after(
-            //std::chrono::seconds(60));
-
+        // VFALCO TODO timeout
         using namespace std::placeholders;
         stream_.set_ssl(true);
         stream_.stream().async_handshake(
@@ -161,35 +108,71 @@ private:
         system::error_code const& ec)
     {
         if(ec.failed())
-            return do_failed("worker_ssl::on_handshake", ec);
+            return do_fail("worker_ssl::on_handshake", ec);
 
-        // Request must be fully processed within 60 seconds.
-        //request_deadline_.expires_after(
-            //std::chrono::seconds(60));
-        this->do_start();
+        LOG_TRC(this->sect_, this->id(), ": worker_ssl::on_handshake");
+
+        this->do_session();
+    }
+
+    /** Close the connection to end the session
+    */
+    void do_close()
+    {
+        stream_.stream().async_shutdown(call_mf(
+            &worker_ssl::on_shutdown, this));
     }
 
     void on_shutdown(system::error_code ec)
     {
         if(ec.failed())
-            return do_failed("worker_ssl::on_shutdown", ec);
+            return do_fail("worker_ssl::on_shutdown", ec);
 
-        stream_.next_layer().shutdown(asio::socket_base::shutdown_both, ec);
+        LOG_TRC(this->sect_, this->id(), ": worker_ssl::on_shutdown");
+
+        stream_.next_layer().shutdown(
+            asio::socket_base::shutdown_both, ec);
         // error ignored
 
-        return do_idle();
+        reset();
+        pb_.do_idle(this);
     }
 
-    void do_idle()
+    void do_fail(
+        core::string_view s, system::error_code const& ec)
     {
-        do_idle_(index_);
+        reset();
+
+        if(ec == asio::error::operation_aborted)
+        {
+            LOG_TRC(this->sect_, this->id(), " ", s, ": ", ec.message());
+            // this means the worker was stopped, don't submit new work
+            return;
+        }
+
+        LOG_DBG(this->sect_, this->id(), " ", s, ": ", ec.message());
+        pb_.do_idle(this);
+    }
+
+    //--------------------------------------------
+
+    void reset()
+    {
+        // Clean up any previous connection.
+        system::error_code ec;
+        stream_.next_layer().close(ec);
+
+        // asio::ssl::stream has an internal state which cannot be reset.
+        // In order to perform the handshake again, we destroy the old
+        // object and assign a new one, in a way that preserves the
+        // original socket to avoid churning file handles.
+        //
+        stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
     }
 
 private:
     // order of destruction matters here
-    std::size_t index_;
-    any_lambda<void(std::size_t)> do_idle_;
-    any_lambda<void()> do_accepted_;
+    ports_base& pb_;
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
     typename Protocol::endpoint ep_;

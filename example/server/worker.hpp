@@ -13,7 +13,7 @@
 #include "asio_server.hpp"
 #include "handler.hpp"
 #include "http_responder.hpp"
-#include "logger.hpp"
+#include <boost/http_io/server/fixed_array.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <stddef.h>

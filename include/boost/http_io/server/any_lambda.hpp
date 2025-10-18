@@ -14,6 +14,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <new>
 #include <stdexcept>
 #include <type_traits>

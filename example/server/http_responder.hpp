@@ -12,12 +12,11 @@
 
 #include "asio_server.hpp"
 #include "handler.hpp"
-#include "logger.hpp"
 
 #include <boost/http_io/detail/config.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/write.hpp>
-#include <boost/http_io/server/call_mf.hpp>
+#include <boost/http_io/server/logger.hpp>
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
@@ -45,12 +44,12 @@ public:
     {
     }
 
-    /** Start a new HTTP session
+    /** Called to start a new HTTP session
 
         The stream must be in a connected,
         correct state for a new session.
     */
-    void do_start()
+    void do_session()
     {
         pr_.reset();
         do_read();
@@ -71,7 +70,10 @@ private:
         (void)bytes_transferred;
 
         if(ec.failed())
-            return self().do_failed("http_responder::on_read", ec);
+            return do_fail("http_responder::on_read", ec);
+
+        LOG_TRC(this->sect_, this->id(),
+            ": http_responder::on_read bytes=", bytes_transferred);
 
         BOOST_ASSERT(pr_.is_complete());
 
@@ -98,9 +100,12 @@ private:
         (void)bytes_transferred;
 
         if(ec.failed())
-            return self().do_failed("http_responder::on_write", ec);
+            return do_fail("http_responder::on_write", ec);
 
         BOOST_ASSERT(sr_.is_done());
+
+        LOG_TRC(this->sect_, this->id(),
+            ": http_responder::on_write bytes=", bytes_transferred);
 
         if(res_.keep_alive())
             return do_read();
@@ -113,7 +118,7 @@ private:
         return self().do_close();
     }
 
-    void on_failed(
+    void do_fail(
         core::string_view s, system::error_code const& ec)
     {
         // tidy up lingering objects
@@ -121,7 +126,7 @@ private:
         sr_.reset();
         res_.clear();
 
-        self().do_failed(s, ec);
+        self().do_fail(s, ec);
     }
 
     Derived&

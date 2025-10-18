@@ -7,9 +7,10 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_LOG_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_LOG_HPP
+#ifndef BOOST_HTTP_IO_SERVER_LOGGER_HPP
+#define BOOST_HTTP_IO_SERVER_LOGGER_HPP
 
+#include <boost/http_io/detail/config.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <sstream>
 
@@ -49,6 +50,7 @@ private:
         os << t;
     }
 
+    BOOST_HTTP_IO_DECL
     void write(int, boost::core::string_view);
 };
 

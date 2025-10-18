@@ -102,7 +102,7 @@ int server_main( int argc, char* argv[] )
             ssl_ctx,
             rr);
         vp.emplace(asio::ip::tcp::endpoint(addr, 443), reuse_addr);
-        vp.emplace(asio::ip::tcp::endpoint(addr, 5050), reuse_addr);
+        //vp.emplace(asio::ip::tcp::endpoint(addr, 5050), reuse_addr);
 
         //
         // Add the listening ports and workers

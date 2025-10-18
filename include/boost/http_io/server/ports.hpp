@@ -10,9 +10,9 @@
 #ifndef BOOST_HTTP_IO_SERVER_PORTS_HPP
 #define BOOST_HTTP_IO_SERVER_PORTS_HPP
 
-#include "logger.hpp"
+#include <boost/http_io/server/logger.hpp>
 #include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/server/call_mf.hpp>
+#include <boost/http_io/server/any_lambda.hpp>
 #include <boost/http_io/server/fixed_array.hpp>
 #include <boost/http_io/server/server.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
@@ -52,19 +52,13 @@ template<class T>
 constexpr of_type_t<T> const& of_type =
     detail::of_type_impl<T>::value;
 
-class ports_base
+class BOOST_SYMBOL_VISIBLE ports_base
 {
 public:
-    struct entry
-    {
-        std::size_t need;   // number of accepts we need
-    };
+    BOOST_HTTP_IO_DECL
+    virtual ~ports_base();
 
-    struct api
-    {
-        std::size_t index;
-    };
-
+    virtual void do_idle(void* worker) = 0;
 };
 
 /** A TCP/IP listening port
@@ -88,16 +82,23 @@ public:
     using protocol_type = Protocol;
     using endpoint = typename Protocol::endpoint;
     using acceptor = asio::basic_socket_acceptor<Protocol, Executor>;
+    using socket_type = asio::basic_stream_socket<Protocol, Executor>;
 
-    struct entry_impl : entry
+    struct entry
     {
         template<class... Args>
-        explicit entry_impl(Args&&... args)
+        explicit
+        entry(
+            unsigned concurrency,
+            Args&&... args)
             : sock(std::forward<Args>(args)...)
+            , need(concurrency)
         {
+            need = concurrency;
         }
 
         acceptor sock;
+        std::size_t need;   // number of accepts we need
     };
 
     /** Constructor
@@ -119,19 +120,13 @@ public:
         Args&&... args)
         : ex_(ex)
         , concurrency_(concurrency)
+        , do_idle_(&ports::do_idle_worker<Worker>)
     {
         fixed_array<Worker> vw(num_workers);
+
         while(! vw.is_full())
             vw.emplace_back(
-                vw.size() + 1,
-                [this](std::size_t i)
-                {
-                    asio::dispatch(ex_,
-                        [this, i]
-                        {
-                            do_idle(i);
-                        });
-                },
+                *this,
                 std::forward<Args>(args)...);
         vw_ = std::move(vw);
 
@@ -140,43 +135,31 @@ public:
         for(std::size_t i = 0; i < vi_.size() - 1; ++i)
             vi_[i] = i + 2;
         vi_.back() = 0;
+        n_idle_ = vi_.size();
 
-        do_accept_ = &ports::do_worker_accept<Worker>;
-        do_stop_ = &ports::do_worker_stop<Worker>;
+        do_accept_ = &ports::do_accept<Worker>;
+        do_stop_ = &ports::do_stop<Worker>;
     }
 
-    template<class Worker>
-    void do_worker_accept(std::size_t i, entry_impl& e)
+    void do_idle(void* worker) override
     {
-        vw_.to_span<Worker>()[i - 1].do_accept(e.sock,
-            [this, &e]
+        asio::dispatch(ex_,
+            [this, worker]()
             {
-                asio::dispatch(ex_,
-                    [this, &e]
-                    {
-                        ++e.need;
-                        LOG_TRC(sect_, "need=", e.need);
-                    });
+                (this->*do_idle_)(worker);
             });
     }
 
     template<class Worker>
-    void do_worker_stop()
+    void do_idle_worker(void* pw)
     {
-        for(auto& w : vw_.to_span<Worker>())
-            w.cancel();
-        for(auto& e : ve_)
-        {
-            system::error_code ec;
-            e.sock.cancel(ec);
-        }
-    }
-
-    void do_idle(std::size_t index)
-    {
-        vi_[index - 1] = idle_;
-        idle_ = index;
-        do_accept();
+        auto const i = (reinterpret_cast<Worker*>(pw) -
+            this->vw_.to_span<Worker>().data()) + 1;
+        // push idle worker
+        vi_[i - 1] = idle_;
+        idle_ = i;
+        ++n_idle_;
+        do_accepts();
     }
 
     /** Add another port
@@ -185,23 +168,27 @@ public:
         endpoint const& ep,
         bool reuse_addr = true)
     {
-        ve_.emplace_back(ex_, ep, reuse_addr);
-        ve_.back().need = concurrency_;
+        ve_.emplace_back(concurrency_, ex_, ep, reuse_addr);
     }
 
 private:
     void run() override
     {
-        asio::dispatch(ex_, call_mf(&ports::do_accept, this));
+        asio::dispatch(ex_, call_mf(&ports::do_accepts, this));
     }
 
     void stop() override
     {
-        asio::dispatch(ex_, call_mf(&ports::do_stop, this));
+        asio::dispatch(ex_,
+            [&]
+            {
+                (this->*do_stop_)();
+            });
     }
 
-    void do_accept()
+    void do_accepts()
     {
+        BOOST_ASSERT(ex_.running_in_this_thread());
         if(idle_ == 0) // no idle workers
             return;
         for(auto& e : ve_)
@@ -210,8 +197,11 @@ private:
             {
                 --e.need;
                 LOG_TRC(sect_, "need=", e.need);
+                // pop idle worker
                 auto const i = idle_;
                 idle_ = vi_[idle_ - 1];
+                --n_idle_;
+                LOG_TRC(sect_, "n_idle=", n_idle_);
                 (this->*do_accept_)(i, e);
                 if(idle_ == 0) // no idle workers
                     return;
@@ -219,20 +209,56 @@ private:
         }
     }
 
-    void do_stop()
+    template<class Worker>
+    void do_accept(std::size_t i, entry& e)
     {
-        (this->*do_stop_)();
+        BOOST_ASSERT(ex_.running_in_this_thread());
+        auto& w = vw_.to_span<Worker>()[i - 1];
+        e.sock.async_accept(w.socket(), w.endpoint(),
+            [this, i, &e](system::error_code const& ec)
+            {
+                ++e.need;
+                LOG_TRC(sect_, "need=", e.need);
+                if(ec.failed())
+                {
+                    // push idle worker
+                    vi_[i - 1] = idle_;
+                    idle_ = i;
+                    ++n_idle_;
+                    LOG_TRC(sect_, "n_idle=", n_idle_);
+                    LOG_DBG(sect_, "async_accept: ", ec.message());
+                    return do_accepts();
+                }
+                do_accepts();
+                auto& w = vw_.to_span<Worker>()[i - 1];
+                asio::dispatch(w.socket().get_executor(),
+                    call_mf(&Worker::on_accept, &w));
+            });
     }
 
+    template<class Worker>
+    void do_stop()
+    {
+        for(auto& w : vw_.to_span<Worker>())
+            w.cancel();
+        for(auto& e : ve_)
+        {
+            system::error_code ec;
+            e.sock.cancel(ec); // error ignored
+        }
+    }
+
+    std::size_t n_idle_ = 0;
     section sect_;
     Executor ex_;
     unsigned concurrency_;
-    std::vector<entry_impl> ve_;
+    std::vector<entry> ve_;
     any_fixed_array vw_;
     std::vector<std::size_t> vi_;
     std::size_t idle_ = 1;
 
-    void(ports::*do_accept_)(std::size_t, entry_impl&);
+    void(ports::*do_idle_)(void*);
+    void(ports::*do_accept_)(std::size_t, entry&);
     void(ports::*do_stop_)();
 };
 
