@@ -47,6 +47,7 @@ project boost/http_io
 alias http_io_sources
     :
     detail/except.cpp
+    server/router.cpp
     server/server.cpp
     ;
 

@@ -513,7 +513,9 @@ struct router_base::impl
     std::vector<entry> v;
 };
 
-router_base::handler::~handler() = default;
+router_base::
+handler::
+~handler() = default;
 
 router_base::
 router_base()

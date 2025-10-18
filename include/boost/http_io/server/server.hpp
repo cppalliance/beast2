@@ -35,15 +35,20 @@ namespace http_io {
 class server
 {
 public:
-    class part
+    class BOOST_SYMBOL_VISIBLE
+        part
     {
     public:
+        BOOST_HTTP_IO_DECL
         virtual ~part();
+
         virtual void run() = 0;
         virtual void stop() = 0;
     };
 
+    BOOST_HTTP_IO_DECL
     server();
+
     server(server const&) = delete;
     server& operator=(server const&) = delete;
 

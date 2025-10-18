@@ -41,23 +41,30 @@ void emplace(
 namespace detail {
 class router_base
 {
+public:
+    struct BOOST_SYMBOL_VISIBLE
+        handler
+    {
+        BOOST_HTTP_IO_DECL
+        virtual ~handler();
+
+        virtual void operator()(void*) const = 0;
+    };
+
 protected:
     struct entry;
     struct impl;
 
-    struct handler
-    {
-        virtual ~handler();
-        virtual void operator()(void*) const = 0;
-    };
-
+    BOOST_HTTP_IO_DECL
     router_base();
 
+    BOOST_HTTP_IO_DECL
     void insert(
         http_proto::method method,
         core::string_view path,
         std::unique_ptr<handler>);
 
+    BOOST_HTTP_IO_DECL
     void invoke_impl(
         http_proto::method method,
         core::string_view path,
