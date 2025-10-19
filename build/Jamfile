@@ -46,6 +46,7 @@ lib boost_http_io
    : http_io_sources
    : requirements
      <library>/boost//http_proto
+     <library>/boost//url
      <include>../
      <define>BOOST_HTTP_IO_SOURCE
    : usage-requirements
