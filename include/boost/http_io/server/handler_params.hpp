@@ -7,22 +7,29 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_HTTP_PARAMS_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_HTTP_PARAMS_HPP
+#ifndef BOOST_HTTP_IO_SERVER_HANDLER_PARAMS_HPP
+#define BOOST_HTTP_IO_SERVER_HANDLER_PARAMS_HPP
 
 #include <boost/http_io/detail/config.hpp>
-#include <boost/http_proto/request_base.hpp>
+#include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
 
 namespace boost {
 namespace http_io {
 
-struct http_params
+/** Parameters passed to a request handler
+
+    Objects of this type are passed to handlers which respond to HTTP requests.
+*/
+struct handler_params
 {
     http_proto::request_base const& req;
     http_proto::response& res;
-    http_proto::serializer& sr;
+
+    http_proto::request_parser& parser;
+    http_proto::serializer& serializer;
+
     bool is_shutting_down;
 };
 

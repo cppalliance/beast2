@@ -162,7 +162,10 @@ public:
         do_accepts();
     }
 
-    /** Add another port
+    /** Add an acceptor bound to the specified endpoint
+
+        @param ep The endpoint to bind the acceptor to.
+        @param reuse_addr If `true`, set the `SO_REUSEADDR` socket option on the acceptor.
     */
     void emplace(
         endpoint const& ep,

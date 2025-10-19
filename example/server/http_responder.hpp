@@ -81,9 +81,10 @@ private:
         auto found = rr_.invoke(
             pr_.get().method(),
             pr_.get().target(),
-            http_params{
+            handler_params{
                 pr_.get(),
                 res_,
+                pr_,
                 sr_,
                 srv_.is_stopping()});
         BOOST_ASSERT(found);

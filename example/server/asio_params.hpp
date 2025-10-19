@@ -10,13 +10,13 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_ASIO_PARAMS_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_ASIO_PARAMS_HPP
 
-#include "http_params.hpp"
 #include <boost/http_io/detail/config.hpp>
+#include <boost/http_io/server/handler_params.hpp>
 
 namespace boost {
 namespace http_io {
 
-struct asio_params : http_params
+struct asio_params : handler_params
 {
 };
 

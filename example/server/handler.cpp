@@ -301,11 +301,11 @@ service_unavailable(
 void
 file_responder::
 operator()(
-    http_params& params) const
+    handler_params& params) const
 {
     if(params.is_shutting_down)
         return service_unavailable(
-            params.res, params.sr, params.req);
+            params.res, params.serializer, params.req);
 
 #if 0
     // Returns a server error response
@@ -327,7 +327,7 @@ operator()(
         params.req.target()[0] != '/' ||
         params.req.target().find("..") != core::string_view::npos)
         return make_error_response(http_proto::status::bad_request,
-            params.req, params.res, params.sr);
+            params.req, params.res, params.serializer);
 
     // Build the path to the requested file
     std::string path; 
@@ -355,7 +355,7 @@ operator()(
         params.res.append(
             http_proto::field::content_type, mt);
 
-        params.sr.start<http_proto::file_source>(
+        params.serializer.start<http_proto::file_source>(
             params.res, std::move(f), size);
         return;
     }
@@ -363,23 +363,23 @@ operator()(
     if(ec == system::errc::no_such_file_or_directory)
         return make_error_response(
             http_proto::status::not_found,
-                params.req, params.res, params.sr);
+                params.req, params.res, params.serializer);
 
     // ec.message()?
     return make_error_response(
         http_proto::status::internal_server_error,
-            params.req, params.res, params.sr);
+            params.req, params.res, params.serializer);
 }
 
 //------------------------------------------------
 
 void
 https_redirect_responder::
-operator()(http_params& params) const
+operator()(handler_params& params) const
 {
     if(params.is_shutting_down)
         return service_unavailable(
-            params.res, params.sr, params.req);
+            params.res, params.serializer, params.req);
 
     std::string body;
     prepare_error(params.res, body,
@@ -388,7 +388,7 @@ operator()(http_params& params) const
     u1.set_scheme_id(urls::scheme::https);
     u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
     params.res.append(http_proto::field::location, u1.buffer());
-    params.sr.start(params.res,
+    params.serializer.start(params.res,
         http_proto::string_body( std::move(body)));
 }
 
