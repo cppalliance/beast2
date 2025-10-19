@@ -917,6 +917,11 @@ jobs:
           toolchain=$(echo "$GITHUB_WORKSPACE/vcpkg-root/scripts/buildsystems/vcpkg.cmake" | sed 's/\/d\//D:\//g' )
           echo "toolchain=${toolchain}" >> $GITHUB_OUTPUT
 
+      - name: Patch user-config.jam (macOS)
+        if: ${{ startsWith(matrix.runs-on, 'macOS') }}
+        run: |
+          echo "using openssl : : <include>\"$(brew --prefix openssl)/include\" <search>\"$(brew --prefix openssl)/lib\" ;" >> user-config.jam
+
       - name: ASLR Fix
         if: ${{ startsWith(matrix.runs-on, 'ubuntu' )}}
         run: |
@@ -975,7 +980,7 @@ jobs:
           shared: ${{ matrix.shared }}
           rtti: ${{ (matrix.is-latest && 'on,off') || 'on' }}
           cxxflags: ${{ (matrix.asan && '-fsanitize=pointer-subtract') || '' }}
-          user-config: ${{ (startsWith(matrix.runs-on, 'windows') && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
+          user-config: ${{ ((startsWith(matrix.runs-on, 'windows') || startsWith(matrix.runs-on, 'macOS')) && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
           stop-on-error: true
           extra-args: "libs/http_io/example" # https://github.com/ashtum/cpp-actions/issues/23
 
