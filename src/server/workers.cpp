@@ -7,13 +7,13 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#include <boost/http_io/server/ports.hpp>
+#include <boost/http_io/server/workers.hpp>
 
 namespace boost {
 namespace http_io {
 
-ports_base::
-~ports_base() = default;
+workers_base::
+~workers_base() = default;
 
 } // http_io
 } // boost

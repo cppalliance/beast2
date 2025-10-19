@@ -49,8 +49,10 @@ public:
         The stream must be in a connected,
         correct state for a new session.
     */
-    void do_session()
+    void do_session(
+        acceptor_config const& config)
     {
+        pconfig_ = &config;
         pr_.reset();
         do_read();
     }
@@ -82,6 +84,7 @@ private:
             pr_.get().method(),
             pr_.get().target(),
             handler_params{
+                *pconfig_,
                 pr_.get(),
                 res_,
                 pr_,
@@ -154,6 +157,7 @@ protected:
     asio_server& srv_;
 
 private:
+    acceptor_config const* pconfig_ = nullptr;
     router_type& rr_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;

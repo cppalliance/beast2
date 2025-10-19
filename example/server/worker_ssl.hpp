@@ -12,14 +12,16 @@
 
 #include "asio_server.hpp"
 #include "handler.hpp"
+#include "http_responder.hpp"
 #include <boost/http_io/server/call_mf.hpp>
 #include <boost/http_io/server/logger.hpp>
-#include <boost/http_io/server/ports.hpp>
 #include <boost/http_io/server/router.hpp>
+#include <boost/http_io/server/workers.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/ssl_stream.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
+#include <boost/asio/prepend.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
 
@@ -47,18 +49,20 @@ public:
         asio::basic_stream_socket<Protocol, Executor>;
     using stream_type = ssl_stream<socket_type>;
 
+    using acceptor_config = http_io::acceptor_config;
+
     template<
         class Executor0,
         class = typename std::enable_if<std::is_constructible<Executor, Executor0>::value>::type
     >
     worker_ssl(
-        ports_base& pb,
+        workers_base& wb,
         asio_server& srv,
         Executor0 const& ex,
         asio::ssl::context& ssl_ctx,
         router_type& rr)
         : http_responder<worker_ssl>(srv, rr)
-        , pb_(pb)
+        , wb_(wb)
         , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
     {
@@ -94,17 +98,19 @@ public:
     //--------------------------------------------
 
     // Called when an incoming connection is accepted
-    void on_accept()
+    void on_accept(acceptor_config const* pconfig)
     {
         // VFALCO TODO timeout
         using namespace std::placeholders;
         stream_.set_ssl(true);
         stream_.stream().async_handshake(
             asio::ssl::stream_base::server,
-            std::bind(&worker_ssl::on_handshake, this, _1));
+            asio::prepend(call_mf(
+                &worker_ssl::on_handshake, this), pconfig));
     }
 
     void on_handshake(
+        acceptor_config const* pconfig,
         system::error_code const& ec)
     {
         if(ec.failed())
@@ -112,7 +118,7 @@ public:
 
         LOG_TRC(this->sect_, this->id(), ": worker_ssl::on_handshake");
 
-        this->do_session();
+        this->do_session(*pconfig);
     }
 
     /** Close the connection to end the session
@@ -135,7 +141,7 @@ public:
         // error ignored
 
         reset();
-        pb_.do_idle(this);
+        wb_.do_idle(this);
     }
 
     void do_fail(
@@ -151,7 +157,7 @@ public:
         }
 
         LOG_DBG(this->sect_, this->id(), " ", s, ": ", ec.message());
-        pb_.do_idle(this);
+        wb_.do_idle(this);
     }
 
     //--------------------------------------------
@@ -172,7 +178,7 @@ public:
 
 private:
     // order of destruction matters here
-    ports_base& pb_;
+    workers_base& wb_;
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
     typename Protocol::endpoint ep_;

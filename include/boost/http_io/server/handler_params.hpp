@@ -18,12 +18,20 @@
 namespace boost {
 namespace http_io {
 
+struct acceptor_config
+{
+    bool is_ssl;
+    bool is_admin;
+};
+
 /** Parameters passed to a request handler
 
     Objects of this type are passed to handlers which respond to HTTP requests.
 */
 struct handler_params
 {
+    acceptor_config const& port;
+
     http_proto::request_base const& req;
     http_proto::response& res;
 
@@ -32,6 +40,57 @@ struct handler_params
 
     bool is_shutting_down;
 };
+
+#if 0
+struct resumer
+{
+    struct impl
+    {
+        ~impl() = default;
+        virtual void resume() = 0;
+        virtual void close() = 0;
+        virtual void fail() = 0;
+    };
+
+    /** Destructor
+
+        If no other members have been invoked, destruction
+        of the resumer object is equivalent to calling close().
+    */
+    ~resumer();
+
+    resumer(std::shared_ptr<impl> sp)
+        : sp_(std::move(sp))
+    {
+    }
+
+    void resume()
+    {
+        sp_->resume();
+    }
+
+    void close()
+    {
+        sp_->close();
+    }
+
+    void fail()
+    {
+        sp_->fail();
+    }
+
+private:
+    std::shared_ptr<impl> sp_;
+};
+
+struct actions
+{
+    ~actions() = default;
+    virtual void detach() = 0;
+    virtual void close() = 0;
+    virtual void fail() = 0;
+};
+#endif
 
 } // http_io
 } // boost

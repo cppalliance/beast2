@@ -225,6 +225,20 @@ public:
         return n_ >= cap_;
     }
 
+    /** Return a pointer to the beginning of the array
+    */
+    T* data() noexcept
+    {
+        return t_;
+    }
+
+    /** Return a pointer to the beginning of the array
+    */
+    T const* data() const noexcept
+    {
+        return t_;
+    }   
+
     reference operator[](std::size_t i)
     {
         BOOST_ASSERT(i < n_);

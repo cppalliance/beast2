@@ -111,57 +111,6 @@ emplace_part(
     return part;
 }
 
-//------------------------------------------------
-
-struct resumer
-{
-    struct impl
-    {
-        ~impl() = default;
-        virtual void resume() = 0;
-        virtual void close() = 0;
-        virtual void fail() = 0;
-    };
-
-    /** Destructor
-
-        If no other members have been invoked, destruction
-        of the resumer object is equivalent to calling close().
-    */
-    ~resumer();
-
-    resumer(std::shared_ptr<impl> sp)
-        : sp_(std::move(sp))
-    {
-    }
-
-    void resume()
-    {
-        sp_->resume();
-    }
-
-    void close()
-    {
-        sp_->close();
-    }
-
-    void fail()
-    {
-        sp_->fail();
-    }
-
-private:
-    std::shared_ptr<impl> sp_;
-};
-
-struct actions
-{
-    ~actions() = default;
-    virtual void detach() = 0;
-    virtual void close() = 0;
-    virtual void fail() = 0;
-};
-
 } // http_io
 } // boost
 

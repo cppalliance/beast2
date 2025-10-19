@@ -9,10 +9,8 @@
 
 #include "asio_server.hpp"
 #include "certificate.hpp"
-#include "listening_port.hpp"
-#include "worker.hpp"
 #include "worker_ssl.hpp"
-#include <boost/http_io/server/ports.hpp>
+#include <boost/http_io/server/workers.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/rts/brotli/decode.hpp>
@@ -92,17 +90,23 @@ int server_main( int argc, char* argv[] )
         router_type rr;
         rr.get<file_responder>("/*splat", doc_root);
 
-        auto& vp = emplace_part<ports<executor_type>>(srv,
+        using workers_type = workers<executor_type,
+            worker_ssl<executor_type>>;
+        auto& vp = emplace_part<workers_type>(
+            srv,
             srv.get_executor(),
             1,
             num_workers,
-            of_type<worker_ssl<executor_type>>,
             srv,
             srv.get_executor(),
             ssl_ctx,
             rr);
-        vp.emplace(asio::ip::tcp::endpoint(addr, 443), reuse_addr);
-        //vp.emplace(asio::ip::tcp::endpoint(addr, 5050), reuse_addr);
+        vp.emplace(
+            acceptor_config{ true, false },
+            workers_type::acceptor_type(
+                srv.get_executor(),
+                asio::ip::tcp::endpoint(addr, 443),
+                reuse_addr));
 
         //
         // Add the listening ports and workers

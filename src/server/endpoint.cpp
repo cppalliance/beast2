@@ -24,6 +24,8 @@ endpoint::
     case urls::host_type::ipv6:
         ipv6_.~ipv6_address();
         break;
+    default:
+        break;
     }
 }
 
@@ -40,6 +42,8 @@ endpoint(
         break;
     case urls::host_type::ipv6:
         new(&ipv6_) urls::ipv6_address(other.ipv6_);
+        break;
+    default:
         break;
     }
 }
@@ -80,14 +84,14 @@ format(std::ostream& os) const
 {
     switch(kind_)
     {
-    case urls::host_type::none:
-        os << "none";
-        break;
     case urls::host_type::ipv4:
         os << ipv4_;
         break;
     case urls::host_type::ipv6:
         os << ipv6_;
+        break;
+    default:
+        os << "none";
         break;
     }
     if(port_)
