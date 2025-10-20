@@ -25,8 +25,6 @@
 #include <algorithm>
 #include <iostream>
 
-static int count = 0;
-
 namespace boost {
 
 template<class Executor>
@@ -72,10 +70,6 @@ struct MockReadStream {
                     (std::size_t)1);
 
                 std::size_t n = asio::buffer_copy(buf, source_buf, chunk_size);
-
-                count += n;
-
-                std::cout << "Writing: (" << n << " gives " << count << ") : " << std::string(asio::buffers_begin(buf), asio::buffers_begin(buf) + n) << std::endl;
 
                 system::error_code ec = (n != 0) ? system::error_code{} : asio::stream_errc::eof;
 
@@ -123,7 +117,7 @@ struct body_read_stream_test
         http_proto::response_parser pr(rts_ctx);
         pr.reset();
         pr.start();
-        body_read_stream<decltype(ms)> brs(rts_ctx, ms, pr);
+        body_read_stream<decltype(ms)> brs(ms, pr);
 
         brs.async_read_some(buf,
             [this, &brs, &arr, &buf](system::error_code ec, std::size_t bytes_transferred)

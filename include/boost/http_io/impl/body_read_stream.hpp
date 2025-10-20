@@ -163,12 +163,10 @@ public:
 
 template<class UnderlyingAsyncReadStream>
 body_read_stream<UnderlyingAsyncReadStream>::body_read_stream(
-      const rts::context& rts_ctx
-    , UnderlyingAsyncReadStream& und_stream
+      UnderlyingAsyncReadStream& und_stream
     , http_proto::parser& pr)
     :
-      rts_ctx_(rts_ctx)
-    , und_stream_(und_stream)
+      und_stream_(und_stream)
     , pr_(pr)
 {
 }

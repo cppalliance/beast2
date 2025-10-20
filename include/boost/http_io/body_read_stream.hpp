@@ -27,7 +27,6 @@ class body_read_stream {
 public:
     explicit
         body_read_stream(
-            const rts::context& rts_ctx,
             UnderlyingAsyncReadStream& und_stream,
             http_proto::parser& pr);
 
@@ -42,7 +41,6 @@ public:
             CompletionToken&& token);
 
 private:
-    const rts::context& rts_ctx_;
     UnderlyingAsyncReadStream& und_stream_;
     http_proto::parser& pr_;
 };
