@@ -14,82 +14,127 @@
 #include <boost/core/detail/string_view.hpp>
 #include <sstream>
 
+namespace boost {
+namespace http_io {
+
 struct section
 {
     int threshold() const noexcept { return 0; }
 
     template<class... Args>
-    void format(int level, Args const&... args)
+    void operator()(
+        core::string_view const& fs,
+        Args const&... args)
     {
-        std::string s;
-        {
-            std::stringstream ss;
-            append(ss, args...);
-            s = ss.str();
-        }
-        write(level, s);
+        int level = 0;
+
+        auto const N = sizeof...(Args);
+        std::size_t len[N];
+        std::stringstream ss;
+        write(ss, len, args...);
+        // VFALCO This makes an unnecessary copy
+        std::string s(ss.str());
+        format_impl(level, fs, s.data(), len, N);
     }
 
 private:
     template<class T1, class T2, class... TN>
-    static void append(
-        std::ostream& os,
+    static void write(
+        std::stringstream& ss,
+        std::size_t* plen,
         T1 const& t1,
         T2 const& t2,
         TN const&... tn)
     {
-        os << t1;
-        append(os, t2, tn...);
+        auto const n0 = ss.rdbuf()->pubseekoff(
+            0, std::ios::cur, std::ios::out);
+        ss << t1;
+        auto const n1 = ss.rdbuf()->pubseekoff(
+            0, std::ios::cur, std::ios::out);
+        *plen = n1 - n0;
+        write(ss, ++plen, t2, tn...);
     }
 
     template<class T>
-    static void append(
-        std::ostream& os,
+    static void write(
+        std::stringstream& ss,
+        std::size_t* plen,
         T const& t)
     {
-        os << t;
+        auto const n0 = ss.str().size();
+        ss << t;
+        *plen = ss.str().size() - n0;
     }
+
+    BOOST_HTTP_IO_DECL
+    void format_impl(int, core::string_view,
+        char const*, std::size_t*, std::size_t n);
 
     BOOST_HTTP_IO_DECL
     void write(int, boost::core::string_view);
 };
 
+//------------------------------------------------
+
+class log_stream
+{
+public:
+    log_stream() = default;
+
+    log_stream(section& sect, int level)
+        : sect_(&sect)
+        , level_(level)
+    {
+    }
+
+    template<class... Args>
+    void operator()(Args const&... args)
+    {
+        if( sect_)
+            sect_->operator()(args...);
+    }
+
+private:
+    section* sect_ = nullptr;
+    int level_ = 0;
+};
+
 #ifndef LOG_AT_LEVEL
-#define LOG_AT_LEVEL(sect, level, ...) \
-    do { \
-        if(level >= sect.threshold()) \
-            sect.format(level, __VA_ARGS__); \
-    } while(false)
+#define LOG_AT_LEVEL(sect, level) \
+    if((level) < (sect).threshold()) {} else sect
 #endif
 
 /// Log at trace level
 #ifndef LOG_TRC
-#define LOG_TRC(sect, ...) LOG_AT_LEVEL(sect, 0, __VA_ARGS__)
+#define LOG_TRC(sect) LOG_AT_LEVEL(sect, 0)
 #endif
 
 /// Log at debug level
 #ifndef LOG_DBG
-#define LOG_DBG(sect, ...) LOG_AT_LEVEL(sect, 1, __VA_ARGS__)
+#define LOG_DBG(sect) LOG_AT_LEVEL(sect, 1)
 #endif
 
 /// Log at info level (normal)
 #ifndef LOG_INF
-#define LOG_INF(sect, ...) LOG_AT_LEVEL(sect, 2, __VA_ARGS__)
+#define LOG_INF(sect) LOG_AT_LEVEL(sect, 2)
 #endif
 
 /// Log at warning level
 #ifndef LOG_WRN
-#define LOG_WRN(sect, ...) LOG_AT_LEVEL(sect, 3, __VA_ARGS__)
+#define LOG_WRN(sect) LOG_AT_LEVEL(sect, 3)
 #endif
 
 /// Log at error level
 #ifndef LOG_ERR
-#define LOG_ERR(sect, ...) LOG_AT_LEVEL(sect, 4, __VA_ARGS__)
+#define LOG_ERR(sect) LOG_AT_LEVEL(sect, 4)
 #endif
 
 /// Log at fatal level
 #ifndef LOG_FTL
 #define LOG_FTL(sect, ...) LOG_AT_LEVEL(sect, 5, __VA_ARGS__)
 #endif
+
+} // http_io
+} // boost
 
 #endif

@@ -122,12 +122,12 @@ do_accepts()
             while(a.need > 0)
             {
                 --a.need;
-                LOG_TRC(sect_, "need=", a.need);
+                LOG_TRC(sect_)("need={}", a.need);
                 // pop
                 auto pw = idle_;
                 idle_ = idle_->next;
                 --n_idle_;
-                LOG_TRC(sect_, "n_idle=", n_idle_);
+                LOG_TRC(sect_)("n_idle={}", n_idle_);
                 a.sock.async_accept(pw->w.socket(), pw->w.endpoint(),
                     asio::prepend(call_mf(&workers::on_accept, this), &a, pw));
                 if(! idle_)
@@ -151,15 +151,15 @@ on_accept(
     system::error_code const& ec)
 {
     ++pa->need;
-    LOG_TRC(sect_, "need=", pa->need);
+    LOG_TRC(sect_)("need={}", pa->need);
     if(ec.failed())
     {
         // push
         pw->next = idle_;
         idle_ = pw;
         ++n_idle_;
-        LOG_TRC(sect_, "n_idle=", n_idle_);
-        LOG_DBG(sect_, "async_accept: ", ec.message());
+        LOG_TRC(sect_)("n_idle={}", n_idle_);
+        LOG_DBG(sect_)("async_accept: {}", ec.message());
         return do_accepts();
     }
     do_accepts();

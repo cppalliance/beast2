@@ -74,8 +74,9 @@ private:
         if(ec.failed())
             return do_fail("http_responder::on_read", ec);
 
-        LOG_TRC(this->sect_, this->id(),
-            ": http_responder::on_read bytes=", bytes_transferred);
+        LOG_TRC(this->sect_)(
+            "{} http_responder::on_read bytes={}",
+            this->id(), bytes_transferred);
 
         BOOST_ASSERT(pr_.is_complete());
 
@@ -108,8 +109,9 @@ private:
 
         BOOST_ASSERT(sr_.is_done());
 
-        LOG_TRC(this->sect_, this->id(),
-            ": http_responder::on_write bytes=", bytes_transferred);
+        LOG_TRC(this->sect_)(
+            "{} http_responder::on_write bytes={}",
+            this->id(), bytes_transferred);
 
         if(res_.keep_alive())
             return do_read();

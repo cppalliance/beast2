@@ -116,7 +116,9 @@ public:
         if(ec.failed())
             return do_fail("worker_ssl::on_handshake", ec);
 
-        LOG_TRC(this->sect_, this->id(), ": worker_ssl::on_handshake");
+        LOG_TRC(this->sect_)(
+            "{} worker_ssl::on_handshake",
+            this->id());
 
         this->do_session(*pconfig);
     }
@@ -134,7 +136,9 @@ public:
         if(ec.failed())
             return do_fail("worker_ssl::on_shutdown", ec);
 
-        LOG_TRC(this->sect_, this->id(), ": worker_ssl::on_shutdown");
+        LOG_TRC(this->sect_)(
+            "{} worker_ssl::on_shutdown",
+            this->id());
 
         stream_.next_layer().shutdown(
             asio::socket_base::shutdown_both, ec);
@@ -151,12 +155,16 @@ public:
 
         if(ec == asio::error::operation_aborted)
         {
-            LOG_TRC(this->sect_, this->id(), " ", s, ": ", ec.message());
+            LOG_TRC(this->sect_)(
+                "{} {}: {}",
+                this->id(), s, ec.message());
             // this means the worker was stopped, don't submit new work
             return;
         }
 
-        LOG_DBG(this->sect_, this->id(), " ", s, ": ", ec.message());
+        LOG_DBG(this->sect_)(
+            "{} {}: {}",
+            this->id(), s, ec.message());
         wb_.do_idle(this);
     }
 
