@@ -10,7 +10,6 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
 
-#include "asio_server.hpp"
 #include "handler.hpp"
 
 #include <boost/http_io/detail/config.hpp>
@@ -18,6 +17,7 @@
 #include <boost/http_io/write.hpp>
 #include <boost/http_io/server/logger.hpp>
 #include <boost/http_io/server/router.hpp>
+#include <boost/http_io/server/server_asio.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -33,14 +33,19 @@ template<class Derived>
 class http_responder
 {
 public:
+    explicit
     http_responder(
-        asio_server& srv,
+        server& srv,
         router_type& rr)
-        : id_(srv.make_unique_id())
-        , srv_(srv)
+        : id_(
+            []() noexcept
+            {
+                static std::size_t n = 0;
+                return ++n;
+            }())
         , rr_(rr)
-        , pr_(srv_.services())
-        , sr_(srv_.services())
+        , pr_(srv.services())
+        , sr_(srv.services())
     {
     }
 
@@ -90,7 +95,7 @@ private:
                 res_,
                 pr_,
                 sr_,
-                srv_.is_stopping()});
+                self().server().is_stopping()});
         BOOST_ASSERT(found);
         (void)found;
 
@@ -156,7 +161,6 @@ protected:
 protected:
     std::size_t id_ = 0;
     section sect_;
-    asio_server& srv_;
 
 private:
     acceptor_config const* pconfig_ = nullptr;

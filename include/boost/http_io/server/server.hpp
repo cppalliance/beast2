@@ -11,12 +11,9 @@
 #define BOOST_HTTP_IO_SERVER_SERVER_HPP
 
 #include <boost/http_io/detail/config.hpp>
-//#include <boost/http_io/detail/type_traits.hpp>
 #include <boost/rts/context.hpp>
-#include <atomic>
 #include <memory>
 #include <type_traits>
-#include <vector>
 
 namespace boost {
 namespace http_io {
@@ -32,9 +29,12 @@ namespace http_io {
 
     The server also contains an `rts::services` collection VFALCO TODO
 */
-class server
+class BOOST_SYMBOL_VISIBLE
+    server
 {
 public:
+    /** Base class for all server parts
+    */
     class BOOST_SYMBOL_VISIBLE
         part
     {
@@ -42,50 +42,61 @@ public:
         BOOST_HTTP_IO_DECL
         virtual ~part();
 
-        virtual void run() = 0;
+        /** Called once when the server starts
+        */
+        virtual void start() = 0;
+
+        /** Called once when the server stops
+
+            This function is invoked from an
+            implementation-defined foreign thread.
+        */
         virtual void stop() = 0;
     };
-
-    BOOST_HTTP_IO_DECL
-    server();
 
     server(server const&) = delete;
     server& operator=(server const&) = delete;
 
-    bool is_stopping() const noexcept
-    {
-        return is_stopping_;
-    }
-
-    /** Return a unique ID
-
-        Workers are identified in log output by ID.
+    /** Destructor
     */
-    std::size_t
-    make_unique_id() noexcept
-    {
-        return ++id_;
-    }
+    BOOST_HTTP_IO_DECL
+    ~server();
 
-    rts::context&
-    services()
-    {
-        return services_;
-    }
+    /** Constructor
+    */
+    BOOST_HTTP_IO_DECL
+    server();
 
-    void
-    install(std::unique_ptr<part> p)
-    {
-        v_.emplace_back(std::move(p));
-    }
+    BOOST_HTTP_IO_DECL
+    bool is_stopping() const noexcept;
+
+    BOOST_HTTP_IO_DECL
+    rts::context& services() noexcept;
+
+    BOOST_HTTP_IO_DECL
+    void install(std::unique_ptr<part> pp);
+
+    /** Stop the server
+    */
+    virtual void stop() = 0;
 
 protected:
-    rts::context services_;
-    std::atomic<std::size_t> id_{0};
-    std::vector<std::unique_ptr<part>> v_;
-    bool is_stopping_ = false;
-    bool is_stopped_ = false;
+    /** Call start on each part
+
+        @par Thread Safety
+        May not be called concurrently
+    */
+    BOOST_HTTP_IO_DECL void do_start();
+
+    BOOST_HTTP_IO_DECL void do_stop();
+
+private:
+    enum state : char;
+    struct impl;
+    impl* impl_;
 };
+
+//------------------------------------------------
 
 /** Construct a new server part
 */

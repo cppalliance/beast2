@@ -10,12 +10,12 @@
 #ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_SSL_HPP
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_SSL_HPP
 
-#include "asio_server.hpp"
 #include "handler.hpp"
 #include "http_responder.hpp"
 #include <boost/http_io/server/call_mf.hpp>
 #include <boost/http_io/server/logger.hpp>
 #include <boost/http_io/server/router.hpp>
+#include <boost/http_io/server/server_asio.hpp>
 #include <boost/http_io/server/workers.hpp>
 #include <boost/http_io/read.hpp>
 #include <boost/http_io/ssl_stream.hpp>
@@ -57,15 +57,19 @@ public:
     >
     worker_ssl(
         workers_base& wb,
-        asio_server& srv,
         Executor0 const& ex,
         asio::ssl::context& ssl_ctx,
         router_type& rr)
-        : http_responder<worker_ssl>(srv, rr)
+        : http_responder<worker_ssl>(wb.server(), rr)
         , wb_(wb)
         , ssl_ctx_(ssl_ctx)
         , stream_(ex, ssl_ctx)
     {
+    }
+
+    http_io::server& server() noexcept
+    {
+        return wb_.server();
     }
 
     socket_type& socket() noexcept

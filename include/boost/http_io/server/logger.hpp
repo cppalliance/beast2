@@ -76,6 +76,7 @@ private:
 
 //------------------------------------------------
 
+#if 0
 class log_stream
 {
 public:
@@ -98,6 +99,40 @@ private:
     section* sect_ = nullptr;
     int level_ = 0;
 };
+#endif
+
+//------------------------------------------------
+
+#if 0
+class log_sections
+{
+public:
+    /** Destructor
+    */
+    BOOST_HTTP_IO_DECL
+    ~log_sections();
+
+    /** Constructor
+    */
+    BOOST_HTTP_IO_DECL
+    log_sections();
+
+    /** Return a log section by name.
+
+        If the section does not already exist, it is created.
+        The name is case sensitive.
+    */
+    BOOST_HTTP_IO_DECL
+    section
+    get(core::string_view name);
+
+private:
+    struct impl;
+    impl* impl_;
+};
+#endif
+
+//------------------------------------------------
 
 #ifndef LOG_AT_LEVEL
 #define LOG_AT_LEVEL(sect, level) \

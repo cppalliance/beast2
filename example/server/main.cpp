@@ -7,9 +7,9 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#include "asio_server.hpp"
 #include "certificate.hpp"
 #include "worker_ssl.hpp"
+#include <boost/http_io/server/server_asio.hpp>
 #include <boost/http_io/server/workers.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -45,11 +45,12 @@ int server_main( int argc, char* argv[] )
         (void)port;
         std::string const doc_root = argv[3];
         std::size_t num_workers = std::atoi(argv[4]);
+        int num_threads = 1;
         bool reuse_addr = true; // VFALCO this could come from the command line
 
-        using executor_type = asio_server::executor_type;
+        using executor_type = server_asio::executor_type;
 
-        asio_server srv;
+        server_asio srv(num_threads);
 
         #ifdef BOOST_RTS_HAS_BROTLI
         rts::brotli::install_decode_service(srv.services());
@@ -92,57 +93,22 @@ int server_main( int argc, char* argv[] )
 
         using workers_type = workers<executor_type,
             worker_ssl<executor_type>>;
+
         auto& vp = emplace_part<workers_type>(
             srv,
             srv.get_executor(),
             1,
             num_workers,
-            srv,
             srv.get_executor(),
             ssl_ctx,
             rr);
+
         vp.emplace(
             acceptor_config{ true, false },
             workers_type::acceptor_type(
                 srv.get_executor(),
                 asio::ip::tcp::endpoint(addr, 443),
                 reuse_addr));
-
-        //
-        // Add the listening ports and workers
-        //
-#if 0
-        {
-            // plain (no https) port that does https redirect
-            //
-            auto& lp = emplace_part<listening_port<executor_type>>(
-                srv,
-                asio::ip::tcp::endpoint(
-                    asio::ip::make_address_v4("127.0.0.1"), 80),
-                srv.get_executor(),
-                reuse_addr);
-            emplace_workers<worker<executor_type>>(
-                lp,
-                16, // small number of workers
-                srv.get_executor(),
-                rr0);
-        }
-        {
-            // A secure SSL public listening port
-            //
-            auto& lp = emplace_part<listening_port<executor_type>>(
-                srv,
-                asio::ip::tcp::endpoint(addr, 443),
-                srv.get_executor(),
-                reuse_addr);
-            emplace_workers<worker_ssl<executor_type>>(
-                lp,
-                num_workers,
-                srv.get_executor(),
-                ssl_ctx,
-                rr);
-        }
-#endif
 
         srv.run();
     }

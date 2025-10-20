@@ -60,12 +60,13 @@ template<class Executor, class Worker>
 template<class Executor1, class... Args>
 workers<Executor, Worker>::
 workers(
-    server&,
+    http_io::server& srv,
     Executor1 const& ex,
     unsigned concurrency,
     std::size_t num_workers,
     Args&&... args)
-    : ex_(ex)
+    : srv_(srv)
+    , ex_(ex)
     , vw_(num_workers)
     , concurrency_(concurrency)
 {
@@ -73,6 +74,14 @@ workers(
         idle_ = &vw_.emplace_back(idle_, *this,
             std::forward<Args>(args)...);
     n_idle_ = vw_.size();
+}
+
+template<class Executor, class Worker>
+http_io::server&
+workers<Executor, Worker>::
+server() noexcept
+{
+    return srv_;
 }
 
 template<class Executor, class Worker>
@@ -96,7 +105,7 @@ do_idle(void* pw)
 template<class Executor, class Worker>
 void
 workers<Executor, Worker>::
-run()
+start()
 {
     asio::dispatch(ex_, call_mf(&workers::do_accepts, this));
 }
@@ -115,6 +124,8 @@ workers<Executor, Worker>::
 do_accepts()
 {
     BOOST_ASSERT(ex_.running_in_this_thread());
+    if(srv_.is_stopping())
+        return;
     if(idle_)
     {
         for(auto& a : va_)
@@ -122,12 +133,10 @@ do_accepts()
             while(a.need > 0)
             {
                 --a.need;
-                LOG_TRC(sect_)("need={}", a.need);
                 // pop
                 auto pw = idle_;
                 idle_ = idle_->next;
                 --n_idle_;
-                LOG_TRC(sect_)("n_idle={}", n_idle_);
                 a.sock.async_accept(pw->w.socket(), pw->w.endpoint(),
                     asio::prepend(call_mf(&workers::on_accept, this), &a, pw));
                 if(! idle_)
@@ -151,14 +160,12 @@ on_accept(
     system::error_code const& ec)
 {
     ++pa->need;
-    LOG_TRC(sect_)("need={}", pa->need);
     if(ec.failed())
     {
         // push
         pw->next = idle_;
         idle_ = pw;
         ++n_idle_;
-        LOG_TRC(sect_)("n_idle={}", n_idle_);
         LOG_DBG(sect_)("async_accept: {}", ec.message());
         return do_accepts();
     }
@@ -172,13 +179,13 @@ void
 workers<Executor, Worker>::
 do_stop()
 {
-    for(auto& w : vw_)
-        w.w.cancel();
     for(auto& a : va_)
     {
         system::error_code ec;
         a.sock.cancel(ec); // error ignored
     }
+    for(auto& w : vw_)
+        w.w.cancel();
 }
 
 } // http_io

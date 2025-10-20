@@ -28,6 +28,7 @@ public:
     BOOST_HTTP_IO_DECL
     virtual ~workers_base();
 
+    virtual http_io::server& server() noexcept = 0;
     virtual void do_idle(void* worker) = 0;
 };
 
@@ -81,7 +82,7 @@ public:
     */
     template<class Executor1, class... Args>
     workers(
-        server& srv,
+        http_io::server& srv,
         Executor1 const& ex,
         unsigned concurrency,
         std::size_t num_workers,
@@ -104,14 +105,16 @@ private:
     struct acceptor;
     struct worker;
 
-    void run() override;
+    void start() override;
     void stop() override;
+    http_io::server& server() noexcept override;
     void do_idle(void*) override;
     void do_accepts();
     void on_accept(acceptor*, worker*,
         system::error_code const&);
     void do_stop();
 
+    http_io::server& srv_;
     Executor ex_;
     fixed_array<worker> vw_;
     std::vector<acceptor> va_;
