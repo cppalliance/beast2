@@ -10,41 +10,38 @@
 #ifndef BOOST_HTTP_IO_IMPL_BODY_READ_STREAM_HPP
 #define BOOST_HTTP_IO_IMPL_BODY_READ_STREAM_HPP
 
-#include <boost/http_io/detail/except.hpp>
-#include <boost/http_proto/error.hpp>
-#include <boost/http_proto/parser.hpp>
-#include <boost/asio/append.hpp>
+#include <boost/asio/async_result.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/buffers_iterator.hpp>
-#include <boost/asio/compose.hpp>
 #include <boost/asio/coroutine.hpp>
-#include <boost/asio/immediate.hpp>
-#include <boost/asio/prepend.hpp>
-#include <boost/assert.hpp>
+#include <boost/core/ignore_unused.hpp>
+#include <boost/http_io/detail/config.hpp>
+#include <boost/http_io/read.hpp>
+#include <boost/http_proto/parser.hpp>
+#include <boost/system/error_code.hpp>
 
-#include <iostream>
 
 namespace boost {
 namespace http_io {
 
 namespace detail {
 
-template <class MutableBufferSequence, class UnderlyingAsyncReadStream>
+template <class MutableBufferSequence, class AsyncReadStream>
 class body_read_stream_op : public asio::coroutine {
 
-    UnderlyingAsyncReadStream& underlying_stream_;
+    AsyncReadStream& us_;
     const MutableBufferSequence& mb_;
     http_proto::parser& pr_;
-    bool already_have_header_ = false;
     bool some_ = false;
 
 public:
+
     body_read_stream_op(
-        UnderlyingAsyncReadStream& s,
+        AsyncReadStream& s,
         const MutableBufferSequence& mb,
         http_proto::parser& pr,
         bool some) noexcept
-        : underlying_stream_(s)
+        : us_(s)
         , mb_(mb)
         , pr_(pr)
         , some_(some)
@@ -58,82 +55,49 @@ public:
             system::error_code ec = {},
             std::size_t bytes_transferred = 0)
     {
+        boost::ignore_unused(bytes_transferred);
+
         BOOST_ASIO_CORO_REENTER(*this)
         {
-            if (!pr_.is_complete())
-            {
-                for (;;)
-                {
-                    BOOST_ASIO_CORO_YIELD
-                    {
-                        BOOST_ASIO_HANDLER_LOCATION((
-                            __FILE__, __LINE__,
-                            "async_read_some"));
-                        underlying_stream_.async_read_some(
-                            pr_.prepare(),
-                            std::move(self));
-                    }
-                    pr_.commit(bytes_transferred);
-                    if (ec == asio::error::eof)
-                    {
-                        BOOST_ASSERT(
-                            bytes_transferred == 0);
-                        pr_.commit_eof();
-                        ec = {};
-                    }
-                    else if (ec.failed())
-                    {
-                        break; // genuine error
-                    }
-                    pr_.parse(ec);
-                    if (ec.failed() && ec != http_proto::condition::need_more_input)
-                    {
-                        break; // genuine error.
-                    }
-                    if (already_have_header_) {
-                        if (!ec.failed())
-                        {
-                            BOOST_ASSERT(
-                                pr_.is_complete());
-                            break;
-                        }
-                        if (some_)
-                        {
-                            ec = {};
-                            break;
-                        }
-                    }
-                    if (!already_have_header_ && pr_.got_header())
-                    {
-                        already_have_header_ = true;
-                        ec = {}; // override possible need_more_input
-                        pr_.parse(ec); // having parsed the header, call parse again for the start of the body.
-                        if (ec.failed() && ec != http_proto::condition::need_more_input)
-                        {
-                            break; // genuine error.
-                        }
-                        if (!ec.failed())
-                        {
-                            BOOST_ASSERT(
-                                pr_.is_complete());
-                            break;
-                        }
-                    }
-                }
-            }
-            else {
+            if (!pr_.got_header()) {
                 BOOST_ASIO_CORO_YIELD
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
+                        "async_read_header"));
+                    http_io::async_read_header<
+                        AsyncReadStream,
+                        Self  > (
+                        us_,
+                        pr_,
+                        std::move(self));
+                }
+                if (ec.failed()) goto upcall;
+            }
+
+            BOOST_ASIO_CORO_YIELD
+            {
+                if (some_) {
+                    BOOST_ASIO_HANDLER_LOCATION((
+                        __FILE__, __LINE__,
                         "async_read_some"));
-                    // The initiation function must return before the completion handler is called.
-                    asio::dispatch(
-                        asio::get_associated_executor(underlying_stream_),
+                    http_io::async_read_some(
+                        us_,
+                        pr_,
+                        std::move(self));
+                }
+                else {
+                    BOOST_ASIO_HANDLER_LOCATION((
+                        __FILE__, __LINE__,
+                        "async_read"));
+                    http_io::async_read(
+                        us_,
+                        pr_,
                         std::move(self));
                 }
             }
 
+        upcall:
             std::size_t n = 0;
 
             if (!ec.failed())
@@ -156,30 +120,30 @@ public:
 
 //------------------------------------------------
 
-    // TODO: copy in Beast's stream traits to check if UnderlyingAsyncReadStream
+    // TODO: copy in Beast's stream traits to check if AsyncReadStream
     // is an AsyncReadStream, and also static_assert that body_read_stream is too.
 
 
 
-template<class UnderlyingAsyncReadStream>
-body_read_stream<UnderlyingAsyncReadStream>::body_read_stream(
-      UnderlyingAsyncReadStream& und_stream
+template<class AsyncReadStream>
+body_read_stream<AsyncReadStream>::body_read_stream(
+      AsyncReadStream& und_stream
     , http_proto::parser& pr)
     :
-      und_stream_(und_stream)
+      us_(und_stream)
     , pr_(pr)
 {
 }
 
 
-template<class UnderlyingAsyncReadStream>
+template<class AsyncReadStream>
 template<
     class MutableBufferSequence,
     BOOST_ASIO_COMPLETION_TOKEN_FOR(
         void(system::error_code, std::size_t)) CompletionToken>
 BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void(system::error_code, std::size_t))
-body_read_stream<UnderlyingAsyncReadStream>::async_read_some(
+body_read_stream<AsyncReadStream>::async_read_some(
       const MutableBufferSequence& mb
     , CompletionToken&& token)
 {
@@ -187,9 +151,30 @@ body_read_stream<UnderlyingAsyncReadStream>::async_read_some(
         CompletionToken,
         void(system::error_code, std::size_t)>(
             detail::body_read_stream_op<
-            MutableBufferSequence, UnderlyingAsyncReadStream>{und_stream_, mb, pr_, true},
+            MutableBufferSequence, AsyncReadStream>{us_, mb, pr_, true},
             token,
-            asio::get_associated_executor(und_stream_)
+            asio::get_associated_executor(us_)
+        );
+}
+
+template<class AsyncReadStream>
+template<
+    class MutableBufferSequence,
+    BOOST_ASIO_COMPLETION_TOKEN_FOR(
+        void(system::error_code, std::size_t)) CompletionToken>
+BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
+    void(system::error_code, std::size_t))
+    body_read_stream<AsyncReadStream>::async_read(
+          const MutableBufferSequence& mb
+        , CompletionToken&& token)
+{
+    return asio::async_compose<
+        CompletionToken,
+        void(system::error_code, std::size_t)>(
+            detail::body_read_stream_op<
+            MutableBufferSequence, AsyncReadStream>{us_, mb, pr_, false},
+            token,
+            asio::get_associated_executor(us_)
         );
 }
 
