@@ -84,30 +84,51 @@ int server_main( int argc, char* argv[] )
             http_proto::install_serializer_service(srv.services(), cfg);
         }
 
-        // Create the routes
-        // VFALCO this is a hacky WIP
-        router_type rr0;
-        rr0.get<https_redirect_responder>("/*splat");
-        router_type rr;
-        rr.get<file_responder>("/*splat", doc_root);
+        router_type app;
 
-        using workers_type = workers<executor_type,
-            worker_ssl<executor_type>>;
+        // redirect HTTP to HTTPS
+        app.use(
+            [](Request& req, Response& res)
+            {
+                if(req.port.is_ssl)
+                    return true;
+                return https_redirect_responder()(req, res);
+            });
 
+        // "/" => "/index.html"
+        app.get("/",
+            [](Request& req, Response&)
+            {
+                req.path = urls::segments_encoded_view("index.html");
+                return true;
+            });
+
+        // static route for website
+        app.get("/*",
+            file_responder{ doc_root });
+
+        using workers_type =
+            workers< executor_type, worker_ssl<executor_type> >;
+
+        // Create all our workers
         auto& vp = emplace_part<workers_type>(
-            srv,
-            srv.get_executor(),
-            1,
-            num_workers,
-            srv.get_executor(),
-            ssl_ctx,
-            rr);
+            srv, srv.get_executor(), 1, num_workers,
+            srv.get_executor(), ssl_ctx, app);
 
+        // SSL port
         vp.emplace(
             acceptor_config{ true, false },
             workers_type::acceptor_type(
                 srv.get_executor(),
                 asio::ip::tcp::endpoint(addr, 443),
+                reuse_addr));
+
+        // plain port
+        vp.emplace(
+            acceptor_config{ false, false },
+            workers_type::acceptor_type(
+                srv.get_executor(),
+                asio::ip::tcp::endpoint(addr, 80),
                 reuse_addr));
 
         srv.run();

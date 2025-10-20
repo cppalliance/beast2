@@ -36,6 +36,22 @@ namespace http_io {
 #  include <boost/config/auto_link.hpp>
 # endif
 
+// Add source location to error codes
+#ifdef BOOST_HTTP_IO_NO_SOURCE_LOCATION
+# define BOOST_HTTP_IO_ERR(ev) (::boost::system::error_code(ev))
+# define BOOST_HTTP_IO_RETURN_EC(ev) return (ev)
+#else
+# define BOOST_HTTP_IO_ERR(ev) ( \
+    ::boost::system::error_code( (ev), [] { \
+    static constexpr auto loc((BOOST_CURRENT_LOCATION)); \
+    return &loc; }()))
+# define BOOST_HTTP_IO_RETURN_EC(ev)                                  \
+    do {                                                                 \
+        static constexpr auto loc ## __LINE__((BOOST_CURRENT_LOCATION)); \
+        return ::boost::system::error_code((ev), &loc ## __LINE__);      \
+    } while(0)
+#endif
+
 } // http_io
 } // boost
 

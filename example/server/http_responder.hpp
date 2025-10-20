@@ -86,19 +86,23 @@ private:
 
         BOOST_ASSERT(pr_.is_complete());
 
-        // find the route
-        auto found = rr_.invoke(
+        Request req{
             pr_.get().method(),
-            pr_.get().target(),
-            handler_params{
-                *pconfig_,
-                pr_.get(),
-                res_,
-                pr_,
-                sr_,
-                self().server().is_stopping()});
-        BOOST_ASSERT(found);
-        (void)found;
+            urls::segments_encoded_view(
+                pr_.get().target()),
+            *this->pconfig_,
+            pr_.get(),
+            pr_,
+            self().server().is_stopping()
+        };
+        Response res{
+            res_,
+            sr_
+        };
+
+        // invoke handlers for the route
+        auto cont = rr_(req, res);
+        BOOST_ASSERT(! cont);
 
         http_io::async_write(self().stream(), sr_,
             call_mf(&http_responder::on_write, this));
@@ -160,15 +164,13 @@ protected:
     }
 
 protected:
-    std::size_t id_ = 0;
     section sect_;
-
-private:
-    acceptor_config const* pconfig_ = nullptr;
+    std::size_t id_ = 0;
     router_type& rr_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;
+    acceptor_config const* pconfig_ = nullptr;
 };
 
 } // http_io

@@ -11,7 +11,7 @@
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_HANDLER_HPP
 
 #include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/server/handler_params.hpp>
+#include <boost/http_io/server/route_params.hpp>
 #include <boost/http_io/server/router.hpp>
 #include <boost/http_proto/request_base.hpp>
 #include <boost/http_proto/response.hpp>
@@ -21,13 +21,13 @@
 namespace boost {
 namespace http_io {
 
-using router_type = router<handler_params>;
+using router_type = router<Response>;
 
 //------------------------------------------------
 
 struct https_redirect_responder
 {
-    void operator()(handler_params&) const;
+    bool operator()(Request&, Response&) const;
 };
 
 //------------------------------------------------
@@ -40,7 +40,7 @@ struct file_responder
     {
     }
 
-    void operator()(handler_params&) const;
+    bool operator()(Request&, Response&) const;
 
 private:
     std::string doc_root_;

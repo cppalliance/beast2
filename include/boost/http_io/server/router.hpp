@@ -11,172 +11,180 @@
 #define BOOST_HTTP_IO_SERVER_ROUTER_HPP
 
 #include <boost/http_io/detail/config.hpp>
+#include <boost/http_io/server/any_lambda.hpp>
 #include <boost/http_proto/method.hpp>
-#include <boost/assert.hpp>
-#include <boost/core/span.hpp>
+#include <boost/url/segments_encoded_view.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <memory>
-#include <new>
-#include <regex>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace boost {
 namespace http_io {
 
-// Enum for the different token types in a parsed path pattern
-enum class TokenType { Text, Param, Wildcard, Group };
+struct Request;
 
+//------------------------------------------------
+
+#if 0
 template<class T>
-class router;
-
-template<class T, class... Args>
-void emplace(
-    router<T>&,
-    http_proto::method,
-    core::string_view,
-    Args&&...);
+struct of_type_t
+{
+    using type = T;
+};
 
 namespace detail {
+template<class T>
+struct of_type_impl
+{
+    static of_type_t<T> const value;
+};
+template<class T>
+of_type_t<T> const
+of_type_impl<T>::value = of_type_t<T>{};
+} // detail
+
+template<class T>
+constexpr of_type_t<T> const& of_type =
+    detail::of_type_impl<T>::value;
+#endif
+
+//------------------------------------------------
+
+template<class Response, class Request>
+class router;
+
+//------------------------------------------------
+
 class router_base
 {
-public:
+protected:
     struct BOOST_SYMBOL_VISIBLE
-        handler
+        any_handler
     {
         BOOST_HTTP_IO_DECL
-        virtual ~handler();
+        virtual ~any_handler();
 
-        virtual void operator()(void*) const = 0;
+        virtual bool operator()(
+            void* req, void* res) const = 0;
     };
 
-protected:
-    struct entry;
-    struct impl;
+    using handler_ptr = std::unique_ptr<any_handler>;
 
     BOOST_HTTP_IO_DECL
-    router_base();
+    router_base(
+        http_proto::method(*)(void*),
+        urls::segments_encoded_view&(*)(void*));
+
+    BOOST_HTTP_IO_DECL
+    void use(handler_ptr);
 
     BOOST_HTTP_IO_DECL
     void insert(
-        http_proto::method method,
-        core::string_view path,
-        std::unique_ptr<handler>);
+        http_proto::method,
+        core::string_view,
+        handler_ptr);
 
     BOOST_HTTP_IO_DECL
-    void invoke_impl(
-        http_proto::method method,
-        core::string_view path,
-        void* param) const;
+    bool invoke(void*, void*) const;
 
-    template<class T, class... Args>
-    friend
-    void http_io::emplace(
-        router<T>& r,
-        http_proto::method method,
-        core::string_view path,
-        Args&&... args);
+    struct entry;
+    struct impl;
 
     std::shared_ptr<impl> impl_;
-    std::unique_ptr<handler> h_;
-};
-} // detail
-
-/** A container mapping HTTP requests to handlers
-*/
-template<class T>
-class router : private detail::router_base
-{
-public:
-    struct route
-    {
-        span<std::pair<std::string const, TokenType const>> keys;
-    };
-
-    template<
-        class Handler,
-        class T_,
-        class... Args>
-    friend void
-    emplace(
-        router<T_>& r,
-        http_proto::method method,
-        core::string_view path,
-        Args&&... args);
-
-    /** Add a GET route
-    */
-    template<
-        class Handler,
-        class... Args>
-    void
-    get(
-        core::string_view path,
-        Args&&... args);
-
-    bool
-    invoke(
-        http_proto::method method,
-        core::string_view path,
-        T&& param) const
-    {
-        invoke_impl(method, path, &param);
-        return true;
-    }
 };
 
 //------------------------------------------------
 
+/** A container mapping HTTP requests to handlers
+*/
 template<
-    class Handler,
-    class T,
-    class... Args>
-void
-emplace(
-    router<T>& r,
-    http_proto::method method,
-    core::string_view path,
-    Args&&... args)
+    class Response,
+    class Request = http_io::Request>
+class router : public router_base
 {
-    (void)method;
-    (void)path;
-
-    struct impl : detail::router_base::handler
+public:
+    router()
+        : router_base(
+            [](void* req) -> http_proto::method
+            {
+                return reinterpret_cast<Request*>(req)->method;
+            },
+            [](void* req) -> urls::segments_encoded_view&
+            {
+                return reinterpret_cast<Request*>(req)->path;
+            })
     {
-        Handler h;
+    }
 
-        impl(Args&&... args)
+    /** Add a global handler
+    */
+    template<class Handler>
+    router_base&
+    use(Handler&& h)
+    {
+        router_base::use(handler_ptr(
+            new handler_impl<Handler>(
+                std::forward<Handler>(h))));
+        return *this;
+    }
+
+    /** Add a GET handler
+    */
+    template<class Handler>
+    void
+    get(
+        core::string_view pattern,
+        Handler&& h)
+    {
+        insert(http_proto::method::get,
+            pattern, std::forward<Handler>(h));
+    }
+
+    /** Add a handler to match a method and pattern
+    */
+    template<class Handler>
+    void
+    insert(
+        http_proto::method method,
+        core::string_view pattern,
+        Handler&& h)
+    {
+        router_base::insert(method, pattern,
+            handler_ptr(new handler_impl<Handler>(
+                std::forward<Handler>(h))));
+    }
+
+    bool operator()(
+        Request& req, Response& res) const
+    {
+        return invoke(&req, &res);
+    }
+
+private:
+    template<class Handler>
+    struct handler_impl : any_handler
+    {
+        template<class... Args>
+        handler_impl(Args&&... args)
             : h(std::forward<Args>(args)...)
         {
         }
 
-        void operator()(void* p) const override
+    private:
+        using handler_type = typename
+            std::decay<Handler>::type;
+        handler_type h;
+        //static_assert(std::is_invocable<
+            //Handler, Response&, Request&>::value, "");
+        bool operator()(void* req, void* res) const override
         {
-            h(*reinterpret_cast<T*>(p));
+            return h(
+                *reinterpret_cast<Request*>(req),
+                *reinterpret_cast<Response*>(res));
         }
     };
+};
 
-    r.insert(method, path, std::unique_ptr<impl>(new
-        impl{std::forward<Args>(args)...}));
-}
-
-template<class T>
-template<
-    class Handler,
-    class... Args>
-void
-router<T>::
-get(
-    core::string_view path,
-    Args&&... args)
-{
-    emplace<Handler>(
-        *this,
-        http_proto::method::get,
-        path,
-        std::forward<Args>(args)...);
-}
+//------------------------------------------------
 
 } // http_io
 } // boost

@@ -11,14 +11,9 @@
 #define BOOST_HTTP_IO_EXAMPLE_SERVER_ASIO_PARAMS_HPP
 
 #include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/server/handler_params.hpp>
 
 namespace boost {
 namespace http_io {
-
-struct asio_params : handler_params
-{
-};
 
 } // http_io
 } // boost
