@@ -15,13 +15,17 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/prepend.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/rts/context.hpp>
 #include <boost/utility/string_view.hpp>
 
 #include "test_suite.hpp"
 
+#include <algorithm>
 #include <iostream>
+
+static int count = 0;
 
 namespace boost {
 
@@ -63,16 +67,21 @@ struct MockReadStream {
                     mock_data_.size() - sent_ };
                 auto source_buf = asio::buffer(source_str);
 
-                std::size_t chunk_size = rand() % mock_data_.size() + 1 + 100;
+                std::size_t chunk_size = std::max(
+                    (std::size_t)(rand() % mock_data_.size()),
+                    (std::size_t)1);
 
                 std::size_t n = asio::buffer_copy(buf, source_buf, chunk_size);
+
+                count += n;
+
+                std::cout << "Writing: (" << n << " gives " << count << ") : " << std::string(asio::buffers_begin(buf), asio::buffers_begin(buf) + n) << std::endl;
 
                 system::error_code ec = (n != 0) ? system::error_code{} : asio::stream_errc::eof;
 
                 sent_ += n;
 
-                std::move(token)(ec, n);
-                //asio::post(ex_, asio::prepend(std::move(token), ec, n));
+                asio::post(ex_, asio::prepend(std::move(token), ec, n));
             },
             token, buf);
     }
@@ -100,9 +109,10 @@ struct body_read_stream_test
             "<!doctype html><html><head><title>Hello World</title></html>\r\n";
 
         asio::io_context ioc;
-        MockReadStream ms(ioc, data);
+        auto strand = asio::make_strand(ioc);
+        MockReadStream<decltype(strand)> ms(strand, data);
 
-        std::array<char, 40> arr;
+        std::array<char, 41> arr;
         auto buf = asio::buffer(arr);
 
         rts::context rts_ctx;
@@ -113,19 +123,31 @@ struct body_read_stream_test
         http_proto::response_parser pr(rts_ctx);
         pr.reset();
         pr.start();
-        body_read_stream brs(rts_ctx, ms, pr);
+        body_read_stream<decltype(ms)> brs(rts_ctx, ms, pr);
 
         brs.async_read_some(buf,
             [this, &brs, &arr, &buf](system::error_code ec, std::size_t bytes_transferred)
             {
-                std::cout << "Error: " << ec.failed() << " bytes " << bytes_transferred << std::endl;
-                std::cout << std::string(arr.data(), bytes_transferred) << std::endl;
+                if (ec.failed()) std::cerr << ec.message() << std::endl;
+
+                BOOST_TEST_EQ(ec.failed(), false);
+                BOOST_TEST_EQ(bytes_transferred, 41);
+                {
+                    std::string value(arr.data(), bytes_transferred);
+                    BOOST_TEST_EQ(value, std::string("<!doctype html><html><head><title>Hello W"));
+                }
 
                 brs.async_read_some(buf,
                     [this, &brs, &arr, &buf](system::error_code ec, std::size_t bytes_transferred)
                     {
-                        std::cout << "2nd Error: " << ec.failed() << " bytes " << bytes_transferred << std::endl;
-                        std::cout << std::string(arr.data(), bytes_transferred) << std::endl;
+                        if (ec.failed()) std::cerr << ec.message() << std::endl;
+
+                        BOOST_TEST_EQ(ec.failed(), false);
+                        BOOST_TEST_EQ(bytes_transferred, 19);
+                        {
+                            std::string value(arr.data(), bytes_transferred);
+                            BOOST_TEST_EQ(value, std::string("orld</title></html>"));
+                        }
                     });
             });
         ioc.run();
@@ -134,7 +156,7 @@ struct body_read_stream_test
 
 TEST_SUITE(
     body_read_stream_test,
-    "boost.http_io.body_read_stream");
+    "boost.http_io.body_read_stream.hello_world");
 
 } // http_io
 } // boost

@@ -15,11 +15,14 @@
 #include <boost/http_proto/parser.hpp>
 #include <boost/asio/append.hpp>
 #include <boost/asio/buffer.hpp>
+#include <boost/asio/buffers_iterator.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/immediate.hpp>
 #include <boost/asio/prepend.hpp>
 #include <boost/assert.hpp>
+
+#include <iostream>
 
 namespace boost {
 namespace http_io {
@@ -47,7 +50,6 @@ public:
         , some_(some)
     {
     }
-
 
     template<class Self>
     void
@@ -105,7 +107,7 @@ public:
                     {
                         already_have_header_ = true;
                         ec = {}; // override possible need_more_input
-                        pr_.parse(ec); // having parsed the header, callle parse again for the start of the body.
+                        pr_.parse(ec); // having parsed the header, call parse again for the start of the body.
                         if (ec.failed() && ec != http_proto::condition::need_more_input)
                         {
                             break; // genuine error.
@@ -119,21 +121,33 @@ public:
                     }
                 }
             }
+            else {
+                BOOST_ASIO_CORO_YIELD
+                {
+                    BOOST_ASIO_HANDLER_LOCATION((
+                        __FILE__, __LINE__,
+                        "async_read_some"));
+                    // The initiation function must return before the completion handler is called.
+                    asio::dispatch(
+                        asio::get_associated_executor(underlying_stream_),
+                        std::move(self));
+                }
+            }
 
-            auto source_buf = pr_.pull_body();
+            std::size_t n = 0;
 
-            std::size_t n = boost::asio::buffer_copy(mb_, source_buf);
+            if (!ec.failed())
+            {
+                auto source_buf = pr_.pull_body();
 
-            pr_.consume_body(n);
+                n = boost::asio::buffer_copy(mb_, source_buf);
 
-            ec = (n != 0) ? system::error_code{} : asio::stream_errc::eof;
+                pr_.consume_body(n);
 
-            // for some reason this crashes - not sure yet why:
-            //asio::dispatch(
-            //    asio::get_associated_executor(underlying_stream_), 
-            //    asio::prepend(std::move(self), ec, n));
+                ec = (n != 0) ? system::error_code{} : asio::stream_errc::eof;
+            }
 
-            self.complete(ec, n); // TODO - work out the byte count
+            self.complete(ec, n);
         }
     }
 };
