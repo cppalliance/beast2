@@ -18,6 +18,8 @@
 namespace boost {
 namespace http_io {
 
+class log_sections;
+
 /** A generic server interface
 
     In this model a server contains zero or more parts, where each part
@@ -72,6 +74,9 @@ public:
 
     BOOST_HTTP_IO_DECL
     rts::context& services() noexcept;
+
+    BOOST_HTTP_IO_DECL
+    log_sections& sections() noexcept;
 
     BOOST_HTTP_IO_DECL
     void install(std::unique_ptr<part> pp);

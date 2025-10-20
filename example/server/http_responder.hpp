@@ -37,7 +37,8 @@ public:
     http_responder(
         server& srv,
         router_type& rr)
-        : id_(
+        : sect_(srv.sections().get("http_responder"))
+        , id_(
             []() noexcept
             {
                 static std::size_t n = 0;

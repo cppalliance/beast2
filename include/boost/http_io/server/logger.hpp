@@ -12,14 +12,24 @@
 
 #include <boost/http_io/detail/config.hpp>
 #include <boost/core/detail/string_view.hpp>
+#include <memory>
 #include <sstream>
+#include <string>
 
 namespace boost {
 namespace http_io {
 
 struct section
 {
-    int threshold() const noexcept { return 0; }
+    BOOST_HTTP_IO_DECL
+    section() noexcept;
+
+    /** Return the level below which logging is squelched
+    */
+    int threshold() const noexcept
+    {
+        return impl_->level;
+    }
 
     template<class... Args>
     void operator()(
@@ -72,6 +82,18 @@ private:
 
     BOOST_HTTP_IO_DECL
     void write(int, boost::core::string_view);
+
+    section(core::string_view);
+
+    friend class log_sections;
+
+    struct impl
+    {
+        std::string name;
+        int level = 0;
+    };
+
+    std::shared_ptr<impl> impl_;
 };
 
 //------------------------------------------------
@@ -103,7 +125,6 @@ private:
 
 //------------------------------------------------
 
-#if 0
 class log_sections
 {
 public:
@@ -130,7 +151,6 @@ private:
     struct impl;
     impl* impl_;
 };
-#endif
 
 //------------------------------------------------
 

@@ -115,12 +115,12 @@ private:
     void do_stop();
 
     http_io::server& srv_;
+    section sect_;
     Executor ex_;
     fixed_array<worker> vw_;
     std::vector<acceptor> va_;
     worker* idle_ = nullptr;
     std::size_t n_idle_ = 0;
-    section sect_;
     unsigned concurrency_;
 };
 

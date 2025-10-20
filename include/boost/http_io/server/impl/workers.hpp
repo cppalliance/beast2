@@ -66,6 +66,7 @@ workers(
     std::size_t num_workers,
     Args&&... args)
     : srv_(srv)
+    , sect_(srv.sections().get("workers"))
     , ex_(ex)
     , vw_(num_workers)
     , concurrency_(concurrency)

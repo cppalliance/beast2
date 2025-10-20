@@ -7,6 +7,7 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
+#include <boost/http_io/server/logger.hpp>
 #include <boost/http_io/server/server.hpp>
 #include <boost/http_io/detail/except.hpp>
 #include <mutex>
@@ -28,6 +29,7 @@ struct server::impl
 {
     std::mutex m;
     rts::context services;
+    log_sections sections;
     std::vector<std::unique_ptr<part>> v;
     state st = state::none;
 };
@@ -60,6 +62,13 @@ server::
 services() noexcept
 {
     return impl_->services;
+}
+
+log_sections&
+server::
+sections() noexcept
+{
+    return impl_->sections;
 }
 
 void
