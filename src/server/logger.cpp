@@ -10,9 +10,13 @@
 #include <boost/http_io/server/logger.hpp>
 #include <iostream>
 #include <mutex>
+#include <unordered_map>
 
 namespace boost {
 namespace http_io {
+
+section::
+section() noexcept = default;
 
 void
 section::
@@ -61,6 +65,63 @@ format_impl(
         p0 = p;
     }
     write(level, s);
+}
+
+section::
+section(core::string_view name)
+    : impl_(std::make_shared<impl>())
+{
+    impl_->name = name;
+}
+
+//------------------------------------------------
+
+struct log_sections::impl
+{
+#if 0
+    struct hash
+    {
+        std::size_t
+        operator()(section const& sect) const noexcept
+        {
+            std::size_t hash = 1469598103934665603ull; // FNV offset basis
+            for (unsigned char c : sect.impl_->name)
+                hash ^= c, hash *= 1099511628211ull;   // FNV prime
+            return hash;
+        }
+    };
+#endif
+
+    std::unordered_map<
+        core::string_view, section> map;
+};
+
+log_sections::
+~log_sections()
+{
+    delete impl_;
+}
+
+log_sections::
+log_sections()
+    : impl_(new impl)
+{
+}
+
+section
+log_sections::
+get(core::string_view name)
+{
+#if 0
+    auto it = impl_->map.find(name);
+    if(it != impl_->map.end())
+        return it->second;
+    auto v = section(name);
+    impl_->map.emplace( core::string_view(v.impl_->name), v);
+    return v;
+#else
+    return {};
+#endif
 }
 
 } // http_io
