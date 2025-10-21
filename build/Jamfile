@@ -38,12 +38,12 @@ project boost/beast2
     : source-location $(HTTP_IO_ROOT)
     ;
 
-alias http_io_sources : [ glob-tree-ex ./src : *.cpp ] ;
+alias beast2_sources : [ glob-tree-ex ./src : *.cpp ] ;
 
-explicit http_io_sources ;
+explicit beast2_sources ;
 
-lib boost_http_io
-   : http_io_sources
+lib boost_beast2
+   : beast2_sources
    : requirements
      <library>/boost//http_proto
      <library>/boost//url
@@ -53,4 +53,4 @@ lib boost_http_io
      <library>/boost//http_proto
    ;
 
-boost-install boost_http_io ;
+boost-install boost_beast2 ;
