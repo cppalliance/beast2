@@ -4,21 +4,21 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_SERVER_ROUTER_HPP
-#define BOOST_HTTP_IO_SERVER_ROUTER_HPP
+#ifndef BOOST_BEAST2_SERVER_ROUTER_HPP
+#define BOOST_BEAST2_SERVER_ROUTER_HPP
 
-#include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/server/any_lambda.hpp>
+#include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/server/any_lambda.hpp>
 #include <boost/http_proto/method.hpp>
 #include <boost/url/segments_encoded_view.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <memory>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 struct Request;
 
@@ -60,7 +60,7 @@ protected:
     struct BOOST_SYMBOL_VISIBLE
         any_handler
     {
-        BOOST_HTTP_IO_DECL
+        BOOST_BEAST2_DECL
         virtual ~any_handler();
 
         virtual bool operator()(
@@ -69,21 +69,21 @@ protected:
 
     using handler_ptr = std::unique_ptr<any_handler>;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     router_base(
         http_proto::method(*)(void*),
         urls::segments_encoded_view&(*)(void*));
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void use(handler_ptr);
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void insert(
         http_proto::method,
         core::string_view,
         handler_ptr);
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     bool invoke(void*, void*) const;
 
     struct entry;
@@ -98,7 +98,7 @@ protected:
 */
 template<
     class Response,
-    class Request = http_io::Request>
+    class Request = beast2::Request>
 class router : public router_base
 {
 public:
@@ -186,7 +186,7 @@ private:
 
 //------------------------------------------------
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

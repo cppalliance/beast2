@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 #include <boost/buffers/buffer.hpp>
@@ -14,7 +14,7 @@
 #include "test_suite.hpp"
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 BOOST_STATIC_ASSERT(
     std::is_constructible<
@@ -36,7 +36,7 @@ struct buffer_test
 
 TEST_SUITE(
     buffer_test,
-    "boost.http_io.buffer");
+    "boost.beast2.buffer");
 
-} // http_io
+} // beast2
 } // boost

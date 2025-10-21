@@ -4,11 +4,11 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_IMPL_WRITE_HPP
-#define BOOST_HTTP_IO_IMPL_WRITE_HPP
+#ifndef BOOST_BEAST2_IMPL_WRITE_HPP
+#define BOOST_BEAST2_IMPL_WRITE_HPP
 
 #include <boost/asio/append.hpp>
 #include <boost/asio/buffer.hpp>
@@ -20,7 +20,7 @@
 #include <boost/http_proto/serializer.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 namespace detail {
 
@@ -75,7 +75,7 @@ public:
             {
                 BOOST_ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
-                    "http_io::write_some_op"));
+                    "beast2::write_some_op"));
                 dest_.async_write_some(
                     *rv,
                     std::move(self));
@@ -123,7 +123,7 @@ public:
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
-                        "http_io::write_op"));
+                        "beast2::write_op"));
                     async_write_some(
                         dest_, sr_, std::move(self));
                 }
@@ -191,7 +191,7 @@ public:
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
-                        "http_io::relay_some_op"));
+                        "beast2::relay_some_op"));
                     asio::post(std::move(self));
                 }
                 goto upcall;
@@ -201,7 +201,7 @@ public:
             {
                 BOOST_ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
-                    "http_io::relay_some_op"));
+                    "beast2::relay_some_op"));
                 dest_.async_write_some(
                     write_buffers(*rv),
                     std::move(self));
@@ -289,7 +289,7 @@ async_relay_some(
 }
 #endif
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

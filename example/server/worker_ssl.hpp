@@ -4,21 +4,21 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_SSL_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_WORKER_SSL_HPP
+#ifndef BOOST_BEAST2_EXAMPLE_SERVER_WORKER_SSL_HPP
+#define BOOST_BEAST2_EXAMPLE_SERVER_WORKER_SSL_HPP
 
 #include "handler.hpp"
 #include "http_responder.hpp"
-#include <boost/http_io/server/call_mf.hpp>
-#include <boost/http_io/server/logger.hpp>
-#include <boost/http_io/server/router.hpp>
-#include <boost/http_io/server/server_asio.hpp>
-#include <boost/http_io/server/workers.hpp>
-#include <boost/http_io/read.hpp>
-#include <boost/http_io/ssl_stream.hpp>
+#include <boost/beast2/server/call_mf.hpp>
+#include <boost/beast2/server/logger.hpp>
+#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/server_asio.hpp>
+#include <boost/beast2/server/workers.hpp>
+#include <boost/beast2/read.hpp>
+#include <boost/beast2/ssl_stream.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/prepend.hpp>
@@ -33,7 +33,7 @@ class tcp; // forward declaration
 } // ip
 } // asio
 
-namespace http_io {
+namespace beast2 {
 
 template<
     class Executor,
@@ -49,7 +49,7 @@ public:
         asio::basic_stream_socket<Protocol, Executor>;
     using stream_type = ssl_stream<socket_type>;
 
-    using acceptor_config = http_io::acceptor_config;
+    using acceptor_config = beast2::acceptor_config;
 
     template<
         class Executor0,
@@ -67,7 +67,7 @@ public:
     {
     }
 
-    http_io::server& server() noexcept
+    beast2::server& server() noexcept
     {
         return wb_.server();
     }
@@ -204,7 +204,7 @@ private:
     typename Protocol::endpoint ep_;
 };
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

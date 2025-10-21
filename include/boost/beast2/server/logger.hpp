@@ -4,24 +4,24 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_SERVER_LOGGER_HPP
-#define BOOST_HTTP_IO_SERVER_LOGGER_HPP
+#ifndef BOOST_BEAST2_SERVER_LOGGER_HPP
+#define BOOST_BEAST2_SERVER_LOGGER_HPP
 
-#include <boost/http_io/detail/config.hpp>
+#include <boost/beast2/detail/config.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <memory>
 #include <sstream>
 #include <string>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 struct section
 {
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     section() noexcept;
 
     /** Return the level below which logging is squelched
@@ -76,11 +76,11 @@ private:
         *plen = ss.str().size() - n0;
     }
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void format_impl(int, core::string_view,
         char const*, std::size_t*, std::size_t n);
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void write(int, boost::core::string_view);
 
     section(core::string_view);
@@ -130,12 +130,12 @@ class log_sections
 public:
     /** Destructor
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     ~log_sections();
 
     /** Constructor
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     log_sections();
 
     /** Return a log section by name.
@@ -143,7 +143,7 @@ public:
         If the section does not already exist, it is created.
         The name is case sensitive.
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     section
     get(core::string_view name);
 
@@ -189,7 +189,7 @@ private:
 #define LOG_FTL(sect, ...) LOG_AT_LEVEL(sect, 5, __VA_ARGS__)
 #endif
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

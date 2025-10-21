@@ -7,7 +7,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/cppalliance/http_io
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 #-------------------------------------------------
@@ -16,14 +16,14 @@
 #
 #-------------------------------------------------
 cmake_minimum_required(VERSION 3.8...3.20)
-set(BOOST_HTTP_IO_VERSION 1)
+set(BOOST_BEAST2_VERSION 1)
 if (BOOST_SUPERPROJECT_VERSION)
-    set(BOOST_HTTP_IO_VERSION ${BOOST_SUPERPROJECT_VERSION})
+    set(BOOST_BEAST2_VERSION ${BOOST_SUPERPROJECT_VERSION})
 endif ()
-project(boost_http_io VERSION "${BOOST_HTTP_IO_VERSION}" LANGUAGES CXX)
-set(BOOST_HTTP_IO_IS_ROOT OFF)
+project(boost_beast2 VERSION "${BOOST_BEAST2_VERSION}" LANGUAGES CXX)
+set(BOOST_BEAST2_IS_ROOT OFF)
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(BOOST_HTTP_IO_IS_ROOT ON)
+    set(BOOST_BEAST2_IS_ROOT ON)
 endif ()
 set(__ignore__ ${CMAKE_C_COMPILER})
 
@@ -32,12 +32,12 @@ set(__ignore__ ${CMAKE_C_COMPILER})
 # Options
 #
 #-------------------------------------------------
-if (BOOST_HTTP_IO_IS_ROOT)
+if (BOOST_BEAST2_IS_ROOT)
     include(CTest)
 endif ()
-option(BOOST_HTTP_IO_BUILD_TESTS "Build boost::http_io tests" ${BUILD_TESTING})
-option(BOOST_HTTP_IO_BUILD_EXAMPLES "Build boost::http_io examples" ${BOOST_HTTP_IO_IS_ROOT})
-option(BOOST_HTTP_IO_MRDOCS_BUILD "Build the target for MrDocs: see mrdocs.yml" OFF)
+option(BOOST_BEAST2_BUILD_TESTS "Build boost::beast2 tests" ${BUILD_TESTING})
+option(BOOST_BEAST2_BUILD_EXAMPLES "Build boost::beast2 examples" ${BOOST_BEAST2_IS_ROOT})
+option(BOOST_BEAST2_MRDOCS_BUILD "Build the target for MrDocs: see mrdocs.yml" OFF)
 
 
 # Check if environment variable BOOST_SRC_DIR is set
@@ -54,7 +54,7 @@ set(BOOST_SRC_DIR ${DEFAULT_BOOST_SRC_DIR} CACHE STRING "Boost source dir to use
 #
 #-------------------------------------------------
 # The boost super-project requires one explicit dependency per-line.
-set(BOOST_HTTP_IO_DEPENDENCIES
+set(BOOST_BEAST2_DEPENDENCIES
     Boost::asio
     Boost::assert
     Boost::config
@@ -63,28 +63,28 @@ set(BOOST_HTTP_IO_DEPENDENCIES
     Boost::throw_exception
     )
 
-foreach (BOOST_HTTP_IO_DEPENDENCY ${BOOST_HTTP_IO_DEPENDENCIES})
-    if (BOOST_HTTP_IO_DEPENDENCY MATCHES "^[ ]*Boost::([A-Za-z0-9_]+)[ ]*$")
-        list(APPEND BOOST_HTTP_IO_INCLUDE_LIBRARIES ${CMAKE_MATCH_1})
+foreach (BOOST_BEAST2_DEPENDENCY ${BOOST_BEAST2_DEPENDENCIES})
+    if (BOOST_BEAST2_DEPENDENCY MATCHES "^[ ]*Boost::([A-Za-z0-9_]+)[ ]*$")
+        list(APPEND BOOST_BEAST2_INCLUDE_LIBRARIES ${CMAKE_MATCH_1})
     endif ()
 endforeach ()
 # Conditional dependencies
-if (BOOST_HTTP_IO_BUILD_TESTS)
-    set(BOOST_HTTP_IO_UNIT_TEST_LIBRARIES beast url)
+if (BOOST_BEAST2_BUILD_TESTS)
+    set(BOOST_BEAST2_UNIT_TEST_LIBRARIES beast url)
 endif ()
-if (BOOST_HTTP_IO_BUILD_EXAMPLES)
-    set(BOOST_HTTP_IO_EXAMPLE_LIBRARIES json program_options scope url multiprecision)
+if (BOOST_BEAST2_BUILD_EXAMPLES)
+    set(BOOST_BEAST2_EXAMPLE_LIBRARIES json program_options scope url multiprecision)
 endif ()
 # Complete dependency list
-set(BOOST_INCLUDE_LIBRARIES ${BOOST_HTTP_IO_INCLUDE_LIBRARIES} ${BOOST_HTTP_IO_UNIT_TEST_LIBRARIES} ${BOOST_HTTP_IO_EXAMPLE_LIBRARIES})
-set(BOOST_EXCLUDE_LIBRARIES http_io)
+set(BOOST_INCLUDE_LIBRARIES ${BOOST_BEAST2_INCLUDE_LIBRARIES} ${BOOST_BEAST2_UNIT_TEST_LIBRARIES} ${BOOST_BEAST2_EXAMPLE_LIBRARIES})
+set(BOOST_EXCLUDE_LIBRARIES beast2)
 
 #-------------------------------------------------
 #
 # Add Boost Subdirectory
 #
 #-------------------------------------------------
-if (BOOST_HTTP_IO_IS_ROOT)
+if (BOOST_BEAST2_IS_ROOT)
     set(CMAKE_FOLDER Dependencies)
     # Find absolute BOOST_SRC_DIR
     if (NOT IS_ABSOLUTE ${BOOST_SRC_DIR})
@@ -132,50 +132,50 @@ endif ()
 #-------------------------------------------------
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-file(GLOB_RECURSE BOOST_HTTP_IO_HEADERS CONFIGURE_DEPENDS include/boost/http_io/*.hpp include/boost/*.natvis)
-file(GLOB_RECURSE BOOST_HTTP_IO_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
+file(GLOB_RECURSE BOOST_BEAST2_HEADERS CONFIGURE_DEPENDS include/boost/beast2/*.hpp include/boost/*.natvis)
+file(GLOB_RECURSE BOOST_BEAST2_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 
-source_group("" FILES "include/boost/http_io.hpp" "build/Jamfile")
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost/http_io PREFIX "include" FILES ${BOOST_HTTP_IO_HEADERS})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "src" FILES ${BOOST_HTTP_IO_SOURCES})
+source_group("" FILES "include/boost/beast2.hpp" "build/Jamfile")
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost/beast2 PREFIX "include" FILES ${BOOST_BEAST2_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "src" FILES ${BOOST_BEAST2_SOURCES})
 
 
-function(boost_http_io_setup_properties target)
+function(boost_beast2_setup_properties target)
     target_compile_features(${target} PUBLIC cxx_constexpr)
     target_include_directories(${target} PUBLIC "${PROJECT_SOURCE_DIR}/include")
-    target_link_libraries(${target} PUBLIC ${BOOST_HTTP_IO_DEPENDENCIES})
+    target_link_libraries(${target} PUBLIC ${BOOST_BEAST2_DEPENDENCIES})
     find_package(Threads REQUIRED)
     target_link_libraries(${target} PUBLIC Threads::Threads)
     if (MINGW)
         target_link_libraries(${target} PUBLIC ws2_32 wsock32)
     endif()
-    target_compile_definitions(${target} PUBLIC BOOST_HTTP_IO_NO_LIB)
-    target_compile_definitions(${target} PRIVATE BOOST_HTTP_IO_SOURCE)
+    target_compile_definitions(${target} PUBLIC BOOST_BEAST2_NO_LIB)
+    target_compile_definitions(${target} PRIVATE BOOST_BEAST2_SOURCE)
     if (BUILD_SHARED_LIBS)
-        target_compile_definitions(${target} PUBLIC BOOST_HTTP_IO_DYN_LINK)
+        target_compile_definitions(${target} PUBLIC BOOST_BEAST2_DYN_LINK)
     else ()
-        target_compile_definitions(${target} PUBLIC BOOST_HTTP_IO_STATIC_LINK)
+        target_compile_definitions(${target} PUBLIC BOOST_BEAST2_STATIC_LINK)
     endif ()
 endfunction()
 
-if (BOOST_HTTP_IO_MRDOCS_BUILD)
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mrdocs.cpp" "#include <boost/http_io.hpp>\n")
-    add_library(boost_http_io_mrdocs "${CMAKE_CURRENT_BINARY_DIR}/mrdocs.cpp")
-    boost_http_io_setup_properties(boost_http_io_mrdocs)
-    boost_http_io_setup_properties(boost_http_io_mrdocs PUBLIC BOOST_HTTP_IO_MRDOCS)
+if (BOOST_BEAST2_MRDOCS_BUILD)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mrdocs.cpp" "#include <boost/beast2.hpp>\n")
+    add_library(boost_beast2_mrdocs "${CMAKE_CURRENT_BINARY_DIR}/mrdocs.cpp")
+    boost_beast2_setup_properties(boost_beast2_mrdocs)
+    boost_beast2_setup_properties(boost_beast2_mrdocs PUBLIC BOOST_BEAST2_MRDOCS)
     return()
 endif()
 
-add_library(boost_http_io include/boost/http_io.hpp build/Jamfile ${BOOST_HTTP_IO_HEADERS} ${BOOST_HTTP_IO_SOURCES})
-add_library(Boost::http_io ALIAS boost_http_io)
-boost_http_io_setup_properties(boost_http_io)
+add_library(boost_beast2 include/boost/beast2.hpp build/Jamfile ${BOOST_BEAST2_HEADERS} ${BOOST_BEAST2_SOURCES})
+add_library(Boost::beast2 ALIAS boost_beast2)
+boost_beast2_setup_properties(boost_beast2)
 
 #-------------------------------------------------
 #
 # Tests
 #
 #-------------------------------------------------
-if (BOOST_HTTP_IO_BUILD_TESTS)
+if (BOOST_BEAST2_BUILD_TESTS)
     add_subdirectory(test)
 endif ()
 
@@ -184,6 +184,6 @@ endif ()
 # Examples
 #
 #-------------------------------------------------
-if (BOOST_HTTP_IO_BUILD_EXAMPLES)
+if (BOOST_BEAST2_BUILD_EXAMPLES)
     add_subdirectory(example)
 endif ()

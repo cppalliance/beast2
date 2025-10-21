@@ -13,10 +13,10 @@ set(__ignore__ ${CMAKE_C_COMPILER})
 set(__ignore__ ${CMAKE_C_FLAGS})
 
 if(BOOST_CI_INSTALL_TEST)
-  find_package(Boost CONFIG REQUIRED COMPONENTS http_io)
+  find_package(Boost CONFIG REQUIRED COMPONENTS beast2)
 else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-  add_subdirectory(../.. boostorg/http_io)
+  add_subdirectory(../.. boostorg/beast2)
 
   set(BOOST_URL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
@@ -86,7 +86,7 @@ else()
 endif()
 
 add_executable(main main.cpp)
-target_link_libraries(main Boost::http_io)
+target_link_libraries(main Boost::beast2)
 
 enable_testing()
 add_test(NAME main COMMAND main)

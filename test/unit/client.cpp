@@ -4,18 +4,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 // Test that header file is self-contained.
-#include <boost/http_io/client.hpp>
+#include <boost/beast2/client.hpp>
 
 #include <boost/asio/ip/tcp.hpp>
 
 #include "test_suite.hpp"
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 struct success_handler
 {
@@ -93,7 +93,7 @@ public:
     }
 };
 
-TEST_SUITE(client_test, "boost.http_io.client");
+TEST_SUITE(client_test, "boost.beast2.client");
 
-} // http_io
+} // beast2
 } // boost

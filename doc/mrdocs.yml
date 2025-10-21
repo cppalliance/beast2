@@ -9,16 +9,16 @@ file-patterns:
 
 # Filters
 include-symbols:
-  - 'boost::http_io::**'
+  - 'boost::beast2::**'
 implementation-defined:
-  - 'boost::http_io::detail'
-  - 'boost::http_io::*::detail'
+  - 'boost::beast2::detail'
+  - 'boost::beast2::*::detail'
 inaccessible-members: never
 inaccessible-bases: never
 
 # Generator
 generate: adoc
-base-url: https://www.github.com/cppalliance/http_io/blob/develop/
+base-url: https://www.github.com/cppalliance/beast2/blob/develop/
 
 # Style
 verbose: true
@@ -26,4 +26,4 @@ multipage: true
 use-system-libc: true
 use-system-stdlib: true
 
-cmake: '-DCMAKE_CXX_STANDARD=20 -DBOOST_HTTP_IO_MRDOCS_BUILD=ON -DBOOST_HTTP_IO_BUILD_TESTS=OFF -DBOOST_HTTP_IO_BUILD_EXAMPLES=OFF'
+cmake: '-DCMAKE_CXX_STANDARD=20 -DBOOST_BEAST2_MRDOCS_BUILD=ON -DBOOST_BEAST2_BUILD_TESTS=OFF -DBOOST_BEAST2_BUILD_EXAMPLES=OFF'

@@ -4,31 +4,31 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_SERVER_WORKERS_HPP
-#define BOOST_HTTP_IO_SERVER_WORKERS_HPP
+#ifndef BOOST_BEAST2_SERVER_WORKERS_HPP
+#define BOOST_BEAST2_SERVER_WORKERS_HPP
 
-#include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/server/logger.hpp>
-#include <boost/http_io/server/fixed_array.hpp>
-#include <boost/http_io/server/server.hpp>
+#include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/server/logger.hpp>
+#include <boost/beast2/server/fixed_array.hpp>
+#include <boost/beast2/server/server.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <utility>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 class BOOST_SYMBOL_VISIBLE
     workers_base
 {
 public:
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     virtual ~workers_base();
 
-    virtual http_io::server& server() noexcept = 0;
+    virtual beast2::server& server() noexcept = 0;
     virtual void do_idle(void* worker) = 0;
 };
 
@@ -46,7 +46,7 @@ public:
         using executor_type = Executor;
         using protocol_type = asio::ip::tcp;
         using socket_type = asio::basic_stream_socket<protocol_type, Executor>;
-        using acceptor_config = http_io::acceptor_config;
+        using acceptor_config = beast2::acceptor_config;
 
         asio::basic_stream_socket<protocol_type, Executor>& socket() noexcept;
         typename protocol_type::endpoint& endpoint() noexcept;
@@ -82,7 +82,7 @@ public:
     */
     template<class Executor1, class... Args>
     workers(
-        http_io::server& srv,
+        beast2::server& srv,
         Executor1 const& ex,
         unsigned concurrency,
         std::size_t num_workers,
@@ -107,14 +107,14 @@ private:
 
     void start() override;
     void stop() override;
-    http_io::server& server() noexcept override;
+    beast2::server& server() noexcept override;
     void do_idle(void*) override;
     void do_accepts();
     void on_accept(acceptor*, worker*,
         system::error_code const&);
     void do_stop();
 
-    http_io::server& srv_;
+    beast2::server& srv_;
     section sect_;
     Executor ex_;
     fixed_array<worker> vw_;
@@ -124,9 +124,9 @@ private:
     unsigned concurrency_;
 };
 
-} // http_io
+} // beast2
 } // boost
 
-#include <boost/http_io/server/impl/workers.hpp>
+#include <boost/beast2/server/impl/workers.hpp>
 
 #endif

@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 #include "connect.hpp"
@@ -16,12 +16,12 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <boost/http_io.hpp>
+#include <boost/beast2.hpp>
 #include <boost/http_proto.hpp>
 #include <boost/url.hpp>
 
 namespace core     = boost::core;
-namespace http_io  = boost::http_io;
+namespace beast2   = boost::beast2;
 using error_code   = boost::system::error_code;
 using system_error = boost::system::system_error;
 
@@ -194,11 +194,11 @@ connect_http_proxy(
     auto parser     = http_proto::response_parser{ rts_ctx };
 
     serializer.start(request);
-    co_await http_io::async_write(stream, serializer);
+    co_await beast2::async_write(stream, serializer);
 
     parser.reset();
     parser.start();
-    co_await http_io::async_read_header(stream, parser);
+    co_await beast2::async_read_header(stream, parser);
 
     if(parser.get().status() != http_proto::status::ok)
         throw std::runtime_error{ "Proxy server rejected the connection" };

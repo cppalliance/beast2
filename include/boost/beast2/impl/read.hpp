@@ -4,13 +4,13 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_IMPL_READ_HPP
-#define BOOST_HTTP_IO_IMPL_READ_HPP
+#ifndef BOOST_BEAST2_IMPL_READ_HPP
+#define BOOST_BEAST2_IMPL_READ_HPP
 
-#include <boost/http_io/detail/except.hpp>
+#include <boost/beast2/detail/except.hpp>
 #include <boost/http_proto/error.hpp>
 #include <boost/http_proto/parser.hpp>
 #include <boost/asio/append.hpp>
@@ -20,7 +20,7 @@
 #include <boost/assert.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 namespace detail {
 
@@ -185,7 +185,7 @@ async_read(
             s);
 }
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

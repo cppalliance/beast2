@@ -4,7 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/CPPAlliance/http_io
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 import ../../config/checks/config : requires ;
@@ -19,38 +19,38 @@ constant c11-requires :
     ]
     ;
 
-path-constant HTTP_IO_ROOT : .. ;
+path-constant BEAST2_ROOT : .. ;
 
 explicit
     [ searched-lib ws2_32 : : <target-os>windows ] # NT
     [ searched-lib mswsock : : <target-os>windows ] # NT
     ;
 
-project boost/http_io
+project boost/beast2
     : common-requirements
       $(c11-requires)
-      <link>shared:<define>BOOST_HTTP_IO_DYN_LINK=1
-      <link>static:<define>BOOST_HTTP_IO_STATIC_LINK=1
+      <link>shared:<define>BOOST_BEAST2_DYN_LINK=1
+      <link>static:<define>BOOST_BEAST2_STATIC_LINK=1
       <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
       <target-os>windows,<toolset>gcc:<library>ws2_32
       <target-os>windows,<toolset>gcc:<library>mswsock
       <target-os>windows,<toolset>gcc-cygwin:<define>__USE_W32_SOCKETS
-    : source-location $(HTTP_IO_ROOT)
+    : source-location $(BEAST2_ROOT)
     ;
 
-alias http_io_sources : [ glob-tree-ex ./src : *.cpp ] ;
+alias beast2_sources : [ glob-tree-ex ./src : *.cpp ] ;
 
-explicit http_io_sources ;
+explicit beast2_sources ;
 
-lib boost_http_io
-   : http_io_sources
+lib boost_beast2
+   : beast2_sources
    : requirements
      <library>/boost//http_proto
      <library>/boost//url
      <include>../
-     <define>BOOST_HTTP_IO_SOURCE
+     <define>BOOST_BEAST2_SOURCE
    : usage-requirements
      <library>/boost//http_proto
    ;
 
-boost-install boost_http_io ;
+boost-install boost_beast2 ;
