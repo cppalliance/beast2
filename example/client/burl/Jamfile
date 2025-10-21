@@ -23,7 +23,7 @@ project
         cxx20_hdr_concepts
         cxx20_hdr_format
       ]
-      <library>/boost/beast2//boost_http_io
+      <library>/boost/beast2//boost_beast2
       [ ac.check-library /boost/rts//boost_rts_zlib : <library>/boost/rts//boost_rts_zlib : ]
       [ ac.check-library /boost/rts//boost_rts_brotli : <library>/boost/rts//boost_rts_brotli : ]
       [ ac.check-library /openssl//ssl : <library>/openssl//ssl/<link>shared : <build>no ]
