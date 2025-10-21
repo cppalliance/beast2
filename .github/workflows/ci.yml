@@ -135,7 +135,7 @@ jobs:
             generator: "MinGW Makefiles"
             is-latest: true
             is-earliest: true
-            name: "MinGW"
+            name: "MinGW (shared)"
             shared: true
             build-type: "Release"
             build-cmake: true
@@ -149,7 +149,7 @@ jobs:
             generator: "MinGW Makefiles"
             is-latest: true
             is-earliest: true
-            name: "MinGW"
+            name: "MinGW (static)"
             shared: false
             build-type: "Release"
             build-cmake: true
@@ -339,7 +339,7 @@ jobs:
             b2-toolset: "gcc"
             is-latest: true
             name: "GCC 14: C++17-20 (ubsan)"
-            shared: true
+            shared: false
             ubsan: true
             build-type: "RelWithDebInfo"
 
@@ -848,7 +848,7 @@ jobs:
           ref: develop
 
       - name: Setup C++
-        uses: alandefreitas/cpp-actions/setup-cpp@v1.8.10
+        uses: ashtum/cpp-actions/setup-cpp@v1.8.13
         id: setup-cpp
         with:
           compiler: ${{ matrix.compiler }}
@@ -857,17 +857,17 @@ jobs:
           trace-commands: true
 
       - name: Install packages
-        uses: alandefreitas/cpp-actions/package-install@v1.8.10
+        uses: ashtum/cpp-actions/package-install@v1.8.13
         id: package-install
         with:
           apt-get-add-architecture: ${{ matrix.x86 && 'i386' || '' }}
           apt-get: >-
             ${{ matrix.install }}
             build-essential libssl-dev zlib1g-dev libbrotli-dev libpsl-dev
-            ${{ matrix.x86 && 'zlib1g-dev:i386 libbrotli-dev:i386 libpsl-dev:i386' || '' }}
+            ${{ matrix.x86 && 'libssl-dev:i386 zlib1g-dev:i386 libbrotli-dev:i386 libpsl-dev:i386' || '' }}
 
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.10
+        uses: ashtum/cpp-actions/boost-clone@v1.8.13
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
@@ -886,7 +886,7 @@ jobs:
             rts
 
       - name: Install Packages (Windows)
-        uses: alandefreitas/cpp-actions/package-install@v1.8.10
+        uses: ashtum/cpp-actions/package-install@v1.8.13
         if: ${{ startsWith(matrix.runs-on, 'windows') }}
         id: package-install-windows
         with:
@@ -916,6 +916,11 @@ jobs:
 
           toolchain=$(echo "$GITHUB_WORKSPACE/vcpkg-root/scripts/buildsystems/vcpkg.cmake" | sed 's/\/d\//D:\//g' )
           echo "toolchain=${toolchain}" >> $GITHUB_OUTPUT
+
+      - name: Patch user-config.jam (macOS)
+        if: ${{ startsWith(matrix.runs-on, 'macOS') }}
+        run: |
+          echo "using openssl : : <include>\"$(brew --prefix openssl)/include\" <search>\"$(brew --prefix openssl)/lib\" ;" >> user-config.jam
 
       - name: ASLR Fix
         if: ${{ startsWith(matrix.runs-on, 'ubuntu' )}}
@@ -958,7 +963,7 @@ jobs:
           cp -r "$workspace_root"/rts-root libs/rts
 
       - name: Boost B2 Workflow
-        uses: alandefreitas/cpp-actions/b2-workflow@v1.8.10
+        uses: ashtum/cpp-actions/b2-workflow@v1.8.13
         if: ${{ !matrix.coverage && !matrix.time-trace }}
         env:
           ASAN_OPTIONS: ${{ (startsWith(matrix.compiler, 'apple-clang') && 'detect_invalid_pointer_pairs=0') || 'detect_invalid_pointer_pairs=2' }}
@@ -975,11 +980,12 @@ jobs:
           shared: ${{ matrix.shared }}
           rtti: ${{ (matrix.is-latest && 'on,off') || 'on' }}
           cxxflags: ${{ (matrix.asan && '-fsanitize=pointer-subtract') || '' }}
-          user-config: ${{ (startsWith(matrix.runs-on, 'windows') && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
+          user-config: ${{ ((startsWith(matrix.runs-on, 'windows') || startsWith(matrix.runs-on, 'macOS')) && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
           stop-on-error: true
+          extra-args: "libs/http_io/example" # https://github.com/ashtum/cpp-actions/issues/23
 
       - name: Boost CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
+        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
         if: ${{ matrix.coverage || matrix.time-trace || matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root
@@ -1016,7 +1022,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/.local/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Find Package Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
+        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -1040,7 +1046,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Subdirectory Integration Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
+        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -1061,7 +1067,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Root Project CMake Workflow
-        uses: alandefreitas/cpp-actions/cmake-workflow@v1.8.10
+        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}
@@ -1084,7 +1090,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: FlameGraph
-        uses: alandefreitas/cpp-actions/flamegraph@v1.8.10
+        uses: ashtum/cpp-actions/flamegraph@v1.8.13
         if: matrix.time-trace
         with:
           source-dir: boost-root/libs/http_io
@@ -1137,7 +1143,7 @@ jobs:
           fetch-depth: 100
 
       - name: Changelog
-        uses: alandefreitas/cpp-actions/create-changelog@v1.8.10
+        uses: ashtum/cpp-actions/create-changelog@v1.8.13
         with:
           thank-non-regular: ${{ startsWith(github.ref, 'refs/tags/') }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -1159,7 +1165,7 @@ jobs:
         shell: bash
     steps:
       - name: Install packages
-        uses: alandefreitas/cpp-actions/package-install@v1.8.7
+        uses: ashtum/cpp-actions/package-install@v1.8.13
         with:
           apt-get: git cmake
 
@@ -1190,7 +1196,7 @@ jobs:
           ref: develop
 
       - name: Clone Boost
-        uses: alandefreitas/cpp-actions/boost-clone@v1.8.10
+        uses: ashtum/cpp-actions/boost-clone@v1.8.13
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}

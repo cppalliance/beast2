@@ -7,18 +7,13 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#include "logger.hpp"
-#include <iostream>
-#include <mutex>
+#include <boost/http_io/server/workers.hpp>
 
-void
-section::
-write(
-    int level,
-    boost::core::string_view s)
-{
-    (void)level;
-    static std::mutex m;
-    std::lock_guard<std::mutex> lock(m);
-    std::cerr << s << std::endl;
-}
+namespace boost {
+namespace http_io {
+
+workers_base::
+~workers_base() = default;
+
+} // http_io
+} // boost

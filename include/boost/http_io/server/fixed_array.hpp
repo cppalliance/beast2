@@ -7,10 +7,12 @@
 // Official repository: https://github.com/cppalliance/http_io
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_FIXED_ARRAY_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_FIXED_ARRAY_HPP
+#ifndef BOOST_HTTP_IO_SERVER_FIXED_ARRAY_HPP
+#define BOOST_HTTP_IO_SERVER_FIXED_ARRAY_HPP
 
+#include <boost/http_io/detail/config.hpp>
 #include <boost/core/span.hpp>
+#include <boost/assert.hpp>
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
@@ -90,6 +92,13 @@ public:
         swap(*this, temp);
         swap(other, *this);
         return *this;
+    }
+
+    /** Return the number of elements
+    */
+    std::size_t size() const noexcept
+    {
+        return n_;
     }
 
     /** Return a typed span of elements
@@ -216,10 +225,53 @@ public:
         return n_ >= cap_;
     }
 
+    /** Return a pointer to the beginning of the array
+    */
+    T* data() noexcept
+    {
+        return t_;
+    }
+
+    /** Return a pointer to the beginning of the array
+    */
+    T const* data() const noexcept
+    {
+        return t_;
+    }   
+
+    reference operator[](std::size_t i)
+    {
+        BOOST_ASSERT(i < n_);
+        return t_[i];
+    }
+
+    const_reference operator[](std::size_t i) const
+    {
+        BOOST_ASSERT(i < n_);
+        return t_[i];
+    }
+
+    reference at(std::size_t i)
+    {
+        if(i < n_)
+            return t_[i];
+        // VFALCO use detail::throw_out_of_range when it is available
+        throw std::out_of_range("i >= size()");
+    }
+
+    const_reference at(std::size_t i) const
+    {
+        if(i < n_)
+            return t_[i];
+        // VFALCO use detail::throw_out_of_range when it is available
+        throw std::out_of_range("i >= size()");
+    }
+
     template<class... Args>
-    T& append(Args&&... args)
+    T& emplace_back(Args&&... args)
     {
         if(is_full())
+            // VFALCO use detail::throw_out_of_range when it is available
             throw std::out_of_range("full");
         auto p = t_ + n_;
         ::new(p) T(std::forward<Args>(args)...);
@@ -261,10 +313,6 @@ private:
 //#endif
 #endif
 
-    T* t_ = nullptr;
-    std::size_t n_;
-    std::size_t cap_;
-
     friend class any_fixed_array;
 
     fixed_array(
@@ -275,6 +323,9 @@ private:
     {
     }
 
+    T* t_ = nullptr;
+    std::size_t n_;
+    std::size_t cap_;
 };
 
 #endif

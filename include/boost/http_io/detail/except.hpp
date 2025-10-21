@@ -20,6 +20,9 @@ namespace detail {
 BOOST_HTTP_IO_DECL void BOOST_NORETURN throw_logic_error(
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
+BOOST_HTTP_IO_DECL void BOOST_NORETURN throw_invalid_argument(
+    source_location const& loc = BOOST_CURRENT_LOCATION);
+
 } // detail
 } // http_io
 } // boost

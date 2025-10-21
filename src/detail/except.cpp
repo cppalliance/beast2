@@ -26,6 +26,16 @@ throw_logic_error(
         loc);
 }
 
+void
+throw_invalid_argument(
+    source_location const& loc)
+{
+    throw_exception(
+        std::invalid_argument(
+            "invalid argument"),
+        loc);
+}
+
 } // detail
 } // http_io
 } // boost

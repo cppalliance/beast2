@@ -22,6 +22,7 @@ project
       <source>../../../url/extra/test_suite/test_suite.cpp
       <include>.
       <include>../../../url/extra/test_suite
+      <include>../../example/include
       <warnings>extra
       <warnings-as-errors>on
       <target-os>darwin,<undefined-sanitizer>norecover:<link>static
@@ -32,15 +33,17 @@ project
     ;
 
 local SOURCES =
+    beast.cpp
     body_read_stream.cpp
     buffer.cpp
+    client.cpp
     read.cpp
     sandbox.cpp
     write.cpp
+    server/fixed_array.cpp
     ;
 
 for local f in $(SOURCES)
 {
     run $(f) : : : ;
-#    run $(f) : target-name $(f:B)_ ;
 }

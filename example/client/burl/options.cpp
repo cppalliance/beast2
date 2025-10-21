@@ -783,7 +783,7 @@ parse_args(int argc, char* argv[])
                 if(!url.has_value())
                     return boost::optional<glob_result>{};
                 return boost::optional<glob_result>(
-                    { std::exchange(url, {}).value(), {} });
+                    glob_result{ std::exchange(url, {}).value(), {} });
             };
         };
 
@@ -830,11 +830,11 @@ parse_args(int argc, char* argv[])
             auto& request_info = requests.back();
             if(auto o = request_info.url_gen())
             {
-                return request_opt(
+                return request_opt{
                     o->result,
                     o->interpolate(request_info.output),
                     request_info.input,
-                    request_info.remotename);
+                    request_info.remotename };
             }
             requests.pop_back();
         }

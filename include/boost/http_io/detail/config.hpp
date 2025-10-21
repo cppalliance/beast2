@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/vinniefalco/http_io
+// Official repository: https://github.com/cppalliance/http_io
 //
 
 #ifndef BOOST_HTTP_IO_DETAIL_CONFIG_HPP
@@ -13,6 +13,7 @@
 #include <boost/config.hpp>
 
 namespace boost {
+namespace http_io {
 
 # if (defined(BOOST_HTTP_IO_DYN_LINK) || defined(BOOST_ALL_DYN_LINK)) && !defined(BOOST_HTTP_IO_STATIC_LINK)
 #  if defined(BOOST_HTTP_IO_SOURCE)
@@ -35,19 +36,22 @@ namespace boost {
 #  include <boost/config/auto_link.hpp>
 # endif
 
-/*
-// lift grammar into our namespace
-namespace urls {
-namespace grammar {}
-}
-namespace http_proto {
-namespace grammar = ::boost::urls::grammar;
-} // http_proto
-*/
+// Add source location to error codes
+#ifdef BOOST_HTTP_IO_NO_SOURCE_LOCATION
+# define BOOST_HTTP_IO_ERR(ev) (::boost::system::error_code(ev))
+# define BOOST_HTTP_IO_RETURN_EC(ev) return (ev)
+#else
+# define BOOST_HTTP_IO_ERR(ev) ( \
+    ::boost::system::error_code( (ev), [] { \
+    static constexpr auto loc((BOOST_CURRENT_LOCATION)); \
+    return &loc; }()))
+# define BOOST_HTTP_IO_RETURN_EC(ev)                                  \
+    do {                                                                 \
+        static constexpr auto loc ## __LINE__((BOOST_CURRENT_LOCATION)); \
+        return ::boost::system::error_code((ev), &loc ## __LINE__);      \
+    } while(0)
+#endif
 
-namespace http_proto {}
-namespace http_io {
-namespace http_proto = ::boost::http_proto;
 } // http_io
 } // boost
 

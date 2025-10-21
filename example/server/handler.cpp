@@ -22,9 +22,13 @@
 #include <iostream>
 
 namespace boost {
+namespace http_io {
+
+//------------------------------------------------
 
 /// Returns the current system time formatted as an HTTP-date per RFC 9110 §5.6.7.
 /// Example: "Sat, 11 Oct 2025 02:12:34 GMT"
+static
 std::string
 make_http_date()
 {
@@ -48,7 +52,7 @@ make_http_date()
     };
 
     // Format strictly according to RFC 9110 (fixed-width, English locale)
-    char buf[30];
+    char buf[40];
     std::snprintf(
         buf, sizeof(buf),
         "%s, %02d %s %04d %02d:%02d:%02d GMT",
@@ -104,6 +108,7 @@ prepare_error(
 //------------------------------------------------
 
 // Return a reasonable mime type based on the extension of a file.
+static
 core::string_view
 get_extension(
     core::string_view path) noexcept
@@ -114,6 +119,7 @@ get_extension(
     return path.substr(pos);
 }
 
+static
 core::string_view
 mime_type(
     core::string_view path)
@@ -146,38 +152,38 @@ mime_type(
 
 // Append an HTTP rel-path to a local filesystem path.
 // The returned path is normalized for the platform.
+static
 void
 path_cat(
     std::string& result,
-    core::string_view base,
-    core::string_view path)
+    core::string_view prefix,
+    urls::segments_view suffix)
 {
-    if(base.empty())
-    {
-        result = path;
-        return;
-    }
-    result = base;
+    result = prefix;
 
 #ifdef BOOST_MSVC
     char constexpr path_separator = '\\';
-    if(result.back() == path_separator)
-        result.resize(result.size() - 1);
-    result.append(path.data(), path.size());
-    for(auto& c : result)
-        if(c == '/')
-            c = path_separator;
 #else
     char constexpr path_separator = '/';
-    if(result.back() == path_separator)
-        result.resize(result.size() - 1);
-    result.append(path.data(), path.size());
 #endif
+    if( result.back() == path_separator)
+        result.resize(result.size() - 1); // remove trailing
+#ifdef BOOST_MSVC
+    for(auto& c : result)
+        if( c == '/')
+            c = path_separator;
+#endif
+    for(auto const& seg : suffix)
+    {
+        result.push_back(path_separator);
+        result.append(seg);
+    }
 }
 
 //------------------------------------------------
 
-void
+static
+bool
 make_error_response(
     http_proto::status code,
     http_proto::request_base const& req,
@@ -236,9 +242,12 @@ make_error_response(
 
     sr.start(res, http_proto::string_body(
         std::move(body)));
+
+    return false;
 }
 
-void
+static
+bool
 service_unavailable(
     http_proto::response& res,
     http_proto::serializer& sr,
@@ -285,18 +294,20 @@ service_unavailable(
         res,
         http_proto::string_body(
             std::move(s)));
+    return false;
 }
 
 //------------------------------------------------
 
-void
-handle_request(
-    core::string_view doc_root,
-    work_params const& params)
+bool
+file_responder::
+operator()(
+    Request& req,
+    Response& res) const
 {
-    if(params.is_shutting_down)
+    if(req.is_shutting_down)
         return service_unavailable(
-            params.res, params.sr, params.req);
+            res.res, res.sr, req.req);
 
 #if 0
     // Returns a server error response
@@ -314,17 +325,15 @@ handle_request(
 #endif
 
     // Request path must be absolute and not contain "..".
-    if( params.req.target().empty() ||
-        params.req.target()[0] != '/' ||
-        params.req.target().find("..") != core::string_view::npos)
+    if( req.req.target().empty() ||
+        req.req.target()[0] != '/' ||
+        req.req.target().find("..") != core::string_view::npos)
         return make_error_response(http_proto::status::bad_request,
-            params.req, params.res, params.sr);
+            req.req, res.res, res.sr);
 
     // Build the path to the requested file
     std::string path; 
-    path_cat(path, doc_root, params.req.target());
-    if(params.req.target().back() == '/')
-        path.append("index.html");
+    path_cat(path, doc_root_, req.path);
 
     // Attempt to open the file
     system::error_code ec;
@@ -335,61 +344,57 @@ handle_request(
         size = f.size(ec);
     if(! ec.failed())
     {
-        params.res.set_start_line(
+        res.res.set_start_line(
             http_proto::status::ok,
-            params.req.version());
-        params.res.set(http_proto::field::server, "Boost");
-        params.res.set_keep_alive(params.req.keep_alive());
-        params.res.set_payload_size(size);
+            req.req.version());
+        res.res.set(http_proto::field::server, "Boost");
+        res.res.set_keep_alive(req.req.keep_alive());
+        res.res.set_payload_size(size);
 
         auto mt = mime_type(get_extension(path));
-        params.res.append(
+        res.res.append(
             http_proto::field::content_type, mt);
 
-        params.sr.start<http_proto::file_source>(
-            params.res, std::move(f), size);
-        return;
+        res.sr.start<http_proto::file_source>(
+            res.res, std::move(f), size);
+        return false;
     }
 
     if(ec == system::errc::no_such_file_or_directory)
         return make_error_response(
             http_proto::status::not_found,
-                params.req, params.res, params.sr);
+                req.req, res.res, res.sr);
 
     // ec.message()?
     return make_error_response(
         http_proto::status::internal_server_error,
-            params.req, params.res, params.sr);
-}
-
-void
-handle_https_redirect(
-    work_params const& params)
-{
-    if(params.is_shutting_down)
-        return service_unavailable(
-            params.res, params.sr, params.req);
-
-    std::string body;
-    prepare_error(params.res, body,
-        http_proto::status::moved_permanently, params.req);
-    urls::url u1(params.req.target());
-    u1.set_scheme_id(urls::scheme::https);
-    u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
-    params.res.append(http_proto::field::location, u1.buffer());
-    params.sr.start(params.res,
-        http_proto::string_body( std::move(body)));
+            req.req, res.res, res.sr);
 }
 
 //------------------------------------------------
 
-void
-file_work_handler::
-on_request(
-    work_params const& params) const
+bool
+https_redirect_responder::
+operator()(
+    Request& req,
+    Response& res) const
 {
-    handle_request(doc_root_, params);
+    if(req.is_shutting_down)
+        return service_unavailable(
+            res.res, res.sr, req.req);
+
+    std::string body;
+    prepare_error(res.res, body,
+        http_proto::status::moved_permanently, req.req);
+    urls::url u1(req.req.target());
+    u1.set_scheme_id(urls::scheme::https);
+    u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
+    res.res.append(http_proto::field::location, u1.buffer());
+    res.sr.start(res.res,
+        http_proto::string_body( std::move(body)));
+    return false;
 }
 
+} // http_io
 } // boost
 

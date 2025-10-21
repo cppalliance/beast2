@@ -22,9 +22,24 @@ set_property(TARGET http_io_server_example
     PROPERTY FOLDER "examples")
 
 find_package(OpenSSL REQUIRED)
-target_link_libraries(http_io_server_example
+target_include_directories(http_io_server_example PRIVATE .)
+target_link_libraries(
+    http_io_server_example
     Boost::http_io
     Boost::url
     OpenSSL::SSL
     OpenSSL::Crypto
     )
+
+if (WIN32)
+    target_link_libraries(http_io_server_example crypt32)
+endif()
+
+if (TARGET Boost::rts_zlib)
+    target_link_libraries(http_io_server_example Boost::rts_zlib)
+endif()
+
+if (TARGET Boost::rts_brotli)
+    target_link_libraries(http_io_server_example Boost::rts_brotli)
+endif()
+
