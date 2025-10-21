@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016-2019 Vinnie Falco (vinnie dot falco at gmail dot com)
+// Copyright (c) 2025 Mohammad Nejati
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -62,7 +63,15 @@ public:
                 {
                     pr_.parse(ec);
                     if(ec == http_proto::condition::need_more_input)
+                    {
+                        // specific to http_io::async_read_some
+                        if(total_bytes_ != 0 && condition_(pr_))
+                        {
+                            ec = {};
+                            goto upcall;
+                        }
                         break;
+                    }
                     if(ec.failed() || condition_(pr_))
                     {
                         if(total_bytes_ == 0)
