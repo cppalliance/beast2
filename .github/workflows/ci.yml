@@ -8,7 +8,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/cppalliance/beast2/
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 name: CI
@@ -1005,7 +1005,7 @@ jobs:
           extra-args: |
             -D Boost_VERBOSE=ON
             -D BOOST_INCLUDE_LIBRARIES="${{ steps.patch.outputs.module }}"
-            -D BOOST_HTTP_IO_BUILD_TESTS=ON
+            -D BOOST_BEAST2_BUILD_TESTS=ON
           export-compile-commands: ${{ matrix.time-trace }}
           package: false
           package-artifact: false

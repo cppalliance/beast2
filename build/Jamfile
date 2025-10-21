@@ -19,7 +19,7 @@ constant c11-requires :
     ]
     ;
 
-path-constant HTTP_IO_ROOT : .. ;
+path-constant BEAST2_ROOT : .. ;
 
 explicit
     [ searched-lib ws2_32 : : <target-os>windows ] # NT
@@ -29,13 +29,13 @@ explicit
 project boost/beast2
     : common-requirements
       $(c11-requires)
-      <link>shared:<define>BOOST_HTTP_IO_DYN_LINK=1
-      <link>static:<define>BOOST_HTTP_IO_STATIC_LINK=1
+      <link>shared:<define>BOOST_BEAST2_DYN_LINK=1
+      <link>static:<define>BOOST_BEAST2_STATIC_LINK=1
       <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
       <target-os>windows,<toolset>gcc:<library>ws2_32
       <target-os>windows,<toolset>gcc:<library>mswsock
       <target-os>windows,<toolset>gcc-cygwin:<define>__USE_W32_SOCKETS
-    : source-location $(HTTP_IO_ROOT)
+    : source-location $(BEAST2_ROOT)
     ;
 
 alias beast2_sources : [ glob-tree-ex ./src : *.cpp ] ;
@@ -48,7 +48,7 @@ lib boost_beast2
      <library>/boost//http_proto
      <library>/boost//url
      <include>../
-     <define>BOOST_HTTP_IO_SOURCE
+     <define>BOOST_BEAST2_SOURCE
    : usage-requirements
      <library>/boost//http_proto
    ;
