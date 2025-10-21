@@ -1,10 +1,10 @@
 {
-    "key": "http_io",
-    "name": "Http.Io",
+    "key": "beast2",
+    "name": "Beast2",
     "authors": [
         "Vinnie Falco"
     ],
-    "description": "HTTP/1 using Asio in C++11",
+    "description": "HTTP/1 and WebSocket using Asio in C++11",
     "category": [
         "Networking"
     ],

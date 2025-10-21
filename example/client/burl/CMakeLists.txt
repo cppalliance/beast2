@@ -4,7 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/cppalliance/http_io
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 if (CMAKE_CXX_STANDARD EQUAL 20)
@@ -25,7 +25,7 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
     find_package(OpenSSL REQUIRED)
 
     target_link_libraries(http_io_example_client_burl
-        Boost::http_io
+        Boost::beast2
         Boost::url
         Boost::program_options
         Boost::scope

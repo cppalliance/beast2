@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <explicit-failures-markup>
-    <!-- http_io -->
-    <library name="http_io">
+    <!-- beast2 -->
+    <library name="beast2">
         <mark-unusable>
             <toolset name="*c++98"/>
             <toolset name="*gnu98"/>

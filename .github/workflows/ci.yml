@@ -8,7 +8,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/cppalliance/http_io/
+# Official repository: https://github.com/cppalliance/beast2/
 #
 
 name: CI
@@ -880,7 +880,7 @@ jobs:
             buffers-root
             rts-root
           scan-modules-ignore: |
-            http_io
+            beast2
             http_proto
             buffers
             rts
@@ -969,7 +969,7 @@ jobs:
           ASAN_OPTIONS: ${{ (startsWith(matrix.compiler, 'apple-clang') && 'detect_invalid_pointer_pairs=0') || 'detect_invalid_pointer_pairs=2' }}
         with:
           source-dir: boost-root
-          modules: http_io
+          modules: beast2
           toolset: ${{ matrix.b2-toolset }}
           build-variant: ${{ matrix.build-type }}
           cxx: ${{ steps.setup-cpp.outputs.cxx || matrix.cxx || '' }}
@@ -982,7 +982,7 @@ jobs:
           cxxflags: ${{ (matrix.asan && '-fsanitize=pointer-subtract') || '' }}
           user-config: ${{ ((startsWith(matrix.runs-on, 'windows') || startsWith(matrix.runs-on, 'macOS')) && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
           stop-on-error: true
-          extra-args: "libs/http_io/example" # https://github.com/ashtum/cpp-actions/issues/23
+          extra-args: "libs/beast2/example" # https://github.com/ashtum/cpp-actions/issues/23
 
       - name: Boost CMake Workflow
         uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
@@ -1009,7 +1009,7 @@ jobs:
           export-compile-commands: ${{ matrix.time-trace }}
           package: false
           package-artifact: false
-          ref-source-dir: boost-root/libs/http_io
+          ref-source-dir: boost-root/libs/beast2
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Set Path
@@ -1041,7 +1041,7 @@ jobs:
           extra-args: |
             -D BOOST_CI_INSTALL_TEST=ON
             -D CMAKE_PREFIX_PATH=${{ steps.patch.outputs.workspace_root }}/.local
-          ref-source-dir: boost-root/libs/http_io
+          ref-source-dir: boost-root/libs/beast2
           trace-commands: true
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
@@ -1063,7 +1063,7 @@ jobs:
           install: false
           cmake-version: '>=3.20'
           extra-args: -D BOOST_CI_INSTALL_TEST=OFF
-          ref-source-dir: boost-root/libs/http_io/test/cmake_test
+          ref-source-dir: boost-root/libs/beast2/test/cmake_test
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Root Project CMake Workflow
@@ -1093,7 +1093,7 @@ jobs:
         uses: ashtum/cpp-actions/flamegraph@v1.8.13
         if: matrix.time-trace
         with:
-          source-dir: boost-root/libs/http_io
+          source-dir: boost-root/libs/beast2
           build-dir: boost-root/__build_cmake_test__
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -1209,7 +1209,7 @@ jobs:
             buffers-root
             rts-root
           scan-modules-ignore: |
-            http_io
+            beast2
             http_proto
             buffers
             rts
@@ -1265,7 +1265,7 @@ jobs:
           
           BOOST_SRC_DIR="$(pwd)/boost-root"
           export BOOST_SRC_DIR
-          cd boost-root/libs/http_io
+          cd boost-root/libs/beast2
           
           cd doc
           bash ./build_antora.sh
@@ -1280,4 +1280,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: antora-docs-${{ matrix.name }}
-          path: boost-root/libs/http_io/doc/build/site
+          path: boost-root/libs/beast2/doc/build/site
