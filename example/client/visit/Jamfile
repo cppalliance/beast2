@@ -5,12 +5,12 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/cppalliance/http_io
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 project
     : requirements
-      <library>/boost/http_io//boost_http_io
+      <library>/boost/beast2//boost_beast2
       <library>/boost/url//boost_url
       <include>.
       <define>BOOST_ASIO_NO_DEPRECATED

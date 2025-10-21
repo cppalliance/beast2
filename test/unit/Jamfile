@@ -4,7 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/cppalliance/http_io
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 import testing ;
@@ -15,7 +15,7 @@ using openssl ;
 project
     : requirements
       $(c11-requires)
-      <library>/boost/http_io//boost_http_io
+      <library>/boost/beast2//boost_beast2
       <library>/boost/beast//boost_beast/<warnings-as-errors>off
       [ ac.check-library /openssl//ssl/<warnings-as-errors>off : <library>/openssl//ssl/<warnings-as-errors>off : ]
       <source>../../../url/extra/test_suite/test_main.cpp

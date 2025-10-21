@@ -4,7 +4,7 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-# Official repository: https://github.com/CPPAlliance/http_io
+# Official repository: https://github.com/cppalliance/beast2
 #
 
 import ../../config/checks/config : requires ;
@@ -26,7 +26,7 @@ explicit
     [ searched-lib mswsock : : <target-os>windows ] # NT
     ;
 
-project boost/http_io
+project boost/beast2
     : common-requirements
       $(c11-requires)
       <link>shared:<define>BOOST_HTTP_IO_DYN_LINK=1

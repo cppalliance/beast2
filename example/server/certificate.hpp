@@ -4,11 +4,11 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_CERTIFICATE_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_CERTIFICATE_HPP
+#ifndef BOOST_BEAST2_EXAMPLE_SERVER_CERTIFICATE_HPP
+#define BOOST_BEAST2_EXAMPLE_SERVER_CERTIFICATE_HPP
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -16,7 +16,7 @@
 #include <memory>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 /*  Load a signed certificate into the ssl context, and configure
     the context for use with a server.
@@ -30,7 +30,7 @@ void
 load_server_certificate(
     asio::ssl::context& ctx);
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

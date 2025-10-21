@@ -4,18 +4,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_SERVER_SERVER_ASIO_HPP
-#define BOOST_HTTP_IO_SERVER_SERVER_ASIO_HPP
+#ifndef BOOST_BEAST2_SERVER_SERVER_ASIO_HPP
+#define BOOST_BEAST2_SERVER_SERVER_ASIO_HPP
 
-#include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/server/server.hpp>
+#include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/server/server.hpp>
 #include <boost/asio/io_context.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 /** A server using Boost.Asio's I/O model
 */
@@ -28,15 +28,15 @@ public:
 
     /** Destructor
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     ~server_asio();
 
     /** Constructor
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     server_asio(int num_threads);
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     executor_type
     get_executor() noexcept;
 
@@ -44,12 +44,12 @@ public:
 
         This function blocks until the server is stopped.
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void run();
 
     /** Stop the server
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void stop() override;
 
 private:
@@ -61,7 +61,7 @@ private:
     impl* impl_;
 };
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

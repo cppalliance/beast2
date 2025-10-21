@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 #include "client.hpp"
@@ -17,7 +17,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <boost/http_io.hpp>
+#include <boost/beast2.hpp>
 #include <boost/http_proto/string_body.hpp>
 #include <boost/json/parse.hpp>
 #include <boost/rts/brotli/decode.hpp>
@@ -314,7 +314,7 @@ public:
         client_.sr_.start<json_source>(
             client_.req_, client_.jsr_, std::move(value));
 
-        http_io::async_write(
+        beast2::async_write(
             *client_.stream_, client_.sr_, std::move(self));
     }
 
@@ -332,12 +332,12 @@ public:
         {
             client_.pr_.start();
             BOOST_ASIO_CORO_YIELD
-            http_io::async_read_header(
+            beast2::async_read_header(
                 *client_.stream_, client_.pr_, std::move(self));
 
             client_.pr_.set_body<json_sink>(client_.jpr_);
             BOOST_ASIO_CORO_YIELD
-            http_io::async_read(
+            beast2::async_read(
                 *client_.stream_, client_.pr_, std::move(self));
 
             {
