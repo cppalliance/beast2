@@ -10,13 +10,13 @@
 #ifndef BOOST_HTTP_IO_BODY_READ_STREAM_HPP
 #define BOOST_HTTP_IO_BODY_READ_STREAM_HPP
 
-#include <boost/http_io/detail/config.hpp>
+#include <boost/beast2/detail/config.hpp>
 #include <boost/http_proto/parser.hpp>
 #include <boost/asio/async_result.hpp>
 #include <boost/system/error_code.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
     /** A body reader for HTTP/1 messages.
 
@@ -231,9 +231,9 @@ private:
     http_proto::parser& pr_;
 };
 
-} // http_io
+} // beast2
 } // boost
 
-#include <boost/http_io/impl/body_read_stream.hpp>
+#include <boost/beast2/impl/body_read_stream.hpp>
 
 #endif

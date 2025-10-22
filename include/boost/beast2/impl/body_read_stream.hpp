@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/vinniefalco/http_io
+// Official repository: https://github.com/vinniefalco/beast2
 //
 
 #ifndef BOOST_HTTP_IO_IMPL_BODY_READ_STREAM_HPP
@@ -15,14 +15,14 @@
 #include <boost/asio/buffers_iterator.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/read.hpp>
+#include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/read.hpp>
 #include <boost/http_proto/parser.hpp>
 #include <boost/system/error_code.hpp>
 
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 namespace detail {
 
@@ -65,7 +65,7 @@ public:
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "async_read_header"));
-                    http_io::async_read_header<
+                    beast2::async_read_header<
                         AsyncReadStream,
                         Self  > (
                         us_,
@@ -81,7 +81,7 @@ public:
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "async_read_some"));
-                    http_io::async_read_some(
+                    beast2::async_read_some(
                         us_,
                         pr_,
                         std::move(self));
@@ -90,7 +90,7 @@ public:
                     BOOST_ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "async_read"));
-                    http_io::async_read(
+                    beast2::async_read(
                         us_,
                         pr_,
                         std::move(self));
@@ -178,7 +178,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
         );
 }
 
-} // http_io
+} // beast2
 } // boost
 
 #endif
