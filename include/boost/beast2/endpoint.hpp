@@ -4,20 +4,20 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_ENDPOINT_HPP
-#define BOOST_HTTP_IO_ENDPOINT_HPP
+#ifndef BOOST_BEAST2_ENDPOINT_HPP
+#define BOOST_BEAST2_ENDPOINT_HPP
 
-#include <boost/http_io/detail/config.hpp>
+#include <boost/beast2/detail/config.hpp>
 #include <boost/url/ipv4_address.hpp>
 #include <boost/url/ipv6_address.hpp>
 #include <boost/url/host_type.hpp>
 #include <iosfwd>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 /** Represents a host and port
 
@@ -29,26 +29,26 @@ namespace http_io {
 class endpoint
 {
 public:
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     ~endpoint();
 
     endpoint() = default;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     endpoint(
         endpoint const& other) noexcept;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     endpoint(
         urls::ipv4_address const& addr,
         unsigned short port) noexcept;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     endpoint(
         urls::ipv6_address const& addr,
         unsigned short port) noexcept;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     endpoint& operator=(endpoint const&) noexcept;
 
     unsigned short
@@ -98,7 +98,7 @@ public:
     }
 
 private:
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void format(std::ostream&) const;
 
     urls::host_type kind_ = urls::host_type::none;
@@ -111,7 +111,7 @@ private:
 
 };
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

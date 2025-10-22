@@ -4,16 +4,16 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 // Test that header file is self-contained.
-#include <boost/http_io/write.hpp>
+#include <boost/beast2/write.hpp>
 
 #include "test_suite.hpp"
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 class any_async_read_stream
 {
@@ -36,7 +36,7 @@ public:
 
 TEST_SUITE(
     write_test,
-    "boost.http_io.write");
+    "boost.beast2.write");
 
-} // http_io
+} // beast2
 } // boost

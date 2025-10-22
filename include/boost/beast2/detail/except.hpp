@@ -4,27 +4,27 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_DETAIL_EXCEPT_HPP
-#define BOOST_HTTP_IO_DETAIL_EXCEPT_HPP
+#ifndef BOOST_BEAST2_DETAIL_EXCEPT_HPP
+#define BOOST_BEAST2_DETAIL_EXCEPT_HPP
 
 #include <boost/assert/source_location.hpp>
-#include <boost/http_io/detail/config.hpp>
+#include <boost/beast2/detail/config.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 namespace detail {
 
-BOOST_HTTP_IO_DECL void BOOST_NORETURN throw_logic_error(
+BOOST_BEAST2_DECL void BOOST_NORETURN throw_logic_error(
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
-BOOST_HTTP_IO_DECL void BOOST_NORETURN throw_invalid_argument(
+BOOST_BEAST2_DECL void BOOST_NORETURN throw_invalid_argument(
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
 } // detail
-} // http_io
+} // beast2
 } // boost
 
 #endif

@@ -4,17 +4,17 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_SERVER_IMPL_WORKERS_HPP
-#define BOOST_HTTP_IO_SERVER_IMPL_WORKERS_HPP
+#ifndef BOOST_BEAST2_SERVER_IMPL_WORKERS_HPP
+#define BOOST_BEAST2_SERVER_IMPL_WORKERS_HPP
 
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/prepend.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 template<class Executor, class Worker>
 struct workers<Executor, Worker>::
@@ -60,7 +60,7 @@ template<class Executor, class Worker>
 template<class Executor1, class... Args>
 workers<Executor, Worker>::
 workers(
-    http_io::server& srv,
+    beast2::server& srv,
     Executor1 const& ex,
     unsigned concurrency,
     std::size_t num_workers,
@@ -78,7 +78,7 @@ workers(
 }
 
 template<class Executor, class Worker>
-http_io::server&
+beast2::server&
 workers<Executor, Worker>::
 server() noexcept
 {
@@ -189,7 +189,7 @@ do_stop()
         w.w.cancel();
 }
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

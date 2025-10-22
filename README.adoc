@@ -2,33 +2,33 @@
 |===
 
 |Branch
-|https://github.com/cppalliance/http_io/tree/master[`master`]
-|https://github.com/cppalliance/http_io/tree/develop[`develop`]
+|https://github.com/cppalliance/beast2/tree/master[`master`]
+|https://github.com/cppalliance/beast2/tree/develop[`develop`]
 
 |https://develop.http-io.cpp.al/[Docs]
 |https://master.http-io.cpp.al/[image:https://img.shields.io/badge/docs-master-brightgreen.svg[Documentation]]
 |https://develop.http-io.cpp.al/[image:https://img.shields.io/badge/docs-develop-brightgreen.svg[Documentation]]
 
 |https://github.com/[GitHub Actions]
-|https://github.com/cppalliance/http_io/actions/workflows/ci.yml?query=branch%3Amaster[image:https://github.com/cppalliance/http_io/actions/workflows/ci.yml/badge.svg?branch=master[CI]]
-|https://github.com/cppalliance/http_io/actions/workflows/ci.yml?query=branch%3Adevelop[image:https://github.com/cppalliance/http_io/actions/workflows/ci.yml/badge.svg?branch=develop[CI]]
+|https://github.com/cppalliance/beast2/actions/workflows/ci.yml?query=branch%3Amaster[image:https://github.com/cppalliance/beast2/actions/workflows/ci.yml/badge.svg?branch=master[CI]]
+|https://github.com/cppalliance/beast2/actions/workflows/ci.yml?query=branch%3Adevelop[image:https://github.com/cppalliance/beast2/actions/workflows/ci.yml/badge.svg?branch=develop[CI]]
 
 
 |https://drone.io/[Drone]
-|https://drone.cpp.al/cppalliance/http_io/branches[image:https://drone.cpp.al/api/badges/cppalliance/http_io/status.svg?ref=refs/heads/master[Build Status]]
-|https://drone.cpp.al/cppalliance/http_io/branches[image:https://drone.cpp.al/api/badges/cppalliance/http_io/status.svg?ref=refs/heads/develop[Build Status]]
+|https://drone.cpp.al/cppalliance/beast2/branches[image:https://drone.cpp.al/api/badges/cppalliance/beast2/status.svg?ref=refs/heads/master[Build Status]]
+|https://drone.cpp.al/cppalliance/beast2/branches[image:https://drone.cpp.al/api/badges/cppalliance/beast2/status.svg?ref=refs/heads/develop[Build Status]]
 
 |https://codecov.io[Codecov]
-|https://app.codecov.io/gh/cppalliance/http_io/tree/master[image:https://codecov.io/gh/cppalliance/http_io/branch/master/graph/badge.svg[codecov]]
-|https://app.codecov.io/gh/cppalliance/http_io/tree/develop[image:https://codecov.io/gh/cppalliance/http_io/branch/develop/graph/badge.svg[codecov]]
+|https://app.codecov.io/gh/cppalliance/beast2/tree/master[image:https://codecov.io/gh/cppalliance/beast2/branch/master/graph/badge.svg[codecov]]
+|https://app.codecov.io/gh/cppalliance/beast2/tree/develop[image:https://codecov.io/gh/cppalliance/beast2/branch/develop/graph/badge.svg[codecov]]
 
 |===
 
-== boost.http_io
+== boost.beast2
 
 === Visual Studio Solution
 
 ```cpp
-cmake -G "Visual Studio 17 2022" -A win32 -B bin -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="C:/Users/vinnie/src/boost/libs/http_io/cmake/toolchains/msvc.cmake"
-cmake -G "Visual Studio 17 2022" -A x64 -B bin64 -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="C:/Users/vinnie/src/boost/libs/http_io/cmake/toolchains/msvc.cmake"
+cmake -G "Visual Studio 17 2022" -A win32 -B bin -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="C:/Users/vinnie/src/boost/libs/beast2/cmake/toolchains/msvc.cmake"
+cmake -G "Visual Studio 17 2022" -A x64 -B bin64 -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="C:/Users/vinnie/src/boost/libs/beast2/cmake/toolchains/msvc.cmake"
 ```

@@ -1,1 +1,1 @@
-* xref:reference:boost/http_io.adoc[Reference]
+* xref:reference:boost/beast2.adoc[Reference]

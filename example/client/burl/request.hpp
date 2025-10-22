@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 #ifndef BURL_REQUEST_HPP
@@ -14,8 +14,8 @@
 #include <boost/asio/deferred.hpp>
 #include <boost/asio/experimental/parallel_group.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/http_io/read.hpp>
-#include <boost/http_io/write.hpp>
+#include <boost/beast2/read.hpp>
+#include <boost/beast2/write.hpp>
 #include <boost/http_proto/response_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 
@@ -24,7 +24,7 @@
 
 namespace asio       = boost::asio;
 namespace ch         = std::chrono;
-namespace http_io    = boost::http_io;
+namespace beast2     = boost::beast2;
 namespace http_proto = boost::http_proto;
 using error_code     = boost::system::error_code;
 
@@ -74,12 +74,12 @@ public:
                 asio::enable_total_cancellation{});
 
             BOOST_ASIO_CORO_YIELD
-            http_io::async_write(stream_, serializer_, std::move(self));
+            beast2::async_write(stream_, serializer_, std::move(self));
 
             if(!ec)
             {
                 BOOST_ASIO_CORO_YIELD
-                http_io::async_read_header(stream_, parser_, std::move(self));
+                beast2::async_read_header(stream_, parser_, std::move(self));
                 return self.complete(ec);
             }
 
@@ -102,11 +102,11 @@ public:
                         {
                             return deferred
                                 .when(exp100->state != exp100::cancelled)
-                                .then(http_io::async_write(stream, serializer))
+                                .then(beast2::async_write(stream, serializer))
                                 .otherwise(deferred.values(
                                     error_code{}, std::size_t{ 0 }));
                         }),
-                http_io::async_read_header(stream_, parser_) |
+                beast2::async_read_header(stream_, parser_) |
                     deferred(
                         [&stream = stream_,
                          &parser = parser_,
@@ -127,7 +127,7 @@ public:
                             return deferred
                                 .when(exp100->state == exp100::received)
                                 .then(
-                                    http_io::async_read_header(stream, parser))
+                                    beast2::async_read_header(stream, parser))
                                 .otherwise(deferred.values(ec, n));
                         }))
                 .async_wait(

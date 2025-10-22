@@ -4,26 +4,26 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
-#define BOOST_HTTP_IO_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
+#ifndef BOOST_BEAST2_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
+#define BOOST_BEAST2_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
 
 #include "handler.hpp"
 
-#include <boost/http_io/detail/config.hpp>
-#include <boost/http_io/read.hpp>
-#include <boost/http_io/write.hpp>
-#include <boost/http_io/server/logger.hpp>
-#include <boost/http_io/server/router.hpp>
-#include <boost/http_io/server/server_asio.hpp>
+#include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/read.hpp>
+#include <boost/beast2/write.hpp>
+#include <boost/beast2/server/logger.hpp>
+#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/server_asio.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 //------------------------------------------------
 
@@ -67,7 +67,7 @@ private:
     void do_read()
     {
         pr_.start();
-        http_io::async_read(self().stream(), pr_,
+        beast2::async_read(self().stream(), pr_,
             call_mf(&http_responder::on_read, this));
     }
 
@@ -104,7 +104,7 @@ private:
         auto cont = rr_(req, res);
         BOOST_ASSERT(! cont);
 
-        http_io::async_write(self().stream(), sr_,
+        beast2::async_write(self().stream(), sr_,
             call_mf(&http_responder::on_write, this));
     }
 
@@ -173,7 +173,7 @@ protected:
     acceptor_config const* pconfig_ = nullptr;
 };
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

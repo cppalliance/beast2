@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 #include "any_iostream.hpp"
@@ -29,7 +29,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/buffers.hpp>
-#include <boost/http_io.hpp>
+#include <boost/beast2.hpp>
 #include <boost/http_proto.hpp>
 #include <boost/rts/brotli/decode.hpp>
 #include <boost/rts/zlib/inflate.hpp>
@@ -40,7 +40,7 @@
 
 #include <cstdlib>
 
-namespace http_io  = boost::http_io;
+namespace beast2   = boost::beast2;
 namespace scope    = boost::scope;
 using system_error = boost::system::system_error;
 
@@ -550,7 +550,7 @@ perform_request(
             // Open a new connection otherwise.
             parser.set_body_limit(32 * 1024);
             auto [ec, _] =
-                co_await http_io::async_read(stream, parser, asio::as_tuple);
+                co_await beast2::async_read(stream, parser, asio::as_tuple);
             if(ec)
                 goto reconnect;
         }
@@ -632,13 +632,13 @@ perform_request(
 
         if(output.is_tty() || oc.parallel_max > 1 || oc.noprogress)
         {
-            co_await http_io::async_read(stream, parser);
+            co_await beast2::async_read(stream, parser);
         }
         else
         {
             auto [order, ec, n, ep] =
                 co_await asio::experimental::make_parallel_group(
-                    http_io::async_read(stream, parser),
+                    beast2::async_read(stream, parser),
                     co_spawn(executor, report_progress(pm)))
                     .async_wait(
                         asio::experimental::wait_for_one{}, asio::deferred);

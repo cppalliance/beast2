@@ -4,19 +4,19 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_SERVER_SERVER_HPP
-#define BOOST_HTTP_IO_SERVER_SERVER_HPP
+#ifndef BOOST_BEAST2_SERVER_SERVER_HPP
+#define BOOST_BEAST2_SERVER_SERVER_HPP
 
-#include <boost/http_io/detail/config.hpp>
+#include <boost/beast2/detail/config.hpp>
 #include <boost/rts/context.hpp>
 #include <memory>
 #include <type_traits>
 
 namespace boost {
-namespace http_io {
+namespace beast2 {
 
 class log_sections;
 
@@ -41,7 +41,7 @@ public:
         part
     {
     public:
-        BOOST_HTTP_IO_DECL
+        BOOST_BEAST2_DECL
         virtual ~part();
 
         /** Called once when the server starts
@@ -61,24 +61,24 @@ public:
 
     /** Destructor
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     ~server();
 
     /** Constructor
     */
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     server();
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     bool is_stopping() const noexcept;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     rts::context& services() noexcept;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     log_sections& sections() noexcept;
 
-    BOOST_HTTP_IO_DECL
+    BOOST_BEAST2_DECL
     void install(std::unique_ptr<part> pp);
 
     /** Stop the server
@@ -91,9 +91,9 @@ protected:
         @par Thread Safety
         May not be called concurrently
     */
-    BOOST_HTTP_IO_DECL void do_start();
+    BOOST_BEAST2_DECL void do_start();
 
-    BOOST_HTTP_IO_DECL void do_stop();
+    BOOST_BEAST2_DECL void do_stop();
 
 private:
     enum state : char;
@@ -127,7 +127,7 @@ emplace_part(
     return part;
 }
 
-} // http_io
+} // beast2
 } // boost
 
 #endif

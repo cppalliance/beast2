@@ -4,7 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-// Official repository: https://github.com/cppalliance/http_io
+// Official repository: https://github.com/cppalliance/beast2
 //
 
 #include <boost/asio/connect.hpp>
@@ -13,7 +13,7 @@
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <boost/http_io.hpp>
+#include <boost/beast2.hpp>
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/response_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -181,12 +181,12 @@ private:
 
         // Send the HTTP request to the remote host
         if(secure_)
-            http_io::async_write(
+            beast2::async_write(
                 stream_,
                 sr_,
                 std::bind(&session::on_write, this, _1, _2));
         else
-            http_io::async_write(
+            beast2::async_write(
                 stream_.next_layer(),
                 sr_,
                 std::bind(&session::on_write, this, _1, _2));
@@ -208,12 +208,12 @@ private:
 
         // Receive the HTTP response header
         if(secure_)
-            http_io::async_read_header(
+            beast2::async_read_header(
                 stream_,
                 pr_,
                 std::bind(&session::on_read_header, this, _1, _2));
         else
-            http_io::async_read_header(
+            beast2::async_read_header(
                 stream_.next_layer(),
                 pr_,
                 std::bind(&session::on_read_header, this, _1, _2));
@@ -238,12 +238,12 @@ private:
 
         // Receive the HTTP response body
         if(secure_)
-            http_io::async_read(
+            beast2::async_read(
                 stream_,
                 pr_,
                 std::bind(&session::on_read, this, _1, _2));
         else
-            http_io::async_read(
+            beast2::async_read(
                 stream_.next_layer(),
                 pr_,
                 std::bind(&session::on_read, this, _1, _2));
@@ -288,7 +288,7 @@ private:
             // Read and discard bodies if they are <= 32KB
             // Open a new connection otherwise.
             pr_.set_body_limit(32 * 1024);
-            return http_io::async_read(
+            return beast2::async_read(
                 stream_,
                 pr_,
                 [this](system::error_code ec, std::size_t)

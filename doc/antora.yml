@@ -1,6 +1,6 @@
-name: http_io
+name: beast2
 version: ~
-title: Boost.Http.Io
+title: Boost.Beast2
 start_page: index.adoc
 asciidoc:
   attributes:

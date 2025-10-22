@@ -1,16 +1,16 @@
 site:
-  title: Boost.Http.Io
+  title: Boost.Beast2
   url: https://antora.cppalliance.org/develop/lib/doc
-  start_page: http_io::index.adoc
+  start_page: beast2::index.adoc
   robots: allow
   keys:
-    repo_url: 'https://github.com/cppalliance/http_io'
+    repo_url: 'https://github.com/cppalliance/beast2'
 
 content:
   sources:
     - url: ..
       start_path: doc
-      edit_url: 'https://github.com/cppalliance/http_io/edit/{refname}/{path}'
+      edit_url: 'https://github.com/cppalliance/beast2/edit/{refname}/{path}'
 
 ui:
   bundle:
