@@ -306,8 +306,11 @@ operator()(
     Response& res) const
 {
     if(req.is_shutting_down)
-        return service_unavailable(
+    {
+        service_unavailable(
             res.res, res.sr, req.req);
+        return true;
+    }
 
 #if 0
     // Returns a server error response
@@ -328,12 +331,20 @@ operator()(
     if( req.req.target().empty() ||
         req.req.target()[0] != '/' ||
         req.req.target().find("..") != core::string_view::npos)
-        return make_error_response(http_proto::status::bad_request,
+    {
+        make_error_response(http_proto::status::bad_request,
             req.req, res.res, res.sr);
+        return true;
+    }
 
     // Build the path to the requested file
-    std::string path; 
+    std::string path;
     path_cat(path, doc_root_, req.path);
+    if(req.pr.get().target().back() == '/')
+    {
+        path.push_back('/');
+        path.append("index.html");
+    }
 
     // Attempt to open the file
     system::error_code ec;
@@ -357,18 +368,22 @@ operator()(
 
         res.sr.start<http_proto::file_source>(
             res.res, std::move(f), size);
-        return false;
+        return true;
     }
 
     if(ec == system::errc::no_such_file_or_directory)
-        return make_error_response(
+    {
+        make_error_response(
             http_proto::status::not_found,
                 req.req, res.res, res.sr);
+        return true;
+    }
 
     // ec.message()?
-    return make_error_response(
+    make_error_response(
         http_proto::status::internal_server_error,
             req.req, res.res, res.sr);
+    return true;
 }
 
 //------------------------------------------------
@@ -380,8 +395,11 @@ operator()(
     Response& res) const
 {
     if(req.is_shutting_down)
-        return service_unavailable(
+    {
+        service_unavailable(
             res.res, res.sr, req.req);
+        return true;
+    }
 
     std::string body;
     prepare_error(res.res, body,
@@ -392,7 +410,7 @@ operator()(
     res.res.append(http_proto::field::location, u1.buffer());
     res.sr.start(res.res,
         http_proto::string_body( std::move(body)));
-    return false;
+    return true;
 }
 
 } // beast2

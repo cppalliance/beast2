@@ -101,9 +101,11 @@ private:
         };
 
         // invoke handlers for the route
-        auto cont = rr_(req, res);
-        BOOST_ASSERT(! cont);
-
+        auto handled = rr_(req, res);
+        if(! handled)
+        {
+            // give a default error response?
+        }
         beast2::async_write(self().stream(), sr_,
             call_mf(&http_responder::on_write, this));
     }
