@@ -35,6 +35,7 @@ project
 
 local SOURCES =
     beast.cpp
+    body_read_stream.cpp
     buffer.cpp
     client.cpp
     read.cpp
