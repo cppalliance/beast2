@@ -7,22 +7,11 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/server/staticfiles.hpp>
+#include <boost/beast2/server/serve_static.hpp>
+#include <boost/beast2/error.hpp>
 #include <boost/http_proto/file_source.hpp>
 #include <boost/url/grammar/ci_string.hpp>
 #include <string>
-
-#if 0
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/string_body.hpp>
-#include <boost/url/url.hpp>
-#include <boost/url/authority_view.hpp>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-#include <string>
-#include <iostream>
-#endif
 
 namespace boost {
 namespace beast2 {
@@ -104,31 +93,44 @@ path_cat(
 
 //------------------------------------------------
 
-struct staticfiles::impl
+// serve-static
+//
+// https://www.npmjs.com/package/serve-static
+
+struct serve_static::impl
 {
-    // server& srv;
+    impl(
+        core::string_view path_,
+        options const& opt_)
+        : path(path_)
+        , opt(opt_)
+    {
+    }
+
     std::string path;
+    options opt;
 };
 
-staticfiles::
-~staticfiles() = default;
+serve_static::
+~serve_static() = default;
 
-staticfiles::
-staticfiles(staticfiles&&) noexcept = default;
+serve_static::
+serve_static(serve_static&&) noexcept = default;
 
-staticfiles::
-staticfiles(
-    core::string_view path)
-    : impl_(new impl)
+serve_static::
+serve_static(
+    core::string_view path,
+    options const& opt)
+    : impl_(new impl(path, opt))
 {
-    impl_->path = std::string(path);
 }
 
-bool
-staticfiles::
+auto
+serve_static::
 operator()(
     Request& req,
-    Response& res) const
+    Response& res) const ->
+        system::error_code
 {
     // Request path must be absolute and not contain "..".
 #if 0
@@ -169,16 +171,17 @@ operator()(
         res.res.append(
             http_proto::field::content_type, mt);
 
+        // send file
         res.sr.start<http_proto::file_source>(
             res.res, std::move(f), size);
-        return true;
+        return {};
     }
 
-    if(ec == system::errc::no_such_file_or_directory)
-        return false;
+    if( ec == system::errc::no_such_file_or_directory &&
+        ! impl_->opt.fallthrough)
+        return error::next;
 
-    // VFALCO TODO perform next(err)
-    return false;
+    return ec;
 }
 
 } // beast2

@@ -11,10 +11,12 @@
 #define BOOST_BEAST2_SERVER_ROUTE_PARAMS_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/server/router.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/url/segments_encoded_view.hpp>
+#include <boost/system/error_code.hpp> // for return value
 
 namespace boost {
 namespace beast2 {
@@ -60,6 +62,8 @@ struct AsioResponse : Response
     {
     }
 };
+
+using router_type = router<Response>;
 
 } // beast2
 } // boost

@@ -10,8 +10,9 @@
 #include "certificate.hpp"
 #include "worker_ssl.hpp"
 #include <boost/beast2/server/server_asio.hpp>
-#include <boost/beast2/server/staticfiles.hpp>
+#include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/server/workers.hpp>
+#include <boost/beast2/error.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/rts/brotli/decode.hpp>
@@ -25,6 +26,11 @@
 
 namespace boost {
 namespace beast2 {
+
+system::error_code fh( Request&, Response& )
+{
+    return {};
+}
 
 int server_main( int argc, char* argv[] )
 {
@@ -93,9 +99,10 @@ int server_main( int argc, char* argv[] )
             {
                 res.res.set(http_proto::field::server, "Boost");
                 res.res.set_keep_alive(req.req.keep_alive());
-                return false;
+                return error::next;
             });
 
+#if 0
         // redirect HTTP to HTTPS
         app.use(
             [](Request& req, Response& res)
@@ -103,13 +110,16 @@ int server_main( int argc, char* argv[] )
                 if(! req.port.is_ssl)
                 {
                     https_redirect_responder()(req, res);
-                    return true;
+                    return {};
                 }
-                return false;
+                return error::next;
             });
+#endif
 
         // static route for website
-        app.get("/", staticfiles( doc_root ));
+        app.use("/", serve_static( doc_root ));
+        app.use("/alt", serve_static( doc_root ));
+        app.use("/test", fh);
 
         using workers_type =
             workers< executor_type, worker_ssl<executor_type> >;

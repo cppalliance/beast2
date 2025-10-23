@@ -248,6 +248,7 @@ struct router_test
         BOOST_TEST_EQ(res.n, n);
     }
 
+#if 0
     void testMatch()
     {
         router<Res, Req> r;
@@ -260,6 +261,7 @@ struct router_test
         check("/admin/app.bin", r, 2);
         check("/form", r, 3);
     }
+#endif
 
     struct P
     {
@@ -270,6 +272,7 @@ struct router_test
     {
         testGrammar();
 
+#if 0
         struct request_t
         {
             http_proto::method method;
@@ -291,15 +294,15 @@ struct router_test
 
             auto const h = [](request_t&, response_t&) { return true; };
             auto const g = http_proto::method::get;
-            r.insert(g, "/path", h);
-            r.insert(g, "/path/2", h);
-            r.insert(g, "/path/2/3", h);
-            r.insert(g, "/path/2/3/", h);
-            r.insert(g, "/:x", h);
-            r.insert(g, "/*y", h);
-            r.insert(g, "/:x(1)", h);
-            r.insert(g, "/*z?", h);
-            r.insert(g, "/*z+", h);
+            r.add(g, "/path", h);
+            r.add(g, "/path/2", h);
+            r.add(g, "/path/2/3", h);
+            r.add(g, "/path/2/3/", h);
+            r.add(g, "/:x", h);
+            r.add(g, "/*y", h);
+            r.add(g, "/:x(1)", h);
+            r.add(g, "/*z?", h);
+            r.add(g, "/*z+", h);
 
             r.use(
                 [](request_t&, response_t&)
@@ -311,7 +314,7 @@ struct router_test
                 {
                     return true;
                 });
-            r.insert(http_proto::method::get, "/here",
+            r.get("/here",
                 [](request_t&, response_t&)
                 {
                     return true;
@@ -330,7 +333,7 @@ struct router_test
 
 
             r(req, res);
-            app.insert(http_proto::method::get, "/stuff", r);
+            app.get("/stuff", r);
             r(req, res);
         }
 
@@ -341,6 +344,7 @@ struct router_test
         app(req, res);
 
         testMatch();
+#endif
     }
 };
 

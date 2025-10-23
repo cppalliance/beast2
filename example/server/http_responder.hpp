@@ -72,7 +72,7 @@ private:
     }
 
     void on_read(
-        system::error_code const& ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -101,9 +101,9 @@ private:
         };
 
         // invoke handlers for the route
-        auto handled = rr_(req, res);
-        BOOST_ASSERT(handled);
-        if(! handled)
+        ec = rr_(req, res);
+        BOOST_ASSERT(! ec.failed());
+        if(ec.failed())
         {
             // give a default error response?
         }
