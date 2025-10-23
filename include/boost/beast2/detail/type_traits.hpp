@@ -7,14 +7,17 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_DETAIL_CONFIG_HPP
-#define BOOST_BEAST2_DETAIL_CONFIG_HPP
+#ifndef BOOST_BEAST2_DETAIL_TYPE_TRAITS_HPP
+#define BOOST_BEAST2_DETAIL_TYPE_TRAITS_HPP
 
 #include <type_traits>
 
 namespace boost {
 namespace beast2 {
 namespace detail {
+
+template<class...> struct make_void { typedef void type; };
+template<class... Ts> using void_t = typename make_void<Ts...>::type;
 
 template<class Base, class Derived>
 using derived_from = std::integral_constant<bool,

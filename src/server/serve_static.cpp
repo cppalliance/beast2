@@ -7,22 +7,11 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/server/staticfiles.hpp>
+#include <boost/beast2/server/serve_static.hpp>
+#include <boost/beast2/error.hpp>
 #include <boost/http_proto/file_source.hpp>
 #include <boost/url/grammar/ci_string.hpp>
 #include <string>
-
-#if 0
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/string_body.hpp>
-#include <boost/url/url.hpp>
-#include <boost/url/authority_view.hpp>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-#include <string>
-#include <iostream>
-#endif
 
 namespace boost {
 namespace beast2 {
@@ -104,40 +93,67 @@ path_cat(
 
 //------------------------------------------------
 
-struct staticfiles::impl
+// serve-static
+//
+// https://www.npmjs.com/package/serve-static
+
+struct serve_static::impl
 {
-    // server& srv;
+    impl(
+        core::string_view path_,
+        options const& opt_)
+        : path(path_)
+        , opt(opt_)
+    {
+    }
+
     std::string path;
+    options opt;
 };
 
-staticfiles::
-~staticfiles() = default;
+serve_static::
+~serve_static() = default;
 
-staticfiles::
-staticfiles(staticfiles&&) noexcept = default;
+serve_static::
+serve_static(serve_static&&) noexcept = default;
 
-staticfiles::
-staticfiles(
-    core::string_view path)
-    : impl_(new impl)
+serve_static::
+serve_static(
+    core::string_view path,
+    options const& opt)
+    : impl_(new impl(path, opt))
 {
-    impl_->path = std::string(path);
 }
 
-bool
-staticfiles::
+auto
+serve_static::
 operator()(
     Request& req,
-    Response& res) const
+    Response& res) const ->
+        system::error_code
 {
+    // Allow: GET, HEAD
+    if( req.method != http_proto::method::get &&
+        req.method != http_proto::method::head)
+    {
+        if(impl_->opt.fallthrough)
+            return error::next;
+
+        res.m.set_status(
+            http_proto::status::method_not_allowed);
+        res.m.set(http_proto::field::allow, "GET, HEAD");
+        res.set_body("");
+        return error::success;
+    }
+
     // Request path must be absolute and not contain "..".
 #if 0
-    if( req.req.target().empty() ||
-        req.req.target()[0] != '/' ||
-        req.req.target().find("..") != core::string_view::npos)
+    if( req.m.target().empty() ||
+        req.m.target()[0] != '/' ||
+        req.m.target().find("..") != core::string_view::npos)
     {
         make_error_response(http_proto::status::bad_request,
-            req.req, res.res, res.sr);
+            req.m, res.m, res.sr);
         return true;
     }
 #endif
@@ -160,25 +176,26 @@ operator()(
         size = f.size(ec);
     if(! ec.failed())
     {
-        res.res.set_start_line(
+        res.m.set_start_line(
             http_proto::status::ok,
-            req.req.version());
-        res.res.set_payload_size(size);
+            req.m.version());
+        res.m.set_payload_size(size);
 
         auto mt = mime_type(get_extension(path));
-        res.res.append(
+        res.m.append(
             http_proto::field::content_type, mt);
 
+        // send file
         res.sr.start<http_proto::file_source>(
-            res.res, std::move(f), size);
-        return true;
+            res.m, std::move(f), size);
+        return {};
     }
 
-    if(ec == system::errc::no_such_file_or_directory)
-        return false;
+    if( ec == system::errc::no_such_file_or_directory &&
+        ! impl_->opt.fallthrough)
+        return error::next;
 
-    // VFALCO TODO perform next(err)
-    return false;
+    return ec;
 }
 
 } // beast2
