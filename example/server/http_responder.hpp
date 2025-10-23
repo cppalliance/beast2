@@ -102,6 +102,7 @@ private:
 
         // invoke handlers for the route
         auto handled = rr_(req, res);
+        BOOST_ASSERT(handled);
         if(! handled)
         {
             // give a default error response?

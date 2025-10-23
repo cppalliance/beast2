@@ -106,6 +106,9 @@ router_base::
 invoke(
     void* req, void* res) const
 {
+    // routing always continues matching until
+    // a handler indicates it handled the request
+
     // global handlers
     for(auto const& r : impl_->v0)
     {
@@ -132,9 +135,6 @@ invoke(
                 if(e->operator()(req, res))
                     return true;
             }
-
-            // no handler indicated it handled the request
-            return false;
         }
     }
 
