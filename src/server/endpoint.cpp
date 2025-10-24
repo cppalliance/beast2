@@ -14,22 +14,6 @@ namespace boost {
 namespace beast2 {
 
 endpoint::
-~endpoint()
-{
-    switch(kind_)
-    {
-    case urls::host_type::ipv4:
-        ipv4_.~ipv4_address();
-        break;
-    case urls::host_type::ipv6:
-        ipv6_.~ipv6_address();
-        break;
-    default:
-        break;
-    }
-}
-
-endpoint::
 endpoint(
     endpoint const& other) noexcept
     : kind_(other.kind_)
