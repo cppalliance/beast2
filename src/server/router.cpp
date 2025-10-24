@@ -21,6 +21,8 @@ namespace beast2 {
 
 router_base::any_handler::~any_handler() = default;
 
+router_base::any_errfn::~any_errfn() = default;
+
 //------------------------------------------------
 
 struct router_base::entry

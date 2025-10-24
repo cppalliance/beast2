@@ -120,7 +120,11 @@ int server_main( int argc, char* argv[] )
         app.use("/", serve_static( doc_root ));
         app.use("/alt", serve_static( doc_root ));
         app.use("/test", fh);
-
+        app.err(
+            [](Request& req, Response& res, system::error_code const& ec)
+            {
+                return system::error_code{};
+            });
         using workers_type =
             workers< executor_type, worker_ssl<executor_type> >;
 
