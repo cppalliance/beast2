@@ -10,12 +10,15 @@
 // Test that header file is self-contained.
 #include <boost/beast2/server/router.hpp>
 
+#include <boost/beast2/server/http_handler.hpp>
+
 #include "src/server/route_rule.hpp"
 
 #include "test_suite.hpp"
 
 namespace boost {
 namespace beast2 {
+
 
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<unreserved_char>::value);
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<ident_char>::value);
@@ -35,6 +38,39 @@ static bool operator==(
 
 struct router_test
 {
+    struct h0 { void operator()() {} };
+    struct h1 { system::error_code operator()() {} };
+    struct h2 { system::error_code operator()(int) {} };
+    struct h3 { system::error_code operator()(Request&, Response&) {} };
+    struct h4 { system::error_code operator()(Request&, Response&, system::error_code&) {} };
+    struct h5 { void operator()(Request&, Response&) {} };
+    struct h6 { void operator()(Request&, Response&, system::error_code) {} };
+    struct h7 { system::error_code operator()(Request&, Response&, int) {} };
+    struct h8 { system::error_code operator()(Request, Response&, int) {} };
+    struct h9 { system::error_code operator()(Request, Response&, system::error_code) {} };
+
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h0>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h1>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h2>::value);
+    BOOST_CORE_STATIC_ASSERT(  detail::is_handler<h3>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h4>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h5>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h6>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h7>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h8>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h9>::value);
+
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h0>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h1>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h2>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h3>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h4>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h5>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h6>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h7>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h8>::value);
+    BOOST_CORE_STATIC_ASSERT(  detail::is_error_handler<h9>::value);
+
     template<class T>
     static void good(core::string_view s, T const& t)
     {

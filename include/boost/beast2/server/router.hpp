@@ -11,24 +11,70 @@
 #define BOOST_BEAST2_SERVER_ROUTER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/any_lambda.hpp>
+#include <boost/beast2/detail/call_traits.hpp>
+#include <boost/beast2/detail/type_traits.hpp>
 #include <boost/http_proto/method.hpp>
 #include <boost/url/segments_encoded_view.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <memory>
+#include <type_traits>
 
 namespace boost {
 namespace beast2 {
 
 struct Request;
-
+struct Response;
+class router_base;
 template<class Response, class Request>
 class router;
 
 //------------------------------------------------
 
+namespace detail {
+
+template<class T, class = void>
+struct is_handler : std::false_type {};
+
+template<class T>
+struct is_handler<T> :
+    detail::is_invocable<T,
+    system::error_code, Request&, Response&>
+{
+};
+
+template<class T, class = void>
+struct is_error_handler : std::false_type {};
+
+template<class T>
+struct is_error_handler<T> :
+    detail::is_invocable<T,
+    system::error_code, Request&, Response&,
+    system::error_code>
+{
+};
+
+template<class T, class = void>
+struct is_router : std::false_type {};
+
+template<class T>
+struct is_router<T> :
+    detail::derived_from<T, router_base>
+{
+};
+
+} // detail
+
+//------------------------------------------------
+
 class router_base
 {
+public:
+    struct state
+    {
+    private:
+        long index_ = 0;
+    };
+
 protected:
     template<class, class> friend class fluent_route;
 
