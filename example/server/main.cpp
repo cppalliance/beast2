@@ -101,6 +101,12 @@ int server_main( int argc, char* argv[] )
                 return error::success;
             });
 
+        {
+            router_type r;
+            r.all("/vinnie", serve_static(doc_root) );
+            app.use("/user", std::move(r));
+        }
+
         app.err(
             []( Request& req, Response& res,
                 system::error_code const& ec)

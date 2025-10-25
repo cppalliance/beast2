@@ -112,7 +112,8 @@ private:
         res.m.set_keep_alive(pr_.get().keep_alive());
 
         // invoke handlers for the route
-        ec = rr_(req, res);
+        route_state_ = {};
+        ec = rr_(req, res, route_state_);
         //if(ec == error::next)
 
         if(ec.failed())
@@ -182,6 +183,7 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     router_type& rr_;
+    router_type::state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;

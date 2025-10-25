@@ -77,7 +77,7 @@ router_base(
 auto
 router_base::
 invoke(
-    void* req, void* res) const ->
+    void* req, void* res, state& st) const ->
         system::error_code
 {
     system::error_code ec;
@@ -103,7 +103,7 @@ invoke(
 
             auto const saved = path;
             // VFALCO TODO adjust path
-            ec = e.handler->operator()(req, res);
+            ec = e.handler->operator()(req, res, st);
             if( ! ec.failed() ||
                 ec == error::close ||
                 ec == error::detach)

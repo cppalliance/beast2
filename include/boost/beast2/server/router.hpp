@@ -58,7 +58,7 @@ struct is_router : std::false_type {};
 
 template<class T>
 struct is_router<T> :
-    detail::derived_from<T, router_base>
+    detail::derived_from<router_base, T>
 {
 };
 
@@ -88,7 +88,7 @@ protected:
         virtual ~any_handler();
 
         virtual system::error_code operator()(
-            void* req, void* res) const = 0;
+            void*, void*, state&) const = 0;
     };
 
     struct BOOST_SYMBOL_VISIBLE
@@ -105,7 +105,11 @@ protected:
     using errfn_ptr = std::unique_ptr<any_errfn>;
 
     // wrapper for route handlers
-    template<class Request, class Response, class Handler>
+    template<
+        class Request,
+        class Response,
+        class Handler,
+        class = void>
     struct handler_impl : any_handler
     {
         typename std::decay<Handler>::type h;
@@ -117,11 +121,37 @@ protected:
         }
 
         system::error_code operator()(
-            void* req, void* res) const override
+            void* req, void* res, state&) const override
         {
             return h(
                 *reinterpret_cast<Request*>(req),
                 *reinterpret_cast<Response*>(res));
+        }
+    };
+
+    // wrapper for route handlers
+    template<
+        class Request,
+        class Response,
+        class Handler>
+    struct handler_impl<Request, Response, Handler,
+        typename std::enable_if<detail::is_router<
+            typename std::decay<Handler>::type>::value>::type>
+        : any_handler
+    {
+        typename std::decay<Handler>::type h;
+
+        template<class... Args>
+        handler_impl(Args&&... args)
+            : h(std::forward<Args>(args)...)
+        {
+        }
+
+        system::error_code operator()(
+            void* req, void* res, state& st) const override
+        {
+            return h(*reinterpret_cast<Request*>(req),
+                *reinterpret_cast<Response*>(res), st);
         }
     };
 
@@ -148,11 +178,12 @@ protected:
     BOOST_BEAST2_DECL router_base(
         http_proto::method(*)(void*),
         urls::segments_encoded_view&(*)(void*));
-    BOOST_BEAST2_DECL system::error_code invoke(void*, void*) const;
+    BOOST_BEAST2_DECL system::error_code
+        invoke(void*, void*, state&) const;
     BOOST_BEAST2_DECL void append(bool, http_proto::method,
         core::string_view, handler_ptr);
     BOOST_BEAST2_DECL void append_err(errfn_ptr);
-    //void append(bool, http_proto::method, core::string_view) {}
+    void append(bool, http_proto::method, core::string_view) {}
 
     std::shared_ptr<impl> impl_;
 };
@@ -290,7 +321,7 @@ public:
         http_proto::method method,
         core::string_view pattern,
         H0&& h0, HN&&... hn) ->
-            fluent_route<Response, Request>&
+            fluent_route<Response, Request>
     {
         return fluent_route<Response, Request>(*this,
             pattern).add(method, std::forward<
@@ -345,10 +376,14 @@ public:
             std::forward<H0>(h0), std::forward<HN>(hn)...);
     }
 
-    system::error_code operator()(
-        Request& req, Response& res) const
+    auto
+    operator()(
+        Request& req,
+        Response& res,
+        state& st) const ->
+            system::error_code 
     {
-        return invoke(&req, &res);
+        return invoke(&req, &res, st);
     }
 
 private:
