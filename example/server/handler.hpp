@@ -11,39 +11,14 @@
 #define BOOST_BEAST2_EXAMPLE_SERVER_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/route_params.hpp>
-#include <boost/beast2/server/router.hpp>
-#include <boost/http_proto/request_base.hpp>
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/serializer.hpp>
-#include <boost/core/detail/string_view.hpp>
+#include <boost/beast2/server/http_handler.hpp>
 
 namespace boost {
 namespace beast2 {
 
-using router_type = router<Response>;
-
-//------------------------------------------------
-
 struct https_redirect_responder
 {
-    bool operator()(Request&, Response&) const;
-};
-
-//------------------------------------------------
-
-struct file_responder
-{
-    file_responder(
-        core::string_view doc_root)
-        : doc_root_(doc_root)
-    {
-    }
-
-    bool operator()(Request&, Response&) const;
-
-private:
-    std::string doc_root_;
+    system::error_code operator()(Request&, Response&) const;
 };
 
 } // beast2

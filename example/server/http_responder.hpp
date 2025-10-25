@@ -72,7 +72,7 @@ private:
     }
 
     void on_read(
-        system::error_code const& ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -86,6 +86,11 @@ private:
 
         BOOST_ASSERT(pr_.is_complete());
 
+        //----------------------------------------
+        //
+        // set up Request and Response objects
+        //
+
         Request req{
             pr_.get().method(),
             urls::segments_encoded_view(
@@ -95,14 +100,23 @@ private:
             pr_,
             self().server().is_stopping()
         };
+
         Response res{
             res_,
             sr_
         };
 
+        // copy keep-alive setting
+        res.m.set_start_line(
+            http_proto::status::ok, pr_.get().version());
+        res.m.set_keep_alive(pr_.get().keep_alive());
+
         // invoke handlers for the route
-        auto handled = rr_(req, res);
-        if(! handled)
+        route_state_ = {};
+        ec = rr_(req, res, route_state_);
+        //if(ec == error::next)
+
+        if(ec.failed())
         {
             // give a default error response?
         }
@@ -169,6 +183,7 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     router_type& rr_;
+    router_type::state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;
