@@ -86,6 +86,11 @@ private:
 
         BOOST_ASSERT(pr_.is_complete());
 
+        //----------------------------------------
+        //
+        // set up Request and Response objects
+        //
+
         Request req{
             pr_.get().method(),
             urls::segments_encoded_view(
@@ -95,14 +100,21 @@ private:
             pr_,
             self().server().is_stopping()
         };
+
         Response res{
             res_,
             sr_
         };
 
+        // copy keep-alive setting
+        res.m.set_start_line(
+            http_proto::status::ok, pr_.get().version());
+        res.m.set_keep_alive(pr_.get().keep_alive());
+
         // invoke handlers for the route
         ec = rr_(req, res);
-        BOOST_ASSERT(! ec.failed());
+        //if(ec == error::next)
+
         if(ec.failed())
         {
             // give a default error response?

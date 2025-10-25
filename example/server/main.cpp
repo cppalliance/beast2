@@ -93,13 +93,26 @@ int server_main( int argc, char* argv[] )
 
         router_type app;
 
-        // common response fields
         app.use(
             [](Request& req, Response& res)
             {
-                res.res.set(http_proto::field::server, "Boost");
-                res.res.set_keep_alive(req.req.keep_alive());
-                return error::next;
+                res.status(http_proto::status::ok);
+                res.set_body("Hello, world!");
+                return error::success;
+            });
+
+        app.err(
+            []( Request& req, Response& res,
+                system::error_code const& ec)
+            {
+                http_proto::status sc;
+                if(ec == system::errc::no_such_file_or_directory)
+                    sc = http_proto::status::not_found;
+                else
+                    sc = http_proto::status::internal_server_error;
+                res.status(sc);
+                res.set_body(ec.message());
+                return error::success;
             });
 
 #if 0
@@ -121,7 +134,8 @@ int server_main( int argc, char* argv[] )
         app.use("/alt", serve_static( doc_root ));
         app.use("/test", fh);
         app.err(
-            [](Request& req, Response& res, system::error_code const& ec)
+            []( Request& req, Response& res,
+                system::error_code const& ec)
             {
                 return system::error_code{};
             });

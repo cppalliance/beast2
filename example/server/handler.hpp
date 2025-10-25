@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_EXAMPLE_SERVER_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/route_params.hpp>
+#include <boost/beast2/server/http_handler.hpp>
 
 namespace boost {
 namespace beast2 {

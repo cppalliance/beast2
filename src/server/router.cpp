@@ -55,6 +55,7 @@ struct router_base::entry
 
 struct router_base::impl
 {
+    router_base* parent_ = nullptr;
     http_proto::method(*get_method)(void*);
     urls::segments_encoded_view&(*get_path)(void*);
     std::vector<entry> list;

@@ -134,12 +134,12 @@ operator()(
 {
     // Request path must be absolute and not contain "..".
 #if 0
-    if( req.req.target().empty() ||
-        req.req.target()[0] != '/' ||
-        req.req.target().find("..") != core::string_view::npos)
+    if( req.m.target().empty() ||
+        req.m.target()[0] != '/' ||
+        req.m.target().find("..") != core::string_view::npos)
     {
         make_error_response(http_proto::status::bad_request,
-            req.req, res.res, res.sr);
+            req.m, res.m, res.sr);
         return true;
     }
 #endif
@@ -162,18 +162,18 @@ operator()(
         size = f.size(ec);
     if(! ec.failed())
     {
-        res.res.set_start_line(
+        res.m.set_start_line(
             http_proto::status::ok,
-            req.req.version());
-        res.res.set_payload_size(size);
+            req.m.version());
+        res.m.set_payload_size(size);
 
         auto mt = mime_type(get_extension(path));
-        res.res.append(
+        res.m.append(
             http_proto::field::content_type, mt);
 
         // send file
         res.sr.start<http_proto::file_source>(
-            res.res, std::move(f), size);
+            res.m, std::move(f), size);
         return {};
     }
 
