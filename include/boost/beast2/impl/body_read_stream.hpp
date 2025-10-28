@@ -20,7 +20,6 @@
 #include <boost/http_proto/parser.hpp>
 #include <boost/system/error_code.hpp>
 
-
 namespace boost {
 namespace beast2 {
 
@@ -30,15 +29,16 @@ template <class MutableBufferSequence, class AsyncReadStream>
 class body_read_stream_op : public asio::coroutine {
 
     AsyncReadStream& us_;
-    const MutableBufferSequence& mb_;
+    MutableBufferSequence mb_;
     http_proto::parser& pr_;
-    bool some_ = false;
+    bool some_ = false; // Whether this is a read_some request.
+    std::size_t bb_ = 0;
 
 public:
 
     body_read_stream_op(
         AsyncReadStream& s,
-        const MutableBufferSequence& mb,
+        MutableBufferSequence mb,
         http_proto::parser& pr,
         bool some) noexcept
         : us_(s)
@@ -59,7 +59,8 @@ public:
 
         BOOST_ASIO_CORO_REENTER(*this)
         {
-            if (!pr_.got_header()) {
+            if (!pr_.got_header())
+            {
                 BOOST_ASIO_CORO_YIELD
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
@@ -144,7 +145,7 @@ template<
 BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void(system::error_code, std::size_t))
 body_read_stream<AsyncReadStream>::async_read_some(
-      const MutableBufferSequence& mb
+      MutableBufferSequence mb
     , CompletionToken&& token)
 {
     return asio::async_compose<
@@ -153,7 +154,7 @@ body_read_stream<AsyncReadStream>::async_read_some(
             detail::body_read_stream_op<
             MutableBufferSequence, AsyncReadStream>{us_, mb, pr_, true},
             token,
-            asio::get_associated_executor(us_)
+            us_
         );
 }
 
@@ -165,7 +166,7 @@ template<
 BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void(system::error_code, std::size_t))
     body_read_stream<AsyncReadStream>::async_read(
-          const MutableBufferSequence& mb
+          MutableBufferSequence mb
         , CompletionToken&& token)
 {
     return asio::async_compose<
@@ -174,7 +175,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
             detail::body_read_stream_op<
             MutableBufferSequence, AsyncReadStream>{us_, mb, pr_, false},
             token,
-            asio::get_associated_executor(us_)
+            us_
         );
 }
 

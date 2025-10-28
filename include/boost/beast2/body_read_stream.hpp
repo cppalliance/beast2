@@ -10,9 +10,9 @@
 #ifndef BOOST_HTTP_IO_BODY_READ_STREAM_HPP
 #define BOOST_HTTP_IO_BODY_READ_STREAM_HPP
 
+#include <boost/asio/async_result.hpp>
 #include <boost/beast2/detail/config.hpp>
 #include <boost/http_proto/parser.hpp>
-#include <boost/asio/async_result.hpp>
 #include <boost/system/error_code.hpp>
 
 namespace boost {
@@ -49,7 +49,7 @@ public:
     This will be the type of executor used to invoke completion
     handlers which do not have an explicit associated executor.
     */
-    typedef AsyncReadStream::executor_type executor_type;
+    typedef typename AsyncReadStream::executor_type executor_type;
 
     /** Get the executor associated with the object.
 
@@ -154,7 +154,7 @@ public:
     BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
         void(system::error_code, std::size_t))
     async_read_some(
-            const MutableBufferSequence& mb,
+            MutableBufferSequence mb,
             CompletionToken&& handler);
 
     /** Read all remaining data asynchronously.
@@ -223,10 +223,10 @@ public:
     BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
         void(system::error_code, std::size_t))
         async_read(
-            const MutableBufferSequence& mb,
+            MutableBufferSequence mb,
             CompletionToken&& handler);
 
-private:
+public:
     AsyncReadStream& us_;
     http_proto::parser& pr_;
 };
