@@ -245,7 +245,7 @@ public:
 
                 // run the test
                 std::size_t total = 0;
-                for (auto i = 0; i < body_length_; i++)
+                for (std::size_t i = 0; i < body_length_; i++)
                 {
                     brs.async_read_some(
                         buf.prepare(1024),
