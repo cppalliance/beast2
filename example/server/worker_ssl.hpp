@@ -59,13 +59,7 @@ public:
         workers_base& wb,
         Executor0 const& ex,
         asio::ssl::context& ssl_ctx,
-        router_type& rr)
-        : http_responder<worker_ssl>(wb.server(), rr)
-        , wb_(wb)
-        , ssl_ctx_(ssl_ctx)
-        , stream_(ex, ssl_ctx)
-    {
-    }
+        router_type& rr);
 
     beast2::server& server() noexcept
     {
@@ -89,120 +83,173 @@ public:
         return stream_;
     }
 
-    //--------------------------------------------
-
     /** Cancel all outstanding I/O
     */
-    void cancel()
-    {
-        system::error_code ec;
-        stream_.next_layer().cancel(ec);
-    }
-
-    //--------------------------------------------
+    void cancel();
 
     // Called when an incoming connection is accepted
-    void on_accept(acceptor_config const* pconfig)
-    {
-        // VFALCO TODO timeout
-        using namespace std::placeholders;
-        stream_.set_ssl(pconfig->is_ssl);
-        if(! pconfig->is_ssl)
-            return this->do_session(*pconfig);
-        return stream_.stream().async_handshake(
-            asio::ssl::stream_base::server,
-            asio::prepend(call_mf(
-                &worker_ssl::on_handshake, this), pconfig));
-    }
+    void on_accept(acceptor_config const* pconfig);
 
     void on_handshake(
         acceptor_config const* pconfig,
-        system::error_code const& ec)
-    {
-        if(ec.failed())
-            return do_fail("worker_ssl::on_handshake", ec);
-
-        LOG_TRC(this->sect_)(
-            "{} worker_ssl::on_handshake",
-            this->id());
-
-        this->do_session(*pconfig);
-    }
+        system::error_code const& ec);
 
     /** Close the connection to end the session
     */
-    void do_close()
-    {
-        if(! this->pconfig_->is_ssl)
-        {
-            reset();
-            wb_.do_idle(this);
-            return;
-        }
-        stream_.stream().async_shutdown(call_mf(
-            &worker_ssl::on_shutdown, this));
-    }
+    void do_close();
 
-    void on_shutdown(system::error_code ec)
-    {
-        if(ec.failed())
-            return do_fail("worker_ssl::on_shutdown", ec);
-
-        LOG_TRC(this->sect_)(
-            "{} worker_ssl::on_shutdown",
-            this->id());
-
-        stream_.next_layer().shutdown(
-            asio::socket_base::shutdown_both, ec);
-        // error ignored
-
-        reset();
-        wb_.do_idle(this);
-    }
+    void on_shutdown(system::error_code ec);
 
     void do_fail(
-        core::string_view s, system::error_code const& ec)
-    {
-        reset();
+        core::string_view s, system::error_code const& ec);
 
-        if(ec == asio::error::operation_aborted)
-        {
-            LOG_TRC(this->sect_)(
-                "{} {}: {}",
-                this->id(), s, ec.message());
-            // this means the worker was stopped, don't submit new work
-            return;
-        }
-
-        LOG_DBG(this->sect_)(
-            "{} {}: {}",
-            this->id(), s, ec.message());
-        wb_.do_idle(this);
-    }
-
-    //--------------------------------------------
-
-    void reset()
-    {
-        // Clean up any previous connection.
-        system::error_code ec;
-        stream_.next_layer().close(ec);
-
-        // asio::ssl::stream has an internal state which cannot be reset.
-        // In order to perform the handshake again, we destroy the old
-        // object and assign a new one, in a way that preserves the
-        // original socket to avoid churning file handles.
-        //
-        stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
-    }
+    void reset();
 
 private:
-    // order of destruction matters here
     workers_base& wb_;
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
     typename Protocol::endpoint ep_;
 };
+
+//------------------------------------------------
+
+template<class Executor, class Protocol>
+template<class Executor0, class>
+worker_ssl<Executor, Protocol>::
+worker_ssl(
+    workers_base& wb,
+    Executor0 const& ex,
+    asio::ssl::context& ssl_ctx,
+    router_type& rr)
+    : http_responder<worker_ssl>(wb.server(), rr)
+    , wb_(wb)
+    , ssl_ctx_(ssl_ctx)
+    , stream_(ex, ssl_ctx)
+{
+}
+
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+cancel()
+{
+    system::error_code ec;
+    stream_.next_layer().cancel(ec);
+}
+
+//--------------------------------------------
+
+// Called when an incoming connection is accepted
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+on_accept(acceptor_config const* pconfig)
+{
+    // VFALCO TODO timeout
+    using namespace std::placeholders;
+    stream_.set_ssl(pconfig->is_ssl);
+    if(! pconfig->is_ssl)
+        return this->do_session(*pconfig);
+    return stream_.stream().async_handshake(
+        asio::ssl::stream_base::server,
+        asio::prepend(call_mf(
+            &worker_ssl::on_handshake, this), pconfig));
+}
+
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+on_handshake(
+    acceptor_config const* pconfig,
+    system::error_code const& ec)
+{
+    if(ec.failed())
+        return do_fail("worker_ssl::on_handshake", ec);
+
+    LOG_TRC(this->sect_)(
+        "{} worker_ssl::on_handshake",
+        this->id());
+
+    this->do_session(*pconfig);
+}
+
+/** Close the connection to end the session
+*/
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+do_close()
+{
+    if(! this->pconfig_->is_ssl)
+    {
+        reset();
+        wb_.do_idle(this);
+        return;
+    }
+    stream_.stream().async_shutdown(call_mf(
+        &worker_ssl::on_shutdown, this));
+}
+
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+on_shutdown(system::error_code ec)
+{
+    if(ec.failed())
+        return do_fail("worker_ssl::on_shutdown", ec);
+
+    LOG_TRC(this->sect_)(
+        "{} worker_ssl::on_shutdown",
+        this->id());
+
+    stream_.next_layer().shutdown(
+        asio::socket_base::shutdown_both, ec);
+    // error ignored
+
+    reset();
+    wb_.do_idle(this);
+}
+
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+do_fail(
+    core::string_view s, system::error_code const& ec)
+{
+    reset();
+
+    if(ec == asio::error::operation_aborted)
+    {
+        LOG_TRC(this->sect_)(
+            "{} {}: {}",
+            this->id(), s, ec.message());
+        // this means the worker was stopped, don't submit new work
+        return;
+    }
+
+    LOG_DBG(this->sect_)(
+        "{} {}: {}",
+        this->id(), s, ec.message());
+    wb_.do_idle(this);
+}
+
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+reset()
+{
+    // Clean up any previous connection.
+    system::error_code ec;
+    stream_.next_layer().close(ec);
+
+    // asio::ssl::stream has an internal state which cannot be reset.
+    // In order to perform the handshake again, we destroy the old
+    // object and assign a new one, in a way that preserves the
+    // original socket to avoid churning file handles.
+    //
+    stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
+}
 
 } // beast2
 } // boost

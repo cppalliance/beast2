@@ -261,10 +261,10 @@ struct router_test
         {
         };
 
-        router<Res, Req> r;
+        router<Req, Res> r;
         r.use([](Req&, Res&){ return error::next; });
         {
-            router<Res, Req> r1;
+            router<Req, Res> r1;
             r1.use([](Req&, Res&){ return error::next; });
             r1.use(
                 [](Req&, Res&)->system::error_code

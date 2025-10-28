@@ -189,7 +189,7 @@ struct AsioResponse : Response
     }
 };
 
-using router_type = router<Response>;
+using router_type = router<Request, Response>;
 
 } // beast2
 } // boost

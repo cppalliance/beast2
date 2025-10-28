@@ -82,8 +82,6 @@ public:
     };
 
 protected:
-    template<class, class> friend class fluent_route;
-
     struct entry;
     struct impl;
     struct any_handler;
@@ -124,81 +122,9 @@ protected:
 
 //------------------------------------------------
 
-template<class Response, class Request>
-class fluent_route
-{
-    static constexpr http_proto::method all_methods =
-        http_proto::method::unknown;
-
-    auto add(http_proto::method method) ->
-        fluent_route<Response, Request>
-    {
-        return *this;
-    }
-
-public:
-    // note: express does not offer Route::use()
-
-    template<class H0, class... HN>
-    auto add(
-        http_proto::method method,
-        H0&& h0, HN&&... hn) ->
-            fluent_route<Response, Request>
-    {
-        r_.append(false, method, pat_, typename
-            router_base::handler_ptr(new typename
-                router_base::handler_impl<Request,
-                    Response, H0>(std::forward<H0>(h0))));
-        r_.append(false, method, pat_, std::forward<HN>(hn)...);
-        return *this;
-    }
-
-    template<class... HN>
-    auto all(HN&&... hn) ->
-        fluent_route<Response, Request>
-    {
-        return add(all_methods, std::forward<HN>(hn)...);
-    }
-
-    template<class H0, class... HN>
-    auto get(H0&& h0, HN&&... hn) ->
-        fluent_route<Response, Request>
-    {
-        return add(
-            http_proto::method::get,
-            std::forward<H0>(h0),
-            std::forward<HN>(hn)...);
-    }
-
-    template<class... HN>
-    auto post(HN&&... hn) ->
-        fluent_route<Response, Request>
-    {
-        return add(http_proto::method::post,
-            std::forward<HN>(hn)...);
-    }
-
-private:
-    friend class router<Response, Request>;
-    fluent_route(
-        router_base& r,
-        core::string_view pat)
-        : r_(r)
-        , pat_(pat)
-    {
-    }
-
-    router_base& r_;
-    core::string_view pat_;
-};
-
-//------------------------------------------------
-
 /** A container mapping HTTP requests to handlers
 */
-template<
-    class Response,
-    class Request = beast2::Request>
+template<class Request, class Response>
 class router : public router_base
 {
     static constexpr http_proto::method all_methods =
@@ -227,62 +153,54 @@ public:
     , class = typename std::enable_if<
         ! std::is_convertible<H0, core::string_view>::value>::type
     >
-    auto use(H0&& h0, HN&&... hn) ->
-        router&
+    void use(H0&& h0, HN&&... hn)
     {
         append(true, all_methods, "/",
             std::forward<H0>(h0),
             std::forward<HN>(hn)...);
-        return *this;
     }
 
     /** Add a mounted middleware
         The handler will run for every request matching the given prefix.
     */
     template<class H0, class... HN>
-    auto use(core::string_view pattern,
-        H0&& h0, HN... hn) ->
-            router&
+    void use(core::string_view pattern,
+        H0&& h0, HN... hn)
     {
         append(true, all_methods, pattern,
             std::forward<H0>(h0),
             std::forward<HN>(hn)...);
-        return *this;
     }
 
     template<class H0, class... HN>
-    auto add(
+    void add(
         http_proto::method method,
         core::string_view pattern,
-        H0&& h0, HN&&... hn) ->
-            fluent_route<Response, Request>
+        H0&& h0, HN&&... hn)
     {
-        return fluent_route<Response, Request>(*this,
-            pattern).add(method, std::forward<
-                H0>(h0), std::forward<HN>(hn)...);
+        append(false, method, pattern,
+            std::forward<H0>(h0),
+            std::forward<HN>(hn)...);
     }
 
     /** Add an error handler
     */
     template<class H0, class... HN>
-    auto err(
-        H0&& h0, HN&&... hn) ->
-            router&
+    void err(
+        H0&& h0, HN&&... hn)
     {
         append_err(
             std::forward<H0>(h0),
             std::forward<HN>(hn)...);
-        return *this;
     }
 
     /** Add a route handler matching all methods and the given pattern
         The handler will run for every request matching the entire pattern.
     */
     template<class H0, class... HN>
-    auto all(
+    void all(
         core::string_view pattern,
-        H0&& h0, HN&&... hn) ->
-        fluent_route<Response, Request>
+        H0&& h0, HN&&... hn)
     {
         return add(all_methods, pattern,
             std::forward<H0>(h0), std::forward<HN>(hn)...);
@@ -291,22 +209,20 @@ public:
     /** Add a GET handler
     */
     template<class H0, class... HN>
-    auto get(
+    void get(
         core::string_view pattern,
-        H0&& h0, HN&&... hn) ->
-        fluent_route<Response, Request>
+        H0&& h0, HN&&... hn)
     {
-        return add(http_proto::method::get, pattern,
+        add(http_proto::method::get, pattern,
             std::forward<H0>(h0), std::forward<HN>(hn)...);
     }
 
     template<class H0, class... HN>
-    auto post(
+    void post(
         core::string_view pattern,
-        H0&& h0, HN&&... hn) ->
-        fluent_route<Response, Request>
+        H0&& h0, HN&&... hn)
     {
-        return add(http_proto::method::post, pattern,
+        add(http_proto::method::post, pattern,
             std::forward<H0>(h0), std::forward<HN>(hn)...);
     }
 
