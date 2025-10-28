@@ -8,24 +8,25 @@
 //
 
 #include "src/server/route_rule.hpp"
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/basic_router.hpp>
+#include <boost/beast2/server/detail/any_router.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
-//#include <boost/url/decode_view.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace boost {
 namespace beast2 {
+namespace detail {
 
-router_base::any_handler::~any_handler() = default;
+any_router::any_handler::~any_handler() = default;
 
-router_base::any_errfn::~any_errfn() = default;
+any_router::any_errfn::~any_errfn() = default;
 
 //------------------------------------------------
 
-struct router_base::entry
+struct any_router::entry
 {
     bool prefix = true;             // prefix match, for pathless use()
     http_proto::method method;      // method::unknown for all, ignored for use()
@@ -53,7 +54,7 @@ struct router_base::entry
     }
 };
 
-struct router_base::impl
+struct any_router::impl
 {
     std::size_t size = 0;
     std::vector<entry> list;
@@ -64,8 +65,8 @@ struct router_base::impl
 
 //------------------------------------------------
 
-router_base::
-router_base(
+any_router::
+any_router(
     http_proto::method(*get_method)(void*),
     urls::segments_encoded_view&(*get_path)(void*))
     : impl_(std::make_shared<impl>())
@@ -75,16 +76,16 @@ router_base(
 }
 
 std::size_t
-router_base::
+any_router::
 size() const noexcept
 {
     return impl_->size;
 }
 
 auto
-router_base::
+any_router::
 invoke(
-    void* req, void* res, state& st) const ->
+    void* req, void* res, route_state& st) const ->
         system::error_code
 {
     system::error_code ec;
@@ -179,9 +180,9 @@ do_error:
 }
 
 auto
-router_base::
+any_router::
 resume(
-    void* req, void* res, state& st,
+    void* req, void* res, route_state& st,
     system::error_code const& ec) const ->
         system::error_code
 {
@@ -190,7 +191,7 @@ resume(
 }
 
 void
-router_base::
+any_router::
 append(
     bool prefix,
     http_proto::method method,
@@ -211,7 +212,7 @@ append(
 }
 
 void
-router_base::
+any_router::
 append_err(errfn_ptr h)
 {
     impl_->errfns.emplace_back(std::move(h));
@@ -241,5 +242,6 @@ static bool match(
 }
 #endif
 
+} // detail
 } // beast2
 } // boost

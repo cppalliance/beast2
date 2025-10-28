@@ -270,7 +270,7 @@ public:
     ~stable_chars()
     {
         if(p_)
-            delete p_;
+            delete[] p_;
     }
 
     stable_chars() = default;

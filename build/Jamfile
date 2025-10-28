@@ -46,7 +46,6 @@ lib boost_beast2
    : beast2_sources
    : requirements
      <library>/boost//http_proto
-     <library>/boost//url
      <include>../
      <define>BOOST_BEAST2_SOURCE
    : usage-requirements

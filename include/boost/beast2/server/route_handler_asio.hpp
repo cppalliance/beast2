@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_HTTP_REDIRECT_RESPONDER_HPP
-#define BOOST_BEAST2_SERVER_HTTP_REDIRECT_RESPONDER_HPP
+#ifndef BOOST_BEAST2_SERVER_ROUTE_HANDLER_ASIO_HPP
+#define BOOST_BEAST2_SERVER_ROUTE_HANDLER_ASIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/route_handler.hpp>
@@ -16,11 +16,24 @@
 namespace boost {
 namespace beast2 {
 
-struct https_redirect_responder
+/** Response object for Asio HTTP route handlers
+*/
+template<class Stream>
+struct ResponseAsio : Response
 {
-    BOOST_BEAST2_DECL
-    system::error_code
-    operator()(Request&, Response&) const;
+    using stream_type = Stream;
+
+    Stream& stream;
+
+    template<class... Args>
+    explicit
+    ResponseAsio(
+        Stream& stream_,
+        Args&&... args)
+        : Response(std::forward<Args>(args)...)
+        , stream(stream_)
+    {
+    }
 };
 
 } // beast2

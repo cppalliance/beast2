@@ -40,7 +40,18 @@ local SOURCES =
     read.cpp
     sandbox.cpp
     write.cpp
+    server/any_lambda.cpp
+    server/basic_router.cpp
+    server/call_mf.cpp
     server/fixed_array.cpp
+    server/logger.cpp
+    server/route_handler.cpp
+    server/route_handler_asio.cpp
+    server/router.cpp
+    server/router_asio.cpp
+    server/serve_static.cpp
+    server/server_.cpp
+    server/server_asio.cpp
     ;
 
 for local f in $(SOURCES)

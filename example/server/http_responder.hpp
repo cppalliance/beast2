@@ -15,8 +15,10 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
+#include <boost/beast2/server/any_lambda.hpp>
+#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/logger.hpp>
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
@@ -29,210 +31,58 @@ namespace boost {
 namespace beast2 {
 
 //------------------------------------------------
+/*
 
+*/
 /** Mixin for delivering responses to HTTP requests
 */
-template<class Derived>
+template<class Worker>
 class http_responder
-    : public detacher::owner
+    : private detacher::owner
 {
 public:
-    explicit
     http_responder(
         server& srv,
-        router_type& rr)
-        : sect_(srv.sections().get("http_responder"))
-        , id_(
-            []() noexcept
-            {
-                static std::size_t n = 0;
-                return ++n;
-            }())
-        , rr_(rr)
-        , pr_(srv.services())
-        , sr_(srv.services())
-    {
-    }
+        router_type& rr,
+        any_lambda<void(system::error_code)> close_fn);
 
     /** Called to start a new HTTP session
 
         The stream must be in a connected,
         correct state for a new session.
     */
-    void do_session(
-        acceptor_config const& config)
-    {
-        pconfig_ = &config;
-        pr_.reset();
-        do_read();
-    }
+    void do_session(acceptor_config const& config);
 
 private:
-    void do_read()
-    {
-        pr_.start();
-        beast2::async_read(self().stream(), pr_,
-            call_mf(&http_responder::on_read, this));
-    }
+    void do_read();
 
     void on_read(
         system::error_code ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
-
-        if(ec.failed())
-            return do_fail("http_responder::on_read", ec);
-
-        LOG_TRC(this->sect_)(
-            "{} http_responder::on_read bytes={}",
-            this->id(), bytes_transferred);
-
-        BOOST_ASSERT(pr_.is_complete());
-
-        //----------------------------------------
-        //
-        // set up Request and Response objects
-        //
-
-        Request req{
-            pr_.get().method(),
-            urls::segments_encoded_view(
-                pr_.get().target()),
-            *this->pconfig_,
-            pr_.get(),
-            pr_,
-            self().server().is_stopping()
-        };
-
-        Response res{
-            res_,
-            sr_
-        };
-
-        // copy version
-        res.m.set_version(req.m.version());
-
-        // copy keep-alive setting
-        res.m.set_start_line(
-            http_proto::status::ok, pr_.get().version());
-        res.m.set_keep_alive(pr_.get().keep_alive());
-
-        // invoke handlers for the route
-
-        detached_ = false;
-        route_state_ = {};
-        ec = rr_(req, res, route_state_);
-
-        if(ec == error::detach)
-        {
-            // make sure they called detach()
-            BOOST_ASSERT(detached_);
-            return;
-        }
-
-        if(ec.failed())
-        {
-            // give a default error response?
-        }
-        beast2::async_write(self().stream(), sr_,
-            call_mf(&http_responder::on_write, this));
-    }
+        std::size_t bytes_transferred);
 
     void on_write(
         system::error_code const& ec,
-        std::size_t bytes_transferred)
-    {
-        (void)bytes_transferred;
+        std::size_t bytes_transferred);
 
-        if(ec.failed())
-            return do_fail("http_responder::on_write", ec);
+    void do_fail(core::string_view s,
+        system::error_code const& ec);
 
-        BOOST_ASSERT(sr_.is_done());
+    detacher::resumer do_detach() override;
 
-        LOG_TRC(this->sect_)(
-            "{} http_responder::on_write bytes={}",
-            this->id(), bytes_transferred);
+    void do_resume(system::error_code const& ec) override;
 
-        if(res_.keep_alive())
-            return do_read();
+    void do_resume2(system::error_code const& ec);
 
-        // tidy up lingering objects
-        pr_.reset();
-        sr_.reset();
-        res_.clear();
-
-        return self().do_close();
-    }
-
-    void do_fail(
-        core::string_view s, system::error_code const& ec)
-    {
-        // tidy up lingering objects
-        pr_.reset();
-        sr_.reset();
-        res_.clear();
-
-        self().do_fail(s, ec);
-    }
-
-    detacher::resumer
-    do_detach() override
-    {
-        // can't call twice
-        BOOST_ASSERT(! detached_);
-        detached_ = true;
-
-        // VFALCO cancel timer
-        // VFALCO work guard to-do
-        //wg_ = asio::make_work_guard(self().stream().get_executor());
-
-        return detacher::resumer(*this);
-    }
-
-    void do_resume(system::error_code const& ec) override
-    {
-        asio::dispatch(
-            self().stream().get_executor(),
-            asio::prepend(call_mf(
-                &http_responder::do_resume2, this), ec));
-    }
-
-    void do_resume2(system::error_code const& ec)
-    {
-        if(ec == error::detach)
-        {
-            // Cannot detach when resuming
-            detail::throw_logic_error();
-        }
-
-        (void)ec;
-        Request req{
-            pr_.get().method(),
-            urls::segments_encoded_view(
-                pr_.get().target()),
-            *this->pconfig_,
-            pr_.get(),
-            pr_,
-            self().server().is_stopping()
-        };
-
-        Response res{
-            res_,
-            sr_
-        };
-    }
-
-    Derived&
+    Worker&
     self() noexcept
     {
-        return *static_cast<Derived*>(this);
+        return *static_cast<Worker*>(this);
     }
 
-    Derived const&
+    Worker const&
     self() const noexcept
     {
-        return *static_cast<Derived const*>(this);
+        return *static_cast<Worker const*>(this);
     }
 
 protected:
@@ -245,7 +95,8 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     router_type& rr_;
-    router_type::state route_state_;
+    any_lambda<void(system::error_code)> close_;
+    route_state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;
@@ -255,6 +106,226 @@ protected:
     //asio::executor_work_guard<
         //decltype(self().get_executor())> wg_;
 };
+
+//------------------------------------------------
+
+template<class Worker>
+http_responder<Worker>::
+http_responder(
+    server& srv,
+    router_type& rr,
+    any_lambda<void(system::error_code)> close)
+    : sect_(srv.sections().get("http_responder"))
+    , id_(
+        []() noexcept
+        {
+            static std::size_t n = 0;
+            return ++n;
+        }())
+    , rr_(rr)
+    , close_(close)
+    , pr_(srv.services())
+    , sr_(srv.services())
+{
+}
+
+/** Called to start a new HTTP session
+
+    The stream must be in a connected,
+    correct state for a new session.
+*/
+template<class Worker>
+void
+http_responder<Worker>::
+do_session(
+    acceptor_config const& config)
+{
+    pconfig_ = &config;
+    pr_.reset();
+    do_read();
+}
+
+template<class Worker>
+void
+http_responder<Worker>::
+do_read()
+{
+    pr_.start();
+    beast2::async_read(self().stream(), pr_,
+        call_mf(&http_responder::on_read, this));
+}
+
+template<class Worker>
+void 
+http_responder<Worker>::
+on_read(
+    system::error_code ec,
+    std::size_t bytes_transferred)
+{
+    (void)bytes_transferred;
+
+    if(ec.failed())
+        return do_fail("http_responder::on_read", ec);
+
+    LOG_TRC(this->sect_)(
+        "{} http_responder::on_read bytes={}",
+        this->id(), bytes_transferred);
+
+    BOOST_ASSERT(pr_.is_complete());
+
+    //----------------------------------------
+    //
+    // set up Request and Response objects
+    //
+
+    Request req{
+        pr_.get().method(),
+        urls::segments_encoded_view(
+            pr_.get().target()),
+        *this->pconfig_,
+        pr_.get(),
+        pr_,
+        self().server().is_stopping()
+    };
+
+    using stream_type = typename Worker::stream_type;
+    ResponseAsio<stream_type> res{
+        self().stream(),
+        res_,
+        sr_
+    };
+
+    // copy version
+    res.m.set_version(req.m.version());
+
+    // copy keep-alive setting
+    res.m.set_start_line(
+        http_proto::status::ok, pr_.get().version());
+    res.m.set_keep_alive(pr_.get().keep_alive());
+
+    // invoke handlers for the route
+
+    detached_ = false;
+    route_state_ = {};
+    ec = rr_(req, res, route_state_);
+
+    if(ec == error::detach)
+    {
+        // make sure they called detach()
+        BOOST_ASSERT(detached_);
+        return;
+    }
+
+    if(ec.failed())
+    {
+        // give a default error response?
+    }
+    beast2::async_write(self().stream(), sr_,
+        call_mf(&http_responder::on_write, this));
+}
+
+template<class Worker>
+void 
+http_responder<Worker>::
+on_write(
+    system::error_code const& ec,
+    std::size_t bytes_transferred)
+{
+    (void)bytes_transferred;
+
+    if(ec.failed())
+        return do_fail("http_responder::on_write", ec);
+
+    BOOST_ASSERT(sr_.is_done());
+
+    LOG_TRC(this->sect_)(
+        "{} http_responder::on_write bytes={}",
+        this->id(), bytes_transferred);
+
+    if(res_.keep_alive())
+        return do_read();
+
+    // tidy up lingering objects
+    pr_.reset();
+    sr_.reset();
+    res_.clear();
+
+    close_({});
+}
+
+template<class Worker>
+void 
+http_responder<Worker>::
+do_fail(
+    core::string_view s, system::error_code const& ec)
+{
+    LOG_TRC(this->sect_)("{}: {}", s, ec.message());
+
+    // tidy up lingering objects
+    pr_.reset();
+    sr_.reset();
+    res_.clear();
+
+    close_(ec);
+}
+
+template<class Worker>
+auto
+http_responder<Worker>::
+do_detach() ->
+    detacher::resumer
+{
+    // can't call twice
+    BOOST_ASSERT(! detached_);
+    detached_ = true;
+
+    // VFALCO cancel timer
+    // VFALCO work guard to-do
+    //wg_ = asio::make_work_guard(self().stream().get_executor());
+
+    return detacher::resumer(*this);
+}
+
+template<class Worker>
+void
+http_responder<Worker>::
+do_resume(system::error_code const& ec)
+{
+    asio::dispatch(
+        self().stream().get_executor(),
+        asio::prepend(call_mf(
+            &http_responder::do_resume2, this), ec));
+}
+
+template<class Worker>
+void
+http_responder<Worker>::
+do_resume2(system::error_code const& ec)
+{
+    if(ec == error::detach)
+    {
+        // Cannot detach when resuming
+        detail::throw_logic_error();
+    }
+
+    (void)ec;
+    Request req{
+        pr_.get().method(),
+        urls::segments_encoded_view(
+            pr_.get().target()),
+        *this->pconfig_,
+        pr_.get(),
+        pr_,
+        self().server().is_stopping()
+    };
+
+    Response res{
+        res_,
+        sr_
+    };
+    (void)req;
+    (void)res;
+}
 
 } // beast2
 } // boost
