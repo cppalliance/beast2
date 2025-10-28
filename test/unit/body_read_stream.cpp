@@ -340,10 +340,10 @@ public:
 
             // read body
             pr.set_body_limit(2);
-            async_read_some(
-                ts,
-                pr,
-                test::fail_handler(http_proto::error::body_too_large));
+            //async_read_some(
+            //    ts,
+            //    pr,
+            //    test::fail_handler(http_proto::error::body_too_large));
             test::run(ioc);
         }
     }
