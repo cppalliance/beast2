@@ -90,21 +90,16 @@ int server_main( int argc, char* argv[] )
         app.use(
             [](Request& req, Response& res)
             {
-                if(req.port.is_ssl)
+                if(! req.port.is_ssl)
+                {
+                    https_redirect_responder()(req, res);
                     return true;
-                return https_redirect_responder()(req, res);
-            });
-
-        // "/" => "/index.html"
-        app.get("/",
-            [](Request& req, Response&)
-            {
-                req.path = urls::segments_encoded_view("index.html");
-                return true;
+                }
+                return false;
             });
 
         // static route for website
-        app.get("/*",
+        app.get("/",
             file_responder{ doc_root });
 
         using workers_type =

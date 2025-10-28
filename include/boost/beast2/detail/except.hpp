@@ -17,10 +17,13 @@ namespace boost {
 namespace beast2 {
 namespace detail {
 
-BOOST_BEAST2_DECL void BOOST_NORETURN throw_logic_error(
+BOOST_BEAST2_DECL void BOOST_NORETURN throw_bad_typeid(
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
 BOOST_BEAST2_DECL void BOOST_NORETURN throw_invalid_argument(
+    source_location const& loc = BOOST_CURRENT_LOCATION);
+
+BOOST_BEAST2_DECL void BOOST_NORETURN throw_logic_error(
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
 } // detail

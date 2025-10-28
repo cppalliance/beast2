@@ -7,224 +7,15 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
+#include "src/server/route_rule.hpp"
 #include <boost/beast2/server/router.hpp>
-#include <boost/url/grammar/alpha_chars.hpp>
-#include <boost/url/grammar/charset.hpp>
-#include <boost/url/grammar/lut_chars.hpp>
-#include <boost/url/grammar/parse.hpp>
-#include <boost/url/grammar/range_rule.hpp>
+#include <boost/url/decode_view.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace boost {
 namespace beast2 {
-
-namespace grammar = urls::grammar;
-
-//------------------------------------------------
-
-namespace {
-
-/*
-route-pattern     =  *( "/" segment ) [ "/" ]
-segment           = literal-segment / param-segment
-literal-segment   = 1*( unreserved-char )
-param-segment     = param-prefix param-name [ constraint ] [ modifier ]
-param-prefix      = ":" / "*"     ; either named param ":" or named wildcard "*"
-param-name        = ident
-constraint        = "(" 1*( constraint-char ) ")"
-modifier          = "?" / "*" / "+"
-ident             = ALPHA *( ALPHA / DIGIT / "_" )
-constraint-char   = %x20-7E except ( ")" )
-unreserved-char   = %x21-2F / %x30-3B / %x3D-5A / %x5C-7E  ; all printable except slash
-*/
-
-struct unreserved_char
-{
-    constexpr
-    bool
-    operator()(char ch) const noexcept
-    {
-        return ch != '/' && (
-            (ch >= 0x21 && ch <= 0x2F) ||
-            (ch >= 0x30 && ch <= 0x3B) ||
-            (ch >= 0x3D && ch <= 0x5A) ||
-            (ch >= 0x5C && ch <= 0x7E));
-    }
-};
-
-struct ident_char
-{
-    constexpr
-    bool
-    operator()(char ch) const noexcept
-    {
-        return
-            (ch >= 'a' && ch <= 'z') ||
-            (ch >= '0' && ch <= '9') ||
-            (ch >= 'A' && ch <= 'Z') ||
-            (ch == '_');
-    }
-};
-
-struct constraint_char
-{
-    constexpr
-    bool
-    operator()(char ch) const noexcept
-    {
-        return ch >= 0x20 && ch <= 0x7E && ch != ')';
-    }
-};
-
-constexpr grammar::lut_chars unreserved_chars(unreserved_char{});
-
-struct ident_rule
-{
-    using value_type = core::string_view;
-
-    auto
-    parse(
-        char const*& it,
-        char const* end) const noexcept ->
-            system::result<value_type>
-    {
-        if(it == end)
-        {
-            BOOST_HTTP_PROTO_RETURN_EC(
-                grammar::error::syntax);
-        }
-        if(! grammar::alpha_chars(*it))
-        {
-            BOOST_HTTP_PROTO_RETURN_EC(
-                grammar::error::syntax);
-        }
-        auto it0 = it++;
-        it = grammar::find_if_not(
-            it, end, ident_char{});
-        return core::string_view(it0, it);
-    }
-};
-
-struct segment_rule
-{
-    struct value_type
-    {
-        core::string_view s;
-        core::string_view name;
-        core::string_view constraint;
-        char prefix = 0; // param-prefix or 0
-        char modifier = 0;
-    };
-
-    auto
-    parse(
-        char const*& it,
-        char const* end) const noexcept ->
-            system::result<value_type>
-    {
-        if(it == end)
-        {
-            BOOST_HTTP_PROTO_RETURN_EC(
-                grammar::error::need_more);
-        }
-        value_type v;
-        auto it0 = it;
-        if(*it != ':' && *it != '*')
-        {
-            // literal_segment
-            it = grammar::find_if_not(
-                it, end, unreserved_chars);
-            if(it == it0)
-            {
-                BOOST_HTTP_PROTO_RETURN_EC(
-                    grammar::error::mismatch);
-            }
-            v.s = { it0, it };
-            return v;
-        }
-        // param-segment
-        v.prefix = *it++;
-        auto rv = grammar::parse(it, end, ident_rule{});
-        if(rv.has_error())
-            return rv.error();
-        v.name = rv.value();
-        // constraint
-        if(it != end && *it == '(')
-        {
-            ++it;
-            auto it1 = it;
-            it = grammar::find_if_not(
-                it, end, constraint_char{});
-            if(it == it1)
-            {
-                it = it0;
-                BOOST_HTTP_PROTO_RETURN_EC(
-                    grammar::error::syntax);
-            }
-            if(it == end || *it != ')')
-            {
-                it = it0;
-                BOOST_HTTP_PROTO_RETURN_EC(
-                    grammar::error::syntax);
-            }
-            v.constraint = { it1, it };
-            ++it;
-        }
-        // modifier
-        if( it != end &&
-            *it == '?' || *it == '*' || *it == '+')
-            v.modifier = *it++;
-        return v;
-    }
-};
-
-struct path_rule
-{
-    using value_type =
-        grammar::range<segment_rule::value_type>;
-
-    auto
-    parse(
-        char const*& it,
-        char const* end) const ->
-            system::result<value_type>
-    {
-        return grammar::parse(it, end,
-            grammar::range_rule(next_rule{}));
-    }
-
-private:
-    struct next_rule
-    {
-        using value_type = segment_rule::value_type;
-
-        auto
-        parse(
-            char const*& it,
-            char const* end) const ->
-                system::result<value_type>
-        {
-            if(it == end)
-                return grammar::error::end_of_range;
-            if (*it != '/')
-                return grammar::error::mismatch;
-            auto it0 = it;
-            ++it;
-            if(it == end)
-            {
-                // trailing "/"
-                return value_type{};
-            }
-            return grammar::parse(it, end, segment_rule{});
-        }
-    };
-};
-
-} // (anon)
-
-//------------------------------------------------
 
 router_base::any_handler::~any_handler() = default;
 
@@ -233,7 +24,10 @@ router_base::any_handler::~any_handler() = default;
 struct router_base::entry
 {
     http_proto::method method;
-    std::vector<handler_ptr> v;
+    // VFALCO For now we do exact prefix-match
+    std::string exact_prefix;
+    path_rule_t::value_type pat;
+    std::vector<handler_ptr> handlers;
 };
 
 struct router_base::impl
@@ -241,7 +35,7 @@ struct router_base::impl
     http_proto::method(*get_method)(void*);
     urls::segments_encoded_view&(*get_path)(void*);
     std::vector<handler_ptr> v0;
-    std::vector<entry> v;
+    std::vector<entry> patterns;
 };
 
 //------------------------------------------------
@@ -273,20 +67,39 @@ insert(
 {
     char const* it = path.data();
     char const* const end = it + path.size();
-    auto rv = grammar::parse(it, end, path_rule{});
-    path_rule::value_type v;
-    if(rv.has_value())
-        v = rv.value();
+    std::vector<handler_ptr> handlers;
+    handlers.emplace_back(std::move(h));
 
-    std::vector<handler_ptr> vh;
-    vh.emplace_back(std::move(h));
-
-    impl_->v.emplace_back(entry{
+    impl_->patterns.emplace_back(entry{
         method,
-        std::move(vh)});
+        path, // exact_prefix
+        grammar::parse(it, end, path_rule).value(),
+        std::move(handlers)});
 }
 
 //------------------------------------------------
+
+#if 0
+static bool match(
+    urls::segments_encoded_view path,
+    path_rule_t::value_type const& pat)
+{
+    auto it0 = path.begin();
+    auto it1 = pat.v.begin();
+    auto const end0 = path.end();
+    auto const end1 = pat.v.end();
+
+    while(it0 != end0 && it1 != end1)
+    {
+        auto const& seg0 = *it0++;
+        auto const& seg1 = *it1++;
+        if(*seg0 != seg1.s)
+            return false;
+    }
+
+    return it0 == end0 && it1 == end1;
+}
+#endif
 
 bool
 router_base::
@@ -296,23 +109,37 @@ invoke(
     // global handlers
     for(auto const& r : impl_->v0)
     {
-        if(! r->operator()(req, res))
-            return false;
+        if(r->operator()(req, res))
+            return true;
     }
 
     auto method = impl_->get_method(req);
     auto& path = impl_->get_path(req);
-    for(auto const& r : impl_->v)
+    std::string path_str = std::string(path.buffer());
+    for(auto const& r : impl_->patterns)
     {
         if(r.method != method &&
             method != http_proto::method::unknown)
             continue;
-        for(auto& e : r.v)
-            if(! e->operator()(req, res))
-                return false;
+        //if(match(path, r.pat))
+        // VFALCO exact-prefix matching for now
+        if( core::string_view(path_str).starts_with(
+            core::string_view(r.exact_prefix)))
+        {
+            // matched
+            for(auto& e : r.handlers)
+            {
+                if(e->operator()(req, res))
+                    return true;
+            }
+
+            // no handler indicated it handled the request
+            return false;
+        }
     }
 
-    return true;
+    // no route matched
+    return false;
 }
 
 } // beast2

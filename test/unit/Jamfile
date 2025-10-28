@@ -21,6 +21,7 @@ project
       <source>../../../url/extra/test_suite/test_main.cpp
       <source>../../../url/extra/test_suite/test_suite.cpp
       <include>.
+      <include>../..
       <include>../../../url/extra/test_suite
       <include>../../example/include
       <warnings>extra

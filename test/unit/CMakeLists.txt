@@ -26,6 +26,7 @@ add_executable(boost_beast2_tests ${PFILES} ${EXTRAFILES})
 target_include_directories(boost_beast2_tests
     PRIVATE
     .
+    ../../
     ../../example/include
     ../../../url/extra/test_suite
 )
