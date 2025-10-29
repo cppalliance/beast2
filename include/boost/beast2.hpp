@@ -10,6 +10,7 @@
 #ifndef BOOST_BEAST2_HPP
 #define BOOST_BEAST2_HPP
 
+#include <boost/beast2/body_read_stream.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
 

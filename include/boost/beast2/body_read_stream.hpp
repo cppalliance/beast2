@@ -26,18 +26,19 @@ namespace beast2 {
 
         Any call to `async_read_some` initially triggers reads
         from the underlying stream until all of the HTTP headers
+	and at least one byte of the body
         have been read and processed. Thereafter, each subsequent
-        call to `async_read_some` triggers a call to the underlying
-        stream's `async_read_some` method, with the resulting body
-        data stored in the referenced MutableBufferSequence.
+        call to `async_read_some` processes at least one byte of
+	the body, triggering, where required, calls to the underlying
+        stream's `async_read_some` method. The resulting body
+        data is stored in the referenced MutableBufferSequence.
 
         All processing depends on a http_io::parser object owned
         by the caller and referenced in the construction of this
         object.
 
         @see
-            @ref response_parser,
-            @ref request_parser.
+            @ref http_proto::parser.
     */
 template<class AsyncReadStream>
 class body_read_stream {
@@ -100,10 +101,10 @@ public:
 
         The algorithm, known as a <em>composed asynchronous operation</em>,
         is implemented in terms of calls to the underlying stream's `async_read_some`
-        function. The program must ensure that no other calls to @ref
+        function. The program must ensure that no other calls to
         `async_read_some` are performed until this operation completes.
 
-        @param mb The buffers into which the data will be read. If the size
+        @param mb The buffers into which the body data will be read. If the size
         of the buffers is zero bytes, the operation always completes immediately
         with no error.
         Although the buffers object may be copied as necessary, ownership of the
@@ -116,12 +117,7 @@ public:
         completes. The implementation takes ownership of the handler by
         performing a decay-copy. The equivalent function signature of
         the handler must be:
-        @code
-        void handler(
-            error_code error,               // Result of operation.
-            std::size_t bytes_transferred   // Number of bytes read.
-        );
-        @endcode
+	`void handler(error_code error, std::size_t bytes_transferred)`
         If the handler has an associated immediate executor,
         an immediate completion will be dispatched to it.
         Otherwise, the handler will not be invoked from within
@@ -169,7 +165,7 @@ public:
 
         The algorithm, known as a <em>composed asynchronous operation</em>,
         is implemented in terms of calls to the underlying stream's `async_read_some`
-        function. The program must ensure that no other calls to @ref
+        function. The program must ensure that no other calls to
         `async_read_some` are performed until this operation completes.
 
         @param mb The buffers into which the body data will be read. If the size
@@ -185,12 +181,7 @@ public:
         completes. The implementation takes ownership of the handler by
         performing a decay-copy. The equivalent function signature of
         the handler must be:
-        @code
-        void handler(
-            error_code error,               // Result of operation.
-            std::size_t bytes_transferred   // Number of bytes read.
-        );
-        @endcode
+	`void handler(error_code error, std::size_t bytes_transferred)`
         If the handler has an associated immediate executor,
         an immediate completion will be dispatched to it.
         Otherwise, the handler will not be invoked from within
@@ -198,11 +189,6 @@ public:
         by dispatching to the immediate executor. If no
         immediate executor is specified, this is equivalent
         to using `net::post`.
-
-        @note The `async_read_some` operation may not receive all of the requested
-        number of bytes. Consider using the function `net::async_read` if you need
-        to ensure that the requested amount of data is read before the asynchronous
-        operation completes.
 
         @par Per-Operation Cancellation
 
