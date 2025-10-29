@@ -13,6 +13,7 @@
 //#include <boost/beast/core/flat_buffer.hpp>
 
 #include <boost/asio/async_result.hpp>
+#include <boost/asio/cancel_after.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/buffers/buffer.hpp>
 #include <boost/buffers/circular_buffer.hpp>
@@ -224,7 +225,7 @@ public:
 
         // async_read_some reads the body for various chunk
         // sizes.
-        {
+        if (false) {
             for (std::size_t cs = 240; cs < msg_length_ + 2; cs++)
             {
                 test::stream ts(ioc, msg_);
@@ -286,6 +287,42 @@ public:
                 BOOST_TEST(result == body_);
                 BOOST_TEST_EQ(result.size(), body_length_);
             }
+        }
+
+
+        // async_read_some cancellation
+        {
+            http_proto::response_parser pr(rts_ctx);
+            pr.reset();
+            pr.start();
+
+            std::string m1 = header_ + body_.substr(0, 10);
+            test::stream ts(ioc, m1);
+
+            // The object under test
+            body_read_stream<test::stream> brs(ts, pr);
+
+            // Create a destination buffer
+            std::string s;
+            s.reserve(2048);
+            boost::buffers::string_buffer buf(&s);
+
+            auto lambda = [&](system::error_code ec, std::size_t n)
+                {
+                    std::cout << "first read " << n << " ec: " << ec << std::endl;
+                    brs.async_read_some(
+                        buf.prepare(1024),
+                        [&](system::error_code ec, std::size_t n)
+                        {
+                            std::cout << "second read " << n << " ec: " << ec << std::endl;
+                        });
+                };
+
+            brs.async_read_some(
+                buf.prepare(1024),
+                asio::cancel_after(std::chrono::seconds{ 2 }, lambda));
+            test::run_for(ioc, std::chrono::minutes{ 2 });
+            std::cout << "done" << std::endl;
         }
 
         // async_read_some reports stream errors

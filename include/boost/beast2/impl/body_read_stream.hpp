@@ -20,6 +20,8 @@
 #include <boost/http_proto/parser.hpp>
 #include <boost/system/error_code.hpp>
 
+#include <iostream>
+
 namespace boost {
 namespace beast2 {
 
@@ -56,6 +58,13 @@ public:
             std::size_t bytes_transferred = 0)
     {
         boost::ignore_unused(bytes_transferred);
+
+        self.reset_cancellation_state(
+            [](asio::cancellation_type requested) {
+                std::cout << "reset cancel state" << std::endl;
+                return asio::cancellation_type::all;
+            }
+        );
 
         BOOST_ASIO_CORO_REENTER(*this)
         {
