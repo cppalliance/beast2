@@ -9,7 +9,9 @@
 
 #include "src/server/route_rule.hpp"
 #include <boost/beast2/server/router.hpp>
-#include <boost/url/decode_view.hpp>
+#include <boost/beast2/error.hpp>
+#include <boost/beast2/detail/except.hpp>
+//#include <boost/url/decode_view.hpp>
 #include <map>
 #include <string>
 #include <vector>
@@ -19,23 +21,45 @@ namespace beast2 {
 
 router_base::any_handler::~any_handler() = default;
 
+router_base::any_errfn::~any_errfn() = default;
+
 //------------------------------------------------
 
 struct router_base::entry
 {
-    http_proto::method method;
-    // VFALCO For now we do exact prefix-match
-    std::string exact_prefix;
-    path_rule_t::value_type pat;
-    std::vector<handler_ptr> handlers;
+    bool prefix = true;             // prefix match, for pathless use()
+    http_proto::method method;      // method::unknown for all, ignored for use()
+    std::string exact_prefix;       // VFALCO hack because true matching doesn't work
+    path_rule_t::value_type pat;    // VFALCO not used yet
+    handler_ptr handler;
+
+    entry(
+        bool prefix_,
+        http_proto::method method_,
+        core::string_view pat_,
+        handler_ptr h = nullptr)
+        : prefix(prefix_)
+        , method(method_)
+        , exact_prefix(pat_)
+        , handler(std::move(h))
+    {
+        // pat = grammar::parse(it, end, path_rule).value(),
+    }
+
+    void append(handler_ptr h)
+    {
+        BOOST_ASSERT(! handler);
+        handler = std::move(h);
+    }
 };
 
 struct router_base::impl
 {
+    std::size_t size = 0;
+    std::vector<entry> list;
+    std::vector<errfn_ptr> errfns;
     http_proto::method(*get_method)(void*);
     urls::segments_encoded_view&(*get_path)(void*);
-    std::vector<handler_ptr> v0;
-    std::vector<entry> patterns;
 };
 
 //------------------------------------------------
@@ -46,35 +70,151 @@ router_base(
     urls::segments_encoded_view&(*get_path)(void*))
     : impl_(std::make_shared<impl>())
 {
-    impl_->get_method = get_method;
     impl_->get_path = get_path;
+    impl_->get_method = get_method;
 }
 
-void
+std::size_t
 router_base::
-use(
-    handler_ptr h)
+size() const noexcept
 {
-    impl_->v0.emplace_back(std::move(h));
+    return impl_->size;
+}
+
+auto
+router_base::
+invoke(
+    void* req, void* res, state& st) const ->
+        system::error_code
+{
+    system::error_code ec;
+    auto method = impl_->get_method(req);
+    auto& path = impl_->get_path(req);
+    std::string path_str = std::string(path.buffer());
+
+    // routers don't detach
+    //BOOST_ASSERT(st.pos != st.resume);
+
+    // loop until the request is handled
+    for(auto const& e : impl_->list)
+    {
+        if(st.resume == 0)
+        {
+            ++st.pos;
+
+            if( e.method != http_proto::method::unknown &&
+                method != e.method)
+                continue;
+
+            if(e.prefix)
+            {
+                // only the prefix has to match
+                if(! core::string_view(path_str).starts_with(
+                        core::string_view(e.exact_prefix)))
+                    continue;
+            }
+            else
+            {
+                // check for full match
+                //if(! match(path, e.pat))
+                //  continue;
+            }
+        }
+        else
+        {
+            // resuming
+
+            // VFALCO this is broken
+            if(st.pos + e.handler->n_routes < st.resume)
+            {
+                // skip on resume
+                st.pos += e.handler->n_routes;
+                continue;
+            }
+
+            ++st.pos;
+
+            if(st.pos == st.resume)
+            {
+                st.resume = 0;
+                return st.ec;
+            }
+        }
+
+        // VFALCO not sure how to handle path on resume
+        auto const saved = path;
+        // VFALCO TODO adjust path
+        ec = e.handler->operator()(req, res, st);
+        if(! ec.failed())
+            return ec;
+        if(ec == error::detach)
+        {
+            if( st.resume == 0)
+                st.resume = st.pos;
+            return ec;
+        }
+        if(ec == error::close)
+            return ec;
+        if( ec != error::next)
+            goto do_error;
+        path = saved;
+    }
+    return error::next;
+
+do_error:
+    for(auto it = impl_->errfns.begin();
+        it != impl_->errfns.end(); ++it)
+    {
+        ec = (*it)->operator()(req, res, ec);
+        if(! ec.failed())
+            return {};
+        if( ec == error::close ||
+            ec == error::detach)
+        {
+            // VFALCO Disallow these for now
+            detail::throw_invalid_argument();
+        }
+    }
+    return ec;
+}
+
+auto
+router_base::
+resume(
+    void* req, void* res, state& st,
+    system::error_code const& ec) const ->
+        system::error_code
+{
+    st.ec = ec;
+    return invoke(req, res, st);
 }
 
 void
 router_base::
-insert(
+append(
+    bool prefix,
     http_proto::method method,
-    core::string_view path,
+    core::string_view pat,
     handler_ptr h)
 {
-    char const* it = path.data();
-    char const* const end = it + path.size();
-    std::vector<handler_ptr> handlers;
-    handlers.emplace_back(std::move(h));
+    // delete the last entry if it is empty, to handle the case where
+    // the user calls route() without actually adding anything after.
+    if( ! impl_->list.empty() &&
+        ! impl_->list.back().handler)
+    {
+        --impl_->size;
+        impl_->list.pop_back();
+    }
 
-    impl_->patterns.emplace_back(entry{
-        method,
-        path, // exact_prefix
-        grammar::parse(it, end, path_rule).value(),
-        std::move(handlers)});
+    impl_->list.emplace_back(prefix, method, pat, std::move(h));
+    ++impl_->size;
+}
+
+void
+router_base::
+append_err(errfn_ptr h)
+{
+    impl_->errfns.emplace_back(std::move(h));
 }
 
 //------------------------------------------------
@@ -100,47 +240,6 @@ static bool match(
     return it0 == end0 && it1 == end1;
 }
 #endif
-
-bool
-router_base::
-invoke(
-    void* req, void* res) const
-{
-    // global handlers
-    for(auto const& r : impl_->v0)
-    {
-        if(r->operator()(req, res))
-            return true;
-    }
-
-    auto method = impl_->get_method(req);
-    auto& path = impl_->get_path(req);
-    std::string path_str = std::string(path.buffer());
-    for(auto const& r : impl_->patterns)
-    {
-        if(r.method != method &&
-            method != http_proto::method::unknown)
-            continue;
-        //if(match(path, r.pat))
-        // VFALCO exact-prefix matching for now
-        if( core::string_view(path_str).starts_with(
-            core::string_view(r.exact_prefix)))
-        {
-            // matched
-            for(auto& e : r.handlers)
-            {
-                if(e->operator()(req, res))
-                    return true;
-            }
-
-            // no handler indicated it handled the request
-            return false;
-        }
-    }
-
-    // no route matched
-    return false;
-}
 
 } // beast2
 } // boost

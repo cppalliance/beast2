@@ -93,9 +93,11 @@ do_idle(void* pw)
     asio::dispatch(ex_,
         [this, pw]()
         {
-            worker* w = vw_.data() +
-                reinterpret_cast<std::uintptr_t>(pw) /
-                reinterpret_cast<std::uintptr_t>(vw_.data());
+            // recover the `worker` pointer without using offsetof
+            worker* w = vw_.data() + (
+                reinterpret_cast<std::uintptr_t>(pw) -
+                reinterpret_cast<std::uintptr_t>(vw_.data())) /
+                sizeof(worker);
             // push
             w->next = idle_;
             idle_ = w;

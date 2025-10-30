@@ -10,7 +10,9 @@
 #include "certificate.hpp"
 #include "worker_ssl.hpp"
 #include <boost/beast2/server/server_asio.hpp>
+#include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/server/workers.hpp>
+#include <boost/beast2/error.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/rts/brotli/decode.hpp>
@@ -24,6 +26,11 @@
 
 namespace boost {
 namespace beast2 {
+
+system::error_code fh( Request&, Response& )
+{
+    return {};
+}
 
 int server_main( int argc, char* argv[] )
 {
@@ -86,6 +93,37 @@ int server_main( int argc, char* argv[] )
 
         router_type app;
 
+#if 0
+        app.use(
+            [](Request& req, Response& res)
+            {
+                res.status(http_proto::status::ok);
+                res.set_body("Hello, world!");
+                return error::success;
+            });
+#endif
+
+        {
+            router_type r;
+            r.all("/vinnie", serve_static(doc_root) );
+            app.use("/user", std::move(r));
+        }
+
+        app.err(
+            []( Request&, Response& res,
+                system::error_code const& ec)
+            {
+                http_proto::status sc;
+                if(ec == system::errc::no_such_file_or_directory)
+                    sc = http_proto::status::not_found;
+                else
+                    sc = http_proto::status::internal_server_error;
+                res.status(sc);
+                res.set_body(ec.message());
+                return error::success;
+            });
+
+#if 0
         // redirect HTTP to HTTPS
         app.use(
             [](Request& req, Response& res)
@@ -93,15 +131,22 @@ int server_main( int argc, char* argv[] )
                 if(! req.port.is_ssl)
                 {
                     https_redirect_responder()(req, res);
-                    return true;
+                    return {};
                 }
-                return false;
+                return error::next;
             });
+#endif
 
         // static route for website
-        app.get("/",
-            file_responder{ doc_root });
-
+        app.use("/", serve_static( doc_root ));
+        app.use("/alt", serve_static( doc_root ));
+        app.use("/test", fh);
+        app.err(
+            []( Request&, Response&,
+                system::error_code const&)
+            {
+                return system::error_code{};
+            });
         using workers_type =
             workers< executor_type, worker_ssl<executor_type> >;
 

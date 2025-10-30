@@ -29,10 +29,24 @@ namespace beast2 {
 class endpoint
 {
 public:
-    BOOST_BEAST2_DECL
-    ~endpoint();
+    ~endpoint()
+    {
+        switch(kind_)
+        {
+        case urls::host_type::ipv4:
+            ipv4_.~ipv4_address();
+            break;
+        case urls::host_type::ipv6:
+            ipv6_.~ipv6_address();
+            break;
+        default:
+            break;
+        }
+    }
 
-    endpoint() = default;
+    endpoint() noexcept
+    {
+    }
 
     BOOST_BEAST2_DECL
     endpoint(
@@ -108,7 +122,6 @@ private:
         urls::ipv4_address ipv4_;
         urls::ipv6_address ipv6_;
     };
-
 };
 
 } // beast2

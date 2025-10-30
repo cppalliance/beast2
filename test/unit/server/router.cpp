@@ -10,12 +10,16 @@
 // Test that header file is self-contained.
 #include <boost/beast2/server/router.hpp>
 
+#include <boost/beast2/server/http_handler.hpp>
+#include <boost/beast2/error.hpp>
+
 #include "src/server/route_rule.hpp"
 
 #include "test_suite.hpp"
 
 namespace boost {
 namespace beast2 {
+
 
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<unreserved_char>::value);
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<ident_char>::value);
@@ -35,6 +39,39 @@ static bool operator==(
 
 struct router_test
 {
+    struct h0 { void operator()() {} };
+    struct h1 { system::error_code operator()() {} };
+    struct h2 { system::error_code operator()(int) {} };
+    struct h3 { system::error_code operator()(Request&, Response&) {} };
+    struct h4 { system::error_code operator()(Request&, Response&, system::error_code&) {} };
+    struct h5 { void operator()(Request&, Response&) {} };
+    struct h6 { void operator()(Request&, Response&, system::error_code) {} };
+    struct h7 { system::error_code operator()(Request&, Response&, int) {} };
+    struct h8 { system::error_code operator()(Request, Response&, int) {} };
+    struct h9 { system::error_code operator()(Request, Response&, system::error_code) {} };
+
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h0>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h1>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h2>::value);
+    BOOST_CORE_STATIC_ASSERT(  detail::is_handler<h3>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h4>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h5>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h6>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h7>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h8>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h9>::value);
+
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h0>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h1>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h2>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h3>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h4>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h5>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h6>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h7>::value);
+    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h8>::value);
+    BOOST_CORE_STATIC_ASSERT(  detail::is_error_handler<h9>::value);
+
     template<class T>
     static void good(core::string_view s, T const& t)
     {
@@ -213,134 +250,45 @@ struct router_test
         path("/a:id/b");
     }
 
-    struct Req
+    void testDetach()
     {
-        http_proto::method method;
-        urls::segments_encoded_view path;
-    };
-
-    struct Res
-    {
-        std::size_t n = 0;
-    };
-
-    struct H
-    {
-        bool operator()(Req&, Res& res) const
-        {
-            res.n = n;
-            return true;
-        }
-
-        std::size_t n;
-    };
-
-    static void check(
-        core::string_view path,
-        router<Res, Req>& r,
-        std::size_t n)
-    {
-        Req req;
-        Res res;
-        req.method = http_proto::method::get;
-        req.path = urls::segments_encoded_view(path);
-        r(req, res);
-        BOOST_TEST_EQ(res.n, n);
-    }
-
-    void testMatch()
-    {
-        router<Res, Req> r;
-        r.get("/form", H{3});
-        r.get("/admin", H{2});
-        r.get("/", H{1});
-        check("/", r, 1);
-        check("/index.htm", r, 1);
-        check("/admin", r, 2);
-        check("/admin/app.bin", r, 2);
-        check("/form", r, 3);
-    }
-
-    struct P
-    {
-        int n = 0;
-    };
-
-    void run()
-    {
-        testGrammar();
-
-        struct request_t
+        struct Req
         {
             http_proto::method method;
             urls::segments_encoded_view path;
         };
-
-        struct response_t
+        struct Res
         {
         };
 
-        struct asio_response_t : response_t
+        router<Res, Req> r;
+        r.use([](Req&, Res&){ return error::next; });
         {
-        };
-
-        router<asio_response_t, request_t> app;
-
-        {
-            router<response_t, request_t> r;
-
-            auto const h = [](request_t&, response_t&) { return true; };
-            auto const g = http_proto::method::get;
-            r.insert(g, "/path", h);
-            r.insert(g, "/path/2", h);
-            r.insert(g, "/path/2/3", h);
-            r.insert(g, "/path/2/3/", h);
-            r.insert(g, "/:x", h);
-            r.insert(g, "/*y", h);
-            r.insert(g, "/:x(1)", h);
-            r.insert(g, "/*z?", h);
-            r.insert(g, "/*z+", h);
-
-            r.use(
-                [](request_t&, response_t&)
+            router<Res, Req> r1;
+            r1.use([](Req&, Res&){ return error::next; });
+            r1.use(
+                [](Req&, Res&)->system::error_code
                 {
-                    return false;
+                    return error::detach;
                 });
-            r.use(
-                [](request_t&, response_t&)
-                {
-                    return true;
-                });
-            r.insert(http_proto::method::get, "/here",
-                [](request_t&, response_t&)
-                {
-                    return true;
-                });
-
-            app.use(
-                [](request_t&, asio_response_t&)
-                {
-                    return true;
-                });
-
-            request_t req;
-            response_t res;
-            req.method = http_proto::method::get;
-            req.path = urls::segments_encoded_view("/stuff");
-
-
-            r(req, res);
-            app.insert(http_proto::method::get, "/stuff", r);
-            r(req, res);
+            r1.use([](Req&, Res&){ return error::next; });
+            r.use(std::move(r1));
         }
+        r.use([](Req&, Res&){ return error::next; });
+        router_base::state st;
+        Req req;
+        Res res;
+        req.path = { "/" };
+        auto ec = r(req, res, st);
+        BOOST_TEST(ec == error::detach);
+        ec = r.resume(req, res, error::close, st);
+        BOOST_TEST(ec == error::close);
+    }
 
-        request_t req;
-        asio_response_t res;
-        req.method = http_proto::method::get;
-        req.path = urls::segments_encoded_view("/path/to/file.txt");
-        app(req, res);
-
-        testMatch();
+    void run()
+    {
+        testGrammar();
+        testDetach();
     }
 };
 

@@ -18,9 +18,12 @@
 #include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/server_asio.hpp>
+#include <boost/beast2/error.hpp>
+#include <boost/beast2/detail/except.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
+#include <boost/asio/prepend.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -31,6 +34,7 @@ namespace beast2 {
 */
 template<class Derived>
 class http_responder
+    : public detacher::owner
 {
 public:
     explicit
@@ -72,7 +76,7 @@ private:
     }
 
     void on_read(
-        system::error_code const& ec,
+        system::error_code ec,
         std::size_t bytes_transferred)
     {
         (void)bytes_transferred;
@@ -86,6 +90,11 @@ private:
 
         BOOST_ASSERT(pr_.is_complete());
 
+        //----------------------------------------
+        //
+        // set up Request and Response objects
+        //
+
         Request req{
             pr_.get().method(),
             urls::segments_encoded_view(
@@ -95,14 +104,34 @@ private:
             pr_,
             self().server().is_stopping()
         };
+
         Response res{
             res_,
             sr_
         };
 
+        // copy version
+        res.m.set_version(req.m.version());
+
+        // copy keep-alive setting
+        res.m.set_start_line(
+            http_proto::status::ok, pr_.get().version());
+        res.m.set_keep_alive(pr_.get().keep_alive());
+
         // invoke handlers for the route
-        auto handled = rr_(req, res);
-        if(! handled)
+
+        detached_ = false;
+        route_state_ = {};
+        ec = rr_(req, res, route_state_);
+
+        if(ec == error::detach)
+        {
+            // make sure they called detach()
+            BOOST_ASSERT(detached_);
+            return;
+        }
+
+        if(ec.failed())
         {
             // give a default error response?
         }
@@ -147,6 +176,53 @@ private:
         self().do_fail(s, ec);
     }
 
+    detacher::resumer
+    do_detach() override
+    {
+        // can't call twice
+        BOOST_ASSERT(! detached_);
+        detached_ = true;
+
+        // VFALCO cancel timer
+        // VFALCO work guard to-do
+        //wg_ = asio::make_work_guard(self().stream().get_executor());
+
+        return detacher::resumer(*this);
+    }
+
+    void do_resume(system::error_code const& ec) override
+    {
+        asio::dispatch(
+            self().stream().get_executor(),
+            asio::prepend(call_mf(
+                &http_responder::do_resume2, this), ec));
+    }
+
+    void do_resume2(system::error_code const& ec)
+    {
+        if(ec == error::detach)
+        {
+            // Cannot detach when resuming
+            detail::throw_logic_error();
+        }
+
+        (void)ec;
+        Request req{
+            pr_.get().method(),
+            urls::segments_encoded_view(
+                pr_.get().target()),
+            *this->pconfig_,
+            pr_.get(),
+            pr_,
+            self().server().is_stopping()
+        };
+
+        Response res{
+            res_,
+            sr_
+        };
+    }
+
     Derived&
     self() noexcept
     {
@@ -169,10 +245,15 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     router_type& rr_;
+    router_type::state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;
     acceptor_config const* pconfig_ = nullptr;
+    bool detached_ = false;
+    // VFALCO how do we get the executor type?
+    //asio::executor_work_guard<
+        //decltype(self().get_executor())> wg_;
 };
 
 } // beast2
