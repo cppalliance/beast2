@@ -40,11 +40,11 @@ public:
 
     body_read_stream_op(
         AsyncReadStream& s,
-        MutableBufferSequence mb,
+        MutableBufferSequence&& mb,
         http_proto::parser& pr,
         bool some) noexcept
         : us_(s)
-        , mb_(mb)
+        , mb_(std::move(mb))
         , pr_(pr)
         , some_(some)
     {
@@ -61,6 +61,7 @@ public:
 
         self.reset_cancellation_state(
             [](asio::cancellation_type requested) {
+                boost::ignore_unused(requested);
                 std::cout << "reset cancel state" << std::endl;
                 return asio::cancellation_type::all;
             }
@@ -161,7 +162,7 @@ body_read_stream<AsyncReadStream>::async_read_some(
         CompletionToken,
         void(system::error_code, std::size_t)>(
             detail::body_read_stream_op<
-            MutableBufferSequence, AsyncReadStream>{us_, mb, pr_, true},
+            MutableBufferSequence, AsyncReadStream>{us_, std::move(mb), pr_, true},
             token,
             us_
         );
@@ -182,7 +183,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
         CompletionToken,
         void(system::error_code, std::size_t)>(
             detail::body_read_stream_op<
-            MutableBufferSequence, AsyncReadStream>{us_, mb, pr_, false},
+            MutableBufferSequence, AsyncReadStream>{us_, std::move(mb), pr_, false},
             token,
             us_
         );

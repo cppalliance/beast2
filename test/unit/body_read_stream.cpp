@@ -10,25 +10,21 @@
 
 #include <boost/beast2/body_read_stream.hpp>
 
-//#include <boost/beast/core/flat_buffer.hpp>
-
 #include <boost/asio/async_result.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/asio/cancel_after.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/read.hpp>
 #include <boost/buffers/buffer.hpp>
 #include <boost/buffers/circular_buffer.hpp>
 #include <boost/buffers/copy.hpp>
 #include <boost/buffers/make_buffer.hpp>
-#include <boost/asio/buffer.hpp>
 #include <boost/asio/prepend.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/rts/context.hpp>
 #include <boost/utility/string_view.hpp>
-
-//#include <boost/asio/basic_socket.hpp>
-//#include <boost/asio/ip/tcp.hpp>
 
 #include <boost/beast2/test/stream.hpp>
 #include "test_helpers.hpp"
@@ -225,8 +221,8 @@ public:
 
         // async_read_some reads the body for various chunk
         // sizes.
-        if (false) {
-            for (std::size_t cs = 240; cs < msg_length_ + 2; cs++)
+        {
+            for (std::size_t cs = 1; cs < msg_length_ + 2; cs++)
             {
                 test::stream ts(ioc, msg_);
                 http_proto::response_parser pr(rts_ctx);
@@ -290,7 +286,7 @@ public:
         }
 
 
-        // async_read_some cancellation
+        // Test async_read_some cancellation
         {
             http_proto::response_parser pr(rts_ctx);
             pr.reset();
@@ -307,22 +303,89 @@ public:
             s.reserve(2048);
             boost::buffers::string_buffer buf(&s);
 
-            auto lambda = [&](system::error_code ec, std::size_t n)
+            int invoked2 = 0;
+
+            auto lambda2 = [&](system::error_code ec, std::size_t n)
                 {
-                    std::cout << "first read " << n << " ec: " << ec << std::endl;
+                    BOOST_TEST_EQ(n, 0);
+                    BOOST_TEST_EQ(ec, http_proto::error::incomplete);
+                    invoked2++;
+                };
+
+            int invoked1 = 0;
+
+            auto lambda1 = [&](system::error_code ec, std::size_t n)
+                {
+                    BOOST_TEST_EQ(n, 0);
+                    BOOST_TEST_EQ(ec, asio::error::operation_aborted);
+                    invoked1++;
                     brs.async_read_some(
                         buf.prepare(1024),
-                        [&](system::error_code ec, std::size_t n)
-                        {
-                            std::cout << "second read " << n << " ec: " << ec << std::endl;
-                        });
+                        lambda2);
                 };
 
             brs.async_read_some(
                 buf.prepare(1024),
-                asio::cancel_after(std::chrono::seconds{ 2 }, lambda));
-            test::run_for(ioc, std::chrono::minutes{ 2 });
+                asio::cancel_after(std::chrono::milliseconds{ 250 }, lambda1));
+
+            test::run_for(ioc, std::chrono::seconds{ 5 });
+
+            BOOST_TEST_EQ(invoked1, 1);
+            BOOST_TEST_EQ(invoked2, 1);
+            BOOST_TEST(pr.got_header());
+            BOOST_TEST(!pr.is_complete());
+
             std::cout << "done" << std::endl;
+        }
+
+        // Test asio::async_read works
+        {
+            // pick a representative chunk, as we already do the looping over all chunks above.
+            std::size_t cs = 5;
+
+            test::stream ts(ioc, msg_);
+            http_proto::response_parser pr(rts_ctx);
+            pr.reset();
+            pr.start();
+
+            // limit async_read_some for better coverage
+            ts.read_size(cs);
+
+            // The object under test
+            body_read_stream<test::stream> brs(ts, pr);
+
+            // Create a destination buffer
+            std::string s;
+            s.reserve(2048);
+            boost::buffers::string_buffer buf(&s);
+
+            // asio::async_read requires a MutableBufferSequence
+            std::array<buffers::mutable_buffer, 1> arr{ buf.prepare(1024) };
+
+            int invoked = 0;
+
+            asio::async_read(brs,
+                arr,
+                [&](system::error_code ec, std::size_t n)
+                {
+                    BOOST_TEST(ec == asio::error::eof);
+                    BOOST_TEST(n == body_length_);
+                    buf.commit(n);
+                    invoked++;
+                });
+
+            test::run(ioc);
+
+            BOOST_TEST_EQ(invoked, 1);
+
+            BOOST_TEST(pr.got_header());
+            BOOST_TEST(pr.is_complete());
+            BOOST_TEST_EQ(buf.size(), body_length_);
+
+            std::string result(test_to_string(buf.data()));
+
+            BOOST_TEST(result == body_);
+            BOOST_TEST_EQ(result.size(), body_length_);
         }
 
         // async_read_some reports stream errors
