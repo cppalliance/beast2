@@ -180,15 +180,6 @@ struct Response
     */
 };
 
-struct AsioResponse : Response
-{
-    template<class... Args>
-    AsioResponse(Args&&... args)
-        : Response(std::forward<Args>(args)...)
-    {
-    }
-};
-
 using router_type = router<Request, Response>;
 
 } // beast2

@@ -147,8 +147,7 @@ int server_main( int argc, char* argv[] )
             {
                 return system::error_code{};
             });
-        using workers_type =
-            workers< executor_type, worker_ssl<executor_type> >;
+        using workers_type = workers<worker_ssl<executor_type>>;
 
         // Create all our workers
         auto& vp = emplace_part<workers_type>(

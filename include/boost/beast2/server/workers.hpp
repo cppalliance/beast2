@@ -59,19 +59,17 @@ public:
     @tparam Executor The type of executor used by acceptor sockets.
     @tparam Worker The type of worker to use.
 */
-template<
-    class Executor,
-    class Worker>
+template<class Worker>
 class workers
     : public workers_base
     , public server::part
 {
 public:
+    using executor_type = typename Worker::executor_type;
     using protocol_type = typename Worker::protocol_type;
-    using acceptor_type =
-        asio::basic_socket_acceptor<protocol_type, Executor>;
+    using acceptor_type = asio::basic_socket_acceptor<protocol_type, executor_type>;
     using acceptor_config = typename Worker::acceptor_config;
-    using socket_type = asio::basic_stream_socket<protocol_type, Executor>;
+    using socket_type = asio::basic_stream_socket<protocol_type, executor_type>;
 
     /** Constructor
 
@@ -117,7 +115,7 @@ private:
 
     beast2::server& srv_;
     section sect_;
-    Executor ex_;
+    executor_type ex_;
     fixed_array<worker> vw_;
     std::vector<acceptor> va_;
     worker* idle_ = nullptr;
@@ -127,8 +125,8 @@ private:
 
 //------------------------------------------------
 
-template<class Executor, class Worker>
-struct workers<Executor, Worker>::
+template<class Worker>
+struct workers<Worker>::
     acceptor
 {
     template<class... Args>
@@ -145,12 +143,12 @@ struct workers<Executor, Worker>::
 
     acceptor_config config;
     asio::basic_socket_acceptor<
-        protocol_type, Executor> sock;
+        protocol_type, executor_type> sock;
     std::size_t need;   // number of accepts we need
 };
 
-template<class Executor, class Worker>
-struct workers<Executor, Worker>::
+template<class Worker>
+struct workers<Worker>::
     worker
 {
     worker* next;
@@ -167,9 +165,9 @@ struct workers<Executor, Worker>::
 
 //------------------------------------------------
 
-template<class Executor, class Worker>
+template<class Worker>
 template<class Executor1, class... Args>
-workers<Executor, Worker>::
+workers<Worker>::
 workers(
     beast2::server& srv,
     Executor1 const& ex,
@@ -188,17 +186,17 @@ workers(
     n_idle_ = vw_.size();
 }
 
-template<class Executor, class Worker>
+template<class Worker>
 beast2::server&
-workers<Executor, Worker>::
+workers<Worker>::
 server() noexcept
 {
     return srv_;
 }
 
-template<class Executor, class Worker>
+template<class Worker>
 void
-workers<Executor, Worker>::
+workers<Worker>::
 do_idle(void* pw)
 {
     asio::dispatch(ex_,
@@ -216,25 +214,25 @@ do_idle(void* pw)
             do_accepts();
         });
 }
-template<class Executor, class Worker>
+template<class Worker>
 void
-workers<Executor, Worker>::
+workers<Worker>::
 start()
 {
     asio::dispatch(ex_, call_mf(&workers::do_accepts, this));
 }
 
-template<class Executor, class Worker>
+template<class Worker>
 void
-workers<Executor, Worker>::
+workers<Worker>::
 stop()
 {
     asio::dispatch(ex_, call_mf(&workers::do_stop, this));
 }
 
-template<class Executor, class Worker>
+template<class Worker>
 void
-workers<Executor, Worker>::
+workers<Worker>::
 do_accepts()
 {
     BOOST_ASSERT(ex_.running_in_this_thread());
@@ -265,9 +263,9 @@ busy:
     return;
 }
 
-template<class Executor, class Worker>
+template<class Worker>
 void
-workers<Executor, Worker>::
+workers<Worker>::
 on_accept(
     acceptor* pa,
     worker* pw,
@@ -288,9 +286,9 @@ on_accept(
         call_mf(&Worker::on_accept, &pw->w), &pa->config));
 }
 
-template<class Executor, class Worker>
+template<class Worker>
 void
-workers<Executor, Worker>::
+workers<Worker>::
 do_stop()
 {
     for(auto& a : va_)
