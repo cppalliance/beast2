@@ -91,6 +91,10 @@ int server_main( int argc, char* argv[] )
             http_proto::install_serializer_service(srv.services(), cfg);
         }
 
+        using workers_type = workers<worker_ssl<executor_type>>;
+
+        //router<Request, ResponseAsio<worker_ssl<
+            //executor_type>::stream_type>> app;
         router_type app;
 
 #if 0
@@ -147,7 +151,6 @@ int server_main( int argc, char* argv[] )
             {
                 return system::error_code{};
             });
-        using workers_type = workers<worker_ssl<executor_type>>;
 
         // Create all our workers
         auto& vp = emplace_part<workers_type>(

@@ -178,6 +178,15 @@ struct Response
     bool error(system::error_code);
     bool status(http_proto::status);
     */
+
+    Response(
+        http_proto::response& m_,
+        http_proto::serializer& sr_) noexcept
+        : m(m_)
+        , sr(sr_)
+    {
+    }
+
 };
 
 using router_type = router<Request, Response>;

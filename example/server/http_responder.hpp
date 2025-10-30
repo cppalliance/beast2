@@ -17,6 +17,7 @@
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
@@ -180,7 +181,9 @@ on_read(
         self().server().is_stopping()
     };
 
-    Response res{
+    using stream_type = typename Worker::stream_type;
+    ResponseAsio<stream_type> res{
+        self().stream(),
         res_,
         sr_
     };
