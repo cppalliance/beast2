@@ -24,9 +24,11 @@ namespace beast2 {
 
 struct Request;
 struct Response;
-class router_base;
 template<class Response, class Request>
 class router;
+namespace detail {
+class any_router;
+} // detail
 
 //------------------------------------------------
 
@@ -58,7 +60,7 @@ struct is_router : std::false_type {};
 
 template<class T>
 struct is_router<T> :
-    detail::derived_from<router_base, T>
+    detail::derived_from<any_router, T>
 {
 };
 
@@ -69,7 +71,7 @@ struct is_router<T> :
 struct route_state
 {
 private:
-    friend class router_base;
+    friend class detail::any_router;
     template<class Res, class Req>
     friend class router;
 
@@ -78,7 +80,11 @@ private:
     system::error_code ec;
 };
 
-class router_base
+//------------------------------------------------
+
+namespace detail {
+
+class any_router
 {
 protected:
     struct entry;
@@ -102,7 +108,7 @@ protected:
     template<class Request, class Response, class Handler>
     struct errfn_impl;
 
-    BOOST_BEAST2_DECL router_base(
+    BOOST_BEAST2_DECL any_router(
         http_proto::method(*)(void*),
         urls::segments_encoded_view&(*)(void*));
     BOOST_BEAST2_DECL std::size_t size() const noexcept;
@@ -119,12 +125,14 @@ protected:
     std::shared_ptr<impl> impl_;
 };
 
+} // detail
+
 //------------------------------------------------
 
 /** A container mapping HTTP requests to handlers
 */
 template<class Request, class Response>
-class router : public router_base
+class router : public detail::any_router
 {
     static constexpr http_proto::method all_methods =
         http_proto::method::unknown;
@@ -133,7 +141,7 @@ public:
     /** Constructor
     */
     router()
-        : router_base(
+        : any_router(
             [](void* req) -> http_proto::method
             {
                 return reinterpret_cast<Request*>(req)->method;
@@ -258,7 +266,7 @@ private:
     void append(bool prefix, http_proto::method method,
         core::string_view pat, H0&& h, HN&&... hn)
     {
-        router_base::append(prefix, method, pat,
+        any_router::append(prefix, method, pat,
             handler_ptr(new handler_impl<Request, Response, H0>(
                 std::forward<H0>(h))));
         append(prefix, method, pat, std::forward<HN>(hn)...);
@@ -271,7 +279,7 @@ private:
     template<class H0, class... HN>
     void append_err(H0&& h, HN&&... hn)
     {
-        router_base::append_err(errfn_ptr(new
+        any_router::append_err(errfn_ptr(new
             errfn_impl<Request, Response, H0>(
                 std::forward<H0>(h))));
         append_err(std::forward<HN>(hn)...);
@@ -282,7 +290,7 @@ private:
 //------------------------------------------------
 
 struct BOOST_SYMBOL_VISIBLE
-    router_base::any_handler
+    detail::any_router::any_handler
 {
     // total children including this one
     std::size_t n_routes;
@@ -295,7 +303,7 @@ struct BOOST_SYMBOL_VISIBLE
 };
 
 struct BOOST_SYMBOL_VISIBLE
-    router_base::any_errfn
+    detail::any_router::any_errfn
 {
     BOOST_BEAST2_DECL
     virtual ~any_errfn();
@@ -310,7 +318,7 @@ template<
     class Response,
     class Handler,
     class>
-struct router_base::handler_impl : any_handler
+struct detail::any_router::handler_impl : any_handler
 {
     typename std::decay<Handler>::type h;
 
@@ -335,7 +343,7 @@ template<
     class Request,
     class Response,
     class Handler>
-struct router_base::handler_impl<Request, Response, Handler,
+struct detail::any_router::handler_impl<Request, Response, Handler,
     typename std::enable_if<detail::is_router<
         typename std::decay<Handler>::type>::value>::type>
     : any_handler
@@ -359,7 +367,7 @@ struct router_base::handler_impl<Request, Response, Handler,
 
 // wrapper for error handling functions
 template<class Request, class Response, class Handler>
-struct router_base::errfn_impl : any_errfn
+struct detail::any_router::errfn_impl : any_errfn
 {
     typename std::decay<Handler>::type h;
 
