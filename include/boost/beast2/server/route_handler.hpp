@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_HTTP_HANDLER_HPP
-#define BOOST_BEAST2_SERVER_HTTP_HANDLER_HPP
+#ifndef BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
+#define BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/router.hpp>
