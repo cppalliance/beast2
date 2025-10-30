@@ -84,7 +84,7 @@ size() const noexcept
 auto
 router_base::
 invoke(
-    void* req, void* res, state& st) const ->
+    void* req, void* res, route_state& st) const ->
         system::error_code
 {
     system::error_code ec;
@@ -181,7 +181,7 @@ do_error:
 auto
 router_base::
 resume(
-    void* req, void* res, state& st,
+    void* req, void* res, route_state& st,
     system::error_code const& ec) const ->
         system::error_code
 {

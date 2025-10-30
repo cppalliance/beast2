@@ -29,7 +29,9 @@ namespace boost {
 namespace beast2 {
 
 //------------------------------------------------
+/*
 
+*/
 /** Mixin for delivering responses to HTTP requests
 */
 template<class Worker>
@@ -88,7 +90,7 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     router_type& rr_;
-    router_type::state route_state_;
+    route_state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;

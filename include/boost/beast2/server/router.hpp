@@ -66,21 +66,20 @@ struct is_router<T> :
 
 //------------------------------------------------
 
+struct route_state
+{
+private:
+    friend class router_base;
+    template<class Res, class Req>
+    friend class router;
+
+    std::size_t pos = 0;
+    std::size_t resume = 0;
+    system::error_code ec;
+};
+
 class router_base
 {
-public:
-    struct state
-    {
-    private:
-        friend class router_base;
-        template<class Res, class Req>
-        friend class router;
-
-        std::size_t pos = 0;
-        std::size_t resume = 0;
-        system::error_code ec;
-    };
-
 protected:
     struct entry;
     struct impl;
@@ -108,9 +107,9 @@ protected:
         urls::segments_encoded_view&(*)(void*));
     BOOST_BEAST2_DECL std::size_t size() const noexcept;
     BOOST_BEAST2_DECL system::error_code invoke(
-        void*, void*, state&) const;
+        void*, void*, route_state&) const;
     BOOST_BEAST2_DECL system::error_code resume(
-        void*, void*, state&, system::error_code const& ec) const;
+        void*, void*, route_state&, system::error_code const& ec) const;
 
     BOOST_BEAST2_DECL void append(bool, http_proto::method,
         core::string_view, handler_ptr);
@@ -230,7 +229,7 @@ public:
     operator()(
         Request& req,
         Response& res,
-        state& st) const ->
+        route_state& st) const ->
             system::error_code 
     {
         return invoke(&req, &res, st);
@@ -241,7 +240,7 @@ public:
         Request& req,
         Response& res,
         system::error_code const& ec,
-        state& st) const ->
+        route_state& st) const ->
             system::error_code
     {
         st.pos = 0;
@@ -292,7 +291,7 @@ struct BOOST_SYMBOL_VISIBLE
     virtual ~any_handler();
 
     virtual system::error_code operator()(
-        void*, void*, state&) const = 0;
+        void*, void*, route_state&) const = 0;
 };
 
 struct BOOST_SYMBOL_VISIBLE
@@ -323,7 +322,7 @@ struct router_base::handler_impl : any_handler
     }
 
     system::error_code operator()(
-        void* req, void* res, state&) const override
+        void* req, void* res, route_state&) const override
     {
         return h(
             *reinterpret_cast<Request*>(req),
@@ -351,7 +350,7 @@ struct router_base::handler_impl<Request, Response, Handler,
     }
 
     system::error_code operator()(
-        void* req, void* res, state& st) const override
+        void* req, void* res, route_state& st) const override
     {
         return h(*reinterpret_cast<Request*>(req),
             *reinterpret_cast<Response*>(res), st);

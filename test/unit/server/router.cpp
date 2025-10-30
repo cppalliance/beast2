@@ -275,7 +275,7 @@ struct router_test
             r.use(std::move(r1));
         }
         r.use([](Req&, Res&){ return error::next; });
-        router_base::state st;
+        route_state st;
         Req req;
         Res res;
         req.path = { "/" };
