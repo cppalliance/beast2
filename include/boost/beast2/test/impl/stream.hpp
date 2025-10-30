@@ -53,16 +53,39 @@ template<class Executor>
 template<class Handler, class Buffers>
 class basic_stream<Executor>::read_op : public detail::stream_read_op_base
 {
-    struct lambda
+    class lambda
     {
         Handler h_;
         boost::weak_ptr<detail::stream_state> wp_;
         Buffers b_;
         asio::executor_work_guard<
             asio::associated_executor_t<Handler, asio::any_io_executor>> wg2_;
-        lambda(lambda&&) = default;
-        lambda(lambda const&) = default;
 
+        class cancellation_handler
+        {
+        public:
+            explicit
+            cancellation_handler(
+                boost::weak_ptr<detail::stream_state> wp)
+                : wp_(std::move(wp))
+            {
+            }
+
+            void
+            operator()(asio::cancellation_type type) const
+            {
+                if (type != asio::cancellation_type::none)
+                {
+                    if (auto sp = wp_.lock())
+                        sp->cancel_read();
+                }
+            }
+
+        private:
+            boost::weak_ptr<detail::stream_state> wp_;
+        };
+
+    public:
         template<class Handler_>
         lambda(
             Handler_&& h,
@@ -73,6 +96,9 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
             , b_(b)
             , wg2_(asio::get_associated_executor(h_, s->exec))
         {
+            auto c_slot = asio::get_associated_cancellation_slot(h_);
+            if (c_slot.is_connected())
+                c_slot.template emplace<cancellation_handler>(wp_);
         }
 
         using allocator_type = asio::associated_allocator_t<Handler>;
