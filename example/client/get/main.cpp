@@ -335,7 +335,7 @@ private:
             stream_.async_shutdown(
                 [](system::error_code ec)
                 {
-                    if(ec != asio::ssl::error::stream_truncated)
+                    if(ec.failed() && ec != asio::ssl::error::stream_truncated)
                         return fail(ec, "shutdown");
                 });
         }

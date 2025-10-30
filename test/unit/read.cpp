@@ -12,6 +12,7 @@
 #include <boost/beast2/read.hpp>
 
 #include <boost/beast2/test/stream.hpp>
+#include <boost/asio/bind_cancellation_slot.hpp>
 #include <boost/asio/bind_immediate_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/buffers/copy.hpp>
@@ -121,6 +122,28 @@ public:
                 ts,
                 pr,
                 test::fail_handler(http_proto::error::body_too_large));
+            test::run(ioc);
+        }
+
+        // async_read_some cancellation
+        {
+            test::stream ts(ioc);
+            asio::cancellation_signal c_signal;
+            http_proto::response_parser pr(rts_ctx);
+            pr.reset();
+            pr.start();
+
+            // read header
+            async_read_some(
+                ts,
+                pr,
+                asio::bind_cancellation_slot(
+                    c_signal.slot(),
+                    test::fail_handler(asio::error::operation_aborted)));
+
+            // send a cancellation
+            asio::post(ioc, [&](){ c_signal.emit(asio::cancellation_type::total); });
+
             test::run(ioc);
         }
     }
