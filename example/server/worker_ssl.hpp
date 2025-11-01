@@ -12,9 +12,9 @@
 
 #include "handler.hpp"
 #include "http_responder.hpp"
+#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/beast2/server/logger.hpp>
-#include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/server/workers.hpp>
 #include <boost/beast2/read.hpp>

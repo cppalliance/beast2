@@ -8,7 +8,7 @@
 //
 
 #include "src/server/route_rule.hpp"
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/detail/any_router.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>

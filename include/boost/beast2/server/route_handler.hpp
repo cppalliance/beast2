@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/basic_router.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -189,7 +189,7 @@ struct Response
 
 };
 
-using router_type = router<Request, Response>;
+using router_type = basic_router<Request, Response>;
 
 } // beast2
 } // boost

@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_ROUTER_HPP
-#define BOOST_BEAST2_SERVER_ROUTER_HPP
+#ifndef BOOST_BEAST2_SERVER_BASIC_ROUTER_HPP
+#define BOOST_BEAST2_SERVER_BASIC_ROUTER_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/detail/any_router.hpp>
@@ -28,7 +28,7 @@ struct route_state
 private:
     friend class detail::any_router;
     template<class Res, class Req>
-    friend class router;
+    friend class basic_router;
 
     std::size_t pos = 0;
     std::size_t resume = 0;
@@ -40,7 +40,7 @@ private:
 /** A container mapping HTTP requests to handlers
 */
 template<class Request, class Response>
-class router : public detail::any_router
+class basic_router : public detail::any_router
 {
     static constexpr http_proto::method all_methods =
         http_proto::method::unknown;
@@ -48,7 +48,7 @@ class router : public detail::any_router
 public:
     /** Constructor
     */
-    router()
+    basic_router()
         : any_router(
             [](void* req) -> http_proto::method
             {

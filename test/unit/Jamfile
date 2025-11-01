@@ -40,6 +40,7 @@ local SOURCES =
     read.cpp
     sandbox.cpp
     write.cpp
+    server/basic_router.cpp
     server/fixed_array.cpp
     ;
 

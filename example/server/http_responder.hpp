@@ -16,8 +16,8 @@
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/server/any_lambda.hpp>
+#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/logger.hpp>
-#include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/error.hpp>
