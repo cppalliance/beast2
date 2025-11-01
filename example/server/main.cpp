@@ -208,6 +208,7 @@ http_responder
         server&
         router&
         Stream&
+        close_fn
 
     do_session: called when a new connection is accepted
     calls external do_close() to notify end of session

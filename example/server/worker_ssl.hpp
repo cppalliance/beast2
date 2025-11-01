@@ -94,10 +94,6 @@ public:
         acceptor_config const* pconfig,
         system::error_code const& ec);
 
-    /** Close the connection to end the session
-    */
-    void do_close(system::error_code const& ec);
-
     void on_shutdown(system::error_code ec);
 
     void do_fail(
@@ -106,6 +102,10 @@ public:
     void reset();
 
 private:
+    /** Called when the logical session ends
+    */
+    void do_close(system::error_code const& ec);
+
     workers_base& wb_;
     asio::ssl::context& ssl_ctx_;
     stream_type stream_;
@@ -122,7 +122,11 @@ worker_ssl(
     Executor0 const& ex,
     asio::ssl::context& ssl_ctx,
     router_type& rr)
-    : http_responder<worker_ssl>(wb.server(), rr)
+    : http_responder<worker_ssl>(wb.server(), rr,
+        [this](system::error_code const& ec)
+        {
+            this->do_close(ec);
+        })
     , wb_(wb)
     , ssl_ctx_(ssl_ctx)
     , stream_(ex, ssl_ctx)
@@ -172,29 +176,6 @@ on_handshake(
         this->id());
 
     this->do_session(*pconfig);
-}
-
-/** Close the connection to end the session
-*/
-template<class Executor, class Protocol>
-void
-worker_ssl<Executor, Protocol>::
-do_close(system::error_code const& ec)
-{
-    if(! ec.failed())
-    {
-        if(! this->pconfig_->is_ssl)
-        {
-            reset();
-            wb_.do_idle(this);
-            return;
-        }
-        stream_.stream().async_shutdown(call_mf(
-            &worker_ssl::on_shutdown, this));
-        return;
-    }
-
-    do_fail("worker_ssl::do_close", ec);
 }
 
 template<class Executor, class Protocol>
@@ -255,6 +236,29 @@ reset()
     // original socket to avoid churning file handles.
     //
     stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
+}
+
+/** Close the connection to end the session
+*/
+template<class Executor, class Protocol>
+void
+worker_ssl<Executor, Protocol>::
+do_close(system::error_code const& ec)
+{
+    if(! ec.failed())
+    {
+        if(! this->pconfig_->is_ssl)
+        {
+            reset();
+            wb_.do_idle(this);
+            return;
+        }
+        stream_.stream().async_shutdown(call_mf(
+            &worker_ssl::on_shutdown, this));
+        return;
+    }
+
+    do_fail("worker_ssl::do_close", ec);
 }
 
 } // beast2

@@ -15,6 +15,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
+#include <boost/beast2/server/any_lambda.hpp>
 #include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
@@ -30,22 +31,6 @@ namespace boost {
 namespace beast2 {
 
 //------------------------------------------------
-
-template<class Stream>
-class http_session
-{
-public:
-    http_session(
-        Stream& stream)
-        : stream_(stream)
-    {
-    }
-
-private:
-    Stream& stream_;
-};
-
-//------------------------------------------------
 /*
 
 */
@@ -58,7 +43,8 @@ class http_responder
 public:
     http_responder(
         server& srv,
-        router_type& rr);
+        router_type& rr,
+        any_lambda<void(system::error_code)> close_fn);
 
     /** Called to start a new HTTP session
 
@@ -109,6 +95,7 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     router_type& rr_;
+    any_lambda<void(system::error_code)> close_;
     route_state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
@@ -126,7 +113,8 @@ template<class Worker>
 http_responder<Worker>::
 http_responder(
     server& srv,
-    router_type& rr)
+    router_type& rr,
+    any_lambda<void(system::error_code)> close)
     : sect_(srv.sections().get("http_responder"))
     , id_(
         []() noexcept
@@ -135,6 +123,7 @@ http_responder(
             return ++n;
         }())
     , rr_(rr)
+    , close_(close)
     , pr_(srv.services())
     , sr_(srv.services())
 {
@@ -261,7 +250,7 @@ on_write(
     sr_.reset();
     res_.clear();
 
-    return self().do_close({});
+    close_({});
 }
 
 template<class Worker>
@@ -277,7 +266,7 @@ do_fail(
     sr_.reset();
     res_.clear();
 
-    self().do_close(ec);
+    close_(ec);
 }
 
 template<class Worker>
