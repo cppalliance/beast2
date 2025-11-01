@@ -91,6 +91,10 @@ int server_main( int argc, char* argv[] )
             http_proto::install_serializer_service(srv.services(), cfg);
         }
 
+        using workers_type = workers<worker_ssl<executor_type>>;
+
+        //router<Request, ResponseAsio<worker_ssl<
+            //executor_type>::stream_type>> app;
         router_type app;
 
 #if 0
@@ -147,8 +151,6 @@ int server_main( int argc, char* argv[] )
             {
                 return system::error_code{};
             });
-        using workers_type =
-            workers< executor_type, worker_ssl<executor_type> >;
 
         // Create all our workers
         auto& vp = emplace_part<workers_type>(
@@ -188,3 +190,29 @@ int main(int argc, char* argv[])
 {
     return boost::beast2::server_main( argc, argv );
 }
+/*
+
+workers
+    provide acceptors
+    has an executor
+    needs a socket to accept into
+
+worker_plain
+worker_ssl
+worker_flex
+    has an executor
+    provides stream()
+
+http_responder
+    inject
+        server&
+        router&
+        Stream&
+        close_fn
+
+    do_session: called when a new connection is accepted
+    calls external do_close() to notify end of session
+    calls derived class do_fail() to log an error
+    uses the executor of the stream
+
+*/

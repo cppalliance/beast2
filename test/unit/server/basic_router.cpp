@@ -8,9 +8,9 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/basic_router.hpp>
 
-#include <boost/beast2/server/http_handler.hpp>
+#include <boost/beast2/server/route_handler.hpp>
 #include <boost/beast2/error.hpp>
 
 #include "src/server/route_rule.hpp"
@@ -37,7 +37,7 @@ static bool operator==(
         lhs.modifier == rhs.modifier;
 }
 
-struct router_test
+struct basic_router_test
 {
     struct h0 { void operator()() {} };
     struct h1 { system::error_code operator()() {} };
@@ -261,10 +261,10 @@ struct router_test
         {
         };
 
-        router<Res, Req> r;
+        basic_router<Req, Res> r;
         r.use([](Req&, Res&){ return error::next; });
         {
-            router<Res, Req> r1;
+            basic_router<Req, Res> r1;
             r1.use([](Req&, Res&){ return error::next; });
             r1.use(
                 [](Req&, Res&)->system::error_code
@@ -275,7 +275,7 @@ struct router_test
             r.use(std::move(r1));
         }
         r.use([](Req&, Res&){ return error::next; });
-        router_base::state st;
+        route_state st;
         Req req;
         Res res;
         req.path = { "/" };
@@ -293,8 +293,8 @@ struct router_test
 };
 
 TEST_SUITE(
-    router_test,
-    "boost.beast2.server.router");
+    basic_router_test,
+    "boost.beast2.server.basic_router");
 
 
 } // beast2

@@ -11,8 +11,7 @@
 #define BOOST_BEAST2_SERVER_SERVE_STATIC_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/http_handler.hpp>
-#include <memory>
+#include <boost/beast2/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -169,7 +168,7 @@ struct serve_static
 
 private:
     struct impl;
-    std::unique_ptr<impl> impl_;
+    impl* impl_;
 };
 
 } // beast2
