@@ -96,7 +96,7 @@ public:
 
     /** Close the connection to end the session
     */
-    void do_close();
+    void do_close(system::error_code const& ec);
 
     void on_shutdown(system::error_code ec);
 
@@ -179,16 +179,22 @@ on_handshake(
 template<class Executor, class Protocol>
 void
 worker_ssl<Executor, Protocol>::
-do_close()
+do_close(system::error_code const& ec)
 {
-    if(! this->pconfig_->is_ssl)
+    if(! ec.failed())
     {
-        reset();
-        wb_.do_idle(this);
+        if(! this->pconfig_->is_ssl)
+        {
+            reset();
+            wb_.do_idle(this);
+            return;
+        }
+        stream_.stream().async_shutdown(call_mf(
+            &worker_ssl::on_shutdown, this));
         return;
     }
-    stream_.stream().async_shutdown(call_mf(
-        &worker_ssl::on_shutdown, this));
+
+    do_fail("worker_ssl::do_close", ec);
 }
 
 template<class Executor, class Protocol>

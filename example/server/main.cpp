@@ -190,3 +190,28 @@ int main(int argc, char* argv[])
 {
     return boost::beast2::server_main( argc, argv );
 }
+/*
+
+workers
+    provide acceptors
+    has an executor
+    needs a socket to accept into
+
+worker_plain
+worker_ssl
+worker_flex
+    has an executor
+    provides stream()
+
+http_responder
+    inject
+        server&
+        router&
+        Stream&
+
+    do_session: called when a new connection is accepted
+    calls external do_close() to notify end of session
+    calls derived class do_fail() to log an error
+    uses the executor of the stream
+
+*/

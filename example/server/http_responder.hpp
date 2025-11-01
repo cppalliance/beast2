@@ -30,6 +30,22 @@ namespace boost {
 namespace beast2 {
 
 //------------------------------------------------
+
+template<class Stream>
+class http_session
+{
+public:
+    http_session(
+        Stream& stream)
+        : stream_(stream)
+    {
+    }
+
+private:
+    Stream& stream_;
+};
+
+//------------------------------------------------
 /*
 
 */
@@ -40,7 +56,9 @@ class http_responder
     : private detacher::owner
 {
 public:
-    http_responder(server& srv, router_type& rr);
+    http_responder(
+        server& srv,
+        router_type& rr);
 
     /** Called to start a new HTTP session
 
@@ -243,7 +261,7 @@ on_write(
     sr_.reset();
     res_.clear();
 
-    return self().do_close();
+    return self().do_close({});
 }
 
 template<class Worker>
@@ -252,12 +270,14 @@ http_responder<Worker>::
 do_fail(
     core::string_view s, system::error_code const& ec)
 {
+    LOG_TRC(this->sect_)("{}: {}", s, ec.message());
+
     // tidy up lingering objects
     pr_.reset();
     sr_.reset();
     res_.clear();
 
-    self().do_fail(s, ec);
+    self().do_close(ec);
 }
 
 template<class Worker>
