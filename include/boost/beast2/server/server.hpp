@@ -85,6 +85,11 @@ public:
     */
     virtual void stop() = 0;
 
+    /** Wait until the server is stopped
+    */
+    BOOST_BEAST2_DECL
+    void join();
+
 protected:
     /** Call start on each part
 
@@ -94,6 +99,8 @@ protected:
     BOOST_BEAST2_DECL void do_start();
 
     BOOST_BEAST2_DECL void do_stop();
+
+    BOOST_BEAST2_DECL void destroy_parts();
 
 private:
     enum state : char;

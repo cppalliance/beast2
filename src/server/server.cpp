@@ -10,6 +10,7 @@
 #include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/server.hpp>
 #include <boost/beast2/detail/except.hpp>
+#include <condition_variable>
 #include <mutex>
 #include <vector>
 
@@ -28,10 +29,11 @@ enum server::state : char
 struct server::impl
 {
     std::mutex m;
-    rts::context services;
+    std::condition_variable cv;
     log_sections sections;
     std::vector<std::unique_ptr<part>> v;
     state st = state::none;
+    rts::context services;
 };
 
 server::part::~part() = default;
@@ -39,6 +41,15 @@ server::part::~part() = default;
 server::
 ~server()
 {
+    {
+        std::lock_guard<std::mutex> lock(impl_->m);
+        if( impl_->st != state::stopped &&
+            impl_->st != state::none)
+        {
+            // forgot to call join()
+            detail::throw_invalid_argument();
+        }
+    }
     delete impl_;
 }
 
@@ -76,6 +87,19 @@ server::
 install(std::unique_ptr<part> pp)
 {
     impl_->v.emplace_back(std::move(pp));
+}
+
+void
+server::
+join()
+{
+    std::unique_lock<std::mutex> lock(impl_->m);
+    impl_->cv.wait(lock, [this]
+    {
+        return
+            impl_->st == state::stopped ||
+            impl_->st == state::none;
+    });
 }
 
 void
@@ -128,12 +152,22 @@ do_stop()
             detail::throw_invalid_argument();
         impl_->st = state::stopping;
     }
+
     for(auto it = impl_->v.rbegin(); it != impl_->v.rend(); ++it)
         (*it)->stop();
+
     {
         std::lock_guard<std::mutex> lock(impl_->m);
         impl_->st = state::stopped;
     }
+    impl_->cv.notify_all();
+}
+
+void
+server::
+destroy_parts()
+{
+    impl_->v.clear();
 }
 
 } // beast2

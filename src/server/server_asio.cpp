@@ -89,6 +89,9 @@ run()
     }
     // VFALCO exception catcher?
     impl_->ioc.run();
+
+    server::join();
+    server::destroy_parts();
 }
 
 void
