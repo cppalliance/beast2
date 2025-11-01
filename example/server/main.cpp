@@ -9,6 +9,8 @@
 
 #include "certificate.hpp"
 #include "worker_ssl.hpp"
+#include "serve_detached.hpp"
+#include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/server/workers.hpp>
@@ -26,11 +28,6 @@
 
 namespace boost {
 namespace beast2 {
-
-system::error_code fh( Request&, Response& )
-{
-    return {};
-}
 
 int server_main( int argc, char* argv[] )
 {
@@ -91,28 +88,17 @@ int server_main( int argc, char* argv[] )
             http_proto::install_serializer_service(srv.services(), cfg);
         }
 
-        using workers_type = workers<worker_ssl<executor_type>>;
+        using workers_type = workers< worker_ssl<executor_type> >;
+        using stream_type = worker_ssl< executor_type>::stream_type;
 
-        //router<Request, ResponseAsio<worker_ssl<
-            //executor_type>::stream_type>> app;
-        router_type app;
+        router_asio< stream_type > app;
 
-#if 0
-        app.use(
-            [](Request& req, Response& res)
-            {
-                res.status(http_proto::status::ok);
-                res.set_body("Hello, world!");
-                return error::success;
-            });
-#endif
+        app.use("/detach", serve_detached());
 
-        {
-            router_type r;
-            r.all("/vinnie", serve_static(doc_root) );
-            app.use("/user", std::move(r));
-        }
+        // root site
+        app.use("/", serve_static( doc_root ));
 
+        // unhandled errors
         app.err(
             []( Request&, Response& res,
                 system::error_code const& ec)
@@ -125,31 +111,6 @@ int server_main( int argc, char* argv[] )
                 res.status(sc);
                 res.set_body(ec.message());
                 return error::success;
-            });
-
-#if 0
-        // redirect HTTP to HTTPS
-        app.use(
-            [](Request& req, Response& res)
-            {
-                if(! req.port.is_ssl)
-                {
-                    https_redirect_responder()(req, res);
-                    return {};
-                }
-                return error::next;
-            });
-#endif
-
-        // static route for website
-        app.use("/", serve_static( doc_root ));
-        app.use("/alt", serve_static( doc_root ));
-        app.use("/test", fh);
-        app.err(
-            []( Request&, Response&,
-                system::error_code const&)
-            {
-                return system::error_code{};
             });
 
         // Create all our workers

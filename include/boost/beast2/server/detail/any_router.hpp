@@ -16,7 +16,6 @@
 #include <boost/http_proto/method.hpp>
 #include <boost/url/segments_encoded_view.hpp>
 #include <boost/core/detail/string_view.hpp>
-#include <memory>
 #include <type_traits>
 
 namespace boost {
@@ -98,8 +97,14 @@ protected:
     template<class Request, class Response, class Handler>
     struct errfn_impl;
 
-    any_router(
-        any_router const&) = default;
+    any_router() = default;
+
+    BOOST_BEAST2_DECL ~any_router();
+    BOOST_BEAST2_DECL any_router(any_router&&) noexcept;
+    BOOST_BEAST2_DECL any_router(any_router const&) noexcept;
+    BOOST_BEAST2_DECL any_router& operator=(any_router&&) noexcept;
+    BOOST_BEAST2_DECL any_router& operator=(any_router const&) noexcept;
+
     BOOST_BEAST2_DECL any_router(
         http_proto::method(*)(void*),
         urls::segments_encoded_view&(*)(void*));
@@ -114,7 +119,7 @@ protected:
     BOOST_BEAST2_DECL void append_err(errfn_ptr);
     void append(bool, http_proto::method, core::string_view) {}
 
-    std::shared_ptr<impl> impl_;
+    impl* impl_ = nullptr;
 };
 
 //------------------------------------------------

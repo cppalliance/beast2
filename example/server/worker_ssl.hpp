@@ -40,7 +40,8 @@ template<
     class Protocol = asio::ip::tcp
 >
 class worker_ssl : public http_responder<
-    worker_ssl<Executor, Protocol>>
+    ssl_stream<asio::basic_stream_socket<Protocol, Executor>>
+>
 {
 public:
     using executor_type = Executor;
@@ -59,7 +60,7 @@ public:
         workers_base& wb,
         Executor0 const& ex,
         asio::ssl::context& ssl_ctx,
-        router_type& rr);
+        router_asio<stream_type> rr);
 
     beast2::server& server() noexcept
     {
@@ -75,12 +76,6 @@ public:
     endpoint() noexcept
     {
         return ep_;
-    }
-
-    stream_type&
-    stream() noexcept
-    {
-        return stream_;
     }
 
     /** Cancel all outstanding I/O
@@ -121,8 +116,11 @@ worker_ssl(
     workers_base& wb,
     Executor0 const& ex,
     asio::ssl::context& ssl_ctx,
-    router_type& rr)
-    : http_responder<worker_ssl>(wb.server(), rr,
+    router_asio<stream_type> rr)
+    : http_responder<stream_type>(
+        wb.server(),
+        stream_,
+        std::move(rr),
         [this](system::error_code const& ec)
         {
             this->do_close(ec);

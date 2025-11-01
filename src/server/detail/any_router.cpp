@@ -12,7 +12,7 @@
 #include <boost/beast2/server/detail/any_router.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
-#include <map>
+#include <atomic>
 #include <string>
 #include <vector>
 
@@ -56,6 +56,7 @@ struct any_router::entry
 
 struct any_router::impl
 {
+    std::atomic<std::size_t> refs{1};
     std::size_t size = 0;
     std::vector<entry> list;
     std::vector<errfn_ptr> errfns;
@@ -66,10 +67,57 @@ struct any_router::impl
 //------------------------------------------------
 
 any_router::
+~any_router()
+{
+    if(! impl_)
+        return;
+    if(--impl_->refs == 0)
+        delete impl_;
+}
+
+any_router::
+any_router(any_router&& other) noexcept
+    :impl_(other.impl_)
+{
+    other.impl_ = nullptr;
+}
+
+any_router::
+any_router(any_router const& other) noexcept
+{
+    impl_ = other.impl_;
+    ++impl_->refs;
+}
+
+any_router&
+any_router::
+operator=(any_router&& other) noexcept
+{
+    auto p = impl_;
+    impl_ = other.impl_;
+    other.impl_ = nullptr;
+    if(p && --p->refs == 0)
+        delete p;
+    return *this;
+}
+
+any_router&
+any_router::
+operator=(any_router const& other) noexcept
+{
+    auto p = impl_;
+    impl_ = other.impl_;
+    ++impl_->refs;
+    if(p && --p->refs == 0)
+        delete p;
+    return *this;
+}
+
+any_router::
 any_router(
     http_proto::method(*get_method)(void*),
     urls::segments_encoded_view&(*get_path)(void*))
-    : impl_(std::make_shared<impl>())
+    : impl_(new impl)
 {
     impl_->get_path = get_path;
     impl_->get_method = get_method;
@@ -150,8 +198,11 @@ invoke(
             return ec;
         if(ec == error::detach)
         {
+            // VFALCO this statement is broken, because a foreign
+            // thread could be resuming and race with st.resume
             if( st.resume == 0)
                 st.resume = st.pos;
+
             return ec;
         }
         if(ec == error::close)
@@ -217,30 +268,6 @@ append_err(errfn_ptr h)
 {
     impl_->errfns.emplace_back(std::move(h));
 }
-
-//------------------------------------------------
-
-#if 0
-static bool match(
-    urls::segments_encoded_view path,
-    path_rule_t::value_type const& pat)
-{
-    auto it0 = path.begin();
-    auto it1 = pat.v.begin();
-    auto const end0 = path.end();
-    auto const end1 = pat.v.end();
-
-    while(it0 != end0 && it1 != end1)
-    {
-        auto const& seg0 = *it0++;
-        auto const& seg1 = *it1++;
-        if(*seg0 != seg1.s)
-            return false;
-    }
-
-    return it0 == end0 && it1 == end1;
-}
-#endif
 
 } // detail
 } // beast2

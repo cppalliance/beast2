@@ -11,6 +11,8 @@
 #define BOOST_BEAST2_SERVER_ROUTE_RULE_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/url/decode_view.hpp>
+#include <boost/url/segments_encoded_view.hpp>
 #include <boost/url/grammar/alpha_chars.hpp>
 #include <boost/url/grammar/charset.hpp>
 #include <boost/url/grammar/parse.hpp>
@@ -342,6 +344,13 @@ struct path_rule_t
             system::result<value_type>
     {
         value_type v;
+        // special case for "/" (empty path segment)
+        if(it0 + 1 == end0 && *it0 == '/')
+        {
+            it0 = end0;
+            // gcc 7 bug workaround
+            return system::result<value_type>(std::move(v));
+        }
         v.s = stable_chars(it0, end0);
         auto it = v.s.data();
         auto const end = it + v.s.size();
@@ -386,6 +395,52 @@ private:
 };
 
 constexpr path_rule_t path_rule{};
+
+struct route_match
+{
+    using iterator = urls::segments_encoded_view::iterator;
+
+    urls::segments_encoded_view base;
+    urls::segments_encoded_view path;
+};
+
+bool match_route(
+    route_match& m,
+    urls::segments_encoded_view path,
+    path_rule_t::value_type const& pat,
+    bool prefix);
+
+inline
+bool
+match_route(
+    route_match& m,
+    urls::segments_encoded_view path,
+    path_rule_t::value_type const& pat,
+    bool prefix)
+{
+    auto it0 = path.begin();
+    auto it1 = pat.v.begin();
+    auto const end0 = path.end();
+    auto const end1 = pat.v.end();
+
+    while(it0 != end0 && it1 != end1)
+    {
+        auto const& seg0 = *it0++;
+        auto const& seg1 = *it1++;
+        if(*seg0 != seg1.s)
+            return false;
+    }
+
+    if(! prefix)
+        return it0 == end0 && it1 == end1;
+
+    if(prefix && it1 != end1)
+        return false;
+
+    m.base = { path.begin(), it0 };
+    m.path = { it0, path.end() };
+    return true;
+}
 
 } // beast2
 } // boost

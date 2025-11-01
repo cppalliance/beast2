@@ -127,6 +127,8 @@ struct basic_router_test
         path_rule_t::value_type const& pat)
     {
         std::string s;
+        if(pat.v.empty())
+            return "/";
         for(auto it = pat.v.begin();
             it != pat.v.end();)
         {
