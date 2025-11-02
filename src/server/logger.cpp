@@ -84,9 +84,15 @@ struct log_sections::impl
         std::size_t
         operator()(core::string_view const& s) const noexcept
         {
-            std::size_t hash = 1469598103934665603ull; // FNV offset basis
+        #if SIZE_MAX == 4294967295U
+            std::size_t hash = 2166136261; // FNV offset basis
             for (unsigned char c : s)
-                hash ^= c, hash *= 1099511628211ull;   // FNV prime
+                hash ^= c, hash *= 16777619;   // FNV prime
+        #else
+            std::size_t hash = 1469598103934665603; // FNV offset basis
+            for (unsigned char c : s)
+                hash ^= c, hash *= 1099511628211;   // FNV prime
+        #endif
             return hash;
         }
     };

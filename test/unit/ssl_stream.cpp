@@ -25,7 +25,7 @@ public:
         asio::io_context ioc;
         asio::ssl::context ctx(asio::ssl::context::tlsv12);
         ssl_stream<asio::ip::tcp::socket> ss(ioc.get_executor(), ctx);
-        ss.async_read_some(asio::mutable_buffer{});
+        // ss.async_read_some(asio::mutable_buffer{});
     }
 };
 

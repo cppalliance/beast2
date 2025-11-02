@@ -16,7 +16,7 @@ polystore::any::~any() = default;
 
 polystore::~polystore() = default;
 
-polystore::polystore() noexcept = default;
+polystore::polystore() = default;
 
 } // beast2
 } // boost
