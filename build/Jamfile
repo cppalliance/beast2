@@ -7,7 +7,7 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
-import ../../config/checks/config : requires ;
+import config : requires ;
 
 constant c11-requires :
     [ requires
@@ -31,10 +31,15 @@ project boost/beast2
       $(c11-requires)
       <link>shared:<define>BOOST_BEAST2_DYN_LINK=1
       <link>static:<define>BOOST_BEAST2_STATIC_LINK=1
-      <target-os>windows:<define>_WIN32_WINNT=0x0601 # VFALCO?
+
+      #TODO: Remove the following defines once asio headers are no longer included in source files
+      <target-os>windows:<define>_WIN32_WINNT=0x0601
       <target-os>windows,<toolset>gcc:<library>ws2_32
       <target-os>windows,<toolset>gcc:<library>mswsock
       <target-os>windows,<toolset>gcc-cygwin:<define>__USE_W32_SOCKETS
+      <toolset>msvc:<define>_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
+      <toolset>msvc:<define>_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING
+      <toolset>msvc:<define>_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
     : source-location $(BEAST2_ROOT)
     ;
 

@@ -79,7 +79,7 @@ public:
     /** Constructor
     */
     BOOST_BEAST2_DECL
-    polystore() noexcept;
+    polystore();
 
     /** Return a pointer to a stored T, or nullptr
     */
