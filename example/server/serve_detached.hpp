@@ -11,7 +11,9 @@
 #define BOOST_BEAST2_SERVER_SERVE_DETACHED_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/error.hpp>
 #include <boost/beast2/server/route_handler.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <memory>
 #include <thread>

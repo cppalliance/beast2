@@ -8,8 +8,8 @@
 //
 
 #include "certificate.hpp"
-#include "worker_ssl.hpp"
 #include "serve_detached.hpp"
+#include <boost/beast2/server/worker_ssl.hpp>
 #include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/server/serve_static.hpp>
@@ -22,12 +22,32 @@
 #include <boost/rts/zlib/deflate.hpp>
 #include <boost/rts/zlib/inflate.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/strand.hpp>
 
 #include <functional>
 #include <iostream>
 
 namespace boost {
 namespace beast2 {
+
+void install_services(application& app)
+{
+#ifdef BOOST_RTS_HAS_BROTLI
+    rts::brotli::install_decode_service(app.services());
+    rts::brotli::install_encode_service(app.services());
+#endif
+
+#ifdef BOOST_RTS_HAS_ZLIB
+    rts::zlib::install_deflate_service(app.services());
+    rts::zlib::install_inflate_service(app.services());
+#endif
+
+    // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
+    http_proto::install_parser_service(app.services(),
+        http_proto::request_parser::config());
+    http_proto::install_serializer_service(app.services(),
+        http_proto::serializer::config());
+}
 
 int server_main( int argc, char* argv[] )
 {
@@ -52,18 +72,10 @@ int server_main( int argc, char* argv[] )
         int num_threads = 1;
         bool reuse_addr = true; // VFALCO this could come from the command line
 
-        using executor_type = server_asio::executor_type;
+        application app;
+        install_services(app);
 
-        server_asio srv(num_threads);
-
-        #ifdef BOOST_RTS_HAS_BROTLI
-        rts::brotli::install_decode_service(srv.services());
-        rts::brotli::install_encode_service(srv.services());
-        #endif
-        #ifdef BOOST_RTS_HAS_ZLIB
-        rts::zlib::install_deflate_service(srv.services());
-        rts::zlib::install_inflate_service(srv.services());
-        #endif
+        auto& srv = app.emplace<server_asio>(num_threads);
 
         // The asio::ssl::context holds the certificates and
         // various states needed for the OpenSSL stream implementation.
@@ -78,28 +90,20 @@ int server_main( int argc, char* argv[] )
         //
         load_server_certificate(ssl_ctx);
 
-        // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
-        {
-            http_proto::request_parser::config cfg;
-            http_proto::install_parser_service(srv.services(), cfg);
-        }
-        {
-            http_proto::serializer::config cfg;
-            http_proto::install_serializer_service(srv.services(), cfg);
-        }
+        using executor_type = server_asio::executor_type;
+        using strand_type = asio::strand<executor_type>;
+        using workers_type = workers< worker_ssl<strand_type> >;
+        using stream_type = worker_ssl<strand_type>::stream_type;
 
-        using workers_type = workers< worker_ssl<executor_type> >;
-        using stream_type = worker_ssl< executor_type>::stream_type;
+        router_asio< stream_type > wwwroot;
 
-        router_asio< stream_type > app;
-
-        app.use("/detach", serve_detached());
+        wwwroot.use("/detach", serve_detached());
 
         // root site
-        app.use("/", serve_static( doc_root ));
+        wwwroot.use("/", serve_static( doc_root ));
 
         // unhandled errors
-        app.err(
+        wwwroot.err(
             []( Request&, Response& res,
                 system::error_code const& ec)
             {
@@ -114,27 +118,24 @@ int server_main( int argc, char* argv[] )
             });
 
         // Create all our workers
-        auto& vp = emplace_part<workers_type>(
-            srv, srv.get_executor(), 1, num_workers,
-            srv.get_executor(), ssl_ctx, app);
+        auto& vp = app.emplace<workers_type>(
+            srv.get_executor(), 1, num_workers,
+            srv.get_executor(), ssl_ctx, wwwroot);
 
         // SSL port
         vp.emplace(
             acceptor_config{ true, false },
-            workers_type::acceptor_type(
-                srv.get_executor(),
-                asio::ip::tcp::endpoint(addr, 443),
-                reuse_addr));
+            asio::ip::tcp::endpoint(addr, 443),
+            reuse_addr);
 
         // plain port
         vp.emplace(
             acceptor_config{ false, false },
-            workers_type::acceptor_type(
-                srv.get_executor(),
-                asio::ip::tcp::endpoint(addr, 80),
-                reuse_addr));
+            asio::ip::tcp::endpoint(addr, 80),
+            reuse_addr);
 
-        srv.run();
+        app.start();
+        srv.attach();
     }
     catch( std::exception const& e )
     {
@@ -164,7 +165,7 @@ worker_flex
     has an executor
     provides stream()
 
-http_responder
+http_session
     inject
         server&
         router&

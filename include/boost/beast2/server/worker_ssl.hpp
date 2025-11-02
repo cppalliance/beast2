@@ -7,11 +7,10 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_EXAMPLE_SERVER_WORKER_SSL_HPP
-#define BOOST_BEAST2_EXAMPLE_SERVER_WORKER_SSL_HPP
+#ifndef BOOST_BEAST2_SERVER_WORKER_SSL_HPP
+#define BOOST_BEAST2_SERVER_WORKER_SSL_HPP
 
-#include "handler.hpp"
-#include "http_responder.hpp"
+#include <boost/beast2/server/http_session.hpp>
 #include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/beast2/server/logger.hpp>
@@ -39,7 +38,7 @@ template<
     class Executor,
     class Protocol = asio::ip::tcp
 >
-class worker_ssl : public http_responder<
+class worker_ssl : public http_session<
     ssl_stream<asio::basic_stream_socket<Protocol, Executor>>
 >
 {
@@ -62,9 +61,9 @@ public:
         asio::ssl::context& ssl_ctx,
         router_asio<stream_type> rr);
 
-    beast2::server& server() noexcept
+    application& app() noexcept
     {
-        return wb_.server();
+        return wb_.app();
     }
 
     socket_type& socket() noexcept
@@ -117,8 +116,8 @@ worker_ssl(
     Executor0 const& ex,
     asio::ssl::context& ssl_ctx,
     router_asio<stream_type> rr)
-    : http_responder<stream_type>(
-        wb.server(),
+    : http_session<stream_type>(
+        wb.app(),
         stream_,
         std::move(rr),
         [this](system::error_code const& ec)
@@ -127,7 +126,7 @@ worker_ssl(
         })
     , wb_(wb)
     , ssl_ctx_(ssl_ctx)
-    , stream_(ex, ssl_ctx)
+    , stream_(Executor(ex), ssl_ctx)
 {
 }
 

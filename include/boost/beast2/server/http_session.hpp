@@ -7,10 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
-#define BOOST_BEAST2_EXAMPLE_SERVER_HTTP_RESPONDER_HPP
-
-#include "handler.hpp"
+#ifndef BOOST_BEAST2_SERVER_HTTP_SESSION_HPP
+#define BOOST_BEAST2_SERVER_HTTP_SESSION_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/read.hpp>
@@ -38,12 +36,12 @@ namespace beast2 {
 /** Mixin for delivering responses to HTTP requests
 */
 template<class Stream>
-class http_responder
+class http_session
     : private detacher::owner
 {
 public:
-    http_responder(
-        server& srv,
+    http_session(
+        application& app,
         Stream& stream,
         router_asio<Stream> rr,
         any_lambda<void(system::error_code)> close_fn);
@@ -103,13 +101,13 @@ protected:
 //------------------------------------------------
 
 template<class Stream>
-http_responder<Stream>::
-http_responder(
-    server& srv,
+http_session<Stream>::
+http_session(
+    application& app,
     Stream& stream,
     router_asio<Stream> rr,
     any_lambda<void(system::error_code)> close)
-    : sect_(srv.sections().get("http_responder"))
+    : sect_(app.sections().get("http_session"))
     , id_(
         []() noexcept
         {
@@ -119,8 +117,8 @@ http_responder(
     , stream_(stream)
     , rr_(std::move(rr))
     , close_(close)
-    , pr_(srv.services())
-    , sr_(srv.services())
+    , pr_(app.services())
+    , sr_(app.services())
 {
 }
 
@@ -131,7 +129,7 @@ http_responder(
 */
 template<class Stream>
 void
-http_responder<Stream>::
+http_session<Stream>::
 do_session(
     acceptor_config const& config)
 {
@@ -142,17 +140,17 @@ do_session(
 
 template<class Stream>
 void
-http_responder<Stream>::
+http_session<Stream>::
 do_read()
 {
     pr_.start();
     beast2::async_read(stream_, pr_,
-        call_mf(&http_responder::on_read, this));
+        call_mf(&http_session::on_read, this));
 }
 
 template<class Stream>
 void 
-http_responder<Stream>::
+http_session<Stream>::
 on_read(
     system::error_code ec,
     std::size_t bytes_transferred)
@@ -160,10 +158,10 @@ on_read(
     (void)bytes_transferred;
 
     if(ec.failed())
-        return do_fail("http_responder::on_read", ec);
+        return do_fail("http_session::on_read", ec);
 
     LOG_TRC(this->sect_)(
-        "{} http_responder::on_read bytes={}",
+        "{} http_session::on_read bytes={}",
         this->id(), bytes_transferred);
 
     BOOST_ASSERT(pr_.is_complete());
@@ -212,12 +210,12 @@ on_read(
         // give a default error response?
     }
     beast2::async_write(stream_, sr_,
-        call_mf(&http_responder::on_write, this));
+        call_mf(&http_session::on_write, this));
 }
 
 template<class Stream>
 void 
-http_responder<Stream>::
+http_session<Stream>::
 on_write(
     system::error_code const& ec,
     std::size_t bytes_transferred)
@@ -225,12 +223,12 @@ on_write(
     (void)bytes_transferred;
 
     if(ec.failed())
-        return do_fail("http_responder::on_write", ec);
+        return do_fail("http_session::on_write", ec);
 
     BOOST_ASSERT(sr_.is_done());
 
     LOG_TRC(this->sect_)(
-        "{} http_responder::on_write bytes={}",
+        "{} http_session::on_write bytes={}",
         this->id(), bytes_transferred);
 
     if(res_.keep_alive())
@@ -248,7 +246,7 @@ on_write(
 
 template<class Stream>
 void 
-http_responder<Stream>::
+http_session<Stream>::
 do_fail(
     core::string_view s, system::error_code const& ec)
 {
@@ -266,7 +264,7 @@ do_fail(
 
 template<class Stream>
 auto
-http_responder<Stream>::
+http_session<Stream>::
 do_detach() ->
     detacher::resumer
 {
@@ -283,18 +281,18 @@ do_detach() ->
 
 template<class Stream>
 void
-http_responder<Stream>::
+http_session<Stream>::
 do_resume(system::error_code const& ec)
 {
     asio::dispatch(
         stream_.get_executor(),
         asio::prepend(call_mf(
-            &http_responder::do_resume2, this), ec));
+            &http_session::do_resume2, this), ec));
 }
 
 template<class Stream>
 void
-http_responder<Stream>::
+http_session<Stream>::
 do_resume2(system::error_code ec)
 {
     BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
@@ -324,7 +322,7 @@ do_resume2(system::error_code ec)
         // give a default error response?
     }
     beast2::async_write(stream_, sr_,
-        call_mf(&http_responder::on_write, this));
+        call_mf(&http_session::on_write, this));
 }
 
 } // beast2

@@ -9,7 +9,7 @@
 
 #include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/server/call_mf.hpp>
-#include <boost/asio/basic_waitable_timer.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/strand.hpp>
 #include <thread>
@@ -23,25 +23,26 @@ struct server_asio::impl
     using strand_type =
         asio::strand<asio::io_context::executor_type>;
 
-    explicit
     impl(
+        application& app_,
         int num_threads_)
-        : num_threads(num_threads_)
+        : app(app_)
+        , num_threads(num_threads_)
         , ioc(num_threads_)
         , sigs(ioc.get_executor(), SIGINT, SIGTERM)
-        , timer(strand_type(ioc.get_executor()))
+        , work(ioc.get_executor())
     {
+        if(num_threads > 1)
+            vt.resize(num_threads - 1);
     }
 
+    application& app;
     int num_threads;
     asio::io_context ioc;
     asio::signal_set sigs;
-    asio::basic_waitable_timer<
-        std::chrono::steady_clock,
-        asio::wait_traits<std::chrono::steady_clock>,
-        strand_type> timer;
     std::vector<std::thread> vt;
-    bool got_sigint = false;
+    asio::executor_work_guard<
+        asio::io_context::executor_type> work;
 };
 
 server_asio::
@@ -52,11 +53,10 @@ server_asio::
 
 server_asio::
 server_asio(
+    application& app,
     int num_threads)
-    : impl_(new impl(num_threads))
+    : impl_(new impl(app, num_threads))
 {
-    if( impl_->num_threads > 1)
-        impl_->vt.resize(impl_->num_threads - 1);
 }
 
 auto
@@ -69,10 +69,8 @@ get_executor() noexcept ->
 
 void
 server_asio::
-run()
+start()
 {
-    do_start();
-
     // Capture SIGINT and SIGTERM to
     // perform a clean shutdown
     impl_->sigs.async_wait(call_mf(
@@ -87,62 +85,37 @@ run()
                 impl_->ioc.run();
             });
     }
-    // VFALCO exception catcher?
-    impl_->ioc.run();
-
-    server::join();
-    server::destroy_parts();
 }
 
 void
 server_asio::
 stop()
 {
-    if(is_stopping())
-    {
-        // happens when SIGINT and timer both fire
-        return;
-    }
     system::error_code ec;
     impl_->sigs.cancel(ec); // VFALCO should we use the 0-arg overload?
-    impl_->timer.cancel();
-    do_stop();
-    // is_stopping() still returns `true` here
-    for(auto& t : impl_->vt)
-        t.join();
+    impl_->work.reset();
 }
 
 void
 server_asio::
 on_signal(
-    system::error_code const&, int)
+    system::error_code const& ec, int)
 {
-    if(impl_->got_sigint)
-    {
-        // second SIGINT causes immediate stop
-        return stop();
-    }
-
-    // first SIGINT starts a 30 second shutdown
-    impl_->got_sigint = true;
-    impl_->sigs.async_wait(call_mf(
-        &server_asio::on_signal, this));
-    impl_->timer.expires_after(std::chrono::seconds(30));
-    impl_->timer.async_wait(call_mf(
-        &server_asio::on_timer, this));
+    if(ec == asio::error::operation_aborted)
+        return;
+    impl_->app.stop();
 }
 
 void
 server_asio::
-on_timer(
-    boost::system::error_code const& ec)
+attach()
 {
-    if(! ec.failed())
-        return stop();
-    if(ec != boost::asio::error::operation_aborted)
-    {
-        // log?
-    }
+    // VFALCO exception catcher?
+    impl_->ioc.run();
+
+    // VFALCO can't figure out where to put this
+    for(auto& t : impl_->vt)
+        t.join();
 }
 
 } // beast2

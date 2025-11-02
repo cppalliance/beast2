@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_SERVER_ASIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/server.hpp>
+#include <boost/beast2/application.hpp>
 #include <boost/asio/io_context.hpp>
 
 namespace boost {
@@ -20,7 +20,7 @@ namespace beast2 {
 /** A server using Boost.Asio's I/O model
 */
 class BOOST_SYMBOL_VISIBLE server_asio
-    : public server
+    : public application::part
 {
 public:
     using executor_type =
@@ -34,7 +34,10 @@ public:
     /** Constructor
     */
     BOOST_BEAST2_DECL
-    server_asio(int num_threads);
+    explicit
+    server_asio(
+        application& app,
+        int num_threads);
 
     BOOST_BEAST2_DECL
     executor_type
@@ -42,22 +45,21 @@ public:
 
     /** Run the server
 
-        This function blocks until the server is stopped.
+        This function attaches the current thread to I/O context
+        so that it may be used for executing submitted function
+        objects. Blocks the calling thread until the part is stopped
+        and has no outstanding work.
     */
     BOOST_BEAST2_DECL
-    void run();
-
-    /** Stop the server
-    */
-    BOOST_BEAST2_DECL
-    void stop() override;
+    void attach();
 
 private:
-    struct impl;
+    void start() override;
+    void stop() override;
 
     void on_signal(system::error_code const&, int);
-    void on_timer(system::error_code const&);
 
+    struct impl;
     impl* impl_;
 };
 

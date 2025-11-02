@@ -11,9 +11,9 @@
 #define BOOST_BEAST2_SERVER_WORKERS_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/application.hpp>
 #include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/fixed_array.hpp>
-#include <boost/beast2/server/server.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/dispatch.hpp>
@@ -29,7 +29,7 @@ public:
     BOOST_BEAST2_DECL
     virtual ~workers_base();
 
-    virtual beast2::server& server() noexcept = 0;
+    virtual application& app() noexcept = 0;
     virtual void do_idle(void* worker) = 0;
 };
 
@@ -62,7 +62,7 @@ public:
 template<class Worker>
 class workers
     : public workers_base
-    , public server::part
+    , public application::part
 {
 public:
     using executor_type = typename Worker::executor_type;
@@ -71,9 +71,13 @@ public:
     using acceptor_config = typename Worker::acceptor_config;
     using socket_type = asio::basic_stream_socket<protocol_type, executor_type>;
 
+    ~workers()
+    {
+    }
+
     /** Constructor
 
-        @param srv The server which owns this part
+        @param app The @ref application which holds this part
         @param ex The executor to use for acceptor sockets
         @param concurrency The number of threads calling io_context::run
         @param num_workers The number of workers to construct
@@ -81,7 +85,7 @@ public:
     */
     template<class Executor1, class... Args>
     workers(
-        beast2::server& srv,
+        application& app,
         Executor1 const& ex,
         unsigned concurrency,
         std::size_t num_workers,
@@ -89,15 +93,17 @@ public:
 
     /** Add an acceptor
     */
+    template<class... Args>
     void
     emplace(
         acceptor_config&& config,
-        acceptor_type&& sock)
+        Args&&... args)
     {
         va_.emplace_back(
             concurrency_,
             std::move(config),
-            std::move(sock));
+            acceptor_type(ex_,
+                std::forward<Args>(args)...));
     }
 
 private:
@@ -106,14 +112,14 @@ private:
 
     void start() override;
     void stop() override;
-    beast2::server& server() noexcept override;
+    application& app() noexcept override;
     void do_idle(void*) override;
     void do_accepts();
     void on_accept(acceptor*, worker*,
         system::error_code const&);
     void do_stop();
 
-    beast2::server& srv_;
+    application& app_;
     section sect_;
     executor_type ex_;
     fixed_array<worker> vw_;
@@ -121,6 +127,7 @@ private:
     worker* idle_ = nullptr;
     std::size_t n_idle_ = 0;
     unsigned concurrency_;
+    bool stop_ = false;
 };
 
 //------------------------------------------------
@@ -169,14 +176,14 @@ template<class Worker>
 template<class Executor1, class... Args>
 workers<Worker>::
 workers(
-    beast2::server& srv,
+    application& app,
     Executor1 const& ex,
     unsigned concurrency,
     std::size_t num_workers,
     Args&&... args)
-    : srv_(srv)
-    , sect_(srv.sections().get("workers"))
-    , ex_(ex)
+    : app_(app)
+    , sect_(app_.sections().get("workers"))
+    , ex_(executor_type(ex))
     , vw_(num_workers)
     , concurrency_(concurrency)
 {
@@ -187,11 +194,11 @@ workers(
 }
 
 template<class Worker>
-beast2::server&
+application&
 workers<Worker>::
-server() noexcept
+app() noexcept
 {
-    return srv_;
+    return app_;
 }
 
 template<class Worker>
@@ -236,7 +243,7 @@ workers<Worker>::
 do_accepts()
 {
     BOOST_ASSERT(ex_.running_in_this_thread());
-    if(srv_.is_stopping())
+    if(stop_)
         return;
     if(idle_)
     {
@@ -271,6 +278,7 @@ on_accept(
     worker* pw,
     system::error_code const& ec)
 {
+    BOOST_ASSERT(ex_.running_in_this_thread());
     ++pa->need;
     if(ec.failed())
     {
@@ -291,6 +299,8 @@ void
 workers<Worker>::
 do_stop()
 {
+    stop_ = true;
+
     for(auto& a : va_)
     {
         system::error_code ec;

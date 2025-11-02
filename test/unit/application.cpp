@@ -8,4 +8,24 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/beast2/server/server.hpp>
+#include <boost/beast2/application.hpp>
+
+#include "test_suite.hpp"
+
+namespace boost {
+namespace beast2 {
+
+struct application_test
+{
+    void
+    run()
+    {
+    }
+};
+
+TEST_SUITE(
+    application_test,
+    "boost.beast2.application");
+
+} // beast2
+} // boost

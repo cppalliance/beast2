@@ -7,13 +7,21 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_EXAMPLE_SERVER_ASIO_PARAMS_HPP
-#define BOOST_BEAST2_EXAMPLE_SERVER_ASIO_PARAMS_HPP
+#ifndef BOOST_BEAST2_SERVER_SERVE_REDIRECT_HPP
+#define BOOST_BEAST2_SERVER_SERVE_REDIRECT_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {
+
+struct serve_redirect
+{
+    BOOST_BEAST2_DECL
+    system::error_code
+    operator()(Request&, Response&) const;
+};
 
 } // beast2
 } // boost

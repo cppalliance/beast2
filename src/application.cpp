@@ -7,17 +7,16 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
+#include <boost/beast2/application.hpp>
 #include <boost/beast2/server/logger.hpp>
-#include <boost/beast2/server/server.hpp>
 #include <boost/beast2/detail/except.hpp>
-#include <condition_variable>
 #include <mutex>
 #include <vector>
 
 namespace boost {
 namespace beast2 {
 
-enum server::state : char
+enum application::state : char
 {
     none,
     starting,
@@ -26,90 +25,56 @@ enum server::state : char
     stopped
 };
 
-struct server::impl
+struct application::impl
 {
     std::mutex m;
-    std::condition_variable cv;
     log_sections sections;
     std::vector<std::unique_ptr<part>> v;
     state st = state::none;
     rts::context services;
+
+    ~impl()
+    {
+        // destroy in reverse order
+        while(! v.empty())
+            v.resize(v.size() - 1);
+    }
 };
 
-server::part::~part() = default;
+application::part::~part() = default;
 
-server::
-~server()
+application::
+~application()
 {
     {
         std::lock_guard<std::mutex> lock(impl_->m);
         if( impl_->st != state::stopped &&
             impl_->st != state::none)
         {
-            // forgot to call join()
+            // stop() hasn't returned yet
             detail::throw_invalid_argument();
         }
     }
     delete impl_;
 }
 
-server::
-server()
+application::
+application()
     : impl_(new impl)
 {
 }
 
-bool
-server::
-is_stopping() const noexcept
-{
-    return
-        impl_->st == state::stopping ||
-        impl_->st == state::stopped;
-}
-
-rts::context&
-server::
-services() noexcept
-{
-    return impl_->services;
-}
-
-log_sections&
-server::
-sections() noexcept
-{
-    return impl_->sections;
-}
-
 void
-server::
-install(std::unique_ptr<part> pp)
-{
-    impl_->v.emplace_back(std::move(pp));
-}
-
-void
-server::
-join()
-{
-    std::unique_lock<std::mutex> lock(impl_->m);
-    impl_->cv.wait(lock, [this]
-    {
-        return
-            impl_->st == state::stopped ||
-            impl_->st == state::none;
-    });
-}
-
-void
-server::
-do_start()
+application::
+start()
 {
     {
         std::lock_guard<std::mutex> lock(impl_->m);
         if(impl_->st != state::none)
+        {
+            // can't call twice
             detail::throw_invalid_argument();
+        }
         impl_->st = state::starting;
     }
     for(auto it = impl_->v.begin(); it != impl_->v.end(); ++it)
@@ -135,16 +100,16 @@ do_start()
             }
             throw;
         }
-        {
-            std::lock_guard<std::mutex> lock(impl_->m);
-            impl_->st = state::running;
-        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(impl_->m);
+        impl_->st = state::running;
     }
 }
 
 void
-server::
-do_stop()
+application::
+stop()
 {
     {
         std::lock_guard<std::mutex> lock(impl_->m);
@@ -160,14 +125,27 @@ do_stop()
         std::lock_guard<std::mutex> lock(impl_->m);
         impl_->st = state::stopped;
     }
-    impl_->cv.notify_all();
+}
+
+rts::context&
+application::
+services() noexcept
+{
+    return impl_->services;
+}
+
+log_sections&
+application::
+sections() noexcept
+{
+    return impl_->sections;
 }
 
 void
-server::
-destroy_parts()
+application::
+insert(std::unique_ptr<part> pp)
 {
-    impl_->v.clear();
+    impl_->v.emplace_back(std::move(pp));
 }
 
 } // beast2
