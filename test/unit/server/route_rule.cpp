@@ -11,6 +11,10 @@
 
 #include "test_suite.hpp"
 
+#if defined(__GNUC__) && __GNUC__ == 12
+# pragma GCC diagnostic ignored "-Wrestrict"
+#endif
+
 namespace boost {
 namespace beast2 {
 
