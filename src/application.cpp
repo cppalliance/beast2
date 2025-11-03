@@ -29,19 +29,9 @@ struct application::impl
 {
     std::mutex m;
     log_sections sections;
-    std::vector<std::unique_ptr<part>> v;
     state st = state::none;
     rts::context services;
-
-    ~impl()
-    {
-        // destroy in reverse order
-        while(! v.empty())
-            v.resize(v.size() - 1);
-    }
 };
-
-application::part::~part() = default;
 
 application::
 ~application()
@@ -77,11 +67,12 @@ start()
         }
         impl_->st = state::starting;
     }
-    for(auto it = impl_->v.begin(); it != impl_->v.end(); ++it)
+    auto v = get_elements();
+    for(std::size_t i = 0; i < v.size(); ++i)
     {
         try
         {
-            (*it)->start();
+            v[i].start();
         }
         catch(std::exception const&)
         {
@@ -91,9 +82,9 @@ start()
             }
             do
             {
-                (*it)->stop();
+                v[i].stop();
             }
-            while(it-- != impl_->v.begin());
+            while(i-- != 0);
             {
                 std::lock_guard<std::mutex> lock(impl_->m);
                 impl_->st = state::stopped;
@@ -118,8 +109,9 @@ stop()
         impl_->st = state::stopping;
     }
 
-    for(auto it = impl_->v.rbegin(); it != impl_->v.rend(); ++it)
-        (*it)->stop();
+    auto v = get_elements();
+    for(std::size_t i = v.size(); i--;)
+        v[i].stop();
 
     {
         std::lock_guard<std::mutex> lock(impl_->m);
@@ -139,13 +131,6 @@ application::
 sections() noexcept
 {
     return impl_->sections;
-}
-
-void
-application::
-insert(std::unique_ptr<part> pp)
-{
-    impl_->v.emplace_back(std::move(pp));
 }
 
 } // beast2

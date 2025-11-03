@@ -75,7 +75,7 @@ int server_main( int argc, char* argv[] )
         application app;
         install_services(app);
 
-        auto& srv = app.emplace<server_asio>(num_threads);
+        auto& srv = app.emplace<server_asio>(app, num_threads);
 
         // The asio::ssl::context holds the certificates and
         // various states needed for the OpenSSL stream implementation.
@@ -119,6 +119,7 @@ int server_main( int argc, char* argv[] )
 
         // Create all our workers
         auto& vp = app.emplace<workers_type>(
+            app,
             srv.get_executor(), 1, num_workers,
             srv.get_executor(), ssl_ctx, wwwroot);
 

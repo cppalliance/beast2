@@ -62,7 +62,6 @@ public:
 template<class Worker>
 class workers
     : public workers_base
-    , public application::part
 {
 public:
     using executor_type = typename Worker::executor_type;
@@ -106,12 +105,13 @@ public:
                 std::forward<Args>(args)...));
     }
 
+    void start();
+    void stop();
+
 private:
     struct acceptor;
     struct worker;
 
-    void start() override;
-    void stop() override;
     application& app() noexcept override;
     void do_idle(void*) override;
     void do_accepts();

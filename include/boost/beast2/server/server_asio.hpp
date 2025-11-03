@@ -20,7 +20,6 @@ namespace beast2 {
 /** A server using Boost.Asio's I/O model
 */
 class BOOST_SYMBOL_VISIBLE server_asio
-    : public application::part
 {
 public:
     using executor_type =
@@ -53,10 +52,10 @@ public:
     BOOST_BEAST2_DECL
     void attach();
 
-private:
-    void start() override;
-    void stop() override;
+    BOOST_BEAST2_DECL void start();
+    BOOST_BEAST2_DECL void stop();
 
+private:
     void on_signal(system::error_code const&, int);
 
     struct impl;

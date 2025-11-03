@@ -93,34 +93,57 @@ struct polystore_test
         return c.d;
     }
 
-    void run()
+    void testUnique()
     {
         polystore ps;
 
         BOOST_TEST_EQ(ps.find<A>(), nullptr);
-        ps.emplace<A>();
+        ps.emplace_unique<A>();
         BOOST_TEST_NE(ps.find<A>(), nullptr);
         BOOST_TEST_EQ(ps.get<A>().i, 1);
-        ps.insert(B{});
+        ps.insert_unique(B{});
         BOOST_TEST_NE(ps.find<B>(), nullptr);
         BOOST_TEST_EQ(ps.get<B>().c, '2');
-        ps.emplace<D>();
+        ps.emplace_unique<D>();
         BOOST_TEST_EQ(ps.find<D>(), nullptr);
         BOOST_TEST_EQ(ps.get<C>().d, 3.14);
-        BOOST_TEST_THROWS(ps.emplace<C>(), std::invalid_argument);
+        BOOST_TEST_THROWS(ps.emplace_unique<C>(),
+            std::invalid_argument);
 
         // invoke
 
-        BOOST_TEST_EQ(ps.invoke(&f), 3);
-        BOOST_TEST_EQ(ps.invoke(&a0), 1);
-        BOOST_TEST_EQ(ps.invoke(&a1), 1);
-        BOOST_TEST_EQ(ps.invoke(&a2), 1);
-        BOOST_TEST_EQ(ps.invoke(&a3), 1);
-        BOOST_TEST_EQ(ps.invoke(&b0), '2');
-        BOOST_TEST_EQ(ps.invoke(&b1), '2');
-        BOOST_TEST_EQ(ps.invoke(&b2), '2');
-        BOOST_TEST_EQ(ps.invoke(&b3), '2');
-        BOOST_TEST_EQ(ps.invoke(&c0), 3.14);
+        BOOST_TEST_EQ(invoke(ps, &f), 3);
+        BOOST_TEST_EQ(invoke(ps, &a0), 1);
+        BOOST_TEST_EQ(invoke(ps, &a1), 1);
+        BOOST_TEST_EQ(invoke(ps, &a2), 1);
+        BOOST_TEST_EQ(invoke(ps, &a3), 1);
+        BOOST_TEST_EQ(invoke(ps, &b0), '2');
+        BOOST_TEST_EQ(invoke(ps, &b1), '2');
+        BOOST_TEST_EQ(invoke(ps, &b2), '2');
+        BOOST_TEST_EQ(invoke(ps, &b3), '2');
+        BOOST_TEST_EQ(invoke(ps, &c0), 3.14);
+    }
+
+    void testMulti()
+    {
+        polystore ps;
+        auto& a0 = ps.emplace<A>();
+        auto& a1 = ps.insert(A{});
+        auto& a2 = ps.emplace<A>();
+        a0.i = 3;
+        a1.i = 4;
+        a2.i = 5;
+        BOOST_TEST_EQ(a0.i, 3);
+        BOOST_TEST_EQ(a1.i, 4);
+        BOOST_TEST_EQ(a2.i, 5);
+        BOOST_TEST(ps.find<A>() == nullptr);
+        BOOST_TEST_THROWS(ps.get<A>(), std::bad_typeid);
+    }
+
+    void run()
+    {
+        testUnique();
+        testMulti();
     }
 };
 
