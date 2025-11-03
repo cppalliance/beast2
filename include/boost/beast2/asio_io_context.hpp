@@ -36,6 +36,12 @@ public:
     executor_type
     get_executor() noexcept = 0;
 
+    /** Return the concurrency level
+    */
+    virtual
+    std::size_t
+    concurrency() const noexcept = 0;
+
     /** Run the context
 
         This function attaches the current thread to I/O context

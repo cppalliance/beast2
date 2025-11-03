@@ -52,6 +52,12 @@ public:
         return ioc_.get_executor();
     }
 
+    std::size_t
+    concurrency() const noexcept override
+    {
+        return num_threads_;
+    }
+
     void attach() override
     {
         // VFALCO exception catcher?

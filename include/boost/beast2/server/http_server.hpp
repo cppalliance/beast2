@@ -11,86 +11,47 @@
 #define BOOST_BEAST2_SERVER_HTTP_SERVER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/application.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/beast2/server/workers.hpp>
+#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/ip/tcp.hpp>
-//#include "worker_ssl.hpp"
 
 namespace boost {
 namespace beast2 {
 
-/*
-enum server_type
-{
-    single_threaded_plain
-    ,multi_threaded_plain
-//#ifdef BOOST_BEAST2_USE_SSL
-    ,single_threaded_ssl
-    ,multi_threaded_ssl
-    ,single_threaded_flex
-    ,multi_threaded_flex
-//#endif
-};
-*/
-/*
+class application;
 
-// single threaded plain
-asio::basic_stream_socket<
-    asio::ip::tcp,
-    asio::io_context::executor_type>
-
-// single threaded SSL
-asio::ssl::stream<
-    asio::basic_stream_socket<
-        asio::ip::tcp,
-        asio::io_context::executor_type> >
-
-// single threaded flex
-ssl_stream<
-    asio::basic_stream_socket<
-        asio::ip::tcp,
-        asio::io_context::executor_type> >
-
-// multi threaded plain
-asio::basic_stream_socket<
-    asio::ip::tcp,
-    asio::strand< asio::io_context::executor_type> >
-
-// multi threaded SSL
-asio::ssl::stream<
-    asio::basic_stream_socket<
-        asio::ip::tcp,
-        asio::strand< asio::io_context::executor_type> > >
-
-// multi threaded flex
-ssl_stream<
-    asio::basic_stream_socket<
-        asio::ip::tcp,
-        asio::strand< asio::io_context::executor_type> > >
-
-
-*/
 template<class Stream>
-struct http_server
+class http_server
 {
-    using stream_type = Stream;
-    using router_type = router_asio<stream_type>;
-    using executor_type = decltype(
-        std::declval<Stream&>().get_executor());
+public:
+    ~http_server() = default;
 
-    virtual std::size_t concurrency() const noexcept = 0;
+    http_server() = default;
+
+    router_asio<Stream> wwwroot;
+
+    /** Run the server
+
+        This function attaches the current thread to I/O context
+        so that it may be used for executing submitted function
+        objects. Blocks the calling thread until the part is stopped
+        and has no outstanding work.
+    */
+    virtual void attach() = 0;
 };
 
-auto
-make_single_threaded_flex_http_server(
-    application& app,
-    std::size_t num_workers) ->
-        http_server<
-            asio::basic_stream_socket<
-                asio::ip::tcp,
-                asio::io_context::executor_type>>&;
+//------------------------------------------------
 
+BOOST_BEAST2_DECL
+auto
+install_plain_http_server(
+    application& app,
+    char const* addr,
+    unsigned short port,
+    std::size_t num_workers) ->
+        http_server<asio::basic_stream_socket<
+            asio::ip::tcp,
+            asio::io_context::executor_type>>&;
 
 } // beast2
 } // boost
