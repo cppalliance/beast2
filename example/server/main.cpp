@@ -9,9 +9,9 @@
 
 #include "certificate.hpp"
 #include "serve_detached.hpp"
+#include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/server/worker_ssl.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/server/workers.hpp>
 #include <boost/beast2/error.hpp>
@@ -23,8 +23,6 @@
 #include <boost/rts/zlib/inflate.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
-
-#include <functional>
 #include <iostream>
 
 namespace boost {
@@ -75,7 +73,7 @@ int server_main( int argc, char* argv[] )
         application app;
         install_services(app);
 
-        auto& srv = app.emplace<server_asio>(app, num_threads);
+        auto& ioc = install_multi_threaded_asio_io_context(app, num_threads);
 
         // The asio::ssl::context holds the certificates and
         // various states needed for the OpenSSL stream implementation.
@@ -90,7 +88,7 @@ int server_main( int argc, char* argv[] )
         //
         load_server_certificate(ssl_ctx);
 
-        using executor_type = server_asio::executor_type;
+        using executor_type = asio_io_context::executor_type;
         using strand_type = asio::strand<executor_type>;
         using workers_type = workers< worker_ssl<strand_type> >;
         using stream_type = worker_ssl<strand_type>::stream_type;
@@ -120,8 +118,8 @@ int server_main( int argc, char* argv[] )
         // Create all our workers
         auto& vp = app.emplace<workers_type>(
             app,
-            srv.get_executor(), 1, num_workers,
-            srv.get_executor(), ssl_ctx, wwwroot);
+            ioc.get_executor(), 1, num_workers,
+            ioc.get_executor(), ssl_ctx, wwwroot);
 
         // SSL port
         vp.emplace(
@@ -136,7 +134,7 @@ int server_main( int argc, char* argv[] )
             reuse_addr);
 
         app.start();
-        srv.attach();
+        ioc.attach();
     }
     catch( std::exception const& e )
     {

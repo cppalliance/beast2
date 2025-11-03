@@ -11,6 +11,7 @@
 #define BOOST_BEAST2_SERVER_HTTP_SESSION_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/application.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/server/any_lambda.hpp>
@@ -18,7 +19,6 @@
 #include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/beast2/server/server_asio.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
 #include <boost/http_proto/request_parser.hpp>
