@@ -264,6 +264,7 @@ struct basic_router_test
         struct Req
         {
             http_proto::method method;
+            std::string base_path;
             urls::segments_encoded_view path;
         };
         struct Res

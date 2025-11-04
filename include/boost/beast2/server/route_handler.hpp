@@ -157,7 +157,7 @@ struct Request
         The remaining portion is available in
         @ref path.
     */
-    urls::segments_encoded_view base_path;
+    std::string base_path;
 
     /** The matching portion of the request path.
 

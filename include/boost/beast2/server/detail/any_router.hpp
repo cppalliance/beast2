@@ -80,6 +80,12 @@ protected:
     struct impl;
     struct any_handler;
     struct any_errfn;
+    struct req_info
+    {
+        http_proto::method method;
+        std::string* base_path;
+        urls::segments_encoded_view* path;
+    };
 
     using handler_ptr = std::unique_ptr<any_handler>;
     using errfn_ptr = std::unique_ptr<any_errfn>;
@@ -105,9 +111,7 @@ protected:
     BOOST_BEAST2_DECL any_router& operator=(any_router&&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router const&) noexcept;
 
-    BOOST_BEAST2_DECL any_router(
-        http_proto::method(*)(void*),
-        urls::segments_encoded_view&(*)(void*));
+    BOOST_BEAST2_DECL any_router(req_info(*)(void*));
     BOOST_BEAST2_DECL std::size_t size() const noexcept;
     BOOST_BEAST2_DECL system::error_code invoke(
         void*, void*, route_state&) const;

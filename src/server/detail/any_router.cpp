@@ -60,8 +60,7 @@ struct any_router::impl
     std::size_t size = 0;
     std::vector<entry> list;
     std::vector<errfn_ptr> errfns;
-    http_proto::method(*get_method)(void*);
-    urls::segments_encoded_view&(*get_path)(void*);
+    req_info(*get_req_info)(void*);
 };
 
 //------------------------------------------------
@@ -115,12 +114,10 @@ operator=(any_router const& other) noexcept
 
 any_router::
 any_router(
-    http_proto::method(*get_method)(void*),
-    urls::segments_encoded_view&(*get_path)(void*))
+    req_info(*get_req_info)(void*))
     : impl_(new impl)
 {
-    impl_->get_path = get_path;
-    impl_->get_method = get_method;
+    impl_->get_req_info = get_req_info;
 }
 
 std::size_t
@@ -137,9 +134,8 @@ invoke(
         system::error_code
 {
     system::error_code ec;
-    auto method = impl_->get_method(req);
-    auto& path = impl_->get_path(req);
-    std::string path_str = std::string(path.buffer());
+    auto ri = impl_->get_req_info(req);
+    std::string path_str = std::string(ri.path->buffer());
 
     // routers don't detach
     //BOOST_ASSERT(st.pos != st.resume);
@@ -152,7 +148,7 @@ invoke(
             ++st.pos;
 
             if( e.method != http_proto::method::unknown &&
-                method != e.method)
+                ri.method != e.method)
                 continue;
 
             if(e.prefix)
@@ -191,7 +187,7 @@ invoke(
         }
 
         // VFALCO not sure how to handle path on resume
-        auto const saved = path;
+        auto const saved = *ri.path;
         // VFALCO TODO adjust path
         ec = e.handler->operator()(req, res, st);
         if(! ec.failed())
@@ -209,7 +205,7 @@ invoke(
             return ec;
         if( ec != error::next)
             goto do_error;
-        path = saved;
+        *ri.path = saved;
     }
     return error::next;
 
