@@ -12,6 +12,7 @@
 #include <boost/beast2/application.hpp>
 #include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/server/http_server.hpp>
+#include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/http_proto/request_parser.hpp>
@@ -65,6 +66,23 @@ int server_main( int argc, char* argv[] )
             (unsigned short)std::atoi(argv[2]),
             std::atoi(argv[4]));
 
+        {
+            router r;
+            r.get("/alan",
+                [](Request&, Response& res)
+                {
+                    res.set_body("User: Alan");
+                    return error::success;
+                });
+            r.get("/vinnie",
+                [](Request&, Response& res)
+                {
+                    res.set_body("User: Vinnie");
+                    return error::success;
+                });
+            srv.wwwroot.use("/user", std::move(r));
+        }
+
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
         // unhandled errors
@@ -100,29 +118,3 @@ int main(int argc, char* argv[])
 {
     return boost::beast2::server_main( argc, argv );
 }
-/*
-
-workers
-    provide acceptors
-    has an executor
-    needs a socket to accept into
-
-worker_plain
-worker_ssl
-worker_flex
-    has an executor
-    provides stream()
-
-http_session
-    inject
-        server&
-        router&
-        Stream&
-        close_fn
-
-    do_session: called when a new connection is accepted
-    calls external do_close() to notify end of session
-    calls derived class do_fail() to log an error
-    uses the executor of the stream
-
-*/

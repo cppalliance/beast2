@@ -84,6 +84,7 @@ protected:
     {
         http_proto::method method;
         std::string* base_path;
+        std::string* suffix_path;
         urls::segments_encoded_view* path;
     };
 

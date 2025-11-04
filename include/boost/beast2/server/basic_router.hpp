@@ -96,6 +96,7 @@ public:
                 req_info ri;
                 ri.method = req.method;
                 ri.base_path = &req.base_path;
+                ri.suffix_path = &req.suffix_path;
                 ri.path = &req.path;
                 return ri;
             })
@@ -125,7 +126,7 @@ public:
     >
     void use(H0&& h0, HN&&... hn)
     {
-        append(true, all_methods, "/",
+        append(true, all_methods, "",
             std::forward<H0>(h0),
             std::forward<HN>(hn)...);
     }

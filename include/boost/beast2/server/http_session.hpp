@@ -24,6 +24,8 @@
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
+#include <boost/http_proto/string_body.hpp>
+#include <boost/url/parse.hpp>
 #include <boost/asio/prepend.hpp>
 
 namespace boost {
@@ -193,6 +195,25 @@ on_read(
         http_proto::status::ok, pr_.get().version());
     pres_->m.set_keep_alive(pr_.get().keep_alive());
 
+    // parse the URL
+    {
+        auto rv = urls::parse_uri_reference(pr_.get().target());
+        if(rv.has_value())
+        {
+            preq_->target = rv.value();
+            preq_->base_path = "";
+            preq_->suffix_path = std::string(rv->buffer());
+        }
+        else
+        {
+            // malformed target
+            pres_->status(
+                http_proto::status::bad_request);
+            pres_->set_body("Bad Request: " + rv.error().message());
+            goto do_write;
+        }
+    }
+
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
     route_state_ = {};
@@ -209,6 +230,8 @@ on_read(
     {
         // give a default error response?
     }
+
+do_write:
     beast2::async_write(stream_, sr_,
         call_mf(&http_session::on_write, this));
 }

@@ -61,6 +61,7 @@ mime_type(
     return "application/text";
 }
 
+#if 0
 // Append an HTTP rel-path to a local filesystem path.
 // The returned path is normalized for the platform.
 static
@@ -88,6 +89,39 @@ path_cat(
     {
         result.push_back(path_separator);
         result.append(seg);
+    }
+}
+#endif
+
+// Append an HTTP rel-path to a local filesystem path.
+// The returned path is normalized for the platform.
+static
+void
+path_cat(
+    std::string& result,
+    core::string_view prefix,
+    core::string_view suffix)
+{
+    result = prefix;
+
+#ifdef BOOST_MSVC
+    char constexpr path_separator = '\\';
+#else
+    char constexpr path_separator = '/';
+#endif
+    if( result.back() == path_separator)
+        result.resize(result.size() - 1); // remove trailing
+#ifdef BOOST_MSVC
+    for(auto& c : result)
+        if( c == '/')
+            c = path_separator;
+#endif
+    for(auto const& c : suffix)
+    {
+        if(c == '/')
+            result.push_back(path_separator);
+        else 
+            result.push_back(c);
     }
 }
 
@@ -154,21 +188,9 @@ operator()(
         return error::success;
     }
 
-    // Request path must be absolute and not contain "..".
-#if 0
-    if( req.m.target().empty() ||
-        req.m.target()[0] != '/' ||
-        req.m.target().find("..") != core::string_view::npos)
-    {
-        make_error_response(http_proto::status::bad_request,
-            req.m, res.m, res.sr);
-        return true;
-    }
-#endif
-
     // Build the path to the requested file
     std::string path;
-    path_cat(path, impl_->path, req.path);
+    path_cat(path, impl_->path, req.suffix_path);
     if(req.pr.get().target().back() == '/')
     {
         path.push_back('/');

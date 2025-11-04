@@ -265,6 +265,7 @@ struct basic_router_test
         {
             http_proto::method method;
             std::string base_path;
+            std::string suffix_path;
             urls::segments_encoded_view path;
         };
         struct Res
@@ -288,7 +289,8 @@ struct basic_router_test
         route_state st;
         Req req;
         Res res;
-        req.path = { "/" };
+        //req.path = { "/" };
+        req.suffix_path = "/";
         auto ec = r(req, res, st);
         BOOST_TEST(ec == error::detach);
         ec = r.resume(req, res, error::close, st);

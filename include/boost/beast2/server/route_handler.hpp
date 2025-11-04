@@ -158,6 +158,7 @@ struct Request
         @ref path.
     */
     std::string base_path;
+    std::string suffix_path;
 
     /** The matching portion of the request path.
 
