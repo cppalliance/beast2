@@ -7,7 +7,7 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/server/http_handler.hpp>
+#include <boost/beast2/server/route_handler.hpp>
 #include <boost/http_proto/string_body.hpp>
 
 namespace boost {

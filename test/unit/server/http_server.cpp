@@ -7,15 +7,22 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_EXAMPLE_SERVER_ASIO_PARAMS_HPP
-#define BOOST_BEAST2_EXAMPLE_SERVER_ASIO_PARAMS_HPP
+// Test that header file is self-contained.
+#include <boost/beast2/server/http_server.hpp>
 
-#include <boost/beast2/detail/config.hpp>
+#include "test_suite.hpp"
 
 namespace boost {
 namespace beast2 {
 
+struct http_server_test
+{
+    void run()
+    {
+    }
+};
+
+TEST_SUITE(http_server_test, "boost.beast2.server.http_server");
+
 } // beast2
 } // boost
-
-#endif

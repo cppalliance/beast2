@@ -7,21 +7,25 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_EXAMPLE_SERVER_HANDLER_HPP
-#define BOOST_BEAST2_EXAMPLE_SERVER_HANDLER_HPP
+// Test that header file is self-contained.
+#include <boost/beast2/application.hpp>
 
-#include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/http_handler.hpp>
+#include "test_suite.hpp"
 
 namespace boost {
 namespace beast2 {
 
-struct https_redirect_responder
+struct application_test
 {
-    system::error_code operator()(Request&, Response&) const;
+    void
+    run()
+    {
+    }
 };
+
+TEST_SUITE(
+    application_test,
+    "boost.beast2.application");
 
 } // beast2
 } // boost
-
-#endif

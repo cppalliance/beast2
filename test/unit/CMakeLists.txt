@@ -11,6 +11,7 @@ set(EXTRAFILES
     ../../../url/extra/test_suite/test_main.cpp
     ../../../url/extra/test_suite/test_suite.cpp
     ../../../url/extra/test_suite/test_suite.hpp
+    #../../../url/include/boost/url/url.natvis
     )
 
 file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp)

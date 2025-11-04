@@ -7,5 +7,17 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-// Test that header file is self-contained.
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/https_server.hpp>
+
+namespace boost {
+namespace beast2 {
+
+namespace {
+
+} // (anon)
+
+//------------------------------------------------
+
+} // beast2
+} // boost
+

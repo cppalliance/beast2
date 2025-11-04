@@ -10,9 +10,10 @@
 #ifndef BOOST_BEAST2_DETAIL_TYPE_INFO_HPP
 #define BOOST_BEAST2_DETAIL_TYPE_INFO_HPP
 
-#include <cstdint>
 #ifndef BOOST_NO_RTTI
-#include <typeinfo>
+# include <typeinfo>
+#else
+# include <cstdint>
 #endif
 
 namespace boost {
@@ -61,7 +62,8 @@ type_info const& get_type_info() noexcept
 using type_info = std::type_info;
 
 template<class T>
-type_info const& get_type_info() noexcept
+type_info const&
+get_type_info() noexcept
 {
     return typeid(T);
 }

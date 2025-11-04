@@ -7,5 +7,11 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-// Test that header file is self-contained.
-#include <boost/beast2/server/router.hpp>
+#include "src/server/route_rule.hpp"
+
+namespace boost {
+namespace beast2 {
+
+
+} // beast2
+} // boost

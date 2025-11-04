@@ -8,24 +8,25 @@
 //
 
 #include "src/server/route_rule.hpp"
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/basic_router.hpp>
+#include <boost/beast2/server/detail/any_router.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
-//#include <boost/url/decode_view.hpp>
-#include <map>
+#include <atomic>
 #include <string>
 #include <vector>
 
 namespace boost {
 namespace beast2 {
+namespace detail {
 
-router_base::any_handler::~any_handler() = default;
+any_router::any_handler::~any_handler() = default;
 
-router_base::any_errfn::~any_errfn() = default;
+any_router::any_errfn::~any_errfn() = default;
 
 //------------------------------------------------
 
-struct router_base::entry
+struct any_router::entry
 {
     bool prefix = true;             // prefix match, for pathless use()
     http_proto::method method;      // method::unknown for all, ignored for use()
@@ -53,8 +54,9 @@ struct router_base::entry
     }
 };
 
-struct router_base::impl
+struct any_router::impl
 {
+    std::atomic<std::size_t> refs{1};
     std::size_t size = 0;
     std::vector<entry> list;
     std::vector<errfn_ptr> errfns;
@@ -64,27 +66,74 @@ struct router_base::impl
 
 //------------------------------------------------
 
-router_base::
-router_base(
+any_router::
+~any_router()
+{
+    if(! impl_)
+        return;
+    if(--impl_->refs == 0)
+        delete impl_;
+}
+
+any_router::
+any_router(any_router&& other) noexcept
+    :impl_(other.impl_)
+{
+    other.impl_ = nullptr;
+}
+
+any_router::
+any_router(any_router const& other) noexcept
+{
+    impl_ = other.impl_;
+    ++impl_->refs;
+}
+
+any_router&
+any_router::
+operator=(any_router&& other) noexcept
+{
+    auto p = impl_;
+    impl_ = other.impl_;
+    other.impl_ = nullptr;
+    if(p && --p->refs == 0)
+        delete p;
+    return *this;
+}
+
+any_router&
+any_router::
+operator=(any_router const& other) noexcept
+{
+    auto p = impl_;
+    impl_ = other.impl_;
+    ++impl_->refs;
+    if(p && --p->refs == 0)
+        delete p;
+    return *this;
+}
+
+any_router::
+any_router(
     http_proto::method(*get_method)(void*),
     urls::segments_encoded_view&(*get_path)(void*))
-    : impl_(std::make_shared<impl>())
+    : impl_(new impl)
 {
     impl_->get_path = get_path;
     impl_->get_method = get_method;
 }
 
 std::size_t
-router_base::
+any_router::
 size() const noexcept
 {
     return impl_->size;
 }
 
 auto
-router_base::
+any_router::
 invoke(
-    void* req, void* res, state& st) const ->
+    void* req, void* res, route_state& st) const ->
         system::error_code
 {
     system::error_code ec;
@@ -149,8 +198,11 @@ invoke(
             return ec;
         if(ec == error::detach)
         {
+            // VFALCO this statement is broken, because a foreign
+            // thread could be resuming and race with st.resume
             if( st.resume == 0)
                 st.resume = st.pos;
+
             return ec;
         }
         if(ec == error::close)
@@ -179,9 +231,9 @@ do_error:
 }
 
 auto
-router_base::
+any_router::
 resume(
-    void* req, void* res, state& st,
+    void* req, void* res, route_state& st,
     system::error_code const& ec) const ->
         system::error_code
 {
@@ -190,7 +242,7 @@ resume(
 }
 
 void
-router_base::
+any_router::
 append(
     bool prefix,
     http_proto::method method,
@@ -211,35 +263,12 @@ append(
 }
 
 void
-router_base::
+any_router::
 append_err(errfn_ptr h)
 {
     impl_->errfns.emplace_back(std::move(h));
 }
 
-//------------------------------------------------
-
-#if 0
-static bool match(
-    urls::segments_encoded_view path,
-    path_rule_t::value_type const& pat)
-{
-    auto it0 = path.begin();
-    auto it1 = pat.v.begin();
-    auto const end0 = path.end();
-    auto const end1 = pat.v.end();
-
-    while(it0 != end0 && it1 != end1)
-    {
-        auto const& seg0 = *it0++;
-        auto const& seg1 = *it1++;
-        if(*seg0 != seg1.s)
-            return false;
-    }
-
-    return it0 == end0 && it1 == end1;
-}
-#endif
-
+} // detail
 } // beast2
 } // boost

@@ -7,14 +7,15 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_HTTP_HANDLER_HPP
-#define BOOST_BEAST2_SERVER_HTTP_HANDLER_HPP
+#ifndef BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
+#define BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/basic_router.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
+#include <boost/url/url_view.hpp>
 #include <boost/url/segments_encoded_view.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <boost/system/error_code.hpp>
@@ -141,13 +142,53 @@ struct acceptor_config
 */
 struct Request
 {
-    http_proto::method method;
+    /** The complete request target
+
+        This is the parsed directly from the start
+        line contained in the HTTP request and is
+        never modified.
+    */
+    urls::url_view target;
+
+    /** The mount path for this handler.
+
+        This is the portion of the request path
+        which was matched to select the handler.
+        The remaining portion is available in
+        @ref path.
+    */
+    urls::segments_encoded_view base_path;
+
+    /** The matching portion of the request path.
+
+        This is the portion of the request path
+        which was matched to select the handler.
+    */
     urls::segments_encoded_view path;
+
+    /** Key and value pairs corresponding to named route parameters
+    */
+    // route_params params;
+
+    http_proto::method method;
 
     acceptor_config port;
     http_proto::request_base const& m;
     http_proto::request_parser& pr;
-    bool is_shutting_down;
+
+    Request(
+        http_proto::method method_,
+        urls::segments_encoded_view path_,
+        acceptor_config port_,
+        http_proto::request_base const& m_,
+        http_proto::request_parser& pr_)
+        : path(path_)
+        , method(method_)
+        , port(port_)
+        , m(m_)
+        , pr(pr_)
+    {
+    }
 };
 
 /** Response object for HTTP route handlers
@@ -172,24 +213,37 @@ struct Response
 
     http_proto::response& m;
     http_proto::serializer& sr;
+    detacher detach;
 
     /*
     bool send(core::string_view);
     bool error(system::error_code);
     bool status(http_proto::status);
     */
-};
 
-struct AsioResponse : Response
-{
-    template<class... Args>
-    AsioResponse(Args&&... args)
-        : Response(std::forward<Args>(args)...)
+    Response(
+        http_proto::response& m_,
+        http_proto::serializer& sr_) noexcept
+        : m(m_)
+        , sr(sr_)
     {
     }
+
 };
 
-using router_type = router<Response>;
+struct RouterTraits
+{
+    static
+    auto
+    method(Request const& req) noexcept ->
+        http_proto::method
+    {
+        return req.pr.get().method();
+    }
+
+};
+
+using router_type = basic_router<Request, Response>;
 
 } // beast2
 } // boost

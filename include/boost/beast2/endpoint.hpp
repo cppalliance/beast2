@@ -45,6 +45,7 @@ public:
     }
 
     endpoint() noexcept
+        : kind_(urls::host_type::none)
     {
     }
 

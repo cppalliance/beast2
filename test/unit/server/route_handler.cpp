@@ -8,4 +8,4 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/route_handler.hpp>

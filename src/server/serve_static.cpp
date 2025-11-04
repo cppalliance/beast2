@@ -112,10 +112,18 @@ struct serve_static::impl
 };
 
 serve_static::
-~serve_static() = default;
+~serve_static()
+{
+    if(impl_)
+        delete impl_;
+}
 
 serve_static::
-serve_static(serve_static&&) noexcept = default;
+serve_static(serve_static&& other) noexcept
+    : impl_(other.impl_)
+{
+    other.impl_ = nullptr;
+}
 
 serve_static::
 serve_static(

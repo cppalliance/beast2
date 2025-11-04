@@ -7,7 +7,7 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include "handler.hpp"
+#include <boost/beast2/server/serve_redirect.hpp>
 #include <boost/http_proto/file_source.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/string_body.hpp>
@@ -104,7 +104,7 @@ prepare_error(
 }
 
 auto
-https_redirect_responder::
+serve_redirect::
 operator()(
     Request& req,
     Response& res) const ->

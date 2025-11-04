@@ -8,10 +8,11 @@
 //
 
 #include "certificate.hpp"
-#include "worker_ssl.hpp"
-#include <boost/beast2/server/server_asio.hpp>
+#include "serve_detached.hpp"
+#include <boost/beast2/application.hpp>
+#include <boost/beast2/asio_io_context.hpp>
+#include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/serve_static.hpp>
-#include <boost/beast2/server/workers.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -19,17 +20,28 @@
 #include <boost/rts/brotli/encode.hpp>
 #include <boost/rts/zlib/deflate.hpp>
 #include <boost/rts/zlib/inflate.hpp>
-#include <boost/asio/ip/tcp.hpp>
-
-#include <functional>
 #include <iostream>
 
 namespace boost {
 namespace beast2 {
 
-system::error_code fh( Request&, Response& )
+void install_services(application& app)
 {
-    return {};
+#ifdef BOOST_RTS_HAS_BROTLI
+    rts::brotli::install_decode_service(app.services());
+    rts::brotli::install_encode_service(app.services());
+#endif
+
+#ifdef BOOST_RTS_HAS_ZLIB
+    rts::zlib::install_deflate_service(app.services());
+    rts::zlib::install_inflate_service(app.services());
+#endif
+
+    // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
+    http_proto::install_parser_service(app.services(),
+        http_proto::request_parser::config());
+    http_proto::install_serializer_service(app.services(),
+        http_proto::serializer::config());
 }
 
 int server_main( int argc, char* argv[] )
@@ -40,76 +52,23 @@ int server_main( int argc, char* argv[] )
         if (argc != 5)
         {
             std::cerr << "Usage: " << argv[0] << " <address> <port> <doc_root> <num_workers>\n";
-            std::cerr << "  For IPv4, try:\n";
-            std::cerr << "    " << argv[0] << " 0.0.0.0 80 . 100\n";
-            std::cerr << "  For IPv6, try:\n";
-            std::cerr << "    " << argv[0] << " 0::0 80 . 100\n";
             return EXIT_FAILURE;
         }
 
-        auto const addr = asio::ip::make_address(argv[1]);
-        unsigned short const port = static_cast<unsigned short>(std::atoi(argv[2]));
-        (void)port;
-        std::string const doc_root = argv[3];
-        std::size_t num_workers = std::atoi(argv[4]);
-        int num_threads = 1;
-        bool reuse_addr = true; // VFALCO this could come from the command line
+        application app;
 
-        using executor_type = server_asio::executor_type;
+        install_services(app);
 
-        server_asio srv(num_threads);
+        auto& srv = install_plain_http_server(
+            app,
+            argv[1],
+            (unsigned short)std::atoi(argv[2]),
+            std::atoi(argv[4]));
 
-        #ifdef BOOST_RTS_HAS_BROTLI
-        rts::brotli::install_decode_service(srv.services());
-        rts::brotli::install_encode_service(srv.services());
-        #endif
-        #ifdef BOOST_RTS_HAS_ZLIB
-        rts::zlib::install_deflate_service(srv.services());
-        rts::zlib::install_inflate_service(srv.services());
-        #endif
+        srv.wwwroot.use("/", serve_static( argv[3] ));
 
-        // The asio::ssl::context holds the certificates and
-        // various states needed for the OpenSSL stream implementation.
-        asio::ssl::context ssl_ctx(asio::ssl::context::tlsv12);
-
-        // This loads a self-signed certificate. You MUST replace this with your
-        // own certificate signed by a well-known Trusted Certificate Authority.
-        // For testing, you can import the file examples/beast-test-CA.crt into
-        // your browser or operating system's trusted certificate store in order
-        // for the browser to not give constant warnings when connecting to
-        // the server via HTTPS.
-        //
-        load_server_certificate(ssl_ctx);
-
-        // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
-        {
-            http_proto::request_parser::config cfg;
-            http_proto::install_parser_service(srv.services(), cfg);
-        }
-        {
-            http_proto::serializer::config cfg;
-            http_proto::install_serializer_service(srv.services(), cfg);
-        }
-
-        router_type app;
-
-#if 0
-        app.use(
-            [](Request& req, Response& res)
-            {
-                res.status(http_proto::status::ok);
-                res.set_body("Hello, world!");
-                return error::success;
-            });
-#endif
-
-        {
-            router_type r;
-            r.all("/vinnie", serve_static(doc_root) );
-            app.use("/user", std::move(r));
-        }
-
-        app.err(
+        // unhandled errors
+        srv.wwwroot.err(
             []( Request&, Response& res,
                 system::error_code const& ec)
             {
@@ -123,55 +82,8 @@ int server_main( int argc, char* argv[] )
                 return error::success;
             });
 
-#if 0
-        // redirect HTTP to HTTPS
-        app.use(
-            [](Request& req, Response& res)
-            {
-                if(! req.port.is_ssl)
-                {
-                    https_redirect_responder()(req, res);
-                    return {};
-                }
-                return error::next;
-            });
-#endif
-
-        // static route for website
-        app.use("/", serve_static( doc_root ));
-        app.use("/alt", serve_static( doc_root ));
-        app.use("/test", fh);
-        app.err(
-            []( Request&, Response&,
-                system::error_code const&)
-            {
-                return system::error_code{};
-            });
-        using workers_type =
-            workers< executor_type, worker_ssl<executor_type> >;
-
-        // Create all our workers
-        auto& vp = emplace_part<workers_type>(
-            srv, srv.get_executor(), 1, num_workers,
-            srv.get_executor(), ssl_ctx, app);
-
-        // SSL port
-        vp.emplace(
-            acceptor_config{ true, false },
-            workers_type::acceptor_type(
-                srv.get_executor(),
-                asio::ip::tcp::endpoint(addr, 443),
-                reuse_addr));
-
-        // plain port
-        vp.emplace(
-            acceptor_config{ false, false },
-            workers_type::acceptor_type(
-                srv.get_executor(),
-                asio::ip::tcp::endpoint(addr, 80),
-                reuse_addr));
-
-        srv.run();
+        app.start();
+        srv.attach();
     }
     catch( std::exception const& e )
     {
@@ -188,3 +100,29 @@ int main(int argc, char* argv[])
 {
     return boost::beast2::server_main( argc, argv );
 }
+/*
+
+workers
+    provide acceptors
+    has an executor
+    needs a socket to accept into
+
+worker_plain
+worker_ssl
+worker_flex
+    has an executor
+    provides stream()
+
+http_session
+    inject
+        server&
+        router&
+        Stream&
+        close_fn
+
+    do_session: called when a new connection is accepted
+    calls external do_close() to notify end of session
+    calls derived class do_fail() to log an error
+    uses the executor of the stream
+
+*/

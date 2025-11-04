@@ -7,19 +7,24 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_ROUTER_HPP
-#define BOOST_BEAST2_SERVER_ROUTER_HPP
+#ifndef BOOST_BEAST2_SERVER_HTTPS_SERVER_HPP
+#define BOOST_BEAST2_SERVER_HTTPS_SERVER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/basic_router.hpp>
-#include <boost/beast2/server/route_handler.hpp>
+//#include <boost/beast2/ssl_stream.hpp>
+#include <boost/asio/any_io_executor.hpp>
 
 namespace boost {
 namespace beast2 {
 
-/** The sans-IO router type
-*/
-using router = basic_router<Request, Response>;
+class https_server
+{
+public:
+    BOOST_BEAST2_DECL
+    https_server();
+
+
+};
 
 } // beast2
 } // boost

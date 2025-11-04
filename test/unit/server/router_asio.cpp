@@ -8,28 +8,36 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/beast2/ssl_stream.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/deferred.hpp>
+#include <boost/beast2/server/router_asio.hpp>
+
+#include <boost/beast2/server/router.hpp>
+#include <boost/core/detail/static_assert.hpp>
+
 #include "test_suite.hpp"
 
 namespace boost {
 namespace beast2 {
 
-class ssl_stream_test
+namespace {
+
+struct Stream
 {
-public:
+};
+
+BOOST_CORE_STATIC_ASSERT(
+    std::is_constructible<router, router_asio<Stream>>::value);
+
+} // (anon)
+
+struct router_asio_test
+{
     void
     run()
     {
-        asio::io_context ioc;
-        asio::ssl::context ctx(asio::ssl::context::tlsv12);
-        ssl_stream<asio::ip::tcp::socket> ss(ioc.get_executor(), ctx);
-        // ss.async_read_some(asio::mutable_buffer{});
     }
 };
 
-TEST_SUITE(ssl_stream_test, "boost.beast2.ssl_stream");
+TEST_SUITE(router_asio_test, "boost.beast2.server.router_asio");
 
 } // beast2
 } // boost
