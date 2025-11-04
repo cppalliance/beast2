@@ -59,14 +59,6 @@ public:
     {
         boost::ignore_unused(bytes_transferred);
 
-        self.reset_cancellation_state(
-            [](asio::cancellation_type requested) {
-                boost::ignore_unused(requested);
-                std::cout << "reset cancel state" << std::endl;
-                return asio::cancellation_type::all;
-            }
-        );
-
         BOOST_ASIO_CORO_REENTER(*this)
         {
             if (!pr_.got_header())
