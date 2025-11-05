@@ -12,11 +12,11 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/application.hpp>
+#include <boost/beast2/log_service.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/server/any_lambda.hpp>
 #include <boost/beast2/server/basic_router.hpp>
-#include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/error.hpp>
@@ -109,7 +109,7 @@ http_session(
     Stream& stream,
     router_asio<Stream> rr,
     any_lambda<void(system::error_code)> close)
-    : sect_(app.sections().get("http_session"))
+    : sect_(use_log_service(app).get_section("http_session"))
     , id_(
         []() noexcept
         {
@@ -175,8 +175,6 @@ on_read(
 
     preq_.reset(new Request(
         pr_.get().method(),
-        urls::segments_encoded_view(
-            pr_.get().target()),
         *this->pconfig_,
         pr_.get(),
         pr_));
@@ -202,7 +200,7 @@ on_read(
         {
             preq_->target = rv.value();
             preq_->base_path = "";
-            preq_->suffix_path = std::string(rv->buffer());
+            preq_->suffix_path = std::string(rv->encoded_path());
         }
         else
         {

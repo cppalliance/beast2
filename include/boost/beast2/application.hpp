@@ -19,9 +19,6 @@
 namespace boost {
 namespace beast2 {
 
-
-class log_sections; // VFALCO REMOVE
-
 /** A collection of type-erased parts and process state
 
     An object of this type holds a collection of type-erased parts,
@@ -73,7 +70,6 @@ public:
     void join();
 
     BOOST_BEAST2_DECL rts::context& services() noexcept;
-    BOOST_BEAST2_DECL log_sections& sections() noexcept;
 
 private:
     enum state : char;

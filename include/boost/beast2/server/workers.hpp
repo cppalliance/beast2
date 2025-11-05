@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/application.hpp>
-#include <boost/beast2/server/logger.hpp>
+#include <boost/beast2/log_service.hpp>
 #include <boost/beast2/server/fixed_array.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
@@ -182,7 +182,7 @@ workers(
     std::size_t num_workers,
     Args&&... args)
     : app_(app)
-    , sect_(app_.sections().get("workers"))
+    , sect_(use_log_service(app).get_section("workers"))
     , ex_(executor_type(ex))
     , vw_(num_workers)
     , concurrency_(concurrency)

@@ -7,14 +7,15 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_LOGGER_HPP
-#define BOOST_BEAST2_SERVER_LOGGER_HPP
+#ifndef BOOST_BEAST2_LOGGER_HPP
+#define BOOST_BEAST2_LOGGER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/core/detail/string_view.hpp>
+#include <boost/beast2/format.hpp>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace boost {
 namespace beast2 {
@@ -23,6 +24,15 @@ struct section
 {
     BOOST_BEAST2_DECL
     section() noexcept;
+
+    /** Return the name of this section
+    */
+    auto
+    name() const noexcept ->
+        core::string_view
+    {
+        return impl_->name;
+    }
 
     /** Return the level below which logging is squelched
     */
@@ -37,51 +47,14 @@ struct section
         Args const&... args)
     {
         int level = 0;
-
-        auto const N = sizeof...(Args);
-        std::size_t len[N];
-        std::stringstream ss;
-        write(ss, len, args...);
-        // VFALCO This makes an unnecessary copy
-        std::string s(ss.str());
-        format_impl(level, fs, s.data(), len, N);
+        std::string s;
+        format_to(s, fs, args...);
+        write(level, std::move(s));
     }
 
 private:
-    template<class T1, class T2, class... TN>
-    static void write(
-        std::stringstream& ss,
-        std::size_t* plen,
-        T1 const& t1,
-        T2 const& t2,
-        TN const&... tn)
-    {
-        auto const n0 = ss.rdbuf()->pubseekoff(
-            0, std::ios::cur, std::ios::out);
-        ss << t1;
-        auto const n1 = ss.rdbuf()->pubseekoff(
-            0, std::ios::cur, std::ios::out);
-        *plen = n1 - n0;
-        write(ss, ++plen, t2, tn...);
-    }
-
-    template<class T>
-    static void write(
-        std::stringstream& ss,
-        std::size_t* plen,
-        T const& t)
-    {
-        auto const n0 = ss.str().size();
-        ss << t;
-        *plen = ss.str().size() - n0;
-    }
-
     BOOST_BEAST2_DECL
-    void format_impl(int, core::string_view,
-        char const*, std::size_t*, std::size_t n);
-
-    BOOST_BEAST2_DECL
-    void write(int, boost::core::string_view);
+    void write(int, std::string);
 
     section(core::string_view);
 
@@ -146,6 +119,11 @@ public:
     BOOST_BEAST2_DECL
     section
     get(core::string_view name);
+
+    BOOST_BEAST2_DECL
+    auto
+    get_sections() const noexcept ->
+        std::vector<section>;
 
 private:
     struct impl;

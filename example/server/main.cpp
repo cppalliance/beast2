@@ -9,6 +9,7 @@
 
 #include "certificate.hpp"
 #include "serve_detached.hpp"
+#include "serve_log_admin.hpp"
 #include <boost/beast2/application.hpp>
 #include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/server/http_server.hpp>
@@ -66,23 +67,7 @@ int server_main( int argc, char* argv[] )
             (unsigned short)std::atoi(argv[2]),
             std::atoi(argv[4]));
 
-        {
-            router r;
-            r.get("/alan",
-                [](Request&, Response& res)
-                {
-                    res.set_body("User: Alan");
-                    return error::success;
-                });
-            r.get("/vinnie",
-                [](Request&, Response& res)
-                {
-                    res.set_body("User: Vinnie");
-                    return error::success;
-                });
-            srv.wwwroot.use("/user", std::move(r));
-        }
-
+        srv.wwwroot.use("/log", serve_log_admin(app));
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
         // unhandled errors

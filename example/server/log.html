@@ -1,0 +1,26 @@
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+</head>
+<body>
+<table>
+<tr><th style="min-width:100px">Name</th><th>Level</th></tr>
+<tr><td>http_session</td><td>
+    <form action="/submit?name=http_session" method="GET">
+    <select id="severity" onchange="this.form.submit()">
+        <option value="1">1: Trace</option>
+        <option value="2" selected>2: Debug</option>
+        <option value="3">3: Info</option>
+        <option value="4">4: Warn</option>
+        <option value="5">5: Fatal</option>
+    </select>
+    </form>
+</td></tr>
+</table>
+</body>
+</html>

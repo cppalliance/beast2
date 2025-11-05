@@ -154,6 +154,28 @@ public:
                 std::forward<T>(t));
     }
 
+    /** Return an existing object or create a new one
+        If an object of the given type (or key type)
+        is already stored in the container, a reference
+        to that object is returned. Otherwise, a new
+        object is constructed in place using the given
+        arguments and a reference to it is returned.
+        @par Exception Safety
+        Strong guarantee.
+        @par Thread Safety
+        Not thread-safe.
+        @param args Arguments forwarded to the constructor of T.
+    */
+    template<class T, class... Args>
+    T& use(Args&&... args)
+    {
+        auto t = find<T>();
+        if(t)
+            return *t;
+        return emplace_unique<T>(
+            std::forward<Args>(args)...);
+    }
+
 protected:
     struct any;
     class elements;

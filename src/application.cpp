@@ -8,7 +8,7 @@
 //
 
 #include <boost/beast2/application.hpp>
-#include <boost/beast2/server/logger.hpp>
+#include <boost/beast2/logger.hpp>
 #include <boost/beast2/detail/except.hpp>
 #include <mutex>
 #include <vector>
@@ -28,7 +28,6 @@ enum application::state : char
 struct application::impl
 {
     std::mutex m;
-    log_sections sections;
     state st = state::none;
     rts::context services;
 };
@@ -124,13 +123,6 @@ application::
 services() noexcept
 {
     return impl_->services;
-}
-
-log_sections&
-application::
-sections() noexcept
-{
-    return impl_->sections;
 }
 
 } // beast2

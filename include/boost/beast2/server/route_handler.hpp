@@ -179,12 +179,10 @@ struct Request
 
     Request(
         http_proto::method method_,
-        urls::segments_encoded_view path_,
         acceptor_config port_,
         http_proto::request_base const& m_,
         http_proto::request_parser& pr_)
-        : path(path_)
-        , method(method_)
+        : method(method_)
         , port(port_)
         , m(m_)
         , pr(pr_)

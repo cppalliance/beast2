@@ -7,10 +7,11 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/server/logger.hpp>
+#include <boost/beast2/logger.hpp>
 #include <iostream>
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace boost {
 namespace beast2 {
@@ -22,50 +23,13 @@ void
 section::
 write(
     int level,
-    boost::core::string_view s)
+    std::string s)
 {
     (void)level;
     // VFALCO NO! This is just for demo purposes
     static std::mutex m;
     std::lock_guard<std::mutex> lock(m);
     std::cerr << s << std::endl;
-}
-
-void
-section::
-format_impl(
-    int level,
-    core::string_view fs,
-    char const* data,
-    std::size_t* plen,
-    std::size_t n)
-{
-    std::string s = impl_->name;
-    s.push_back(' ');
-    char const* p = fs.data();
-    char const* end = fs.data() + fs.size();
-    auto p0 = p;
-    while(p != end)
-    {
-        if(*p++ != '{')
-            continue;
-        if(p == end)
-        {
-            s.append(p0, p - p0);
-            break;
-        }
-        if(*p++ != '}')
-            continue;
-        s.append(p0, p - p0 - 2);
-        if(n)
-        {
-            s.append(data, *plen);
-            data += *plen++;
-            --n;
-        }
-        p0 = p;
-    }
-    write(level, s);
 }
 
 section::
@@ -97,7 +61,9 @@ struct log_sections::impl
         }
     };
 
+    std::mutex m;
     std::unordered_map<core::string_view, section, hash> map;
+    std::vector<section> vec;
 };
 
 log_sections::
@@ -116,12 +82,29 @@ section
 log_sections::
 get(core::string_view name)
 {
+    // contention for this lock should be minimal,
+    // as most sections are created at startup.
+    std::lock_guard<std::mutex> lock(impl_->m);
     auto it = impl_->map.find(name);
     if(it != impl_->map.end())
         return it->second;
+    // the map stores a string_view; make sure
+    // the string data it references does not
+    // move after creation.
     auto v = section(name);
-    impl_->map.emplace( core::string_view(v.impl_->name), v);
+    impl_->map.emplace(
+        core::string_view(v.impl_->name), v);
+    impl_->vec.push_back(v);
     return v;
+}
+
+auto
+log_sections::
+get_sections() const noexcept ->
+    std::vector<section>
+{
+    std::lock_guard<std::mutex> lock(impl_->m);
+    return impl_->vec;
 }
 
 } // beast2

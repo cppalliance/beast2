@@ -13,9 +13,9 @@
 #include <boost/beast2/server/http_session.hpp>
 #include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/call_mf.hpp>
-#include <boost/beast2/server/logger.hpp>
 #include <boost/beast2/server/workers.hpp>
 #include <boost/beast2/application.hpp>
+#include <boost/beast2/logger.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>

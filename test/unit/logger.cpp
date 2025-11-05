@@ -9,3 +9,20 @@
 
 // Test that header file is self-contained.
 #include <boost/beast2/logger.hpp>
+
+#include "test_suite.hpp"
+
+namespace boost {
+namespace beast2 {
+
+struct logger_test
+{
+    void run()
+    {
+    }
+};
+
+TEST_SUITE(logger_test, "boost.beast2.logger");
+
+} // beast2
+} // boost
