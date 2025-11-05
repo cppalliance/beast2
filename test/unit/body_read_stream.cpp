@@ -21,7 +21,6 @@
 #include <boost/buffers/make_buffer.hpp>
 #include <boost/asio/prepend.hpp>
 #include <boost/asio/post.hpp>
-#include <boost/asio/strand.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/rts/context.hpp>
 #include <boost/utility/string_view.hpp>
