@@ -12,7 +12,6 @@
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/signal_set.hpp>
-#include <boost/asio/strand.hpp>
 #include <thread>
 #include <vector>
 
