@@ -14,6 +14,7 @@
 #include <boost/beast2/detail/call_traits.hpp>
 #include <boost/beast2/detail/except.hpp>
 #include <boost/beast2/detail/type_info.hpp>
+#include <boost/beast2/detail/type_traits.hpp>
 #include <boost/core/detail/static_assert.hpp>
 #include <memory>
 #include <type_traits>
@@ -106,7 +107,7 @@ public:
         @param args Arguments forwarded to the constructor of T.
     */
     template<class T, class... Args>
-    T& emplace(Args&&... args);
+    T& emplace_anon(Args&&... args);
 
     /** Insert an object by moving or copying it into the container
         Objects stored with this function will never
@@ -118,9 +119,9 @@ public:
         @param t The object to insert.
     */
     template<class T>
-    T& insert(T&& t)
+    T& insert_anon(T&& t)
     {
-        return emplace<typename
+        return emplace_anon<typename
             std::remove_cv<T>::type>(
                 std::forward<T>(t));
     }
@@ -135,7 +136,7 @@ public:
         @param args Arguments forwarded to the constructor of T.
     */
     template<class T, class... Args>
-    T& emplace_unique(Args&&... args);
+    T& emplace(Args&&... args);
 
     /** Insert an object by moving or copying it into the container
         @par Exception Safety
@@ -147,9 +148,9 @@ public:
         @param t The object to insert.
     */
     template<class T>
-    T& insert_unique(T&& t)
+    T& insert(T&& t)
     {
-        return emplace_unique<typename
+        return emplace<typename
             std::remove_cv<T>::type>(
                 std::forward<T>(t));
     }
@@ -172,7 +173,7 @@ public:
         auto t = find<T>();
         if(t)
             return *t;
-        return emplace_unique<T>(
+        return emplace<T>(
             std::forward<Args>(args)...);
     }
 
@@ -199,7 +200,7 @@ private:
 
     template<class T>
     struct get_key_type_impl<T,
-        decltype(void(typename T::key_type()))>
+        detail::void_t<typename T::key_type>>
     {
         using type = typename T::key_type;
     };
@@ -329,10 +330,9 @@ struct polystore::any_impl : polystore::any
 template<class T>
 T* polystore::find() const noexcept
 {
-    // can't find void
-    static_assert(! std::is_same<T, void>::value, "");
     return static_cast<T*>(find(
-        detail::get_type_info<T>()));
+        detail::get_type_info<
+            get_key_type<T>>()));
 }
 
 template<class T>
@@ -345,7 +345,7 @@ T& polystore::get() const
 }
 
 template<class T, class... Args>
-T& polystore::emplace(Args&&... args)
+T& polystore::emplace_anon(Args&&... args)
 {
     using U = get_key_type<T>;
     BOOST_CORE_STATIC_ASSERT(
@@ -358,7 +358,7 @@ T& polystore::emplace(Args&&... args)
 }
 
 template<class T, class... Args>
-T& polystore::emplace_unique(Args&&... args)
+T& polystore::emplace(Args&&... args)
 {
     using U = get_key_type<T>;
     BOOST_CORE_STATIC_ASSERT(
