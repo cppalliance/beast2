@@ -13,6 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/application.hpp>
 #include <boost/beast2/log_service.hpp>
+#include <boost/beast2/format.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/server/any_lambda.hpp>
@@ -217,6 +218,9 @@ on_read(
     route_state_ = {};
     ec = rr_(*preq_, *pres_, route_state_);
 
+    if(! ec.failed())
+        goto do_write;
+
     if(ec == error::detach)
     {
         // make sure they called detach()
@@ -224,9 +228,24 @@ on_read(
         return;
     }
 
-    if(ec.failed())
+    if(ec == error::next)
     {
-        // give a default error response?
+        // unhandled
+        pres_->status(http_proto::status::not_found);
+        std::string s;
+        format_to(s, "The requested URL {} was not found on this server.", preq_->target);
+        pres_->set_body(s);
+        pres_->m.set_keep_alive(false);
+        goto do_write;
+    }
+
+    // error message of last resort
+    {
+        pres_->status(http_proto::status::internal_server_error);
+        std::string s;
+        format_to(s, "An internal server error occurred: {}", ec.message());
+        pres_->set_body(s);
+        pres_->m.set_keep_alive(false);
     }
 
 do_write:

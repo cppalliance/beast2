@@ -67,23 +67,8 @@ int server_main( int argc, char* argv[] )
             (unsigned short)std::atoi(argv[2]),
             std::atoi(argv[4]));
 
-        srv.wwwroot.use("/log", serve_log_admin(app));
-        srv.wwwroot.use("/", serve_static( argv[3] ));
-
-        // unhandled errors
-        srv.wwwroot.err(
-            []( Request&, Response& res,
-                system::error_code const& ec)
-            {
-                http_proto::status sc;
-                if(ec == system::errc::no_such_file_or_directory)
-                    sc = http_proto::status::not_found;
-                else
-                    sc = http_proto::status::internal_server_error;
-                res.status(sc);
-                res.set_body(ec.message());
-                return error::success;
-            });
+        //srv.wwwroot.use("/log", serve_log_admin(app));
+        //srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();
         srv.attach();
