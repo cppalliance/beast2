@@ -147,6 +147,7 @@ http_session<Stream>::
 do_read()
 {
     pr_.start();
+    sr_.reset();
     beast2::async_read(stream_, pr_,
         call_mf(&http_session::on_read, this));
 }
@@ -234,8 +235,8 @@ on_read(
         pres_->status(http_proto::status::not_found);
         std::string s;
         format_to(s, "The requested URL {} was not found on this server.", preq_->target);
+        //pres_->m.set_keep_alive(false); // VFALCO?
         pres_->set_body(s);
-        pres_->m.set_keep_alive(false);
         goto do_write;
     }
 
@@ -244,11 +245,17 @@ on_read(
         pres_->status(http_proto::status::internal_server_error);
         std::string s;
         format_to(s, "An internal server error occurred: {}", ec.message());
+        //pres_->m.set_keep_alive(false); // VFALCO?
         pres_->set_body(s);
-        pres_->m.set_keep_alive(false);
     }
 
 do_write:
+    if(sr_.is_done())
+    {
+        // happens when the handler sends the response
+        return on_write(system::error_code(), 0);
+    }
+
     beast2::async_write(stream_, sr_,
         call_mf(&http_session::on_write, this));
 }
