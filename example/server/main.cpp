@@ -68,7 +68,7 @@ int server_main( int argc, char* argv[] )
             std::atoi(argv[4]));
 
         //srv.wwwroot.use("/log", serve_log_admin(app));
-        //srv.wwwroot.use("/", serve_static( argv[3] ));
+        srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();
         srv.attach();

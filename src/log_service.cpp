@@ -45,7 +45,7 @@ log_service&
 use_log_service(
     polystore& ps)
 {
-    return ps.use<log_service_impl>();
+    return ps.try_emplace<log_service_impl>();
 }
 
 } // beast2

@@ -12,6 +12,7 @@
 
 #include <boost/assert/source_location.hpp>
 #include <boost/beast2/detail/config.hpp>
+#include <boost/core/detail/string_view.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -21,9 +22,11 @@ BOOST_BEAST2_DECL void BOOST_NORETURN throw_bad_typeid(
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
 BOOST_BEAST2_DECL void BOOST_NORETURN throw_invalid_argument(
+    core::string_view s = "invalid argument",
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
 BOOST_BEAST2_DECL void BOOST_NORETURN throw_logic_error(
+    core::string_view s = "logic error",
     source_location const& loc = BOOST_CURRENT_LOCATION);
 
 } // detail

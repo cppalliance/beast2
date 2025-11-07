@@ -26,22 +26,18 @@ throw_bad_typeid(
 
 void
 throw_invalid_argument(
+    core::string_view s,
     source_location const& loc)
 {
-    throw_exception(
-        std::invalid_argument(
-            "invalid argument"),
-        loc);
+    throw_exception(std::invalid_argument(s), loc);
 }
 
 void
 throw_logic_error(
+    core::string_view s,
     source_location const& loc)
 {
-    throw_exception(
-        std::logic_error(
-            "logic error"),
-        loc);
+    throw_exception(std::logic_error(s), loc);
 }
 
 } // detail

@@ -18,7 +18,6 @@
 #include <boost/core/detail/static_assert.hpp>
 #include <memory>
 #include <type_traits>
-#include <typeinfo>
 
 namespace boost {
 namespace beast2 {
@@ -69,10 +68,24 @@ namespace beast2 {
 */
 class polystore
 {
+    template<class T, class = void>
+    struct get_key : std::false_type
+    {
+    };
+
+    template<class T>
+    struct get_key<T, typename std::enable_if<
+        ! std::is_same<T, typename T::key_type>::value>::type>
+        : std::true_type
+    {
+        using type = typename T::key_type;
+    };
+
 public:
     /** Destructor
 
-        Objects stored in the container are destroyed.
+        All objects stored in the container are destroyed in
+        the reverse order of construction.
     */
     BOOST_BEAST2_DECL
     ~polystore();
@@ -82,41 +95,90 @@ public:
     BOOST_BEAST2_DECL
     polystore();
 
-    /** Return a pointer to a stored T, or nullptr
+    /** Return a pointer to the object associated with type `T`, or `nullptr`
+
+        If no object associated with `T` exists in the container,
+        `nullptr` is returned.
+
         @par Thread Safety
-        May be called concurrently with other `const` member functions.
+        `const` member function calls are thread-safe.
+        Calls to non-`const` member functions must not run concurrently
+        with other member functions on the same object.
+
+        @tparam T The type of object to find.
+        @return A pointer to the associated object, or `nullptr` if none exists.
     */
     template<class T>
-    T* find() const noexcept;
+    T* find() const noexcept
+    {
+        return static_cast<T*>(find(
+            detail::get_type_info<T>()));
+    }
 
-    /** Return a reference to a stored T
-        @par Thread Safety
-        May be called concurrently with other `const` member functions.
-        @throws std::bad_typeid if the type is not found.
-    */
-    template<class T>
-    T& get() const;
+    /** Return a reference to the object associated with type T
 
-    /** Construct and store an object of type T
-        Objects stored with this function will never
-        be returned from @ref find or @ref get.
+        If no such object exists in the container, an exception is thrown.
+
         @par Exception Safety
         Strong guarantee.
+
+        @par Thread Safety
+        Calls to `const` member functions are thread-safe.  
+        Calls to non-`const` member functions must not run concurrently
+        with other member functions on the same object.
+
+        @throws std::bad_typeid
+        If no object associated with type `T` is present.
+        @tparam T The type of object to retrieve.
+        @return A reference to the associated object.
+    */
+    template<class T>
+    T& get() const
+    {
+        if(auto t = find<T>())
+            return *t;
+        detail::throw_bad_typeid();
+    }
+
+    /** Construct and insert an anonymous object into the container
+
+        A new object of type `T` is constructed in place using the provided
+        arguments and inserted into the container without associating it
+        with any key. A reference to the stored object is returned.
+
+        @par Exception Safety
+        Strong guarantee.
+
         @par Thread Safety
         Not thread-safe.
-        @param args Arguments forwarded to the constructor of T.
+
+        @tparam T The type of object to construct and insert.
+        @param args Arguments forwarded to the constructor of `T`.
+        @return A reference to the inserted object.
     */
     template<class T, class... Args>
-    T& emplace_anon(Args&&... args);
+    T& emplace_anon(Args&&... args)
+    {
+        return *static_cast<T*>(insert_impl(
+            make_any<T>(std::forward<Args>(args)...)));
+    }
 
-    /** Insert an object by moving or copying it into the container
-        Objects stored with this function will never
-        be returned from @ref find or @ref get.
+    /** Insert an anonymous object by moving or copying it into the container
+
+        A new object of type `T` is inserted into the container without
+        associating it with any key. The object is move-constructed or
+        copy-constructed from the provided argument, and a reference to
+        the stored object is returned.
+
         @par Exception Safety
         Strong guarantee.
+
         @par Thread Safety
         Not thread-safe.
+
+        @tparam T The type of object to insert.
         @param t The object to insert.
+        @return A reference to the inserted object.
     */
     template<class T>
     T& insert_anon(T&& t)
@@ -126,55 +188,217 @@ public:
                 std::forward<T>(t));
     }
 
-    /** Construct and store an object of type T
+    /** Construct and insert an object with a nested key type
+
+        A new object of type `T` is constructed in place using the provided
+        arguments and inserted into the container. The type `T` must define
+        a nested type `key_type`, which is used as the key for insertion.
+        No additional key types may be specified. The type `T&` must be
+        convertible to a reference to `key_type`.
+
+        @par Constraints
+        `T::key_type` must name a type.
+
         @par Exception Safety
         Strong guarantee.
+
         @par Thread Safety
         Not thread-safe.
-        @throws std::invalid_argument if an object of the same
-            type (or key type) is already stored.
-        @param args Arguments forwarded to the constructor of T.
+
+        @throws std::invalid_argument On duplicate insertion.
+        @tparam T The type of object to construct and insert.
+        @param args Arguments forwarded to the constructor of `T`.
+        @return A reference to the inserted object.
     */
-    template<class T, class... Args>
-    T& emplace(Args&&... args);
+    template<class T, class... Keys, class... Args>
+    auto emplace(Args&&... args) ->
+        typename std::enable_if<get_key<T>::value, T&>::type
+    {
+        // Can't have Keys with nested key_type
+        BOOST_CORE_STATIC_ASSERT(sizeof...(Keys) == 0);
+        // T& must be convertible to key_type&
+        BOOST_CORE_STATIC_ASSERT(std::is_convertible<
+            T&, typename get_key<T>::type&>::value);
+        auto p = make_any<T>(std::forward<Args>(args)...);
+        keyset<T, typename get_key<T>::type> ks(
+            *static_cast<T*>(p->get()));
+        return *static_cast<T*>(insert_impl(
+            std::move(p), ks.kn, ks.N));
+    }
+
+    /** Construct and insert an object into the container
+
+        A new object of type `T` is constructed in place using the provided
+        arguments and inserted into the container. The type `T` must not
+        already exist in the container, nor may any of the additional key
+        types refer to an existing object. The type `T&` must be convertible
+        to a reference to each specified key type.
+
+        @par Constraints
+        `T::key_type` must not name a type.
+
+        @par Exception Safety
+        Strong guarantee.
+
+        @par Thread Safety
+        Not thread-safe.
+
+        @throws std::invalid_argument On duplicate insertion.
+        @tparam T The type of object to construct and insert.
+        @tparam Keys Optional key types associated with the object.
+        @param args Arguments forwarded to the constructor of `T`.
+        @return A reference to the inserted object.
+    */
+    template<class T, class... Keys, class... Args>
+    auto emplace(Args&&... args) ->
+        typename std::enable_if<! get_key<T>::value, T&>::type
+    {
+        // T& must be convertible to each of Keys&
+        BOOST_CORE_STATIC_ASSERT(all_true<std::is_convertible<
+            T&, Keys&>::value...>::value);
+        auto p = make_any<T>(std::forward<Args>(args)...);
+        keyset<T, Keys...> ks(*static_cast<T*>(p->get()));
+        return *static_cast<T*>(insert_impl(
+            std::move(p), ks.kn, ks.N));
+    }
+
+    /** Return an existing object, creating it if necessary
+
+        If an object of the exact type `T` already exists in the container,
+        a reference to that object is returned. Otherwise, a new object is
+        constructed in place using the provided arguments, and a reference
+        to the newly created object is returned. The type `T` must not
+        already exist in the container, nor may any of the additional key
+        types refer to an existing object. The type `T` must be convertible
+        to a reference to each additional key type.
+
+        @par Exception Safety
+        Strong guarantee.
+
+        @par Thread Safety
+        Not thread-safe.
+
+        @throws std::invalid_argument On duplicate insertion.
+        @tparam T The type of object to return or create.
+        @tparam Keys Optional key types associated with the object.
+        @param args Arguments forwarded to the constructor of `T`.
+        @return A reference to the existing or newly created object.
+    */
+    template<class T, class... Keys, class... Args>
+    auto try_emplace(Args&&... args) ->
+        typename std::enable_if<get_key<T>::value, T&>::type
+    {
+        // Can't have Keys with nested key_type
+        BOOST_CORE_STATIC_ASSERT(sizeof...(Keys) == 0);
+        // T& must be convertible to key_type&
+        BOOST_CORE_STATIC_ASSERT(std::is_convertible<
+            T&, typename get_key<T>::type&>::value);
+        if(auto t = find<T>())
+            return *t;
+        auto p = make_any<T>(std::forward<Args>(args)...);
+        keyset<T, typename get_key<T>::type> ks(
+            *static_cast<T*>(p->get()));
+        return *static_cast<T*>(insert_impl(
+            std::move(p), ks.kn, ks.N));
+    }
+
+    /** Return an existing object, creating it if necessary
+
+        If an object of the exact type `T` already exists in the container,
+        a reference to that object is returned. Otherwise, a new object is
+        constructed in place using the provided arguments, and a reference
+        to the newly created object is returned. The type `T` must not
+        already exist in the container, nor may any of the additional key
+        types refer to an existing object. The type `T` must be convertible
+        to a reference to each additional key type.
+
+        @par Exception Safety
+        Strong guarantee.
+
+        @par Thread Safety
+        `const` member function calls are thread-safe.
+        Calls to non-`const` member functions must not run concurrently
+        with other member functions on the same object.
+
+        @throws std::invalid_argument On duplicate insertion.
+        @tparam T The type of object to return or create.
+        @tparam Keys Optional key types associated with the object.
+        @param args Arguments forwarded to the constructor of `T`.
+        @return A reference to the existing or newly created object.
+    */
+    template<class T, class... Keys, class... Args>
+    auto try_emplace(Args&&... args) ->
+        typename std::enable_if<! get_key<T>::value, T&>::type
+    {
+        // T& must be convertible to each of Keys&
+        BOOST_CORE_STATIC_ASSERT(all_true<std::is_convertible<
+            T&, Keys&>::value...>::value);
+        if(auto t = find<T>())
+            return *t;
+        auto p = make_any<T>(std::forward<Args>(args)...);
+        keyset<T, Keys...> ks(*static_cast<T*>(p->get()));
+        return *static_cast<T*>(insert_impl(
+            std::move(p), ks.kn, ks.N));
+    }
 
     /** Insert an object by moving or copying it into the container
+
+        If an object of the same type `T` already exists in the container,
+        or if any of the additional key types would refer to an existing
+        object, an exception is thrown. Otherwise, the object is inserted
+        by move or copy construction, and a reference to the stored object
+        is returned. The type `T` must be convertible to a reference to each
+        additional key type.
+
         @par Exception Safety
         Strong guarantee.
+
         @par Thread Safety
         Not thread-safe.
-        @throws std::invalid_argument if an object of the same
-            type (or key type) is already stored.
+
+        @throws std::invalid_argument On duplicate insertion.
+        @tparam T The type of object to insert.
+        @tparam Keys Optional key types associated with the object.
         @param t The object to insert.
+        @return A reference to the inserted object.
     */
-    template<class T>
+    template<class T, class... Keys>
     T& insert(T&& t)
     {
         return emplace<typename
-            std::remove_cv<T>::type>(
+            std::remove_cv<T>::type, Keys...>(
                 std::forward<T>(t));
     }
 
     /** Return an existing object or create a new one
-        If an object of the given type (or key type)
-        is already stored in the container, a reference
-        to that object is returned. Otherwise, a new
-        object is constructed in place using the given
-        arguments and a reference to it is returned.
+
+        If an object of the exact type `T` already exists in the container,
+        a reference to that object is returned. Otherwise, a new object of
+        type `T` is default-constructed in the container, and a reference
+        to the newly created object is returned. This function ignores
+        nested key types and cannot be used to specify additional keys.
+
+        @par Constraints
+        `T` must be default-constructible.
+
         @par Exception Safety
         Strong guarantee.
+
         @par Thread Safety
         Not thread-safe.
-        @param args Arguments forwarded to the constructor of T.
+
+        @tparam T The type of object to retrieve or create.
+        @return A reference to the stored object.
     */
-    template<class T, class... Args>
-    T& use(Args&&... args)
+    template<class T>
+    T& use()
     {
-        auto t = find<T>();
-        if(t)
+        // T must be default constructible
+        BOOST_CORE_STATIC_ASSERT(
+            std::is_default_constructible<T>::value);
+        if(auto t = find<T>())
             return *t;
-        return emplace<T>(
-            std::forward<Args>(args)...);
+        return emplace<T>();
     }
 
 protected:
@@ -186,36 +410,85 @@ protected:
     get_elements() noexcept;
 
 private:
-    template<class, class = void> struct has_start;
-    template<class, class = void> struct has_stop;
-    template<class T> struct any_impl;
-    using ptr = std::unique_ptr<any>;
-    struct impl;
+    template<bool...> struct bool_pack {};
+    template<bool... Bs>
+    struct all_true : std::is_same<bool_pack<
+        true, Bs...>, bool_pack<Bs..., true>> {};
 
     template<class T, class = void>
-    struct get_key_type_impl
-    {
-        using type = T;
-    };
+    struct has_start : std::false_type {};
 
     template<class T>
-    struct get_key_type_impl<T,
-        detail::void_t<typename T::key_type>>
+    struct has_start<T, typename std::enable_if<
+        std::is_same<decltype(std::declval<T>().start()),
+            void>::value>::type> : std::true_type {};
+
+    template<class T, class = void>
+    struct has_stop : std::false_type {};
+
+    template<class T>
+    struct has_stop<T, typename std::enable_if<
+        std::is_same<decltype(std::declval<T>().stop()),
+            void>::value>::type> : std::true_type {};
+
+    struct key
     {
-        using type = typename T::key_type;
+        detail::type_info const* ti;
+        void* p;
     };
 
-    // Alias for T::key_type if it exists, otherwise T
+    template<class T, class... Key>
+    struct keyset;
+
     template<class T>
-    using get_key_type =
-        typename get_key_type_impl<T>::type;
+    struct keyset<T>
+    {
+        static constexpr std::size_t N = 1;
+        key kn[1];
+
+        explicit keyset(T& t) noexcept
+            : kn{{ &detail::get_type_info<T>(), &t }}
+        {
+        }
+    };
+
+    template<class T, class... Keys>
+    struct keyset
+    {
+        static constexpr std::size_t N = 1 + sizeof...(Keys);
+        key kn[N + 1];
+
+        explicit keyset(T& t) noexcept
+            : kn{
+                {   &detail::get_type_info<T>(),
+                    std::addressof(t) },
+                {   &detail::get_type_info<Keys>(),
+                    &static_cast<Keys&>(t) }...,
+            }
+        {
+        }
+    };
+
+    template<class T> struct any_impl;
+
+    using any_ptr = std::unique_ptr<any>;
+
+    template<class T, class... Args>
+    auto
+    make_any(Args&&... args) ->
+        std::unique_ptr<any_impl<T>>
+    {
+        return std::unique_ptr<any_impl<T>>(new
+            any_impl<T>(std::forward<Args>(args)...));
+    }
 
     BOOST_BEAST2_DECL any& get(std::size_t i);
     BOOST_BEAST2_DECL void* find(
         detail::type_info const& ti) const noexcept;
-    BOOST_BEAST2_DECL void insert(
-        detail::type_info const*, ptr);
+    BOOST_BEAST2_DECL void* insert_impl(any_ptr,
+        key const* = nullptr, std::size_t = 0);
 
+    struct impl;
     impl* impl_;
 };
 
@@ -225,9 +498,11 @@ struct BOOST_SYMBOL_VISIBLE
     polystore::any
 {
     BOOST_BEAST2_DECL virtual ~any();
-    virtual void* get() noexcept = 0;
     virtual void start() = 0;
     virtual void stop() = 0;
+private:
+    friend class polystore;
+    virtual void* get() noexcept = 0;
 };
 
 //------------------------------------------------
@@ -263,22 +538,6 @@ private:
 
 //------------------------------------------------
 
-template<class T, class>
-struct polystore::has_start : std::false_type {};
-
-template<class T>
-struct polystore::has_start<T, typename std::enable_if<
-    std::is_same<decltype(std::declval<T>().start()),
-        void>::value>::type> : std::true_type {};
-
-template<class T, class>
-struct polystore::has_stop : std::false_type {};
-
-template<class T>
-struct polystore::has_stop<T, typename std::enable_if<
-    std::is_same<decltype(std::declval<T>().stop()),
-        void>::value>::type> : std::true_type {};
-
 template<class T>
 struct polystore::any_impl : polystore::any
 {
@@ -289,86 +548,14 @@ struct polystore::any_impl : polystore::any
         : t(std::forward<Args>(args)...)
     {
     }
-
-    void* get() noexcept override
-    {
-        using U = get_key_type<T>;
-        return &static_cast<U&>(t);
-    }
-
-    void start() override
-    {
-        do_start(has_start<T>{});
-    }
-
-    void stop() override
-    {
-        do_stop(has_stop<T>{});
-    }
-
-    void do_start(std::true_type)
-    {
-        t.start();
-    }
-
-    void do_start(std::false_type)
-    {
-    }
-
-    void do_stop(std::true_type)
-    {
-        t.stop();
-    }
-
-    void do_stop(std::false_type)
-    {
-    }
+    void* get() noexcept override { return std::addressof(t); }
+    void start() override { do_start(has_start<T>{}); }
+    void stop() override { do_stop(has_stop<T>{}); }
+    void do_start(std::true_type) { t.start(); }
+    void do_start(std::false_type) {}
+    void do_stop(std::true_type) { t.stop(); }
+    void do_stop(std::false_type) {}
 };
-
-//------------------------------------------------
-
-template<class T>
-T* polystore::find() const noexcept
-{
-    return static_cast<T*>(find(
-        detail::get_type_info<
-            get_key_type<T>>()));
-}
-
-template<class T>
-T& polystore::get() const
-{
-    auto t = find<T>();
-    if(! t)
-        detail::throw_bad_typeid();
-    return *t;
-}
-
-template<class T, class... Args>
-T& polystore::emplace_anon(Args&&... args)
-{
-    using U = get_key_type<T>;
-    BOOST_CORE_STATIC_ASSERT(
-        std::is_convertible<T&, U&>::value);
-    std::unique_ptr<any_impl<T>> p(new any_impl<T>(
-        std::forward<Args>(args)...));
-    auto& t = p->t;
-    insert(nullptr, std::move(p));
-    return t;
-}
-
-template<class T, class... Args>
-T& polystore::emplace(Args&&... args)
-{
-    using U = get_key_type<T>;
-    BOOST_CORE_STATIC_ASSERT(
-        std::is_convertible<T&, U&>::value);
-    std::unique_ptr<any_impl<T>> p(new any_impl<T>(
-        std::forward<Args>(args)...));
-    auto& t = p->t;
-    insert(&detail::get_type_info<U>(), std::move(p));
-    return t;
-}
 
 //------------------------------------------------
 

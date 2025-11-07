@@ -230,18 +230,6 @@ struct Response
 
 };
 
-struct RouterTraits
-{
-    static
-    auto
-    method(Request const& req) noexcept ->
-        http_proto::method
-    {
-        return req.pr.get().method();
-    }
-
-};
-
 using router_type = basic_router<Request, Response>;
 
 } // beast2
