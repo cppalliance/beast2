@@ -42,17 +42,20 @@ public:
         Request&,
         Response& res) const
     {
-        auto resume = res.detach();
-        asio::post(*tp_,
-            [&, resume]()
+        return res.detach(
+            [&](resumer resume)
             {
-                // Simulate some asynchronous work
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                res.status(http_proto::status::ok);
-                res.set_body("Hello from serve_detached!\n");
-                resume(error::success);
+                asio::post(*tp_,
+                    [&, resume]()
+                    {
+                        // Simulate some asynchronous work
+                        std::this_thread::sleep_for(std::chrono::seconds(1));
+                        res.status(http_proto::status::ok);
+                        res.set_body("Hello from serve_detached!\n");
+                        resume(route::send);
+                        // resume( res.send("Hello from serve_detached!\n") );
+                    });
             });
-        return error::detach;
     }
 
 private:

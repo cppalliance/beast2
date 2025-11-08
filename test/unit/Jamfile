@@ -30,6 +30,7 @@ project
       <warnings>extra
       <warnings-as-errors>on
       <undefined-sanitizer>norecover:<link>static
+      <toolset>clang-win:<cxxflags>"-Wno-unused-private-field"
     ;
 
 for local f in [ glob-tree-ex . : *.cpp : ssl_*.cpp ]

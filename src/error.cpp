@@ -39,11 +39,9 @@ message(
 {
     switch(static_cast<error>(code))
     {
-    case error::next: return "next";
-    case error::detach: return "detach";
-    case error::close: return "close";
+    case error::success: return "http_proto::error::success";
     default:
-        return "unknown";
+        return "http_proto::error::?";
     }
 }
 

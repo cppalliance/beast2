@@ -70,7 +70,7 @@ private:
     void do_fail(core::string_view s,
         system::error_code const& ec);
 
-    detacher::resumer do_detach() override;
+    resumer do_detach() override;
 
     void do_resume(system::error_code const& ec) override;
 
@@ -176,7 +176,6 @@ on_read(
     //
 
     preq_.reset(new Request(
-        pr_.get().method(),
         *this->pconfig_,
         pr_.get(),
         pr_));
@@ -200,48 +199,51 @@ on_read(
         auto rv = urls::parse_uri_reference(pr_.get().target());
         if(rv.has_value())
         {
-            preq_->target = rv.value();
+            preq_->url = rv.value();
             preq_->base_path = "";
-            preq_->suffix_path = std::string(rv->encoded_path());
+            preq_->path = std::string(rv->encoded_path());
         }
         else
         {
-            // malformed target
+            // error parsing URL
             pres_->status(
                 http_proto::status::bad_request);
-            pres_->set_body("Bad Request: " + rv.error().message());
+            pres_->set_body(
+                "Bad Request: " + rv.error().message());
             goto do_write;
         }
     }
 
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
-    route_state_ = {};
-    ec = rr_(*preq_, *pres_, route_state_);
-
-    if(! ec.failed())
+    ec = rr_.dispatch(
+        preq_->m.method(),
+        preq_->url,
+        *preq_, *pres_, route_state_);
+    if(ec == route::send)
         goto do_write;
 
-    if(ec == error::detach)
+    if(ec == route::next)
+    {
+        // unhandled
+        pres_->status(http_proto::status::not_found);
+        std::string s;
+        format_to(s, "The requested URL {} was not found on this server.", preq_->url);
+        //pres_->m.set_keep_alive(false); // VFALCO?
+        pres_->set_body(s);
+        goto do_write;
+    }
+
+    if(ec == route::detach)
     {
         // make sure they called detach()
         BOOST_ASSERT(pwg_);
         return;
     }
 
-    if(ec == error::next)
-    {
-        // unhandled
-        pres_->status(http_proto::status::not_found);
-        std::string s;
-        format_to(s, "The requested URL {} was not found on this server.", preq_->target);
-        //pres_->m.set_keep_alive(false); // VFALCO?
-        pres_->set_body(s);
-        goto do_write;
-    }
-
     // error message of last resort
     {
+        BOOST_ASSERT(ec.failed());
         pres_->status(http_proto::status::internal_server_error);
         std::string s;
         format_to(s, "An internal server error occurred: {}", ec.message());
@@ -313,7 +315,7 @@ template<class Stream>
 auto
 http_session<Stream>::
 do_detach() ->
-    detacher::resumer
+    resumer
 {
     BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
 
@@ -323,7 +325,7 @@ do_detach() ->
 
     // VFALCO cancel timer
 
-    return detacher::resumer(*this);
+    return resumer(*this);
 }
 
 template<class Stream>
@@ -347,17 +349,11 @@ do_resume2(system::error_code ec)
     BOOST_ASSERT(pwg_.get() != nullptr);
     pwg_.reset();
 
-    if(ec == error::detach)
-    {
-        // Cannot detach when resuming
-        detail::throw_logic_error();
-    }
-
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
     ec = rr_.resume(*preq_, *pres_, ec, route_state_);
 
-    if(ec == error::detach)
+    if(ec == route::detach)
     {
         // make sure they called detach()
         BOOST_ASSERT(pwg_);

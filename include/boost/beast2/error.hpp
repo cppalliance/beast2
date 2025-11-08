@@ -24,20 +24,6 @@ namespace beast2 {
 enum class error
 {
     success = 0,
-
-    // Routing
-
-    /** The route handler did not satisfy the request
-    */
-    next,
-
-    /** The route handler is detaching from the session
-    */
-    detach,
-
-    /** The route handler wants to close the connection
-    */
-    close
 };
 
 } // beast2

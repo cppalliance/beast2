@@ -13,6 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/detail/call_traits.hpp>
 #include <boost/beast2/detail/type_traits.hpp>
+#include <boost/beast2/server/route_handler.hpp>
 #include <boost/http_proto/method.hpp>
 #include <boost/url/segments_encoded_view.hpp>
 #include <boost/core/detail/string_view.hpp>
@@ -21,88 +22,75 @@
 namespace boost {
 namespace beast2 {
 
-struct Request;
-struct Response;
-//template<class Response, class Request>
-//class basic_router;
-namespace detail {
-class any_router;
-} // detail
-
-//------------------------------------------------
-
-namespace detail {
-
-template<class T, class = void>
-struct is_handler : std::false_type {};
-
-template<class T>
-struct is_handler<T> :
-    detail::is_invocable<T,
-    system::error_code, Request&, Response&>
-{
-};
-
-template<class T, class = void>
-struct is_error_handler : std::false_type {};
-
-template<class T>
-struct is_error_handler<T> :
-    detail::is_invocable<T,
-    system::error_code, Request&, Response&,
-    system::error_code const>
-{
-};
-
-template<class T, class = void>
-struct is_router : std::false_type {};
-
-template<class T>
-struct is_router<T> :
-    detail::derived_from<any_router, T>
-{
-};
-
-} // detail
-
-//------------------------------------------------
-
 struct route_state;
 
 //------------------------------------------------
 
 namespace detail {
 
+class any_router;
+
+// handler kind constants
+// 0 = unrecognized
+// 1 = regular
+// 2 = router
+// 3 = error
+
+template<class T,
+    class Req, class Res, class = void>
+struct get_handler_kind
+    : std::integral_constant<int, 0>
+{
+};
+
+// route_result( Req&, Res& )
+template<class T, class Req, class Res>
+struct get_handler_kind<T, Req, Res,
+    typename std::enable_if<detail::is_invocable<
+        T, route_result, Req&, Res&>::value>::type>
+    : std::integral_constant<int, 1>
+{
+};
+
+// route_result( Req&, Res&, route_state& )
+template<class T, class Req, class Res>
+struct get_handler_kind<T, Req, Res,
+    typename std::enable_if<detail::derived_from<
+        T, any_router>::value>::type>
+    : std::integral_constant<int, 2>
+{
+};
+
+// route_result( Req&, Res&, system::error_code& 
+template<class T, class Req, class Res>
+struct get_handler_kind<T, Req, Res,
+    typename std::enable_if<detail::is_invocable<
+        T, route_result, Req&, Res&,
+            system::error_code&>::value>::type>
+    : std::integral_constant<int, 3>
+{
+};
+
+//------------------------------------------------
+
+// implementation for all routers
 class any_router
 {
 protected:
-    struct entry;
+    struct layer;
     struct impl;
     struct any_handler;
-    struct any_errfn;
+
     struct req_info
     {
-        http_proto::method method;
-        std::string* base_path;
-        std::string* suffix_path;
-        urls::segments_encoded_view* path;
+        core::string_view& base_path;
+        core::string_view& path;
     };
 
     using handler_ptr = std::unique_ptr<any_handler>;
-    using errfn_ptr = std::unique_ptr<any_errfn>;
 
-    template<class Request, class Response,
-        class Handler, class = void>
+    template<class, class, class>
     struct handler_impl;
-
-    template<class Request, class Response, class Handler>
-    struct handler_impl<Request, Response, Handler,
-        typename std::enable_if<detail::is_router<
-            typename std::decay<Handler>::type>::value>::type>;
-
-    // wrapper for error handling functions
-    template<class Request, class Response, class Handler>
-    struct errfn_impl;
 
     any_router() = default;
 
@@ -111,17 +99,17 @@ protected:
     BOOST_BEAST2_DECL any_router(any_router const&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router&&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router const&) noexcept;
-
     BOOST_BEAST2_DECL any_router(req_info(*)(void*));
-    BOOST_BEAST2_DECL std::size_t size() const noexcept;
-    BOOST_BEAST2_DECL system::error_code invoke(
+    BOOST_BEAST2_DECL std::size_t count() const noexcept;
+    BOOST_BEAST2_DECL route_result dispatch_impl(http_proto::method,
+        urls::url_view const&, void*, void*, route_state& st) const;
+    BOOST_BEAST2_DECL route_result dispatch_impl(
         void*, void*, route_state&) const;
-    BOOST_BEAST2_DECL system::error_code resume(
-        void*, void*, route_state&, system::error_code const& ec) const;
-
+    BOOST_BEAST2_DECL route_result resume(
+        void*, void*, route_state&, route_result const& ec) const;
     BOOST_BEAST2_DECL void append(bool, http_proto::method,
         core::string_view, handler_ptr);
-    BOOST_BEAST2_DECL void append_err(errfn_ptr);
+    BOOST_BEAST2_DECL void append(core::string_view, any_router&);
     void append(bool, http_proto::method, core::string_view) {}
 
     impl* impl_ = nullptr;
@@ -132,96 +120,102 @@ protected:
 struct BOOST_SYMBOL_VISIBLE
     any_router::any_handler
 {
-    // total children including this one
-    std::size_t n_routes;
-
-    BOOST_BEAST2_DECL
-    virtual ~any_handler();
-
-    virtual system::error_code operator()(
-        void*, void*, route_state&) const = 0;
-};
-
-struct BOOST_SYMBOL_VISIBLE
-    any_router::any_errfn
-{
-    BOOST_BEAST2_DECL
-    virtual ~any_errfn();
-
-    virtual system::error_code operator()(void* req,
-        void* res, system::error_code const&) const = 0;
+    BOOST_BEAST2_DECL virtual ~any_handler();
+    BOOST_BEAST2_DECL virtual
+        std::size_t count() const noexcept = 0 ;
+    virtual route_result invoke(
+        void*, void*, route_state&,
+            system::error_code*) const = 0;
 };
 
 // wrapper for route handlers
-template<
-    class Request,
-    class Response,
-    class Handler,
-    class>
-struct any_router::handler_impl : any_handler
+template<class Req, class Res, class H>
+struct any_router::
+    handler_impl : any_handler
 {
-    typename std::decay<Handler>::type h;
+    typename std::decay<H>::type h;
 
     template<class... Args>
     handler_impl(Args&&... args)
         : h(std::forward<Args>(args)...)
     {
-        n_routes = 1;
     }
 
-    system::error_code operator()(
-        void* req, void* res, route_state&) const override
+    std::size_t
+    count() const noexcept override
     {
-        return h(
-            *reinterpret_cast<Request*>(req),
-            *reinterpret_cast<Response*>(res));
-    }
-};
-
-// wrapper for route handlers
-template<
-    class Request,
-    class Response,
-    class Handler>
-struct any_router::handler_impl<Request, Response, Handler,
-    typename std::enable_if<detail::is_router<
-        typename std::decay<Handler>::type>::value>::type>
-    : any_handler
-{
-    typename std::decay<Handler>::type h;
-
-    template<class... Args>
-    handler_impl(Args&&... args)
-        : h(std::forward<Args>(args)...)
-    {
-        n_routes = h.size();
+        return count(get_handler_kind<
+            decltype(h), Req, Res>{});
     }
 
-    system::error_code operator()(
-        void* req, void* res, route_state& st) const override
+    route_result
+    invoke(
+        void* req, void* res,
+        route_state& st,
+        system::error_code* pec) const override
     {
-        return h(*reinterpret_cast<Request*>(req),
-            *reinterpret_cast<Response*>(res), st);
-    }
-};
-
-// wrapper for error handling functions
-template<class Request, class Response, class Handler>
-struct any_router::errfn_impl : any_errfn
-{
-    typename std::decay<Handler>::type h;
-
-    template<class... Args>
-    errfn_impl(Args&&... args)
-        : h(std::forward<Args>(args)...)
-    {
+        return invoke(
+            *reinterpret_cast<Req*>(req),
+            *reinterpret_cast<Res*>(res),
+            st, pec, get_handler_kind<
+                decltype(h), Req, Res>{});
     }
 
-    system::error_code operator()(void* req, void* res,
-        system::error_code const& ec) const override
+private:
+    std::size_t count(
+        std::integral_constant<int, 0>) const = delete;
+
+    std::size_t count(
+        std::integral_constant<int, 1>) const noexcept
     {
-        return h(*reinterpret_cast<Request*>(req),
-            *reinterpret_cast<Response*>(res), ec);
+        return 1;
+    }
+
+    std::size_t count(
+        std::integral_constant<int, 2>) const noexcept
+    {
+        return h.count();
+    }
+
+    std::size_t count(
+        std::integral_constant<int, 3>) const noexcept
+    {
+        return 1;
+    }
+
+    route_result
+    invoke(Req&, Res&, route_state&,
+        system::error_code*,
+        std::integral_constant<int, 0>) const = delete;
+
+    route_result
+    invoke(Req& req, Res& res, route_state&,
+        system::error_code* pec,
+        std::integral_constant<int, 1>) const
+    {
+        if(! pec)
+            return h(req, res);
+        return route::next;
+    }
+
+    route_result
+    invoke(Req& req, Res& res, route_state& st,
+        system::error_code* pec,
+        std::integral_constant<int, 2>) const
+    {
+        if(! pec)
+            return h.dispatch(&req, &res, st);
+        return route::next;
+    }
+
+    route_result
+    invoke(Req& req, Res& res, route_state&,
+        system::error_code* pec,
+        std::integral_constant<int, 3>) const
+    {
+        if(pec != nullptr)
+            return h(req, res, *pec);
+        return route::next;
     }
 };
 

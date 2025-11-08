@@ -20,28 +20,8 @@ namespace beast2 {
 
 struct route_rule_test
 {
-    void check(
-        core::string_view pat,
-        core::string_view path,
-        core::string_view base,
-        core::string_view rest)
-    {
-        auto rv = urls::grammar::parse(pat, path_rule);
-        if(! BOOST_TEST(rv.has_value()))
-            return;
-        route_match m;
-        if(! BOOST_TEST(match_route(m, path, *rv, true)))
-            return;
-        auto base1 = std::string(m.base.buffer());
-        auto rest1 = "/" + std::string(m.path.buffer());
-        BOOST_TEST_EQ(base1, base);
-        BOOST_TEST_EQ(rest1, rest);
-    }
-
     void run()
     {
-        //check("/", "/", "/", "/");
-        //check("/foo", "/foo/bar", "/foo", "/bar");
     }
 };
 

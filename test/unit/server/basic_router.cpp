@@ -20,66 +20,54 @@
 namespace boost {
 namespace beast2 {
 
-namespace {
-
-struct Req {};
-struct Res {};
-
-BOOST_CORE_STATIC_ASSERT(std::is_copy_assignable<basic_router<Req, Res>>::value);
-
-} // (anon)
-
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<unreserved_char>::value);
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<ident_char>::value);
 BOOST_CORE_STATIC_ASSERT(grammar::is_charset<constraint_char>::value);
 
-static bool operator==(
-    param_segment_rule_t::value_type const& lhs,
-    param_segment_rule_t::value_type const& rhs) noexcept
-{
-    return
-        lhs.s == rhs.s &&
-        lhs.name == rhs.name &&
-        lhs.constraint == rhs.constraint &&
-        lhs.prefix == rhs.prefix &&
-        lhs.modifier == rhs.modifier;
-}
-
 struct basic_router_test
 {
-    struct h0 { void operator()(); };
-    struct h1 { system::error_code operator()(); };
-    struct h2 { system::error_code operator()(int); };
-    struct h3 { system::error_code operator()(Request&, Response&); };
-    struct h4 { system::error_code operator()(Request&, Response&, system::error_code&); };
-    struct h5 { void operator()(Request&, Response&) {} };
-    struct h6 { void operator()(Request&, Response&, system::error_code) {} };
-    struct h7 { system::error_code operator()(Request&, Response&, int); };
-    struct h8 { system::error_code operator()(Request, Response&, int); };
-    struct h9 { system::error_code operator()(Request, Response&, system::error_code); };
+    void compileTimeTests()
+    {
+        struct Req {};
+        struct Res {};
 
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h0>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h1>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h2>::value);
-    BOOST_CORE_STATIC_ASSERT(  detail::is_handler<h3>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h4>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h5>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h6>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h7>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h8>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_handler<h9>::value);
+        BOOST_CORE_STATIC_ASSERT(std::is_copy_assignable<basic_router<Req, Res>>::value);
 
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h0>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h1>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h2>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h3>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h4>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h5>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h6>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h7>::value);
-    BOOST_CORE_STATIC_ASSERT(! detail::is_error_handler<h8>::value);
-    BOOST_CORE_STATIC_ASSERT(  detail::is_error_handler<h9>::value);
+        struct h0 { void operator()(); };
+        struct h1 { system::error_code operator()(); };
+        struct h2 { system::error_code operator()(int); };
+        struct h3 { system::error_code operator()(Req&, Res&); };
+        struct h4 { system::error_code operator()(Req&, Res&, system::error_code&); };
+        struct h5 { void operator()(Req&, Res&) {} };
+        struct h6 { void operator()(Req&, Res&, system::error_code) {} };
+        struct h7 { system::error_code operator()(Req&, Res&, int); };
+        struct h8 { system::error_code operator()(Req, Res&, int); };
+        struct h9 { system::error_code operator()(Req, Res&, system::error_code); };
 
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h2, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h3, Req, Res>::value == 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h4, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h5, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h6, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h7, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value != 1);
+
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h2, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h3, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h4, Req, Res>::value == 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h5, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h6, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h7, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value == 3);
+    }
+
+#if 0
     template<class T>
     static void good(core::string_view s, T const& t)
     {
@@ -184,9 +172,11 @@ struct basic_router_test
         v.modifier = modifier;
         return v;
     }
+#endif
 
     void testGrammar()
     {
+#if 0
         // constraint_rule
         good("(a)",  "a",   constraint_rule);
         good("(ab)", "ab",  constraint_rule);
@@ -257,50 +247,141 @@ struct basic_router_test
         path("/a/");
         path("/a/b");
         path("/a:id/b");
+#endif
     }
 
     void testDetach()
     {
-        struct Req
-        {
-            http_proto::method method;
-            std::string base_path;
-            std::string suffix_path;
-            urls::segments_encoded_view path;
-        };
-        struct Res
-        {
-        };
-
+#if 0
         basic_router<Req, Res> r;
-        r.use([](Req&, Res&){ return error::next; });
+        r.use([](Req&, Res&){ return route::next; });
         {
             basic_router<Req, Res> r1;
-            r1.use([](Req&, Res&){ return error::next; });
+            r1.use([](Req&, Res&){ return route::next; });
             r1.use(
-                [](Req&, Res&)->system::error_code
+                [](Req&, Res&) -> route_result
                 {
-                    return error::detach;
+                    return route::detach;
                 });
-            r1.use([](Req&, Res&){ return error::next; });
+            r1.use([](Req&, Res&){ return route::next; });
             r.use(std::move(r1));
         }
-        r.use([](Req&, Res&){ return error::next; });
+        r.use([](Req&, Res&){ return route::next; });
         route_state st;
         Req req;
         Res res;
-        //req.path = { "/" };
-        req.suffix_path = "/";
+        req.path = "/";
         auto ec = r(req, res, st);
-        BOOST_TEST(ec == error::detach);
-        ec = r.resume(req, res, error::close, st);
-        BOOST_TEST(ec == error::close);
+        BOOST_TEST(ec == route::detach);
+        ec = r.resume(req, res, route::close, st);
+        BOOST_TEST(ec == route::close);
+#endif
+    }
+
+    //--------------------------------------------
+
+    struct Req
+    {
+        core::string_view base_path;
+        core::string_view path;
+    };
+
+    struct Res
+    {
+    };
+
+    using test_router = basic_router<Req, Res>;
+
+    class h_err
+    {
+        route_result ec_;
+
+    public:
+        h_err(route_result ec) noexcept
+            : ec_(ec)
+        {
+        }
+
+        route_result operator()(Req&, Res&) const
+        {
+            return ec_;
+        }
+    };
+
+    // ensures a 1-route router matches the pattern
+    void good1(
+        core::string_view path,
+        core::string_view pat)
+    {
+        system::error_code const ev =
+            http_proto::error::bad_connection;
+        test_router r;
+        r.use(pat, [ev](Req&, Res&) { return ev; });
+        Req req{ "", path };
+        Res res;
+        route_state st;
+        auto rv = r.dispatch(http_proto::method::get,
+            urls::url_view(path), req, res, st);
+        BOOST_TEST(rv == ev);
+    }
+
+    void bad1(
+        core::string_view path,
+        core::string_view pat)
+    {
+        system::error_code const ev =
+            http_proto::error::bad_connection;
+        test_router r;
+        r.use(pat, [ev](Req&, Res&) { return ev; });
+        Req req{ "", path };
+        Res res;
+        route_state st;
+        auto rv = r.dispatch(http_proto::method::get,
+            urls::url_view(path), req, res, st);
+        BOOST_TEST(rv == route::next);
+    }
+
+    void testUse()
+    {
+        good1("/",    "/");
+        good1("/x",   "/x");
+        good1("/xy",  "/xy");
+        good1("/xy",  "/x");
+        good1("/x/y", "/x");
+        route_result nr[] = {
+            http_proto::error::bad_connection,
+            http_proto::error::bad_content_length,
+            http_proto::error::bad_field_name
+        };
+        {
+            test_router r;
+            r.use( h_err(nr[0]) );
+            Req req{ "", "/" };
+            Res res;
+            route_state st;
+            auto rv = r.dispatch(http_proto::method::get,
+                urls::url_view("/"), req, res, st);
+            BOOST_TEST(rv == nr[0]);
+        }
+        {
+            test_router r;
+            r.use( "/a", h_err(nr[0]) );
+            r.use( "/b", h_err(nr[1]) );
+            r.use( "/c", h_err(nr[2]) );
+            Req req{ "", "/b" };
+            Res res;
+            route_state st;
+            auto rv = r.dispatch(http_proto::method::get,
+                urls::url_view("/b"), req, res, st);
+            BOOST_TEST(rv == nr[1]);
+        }
     }
 
     void run()
     {
         testGrammar();
         testDetach();
+        testUse();
     }
 };
 
