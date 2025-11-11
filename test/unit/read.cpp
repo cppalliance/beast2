@@ -133,18 +133,44 @@ public:
             pr.reset();
             pr.start();
 
-            // read header
+            // async_read_some cancels after reading 0 bytes
             async_read_some(
                 ts,
                 pr,
                 asio::bind_cancellation_slot(
                     c_signal.slot(),
-                    test::fail_handler(asio::error::operation_aborted)));
-
-            // send a cancellation
-            asio::post(ioc, [&](){ c_signal.emit(asio::cancellation_type::total); });
-
+                    [](system::error_code ec, std::size_t n)
+                    {
+                        BOOST_TEST_EQ(n, 0);
+                        BOOST_TEST_EQ(ec, asio::error::operation_aborted);
+                    }));
+            c_signal.emit(asio::cancellation_type::total);
             test::run(ioc);
+
+            // append 8 bytes of the msg
+            ts.append(msg.substr(0, 8));
+
+            // async_read_some cancels after reading 8 bytes
+            async_read_some(
+                ts,
+                pr,
+                asio::bind_cancellation_slot(
+                    c_signal.slot(),
+                    [](system::error_code ec, std::size_t n)
+                    {
+                        BOOST_TEST_EQ(n, 8);
+                        BOOST_TEST_EQ(ec, asio::error::operation_aborted);
+                    }));
+            c_signal.emit(asio::cancellation_type::total);
+            test::run(ioc);
+
+            // append rest of the msg
+            ts.append(msg.substr(8, msg.npos));
+
+            // async_read_some succeeds
+            async_read_some(ts, pr, test::success_handler());
+            test::run(ioc);
+            BOOST_TEST(pr.got_header());
         }
     }
 
