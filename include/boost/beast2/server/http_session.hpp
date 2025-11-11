@@ -88,7 +88,6 @@ protected:
     Stream& stream_;
     router_asio<Stream> rr_;
     any_lambda<void(system::error_code)> close_;
-    route_state route_state_;
     http_proto::request_parser pr_;
     http_proto::serializer sr_;
     http_proto::response res_;
@@ -219,7 +218,7 @@ on_read(
     ec = rr_.dispatch(
         preq_->m.method(),
         preq_->url,
-        *preq_, *pres_, route_state_);
+        *preq_, *pres_);
     if(ec == route::send)
         goto do_write;
 
@@ -351,7 +350,7 @@ do_resume2(system::error_code ec)
 
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
-    ec = rr_.resume(*preq_, *pres_, ec, route_state_);
+    ec = rr_.resume(*preq_, *pres_, ec);
 
     if(ec == route::detach)
     {

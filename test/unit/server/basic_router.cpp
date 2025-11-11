@@ -29,7 +29,7 @@ struct basic_router_test
     void compileTimeTests()
     {
         struct Req {};
-        struct Res {};
+        struct Res : basic_response {};
 
         BOOST_CORE_STATIC_ASSERT(std::is_copy_assignable<basic_router<Req, Res>>::value);
 
@@ -37,12 +37,12 @@ struct basic_router_test
         struct h1 { system::error_code operator()(); };
         struct h2 { system::error_code operator()(int); };
         struct h3 { system::error_code operator()(Req&, Res&); };
-        struct h4 { system::error_code operator()(Req&, Res&, system::error_code&); };
+        struct h4 { system::error_code operator()(Req&, Res&, system::error_code); };
         struct h5 { void operator()(Req&, Res&) {} };
         struct h6 { void operator()(Req&, Res&, system::error_code) {} };
         struct h7 { system::error_code operator()(Req&, Res&, int); };
         struct h8 { system::error_code operator()(Req, Res&, int); };
-        struct h9 { system::error_code operator()(Req, Res&, system::error_code); };
+        struct h9 { system::error_code operator()(Req, Res&, system::error_code const&); };
 
         BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 1);
         BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 1);
@@ -252,7 +252,14 @@ struct basic_router_test
 
     void testDetach()
     {
-#if 0
+        struct Req : basic_request
+        {
+        };
+
+        struct Res : basic_response
+        {
+        };
+
         basic_router<Req, Res> r;
         r.use([](Req&, Res&){ return route::next; });
         {
@@ -267,114 +274,474 @@ struct basic_router_test
             r.use(std::move(r1));
         }
         r.use([](Req&, Res&){ return route::next; });
-        route_state st;
         Req req;
         Res res;
-        req.path = "/";
-        auto ec = r(req, res, st);
+        auto ec = r.dispatch(
+            http_proto::method::get,
+            urls::url_view("/"), req, res);
         BOOST_TEST(ec == route::detach);
-        ec = r.resume(req, res, route::close, st);
-        BOOST_TEST(ec == route::close);
-#endif
+        //ec = r.resume(req, res, route::close, st);
+        //BOOST_TEST(ec == route::close);
     }
 
     //--------------------------------------------
 
-    struct Req
+    struct Req : basic_request
     {
-        core::string_view base_path;
-        core::string_view path;
     };
 
-    struct Res
+    struct Res : basic_response
     {
+        int i = 0;
     };
 
     using test_router = basic_router<Req, Res>;
 
-    class h_err
+    auto get(
+        test_router& r,
+        core::string_view url) ->
+            route_result
     {
-        route_result ec_;
+        Req req;
+        Res res;
+        return r.dispatch(http_proto::method::get,
+            urls::url_view(url), req, res);
+    }
 
-    public:
-        h_err(route_result ec) noexcept
-            : ec_(ec)
+    struct handler
+    {
+        ~handler()
         {
+            if(alive_)
+                BOOST_TEST_EQ(called_, want_ != 0);
+        }
+
+        explicit handler(
+            int want, system::error_code ec =
+                http_proto::error::success)
+            : want_(want)
+            , ec_(ec)
+        {
+        }
+
+        handler(handler&& other)
+        {
+            BOOST_ASSERT(other.alive_);
+            BOOST_ASSERT(! other.called_);
+            want_ = other.want_;
+            alive_ = true;
+            other.alive_ = false;
+            ec_ = other.ec_;
         }
 
         route_result operator()(Req&, Res&) const
         {
-            return ec_;
+            called_ = true;
+            switch(want_)
+            {
+            default:
+            case 0: return route::close;
+            case 1: return route::send;
+            case 2: return route::next;
+            case 3: return ec_;
+            case 4: return route::next_route;
+            }
         }
+
+    private:
+        // 0 = not called
+        // 1 = called
+        // 2 = next
+        // 3 = error
+        // 4 = next_route
+        int want_;
+        bool alive_ = true;
+        bool mutable called_ = false;
+        system::error_code ec_;
     };
 
-    // ensures a 1-route router matches the pattern
-    void good1(
-        core::string_view path,
-        core::string_view pat)
+    struct err_handler
     {
-        system::error_code const ev =
-            http_proto::error::bad_connection;
-        test_router r;
-        r.use(pat, [ev](Req&, Res&) { return ev; });
-        Req req{ "", path };
-        Res res;
-        route_state st;
-        auto rv = r.dispatch(http_proto::method::get,
-            urls::url_view(path), req, res, st);
-        BOOST_TEST(rv == ev);
+        ~err_handler()
+        {
+            if(alive_)
+                BOOST_TEST_EQ(called_, want_ != 0);
+        }
+
+        err_handler(
+            int want,
+            system::error_code ec)
+            : want_(want)
+            , ec_(ec)
+        {
+        }
+
+        err_handler(err_handler&& other)
+        {
+            BOOST_ASSERT(other.alive_);
+            BOOST_ASSERT(! other.called_);
+            want_ = other.want_;
+            alive_ = true;
+            other.alive_ = false;
+            ec_ = other.ec_;
+        }
+
+        route_result operator()(
+            Req&, Res&, system::error_code ec) const
+        {
+            called_ = true;
+            switch(want_)
+            {
+            default:
+            case 0: return route::close;
+            case 1:
+                BOOST_TEST(ec == ec_);
+                return route::send;
+            case 2:
+                BOOST_TEST(ec == ec_);
+                return route::next;
+            case 3:
+                BOOST_TEST(ec.failed());
+                return ec_;
+            }
+        }
+
+    private:
+        // 0 = not called
+        // 1 = called, expecting ec_
+        // 2 = next, expecting ec_
+        // 3 = change error
+        int want_;
+        bool alive_ = true;
+        bool mutable called_ = false;
+        system::error_code ec_;
+    };
+
+    static handler not_called()
+    {
+        return handler(0);
     }
 
-    void bad1(
-        core::string_view path,
-        core::string_view pat)
+    static handler called()
     {
-        system::error_code const ev =
-            http_proto::error::bad_connection;
-        test_router r;
-        r.use(pat, [ev](Req&, Res&) { return ev; });
-        Req req{ "", path };
-        Res res;
-        route_state st;
-        auto rv = r.dispatch(http_proto::method::get,
-            urls::url_view(path), req, res, st);
-        BOOST_TEST(rv == route::next);
+        return handler(1);
     }
+
+    static handler return_next()
+    {
+        return handler(2);
+    }
+
+    static handler return_err(
+        system::error_code ec =
+            http_proto::error::bad_connection)
+    {
+        return handler(3, ec);
+    }
+
+    static err_handler not_called_err()
+    {
+        return err_handler(0,
+            http_proto::error::success);
+    }
+
+    static err_handler send_err(
+        system::error_code ec)
+    {
+        return err_handler(1, ec);
+    }
+
+    static err_handler next_err(
+        system::error_code ec)
+    {
+        return err_handler(2, ec);
+    }
+
+    static err_handler replace_err(
+        system::error_code ec)
+    {
+        return err_handler(3, ec);
+    }
+
+    //--------------------------------------------
 
     void testUse()
     {
-        good1("/",    "/");
-        good1("/x",   "/x");
-        good1("/xy",  "/xy");
-        good1("/xy",  "/x");
-        good1("/x/y", "/x");
-        route_result nr[] = {
-            http_proto::error::bad_connection,
-            http_proto::error::bad_content_length,
-            http_proto::error::bad_field_name
-        };
         {
             test_router r;
-            r.use( h_err(nr[0]) );
-            Req req{ "", "/" };
-            Res res;
-            route_state st;
-            auto rv = r.dispatch(http_proto::method::get,
-                urls::url_view("/"), req, res, st);
-            BOOST_TEST(rv == nr[0]);
+            r.use(called());
+            get(r,"/");
         }
         {
             test_router r;
-            r.use( "/a", h_err(nr[0]) );
-            r.use( "/b", h_err(nr[1]) );
-            r.use( "/c", h_err(nr[2]) );
-            Req req{ "", "/b" };
-            Res res;
-            route_state st;
-            auto rv = r.dispatch(http_proto::method::get,
-                urls::url_view("/b"), req, res, st);
-            BOOST_TEST(rv == nr[1]);
+            r.use("", called());
+            get(r,"/");
         }
+        {
+            test_router r;
+            r.use(called());
+            r.use(not_called());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(
+                called(),
+                not_called());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(called());
+            r.use(not_called());
+            get(r,"/t");
+        }
+        {
+            test_router r;
+            r.use(
+                called(),
+                not_called());
+            get(r,"/t");
+        }
+        {
+            test_router r;
+            r.use("/t", not_called());
+            r.use("/u", called());
+            get(r,"/u");
+        }
+        {
+            test_router r;
+            r.use("/t", not_called());
+            r.use("/u", called());
+            r.use(not_called());
+            get(r,"/u");
+        }
+        {
+            test_router r;
+            r.use("/x/y", not_called());
+            r.use("/x", called());
+            get(r,"/x/z");
+        }
+        {
+            test_router r;
+            r.use("/x/y", not_called());
+            r.use("/x", called());
+            get(r,"/x/z");
+        }
+        {
+            test_router r;
+            r.use("/x/y", not_called());
+            r.use("/x", called());
+            r.use(not_called());
+            get(r,"/x/z");
+        }
+        {
+            test_router r;
+            r.use(return_next());
+            r.use(called());
+            r.use(not_called());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(
+                return_next(),
+                called(),
+                not_called());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(return_next());
+            r.use(return_err());
+            r.use(not_called());
+            get(r,"/");
+        }
+    }
+
+    void testErr()
+    {
+        system::error_code ec1 =
+            http_proto::error::bad_connection;
+        system::error_code ec2 =
+            http_proto::error::bad_content_length;
+        {
+            test_router r;
+            r.err(not_called_err());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.err("", not_called_err());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(called());
+            r.use(not_called_err());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(return_err(ec1));
+            r.use(send_err(ec1));
+            r.use(not_called_err());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(return_err(ec1));
+            r.use("", send_err(ec1));
+            r.use(not_called_err());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.use(return_err(ec2));
+            r.use(send_err(ec2));
+            r.use(not_called_err());
+            get(r,"/");
+        }
+
+        // mount points
+        {
+            test_router r;
+            r.use("/api", return_err(ec1));
+            r.err("/api", send_err(ec1));
+            r.err("/x", not_called_err());
+            get(r, "/api");
+        }
+        {
+            test_router r;
+            r.use("/x", return_err(ec1));
+            r.err("/api", not_called_err());
+            r.err("/x", send_err(ec1));
+            get(r, "/x/data");
+        }
+
+        // replacing errors
+        {
+            test_router r;
+            r.use(return_err(ec1));
+            r.err(replace_err(ec2));
+            r.err(send_err(ec2));
+            get(r, "/");
+        }
+
+        {
+            test_router r;
+            r.use(return_err(ec1));
+            r.use(not_called());
+            r.err(send_err(ec1));
+            get(r, "/");
+        }
+
+        // route-level vs. router-level
+        {
+            test_router r;
+            r.route("/").get(return_err(ec1));
+            r.err(send_err(ec1));
+            get(r, "/");
+        }
+
+        // subrouters
+        {
+            test_router api;
+            api.use(return_err(ec1));
+            api.err(send_err(ec1));
+
+            test_router root;
+            root.use("/api", api);
+            root.err(not_called_err());
+            get(root, "/api");
+        }
+        {
+            test_router api;
+            api.use(return_err(ec1));
+            api.err(next_err(ec1));
+
+            test_router root;
+            root.use("/api", api);
+            root.err(send_err(ec1));
+            root.err(not_called_err());
+            get(root, "/api");
+        }
+    }
+
+    void testRoute()
+    {
+        {
+            test_router r;
+            r.get("/", called());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.get("/x", not_called());
+            get(r,"/");
+        }
+        {
+            test_router r;
+            r.get("/x", called());
+            r.get("/x", not_called());
+            get(r,"/x");
+        }
+        {
+            test_router r;
+            r.get("/x",
+                called(),
+                not_called());
+            get(r,"/x");
+        }
+        {
+            test_router r;
+            r.get("/x", return_next());
+            r.get("/x", called());
+            r.get("/x", not_called());
+            get(r,"/x");
+        }
+        {
+            test_router r;
+            r.get("/x",
+                return_next(),
+                called(),
+                not_called());
+            get(r,"/x");
+        }
+    }
+
+    void path(
+        core::string_view pat,
+        core::string_view target,
+        core::string_view good)
+    {
+        test_router r;
+        r.use( pat,
+            [&](Req& req, Res&)
+            {
+                BOOST_TEST_EQ(req.path, good);
+                return route::send;
+            });
+        Req req;
+        Res res;
+        r.dispatch(
+            http_proto::method::get,
+            urls::url_view(target),
+            req, res);
+    }
+
+    void testPath()
+    {
+        path("/",     "/",       "/");
+        path("/",     "/api",    "/api");
+        path("/api",  "/api",    "/");
+        path("/api",  "/api/",   "/");
+        path("/api",  "/api/",   "/");
+        path("/api",  "/api/v0", "/v0");
+        path("/api/", "/api",    "/");
+        path("/api/", "/api",    "/");
+        path("/api/", "/api/",   "/");
+        path("/api/", "/api/v0", "/v0");
     }
 
     void run()
@@ -382,13 +749,15 @@ struct basic_router_test
         testGrammar();
         testDetach();
         testUse();
+        testErr();
+        testRoute();
+        testPath();
     }
 };
 
 TEST_SUITE(
     basic_router_test,
     "boost.beast2.server.basic_router");
-
 
 } // beast2
 } // boost

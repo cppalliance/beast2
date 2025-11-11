@@ -26,6 +26,11 @@ using derived_from = std::integral_constant<bool,
         Derived const volatile*,
         Base const volatile*>::value>;
 
+template<bool...> struct bool_pack {};
+template<bool... Bs>
+struct all_true : std::is_same<bool_pack<
+    true, Bs...>, bool_pack<Bs..., true>> {};
+
 } // detail
 } // beast2
 } // boost

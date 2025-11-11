@@ -26,22 +26,22 @@ namespace grammar = urls::grammar;
 //------------------------------------------------
 
 // avoids SBO
-class stable_chars
+class stable_string
 {
     char const* p_ = 0;
     std::size_t n_ = 0;
 
 public:
-    ~stable_chars()
+    ~stable_string()
     {
         if(p_)
             delete[] p_;
     }
 
-    stable_chars() = default;
+    stable_string() = default;
 
-    stable_chars(
-        stable_chars&& other) noexcept
+    stable_string(
+        stable_string&& other) noexcept
         : p_(other.p_)
         , n_(other.n_)
     {
@@ -49,8 +49,8 @@ public:
         other.n_ = 0;
     }
 
-    stable_chars& operator=(
-        stable_chars&& other) noexcept
+    stable_string& operator=(
+        stable_string&& other) noexcept
     {
         auto p = p_;
         auto n = n_;
@@ -62,7 +62,7 @@ public:
     }
 
     explicit
-    stable_chars(
+    stable_string(
         core::string_view s)
         : p_(
             [&]
@@ -75,9 +75,9 @@ public:
     {
     }
 
-    stable_chars(
+    stable_string(
         char const* it, char const* end)
-        : stable_chars(core::string_view(it, end))
+        : stable_string(core::string_view(it, end))
     {
     }
 
@@ -89,6 +89,11 @@ public:
     std::size_t size() const noexcept
     {
         return n_;
+    }
+
+    operator core::string_view() const noexcept
+    {
+        return { data(), size() };
     }
 };
 
@@ -314,22 +319,17 @@ struct path_rule_t
     struct value_type
     {
         std::vector<route_seg> segs;
-    private:
-        friend struct path_rule_t;
-        stable_chars chars;
     };
 
     auto
     parse(
         char const*& it0,
-        char const* const end0) const ->
+        char const* const end) const ->
             system::result<value_type>
     {
         value_type rv;
-        rv.chars = stable_chars(it0, end0);
         auto it = it0;
         auto it1 = it;
-        auto const end = it + rv.chars.size();
         while(it != end)
         {
             if( *it == ':' ||

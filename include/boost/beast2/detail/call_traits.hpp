@@ -10,6 +10,7 @@
 #ifndef BOOST_BEAST2_DETAIL_CALL_TRAITS_HPP
 #define BOOST_BEAST2_DETAIL_CALL_TRAITS_HPP
 
+#include <boost/beast2/detail/type_traits.hpp>
 #include <type_traits>
 
 namespace boost {
@@ -18,24 +19,27 @@ namespace detail {
 
 template<class... Ts> struct type_list {};
 
-template<class T> struct call_traits;
+template<class T, class = void>
+struct call_traits : std::false_type
+{
+};
 
 template<class R, class... Args>
-struct call_traits<R(*)(Args...)>
+struct call_traits<R(*)(Args...)> : std::true_type
 {
     using return_type = R;
     using arg_types = type_list<Args...>;
 };
 
 template<class R, class... Args>
-struct call_traits<R(&)(Args...)>
+struct call_traits<R(&)(Args...)> : std::true_type
 {
     using return_type = R;
     using arg_types = type_list<Args...>;
 };
 
 template<class C, class R, class... Args>
-struct call_traits<R(C::*)(Args...)>
+struct call_traits<R(C::*)(Args...)> : std::true_type
 {
     using class_type = C;
     using return_type = R ;
@@ -43,7 +47,7 @@ struct call_traits<R(C::*)(Args...)>
 };
 
 template<class C, class R, class... Args>
-struct call_traits<R(C::*)(Args...) const>
+struct call_traits<R(C::*)(Args...) const> : std::true_type
 {
     using class_type = C;
     using return_type = R ;
@@ -51,36 +55,33 @@ struct call_traits<R(C::*)(Args...) const>
 };
 
 template<class F>
-struct call_traits
+struct call_traits<F, typename std::enable_if<
+        std::is_member_function_pointer<decltype(
+            &F::operator())>::value>::type>
     : call_traits<decltype(&F::operator())>
 {
 };
 
-// Helper to check if T is callable with Args...
-template<class T, class... Args>
-class is_invocable_impl
-{
-    // Try calling T with Args...
-    template<class U>
-    static auto test(int) -> decltype(std::declval<U>()(
-        std::declval<Args>()...), std::true_type{}
-    );
+template<class T, class R, class ArgList, class = void>
+struct is_invocable_impl : std::false_type {};
 
-    template<class>
-    static auto test(...) -> std::false_type;
-
-public:
-    static const bool value = decltype(test<T>(0))::value;
-};
-
-// Primary template
 template<class T, class R, class... Args>
-struct is_invocable : std::integral_constant<bool,
-    is_invocable_impl<T, Args...>::value &&
-    std::is_convertible<typename call_traits<T>::return_type,R>::value>
+struct is_invocable_impl<
+    T, R, type_list<Args...>,
+    void_t<decltype(std::declval<T>()(
+        std::declval<Args>()...))>>
+    : std::integral_constant<bool,
+        call_traits<T>::value &&
+        std::is_convertible<decltype(std::declval<T>()(
+            std::declval<Args>()...)), R>::value>
 {
 };
 
+template<class T, class R, class... Args>
+struct is_invocable
+    : is_invocable_impl<T, R, type_list<Args...>>
+{
+};
 
 } // detail
 } // beast2
