@@ -208,9 +208,9 @@ jobs:
             version: "*"
             cxx: "clang++"
             cc: "clang"
-            runs-on: "macos-13"
+            runs-on: "macos-26"
             b2-toolset: "clang"
-            name: "Apple-Clang (macOS 13)"
+            name: "Apple-Clang (macOS 26)"
             shared: true
             build-type: "Release"
             build-cmake: true
@@ -848,7 +848,7 @@ jobs:
           ref: develop
 
       - name: Setup C++
-        uses: ashtum/cpp-actions/setup-cpp@v1.8.13
+        uses: alandefreitas/cpp-actions/setup-cpp@v1.9.0
         id: setup-cpp
         with:
           compiler: ${{ matrix.compiler }}
@@ -857,7 +857,7 @@ jobs:
           trace-commands: true
 
       - name: Install packages
-        uses: ashtum/cpp-actions/package-install@v1.8.13
+        uses: alandefreitas/cpp-actions/package-install@v1.9.0
         id: package-install
         with:
           apt-get-add-architecture: ${{ matrix.x86 && 'i386' || '' }}
@@ -867,12 +867,11 @@ jobs:
             ${{ matrix.x86 && 'libssl-dev:i386 zlib1g-dev:i386 libbrotli-dev:i386 libpsl-dev:i386' || '' }}
 
       - name: Clone Boost
-        uses: ashtum/cpp-actions/boost-clone@v1.8.13
+        uses: alandefreitas/cpp-actions/boost-clone@v1.9.0
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
           boost-dir: boost-source
-          cache: false
           modules-exclude-paths: ''
           scan-modules-dir: |
             http-io-root
@@ -886,7 +885,7 @@ jobs:
             rts
 
       - name: Install Packages (Windows)
-        uses: ashtum/cpp-actions/package-install@v1.8.13
+        uses: alandefreitas/cpp-actions/package-install@v1.9.0
         if: ${{ startsWith(matrix.runs-on, 'windows') }}
         id: package-install-windows
         with:
@@ -963,7 +962,7 @@ jobs:
           cp -r "$workspace_root"/rts-root libs/rts
 
       - name: Boost B2 Workflow
-        uses: ashtum/cpp-actions/b2-workflow@v1.8.13
+        uses: alandefreitas/cpp-actions/b2-workflow@v1.9.0
         if: ${{ !matrix.coverage && !matrix.time-trace }}
         env:
           ASAN_OPTIONS: ${{ (startsWith(matrix.compiler, 'apple-clang') && 'detect_invalid_pointer_pairs=0') || 'detect_invalid_pointer_pairs=2' }}
@@ -985,7 +984,7 @@ jobs:
           extra-args: "libs/beast2/example" # https://github.com/ashtum/cpp-actions/issues/23
 
       - name: Boost CMake Workflow
-        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.9.0
         if: ${{ matrix.coverage || matrix.time-trace || matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root
@@ -1022,7 +1021,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/.local/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
 
       - name: Find Package Integration Workflow
-        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.9.0
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -1046,7 +1045,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Subdirectory Integration Workflow
-        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.9.0
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}/test/cmake_test
@@ -1067,7 +1066,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: Root Project CMake Workflow
-        uses: ashtum/cpp-actions/cmake-workflow@v1.8.13
+        uses: alandefreitas/cpp-actions/cmake-workflow@v1.9.0
         if: ${{ matrix.build-cmake || matrix.is-earliest }}
         with:
           source-dir: boost-root/libs/${{ steps.patch.outputs.module }}
@@ -1090,7 +1089,7 @@ jobs:
           toolchain: ${{ (startsWith(matrix.runs-on, 'windows') && steps.patch-user-config.outputs.toolchain) || '' }}
 
       - name: FlameGraph
-        uses: ashtum/cpp-actions/flamegraph@v1.8.13
+        uses: alandefreitas/cpp-actions/flamegraph@v1.9.0
         if: matrix.time-trace
         with:
           source-dir: boost-root/libs/beast2
@@ -1143,7 +1142,7 @@ jobs:
           fetch-depth: 100
 
       - name: Changelog
-        uses: ashtum/cpp-actions/create-changelog@v1.8.13
+        uses: alandefreitas/cpp-actions/create-changelog@v1.9.0
         with:
           thank-non-regular: ${{ startsWith(github.ref, 'refs/tags/') }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -1165,7 +1164,7 @@ jobs:
         shell: bash
     steps:
       - name: Install packages
-        uses: ashtum/cpp-actions/package-install@v1.8.13
+        uses: alandefreitas/cpp-actions/package-install@v1.9.0
         with:
           apt-get: git cmake
 
@@ -1196,12 +1195,11 @@ jobs:
           ref: develop
 
       - name: Clone Boost
-        uses: ashtum/cpp-actions/boost-clone@v1.8.13
+        uses: alandefreitas/cpp-actions/boost-clone@v1.9.0
         id: boost-clone
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
           boost-dir: boost-source
-          cache: false
           modules-exclude-paths: ''
           scan-modules-dir: |
             http-io-root

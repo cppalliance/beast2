@@ -31,6 +31,7 @@ project boost/beast2
       $(c11-requires)
       <link>shared:<define>BOOST_BEAST2_DYN_LINK=1
       <link>static:<define>BOOST_BEAST2_STATIC_LINK=1
+      <toolset>clang-win:<cxxflags>"-Wno-unused-private-field"
 
       #TODO: Remove the following defines once asio headers are no longer included in source files
       <target-os>windows:<define>_WIN32_WINNT=0x0601
