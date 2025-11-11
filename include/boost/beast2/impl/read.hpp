@@ -64,6 +64,11 @@ public:
                     pr_.parse(ec);
                     if(ec == http_proto::condition::need_more_input)
                     {
+                        if(!!self.cancelled())
+                        {
+                            ec = asio::error::operation_aborted;
+                            goto upcall;
+                        }
                         // specific to http_io::async_read_some
                         if(total_bytes_ != 0 && condition_(pr_))
                         {

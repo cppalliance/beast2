@@ -116,9 +116,6 @@ struct stream_state
 
     void
     notify_read();
-
-    void
-    cancel_read();
 };
 
 //------------------------------------------------------------------------------
@@ -236,22 +233,6 @@ notify_read()
         cv.notify_all();
     }
 }
-
-inline
-void
-stream_state::
-cancel_read()
-{
-    std::unique_ptr<stream_read_op_base> p;
-    {
-        std::lock_guard<std::mutex> lock(m);
-        code = stream_status::eof;
-        p = std::move(op);
-    }
-    if(p != nullptr)
-        (*p)(asio::error::operation_aborted);
-}
-
 } // detail
 } // test
 } // beast2

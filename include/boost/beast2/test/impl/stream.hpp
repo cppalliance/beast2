@@ -74,10 +74,18 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
             void
             operator()(asio::cancellation_type type) const
             {
-                if (type != asio::cancellation_type::none)
+                if(type != asio::cancellation_type::none)
                 {
-                    if (auto sp = wp_.lock())
-                        sp->cancel_read();
+                    if(auto sp = wp_.lock())
+                    {
+                        std::unique_ptr<stream_read_op_base> p;
+                        {
+                            std::lock_guard<std::mutex> lock(sp->m);
+                            p = std::move(sp->op);
+                        }
+                        if(p != nullptr)
+                            (*p)(asio::error::operation_aborted);            
+                    }
                 }
             }
 
@@ -515,7 +523,11 @@ void
 basic_stream<Executor>::
 close()
 {
-    in_->cancel_read();
+    {
+        std::lock_guard<std::mutex> lock(in_->m);
+        in_->code = detail::stream_status::eof;
+        in_->notify_read();
+    }
 
     // disconnect
     {
