@@ -20,10 +20,8 @@
 #include <algorithm>
 #include <iostream>
 
-namespace boost
-{
-namespace beast2
-{
+namespace boost {
+namespace beast2 {
 
 template<class Buffers>
 std::string
@@ -39,9 +37,10 @@ class body_read_stream_test
 private:
     std::string body_ = "Hello World!";
 
-    std::string header_ = "HTTP/1.1 200 OK\r\n"
-                          "Content-Length: 12\r\n"
-                          "\r\n";
+    std::string header_ =
+        "HTTP/1.1 200 OK\r\n"
+         "Content-Length: 12\r\n"
+         "\r\n";
 
     std::string msg_ = header_ + body_;
 

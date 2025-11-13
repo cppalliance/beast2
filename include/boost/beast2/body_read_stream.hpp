@@ -14,10 +14,8 @@
 #include <boost/http_proto/parser.hpp>
 #include <boost/system/error_code.hpp>
 
-namespace boost
-{
-namespace beast2
-{
+namespace boost {
+namespace beast2 {
 
 /** A body reader for HTTP/1 messages.
 

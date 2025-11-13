@@ -20,13 +20,10 @@
 
 #include <iostream>
 
-namespace boost
-{
-namespace beast2
-{
+namespace boost {
+namespace beast2 {
 
-namespace detail
-{
+namespace detail {
 
 template<class MutableBufferSequence, class AsyncReadStream>
 class body_read_stream_op : public asio::coroutine
