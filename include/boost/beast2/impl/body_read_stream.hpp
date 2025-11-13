@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_IMPL_BODY_READ_STREAM_HPP
-#define BOOST_HTTP_IO_IMPL_BODY_READ_STREAM_HPP
+#ifndef BOOST_BEAST2_IMPL_BODY_READ_STREAM_HPP
+#define BOOST_BEAST2_IMPL_BODY_READ_STREAM_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/read.hpp>
@@ -143,4 +143,4 @@ body_read_stream<AsyncReadStream>::async_read_some(
 } // beast2
 } // boost
 
-#endif
+#endif // BOOST_BEAST2_IMPL_BODY_READ_STREAM_HPP

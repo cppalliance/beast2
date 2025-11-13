@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_HTTP_IO_BODY_READ_STREAM_HPP
-#define BOOST_HTTP_IO_BODY_READ_STREAM_HPP
+#ifndef BOOST_BEAST2_BODY_READ_STREAM_HPP
+#define BOOST_BEAST2_BODY_READ_STREAM_HPP
 
 #include <boost/asio/async_result.hpp>
 #include <boost/http_proto/parser.hpp>
@@ -32,7 +32,7 @@ namespace beast2 {
     stream's `async_read_some` method. The resulting body
     data is stored in the referenced MutableBufferSequence.
 
-    All processing depends on a http_io::parser object owned
+    All processing depends on a beast2::parser object owned
     by the caller and referenced in the construction of this
     object.
 
@@ -160,4 +160,4 @@ private:
 
 #include <boost/beast2/impl/body_read_stream.hpp>
 
-#endif
+#endif // BOOST_BEAST2_BODY_READ_STREAM_HPP
