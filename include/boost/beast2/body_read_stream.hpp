@@ -42,17 +42,18 @@ class body_read_stream
 public:
     /** The type of the executor associated with the stream.
 
-    This will be the type of executor used to invoke completion handlers which
-    do not have an explicit associated executor.
+        This will be the type of executor used to invoke completion handlers
+        which do not have an explicit associated executor.
     */
     typedef typename AsyncReadStream::executor_type executor_type;
 
     /** Get the executor associated with the object.
 
-    This function may be used to obtain the executor object that the stream uses
-    to dispatch completion handlers without an assocaited executor.
+        This function may be used to obtain the executor object that the stream
+        uses to dispatch completion handlers without an assocaited executor.
 
-    @return A copy of the executor that stream will use to dispatch handlers.
+        @return A copy of the executor that stream will use to dispatch
+        handlers.
     */
     executor_type
     get_executor()
@@ -62,18 +63,19 @@ public:
 
     /** Constructor
 
-    This constructor creates the stream by forwarding all arguments to the
-    underlying socket.  The socket then needs to be open and connected or
-    accepted before data can be sent or received on it.
+        This constructor creates the stream by forwarding all arguments to the
+        underlying socket.  The socket then needs to be open and connected or
+        accepted before data can be sent or received on it.
 
-    @param s  The underlying stream from which the HTTP message is read.  This
-              object's executor is initialized to that of the underlying stream.
+        @param s  The underlying stream from which the HTTP message is read.
+                  This object's executor is initialized to that of the
+                  underlying stream.
 
-    @param pr A http_proto::parser object which will perform the parsing of the
-              HTTP message and extraction of the body.  This must be initialized
-              by the caller and ownership of the parser is retained by the
-              caller, which must guarantee that it remains valid until the
-              handler is called.
+        @param pr A http_proto::parser object which will perform the parsing of
+                  the HTTP message and extraction of the body.  This must be
+                  initialized by the caller and ownership of the parser is
+                  retained by the caller, which must guarantee that it remains
+                  valid until the handler is called.
     */
     explicit body_read_stream(AsyncReadStream& s, http_proto::parser& pr);
 
