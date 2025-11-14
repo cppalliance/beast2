@@ -57,6 +57,21 @@ public:
         {
             self.reset_cancellation_state(asio::enable_total_cancellation());
 
+            if(asio::buffer_size(mb_) == 0)
+            {
+                BOOST_ASIO_CORO_YIELD
+                {
+                    BOOST_ASIO_HANDLER_LOCATION(
+                        (__FILE__, __LINE__, "immediate"));
+                    auto io_ex = self.get_io_executor();
+                    asio::async_immediate(
+                        io_ex,
+                        asio::append(
+                            std::move(self), system::error_code{}));
+                }
+                goto upcall;
+            }
+
             if(!pr_.got_header())
             {
                 BOOST_ASIO_CORO_YIELD
@@ -90,13 +105,19 @@ public:
 
             if(!ec.failed())
             {
-                auto source_buf = pr_.pull_body();
+                auto dbs = asio::buffer_size(mb_);
 
-                n = boost::asio::buffer_copy(mb_, source_buf);
+                if(dbs > 0)
+                {
+                    auto source_buf = pr_.pull_body();
 
-                pr_.consume_body(n);
+                    n = asio::buffer_copy(mb_, source_buf);
 
-                ec = (n != 0) ? system::error_code{} : asio::stream_errc::eof;
+                    pr_.consume_body(n);
+
+                    ec = (n != 0) ? system::error_code{}
+                                  : asio::stream_errc::eof;
+                }
             }
 
             self.complete(ec, n);
@@ -113,9 +134,9 @@ public:
 
 template<class AsyncReadStream>
 body_read_stream<AsyncReadStream>::body_read_stream(
-    AsyncReadStream& und_stream,
+    AsyncReadStream& s,
     http_proto::parser& pr)
-    : stream_(und_stream)
+    : stream_(s)
     , pr_(pr)
 {
 }

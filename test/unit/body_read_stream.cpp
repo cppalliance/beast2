@@ -56,88 +56,134 @@ public:
         rts::context rts_ctx;
         http_proto::install_parser_service(rts_ctx, {});
 
+        // Read into a zero sized buffer should return immediately without error
+        {
+            test::stream ts(ioc, msg_);
+            http_proto::response_parser pr(rts_ctx);
+            pr.reset();
+            pr.start();
+
+            // Create a destination buffer
+            std::string s;
+            boost::buffers::string_buffer buf(&s);
+
+            // The object under test
+            body_read_stream<test::stream> brs(ts, pr);
+
+            brs.async_read_some(
+                buf.prepare(0),
+                [&](system::error_code ec, std::size_t n)
+                {
+                    BOOST_TEST(!ec.failed());
+                    BOOST_TEST_EQ(n, 0);
+                });
+
+            test::run(ioc);
+
+            // Ensure it is repeatable.
+            brs.async_read_some(
+                buf.prepare(0),
+                [&](system::error_code ec, std::size_t n)
+                {
+                    BOOST_TEST(!ec.failed());
+                    BOOST_TEST_EQ(n, 0);
+                });
+
+            test::run(ioc);
+        }
+
         // async_read_some reads the body for various chunk
         // sizes.
         {
-            for(std::size_t cs = 1; cs < msg_length_ + 2; cs++)
+            // Iterate through buffer sizes
+            for(std::size_t bs = 1; bs < msg_length_ + 2; bs++)
             {
-                test::stream ts(ioc, msg_);
-                http_proto::response_parser pr(rts_ctx);
-                pr.reset();
-                pr.start();
-
-                // limit async_read_some for better coverage
-                ts.read_size(cs);
-
-                // Create a destination buffer
-                std::string s;
-                s.reserve(2048);
-                boost::buffers::string_buffer buf(&s);
-
-                // The object under test
-                body_read_stream<test::stream> brs(ts, pr);
-
-                // run the test
-                std::size_t total = 0;
-                for(std::size_t i = 0; i < body_length_; i++)
+                // Iterate through chunk sizes
+                for(std::size_t cs = 1; cs < msg_length_ + 2; cs++)
                 {
-                    brs.async_read_some(
-                        buf.prepare(1024),
-                        [&](system::error_code ec, std::size_t n)
-                        {
-                            if(total < body_length_)
-                            {
-                                if(ec.failed())
-                                {
-                                    std::cerr << ec.message() << std::endl;
-                                }
-                                BOOST_TEST(!ec.failed());
-                                std::size_t expected = cs;
-                                // In the first iteration we remove any of the
-                                // data that was associcated with the headers.
-                                if(i == 0)
-                                {
-                                    expected = expected - (header_length_ % cs);
-                                    // The `beast2::async_read_some` will always
-                                    // read move from the wire immediately after
-                                    // the headers, even if we have a partial
-                                    // body in memory already. This should be
-                                    // removable once `async_read_some` changes.
-                                    if(expected < cs)
-                                    {
-                                        expected += cs;
-                                    }
-                                }
-                                expected =
-                                    std::min(expected, body_length_ - total);
-                                BOOST_TEST_EQ(
-                                    n, expected); // because of ts.read_size(x)
-                                if(n != expected)
-                                {
-                                    std::cerr << "cs: " << cs << " i: " << i
-                                              << "\n"
-                                              << std::endl;
-                                }
-                                buf.commit(n);
-                                total += n;
-                            }
-                        });
-                    auto count = test::run(ioc);
-                    if(i > 0)
+                    test::stream ts(ioc, msg_);
+                    http_proto::response_parser pr(rts_ctx);
+                    pr.reset();
+                    pr.start();
+
+                    // limit async_read_some for better coverage
+                    ts.read_size(cs);
+
+                    // Create a destination buffer
+                    std::string s;
+                    s.reserve(2048);
+                    boost::buffers::string_buffer buf(&s);
+
+                    // The object under test
+                    body_read_stream<test::stream> brs(ts, pr);
+
+                    // run the test
+                    std::size_t total = 0;
+                    for(std::size_t i = 0; i < body_length_; i++)
                     {
-                        BOOST_TEST_EQ(count, 1);
+                        brs.async_read_some(
+                            buf.prepare(bs),
+                            [&](system::error_code ec, std::size_t n)
+                            {
+                                if(total < body_length_)
+                                {
+                                    if(ec.failed())
+                                    {
+                                        std::cerr << ec.message() << std::endl;
+                                    }
+                                    BOOST_TEST(!ec.failed());
+                                    std::size_t expected = cs;
+                                    // In the first iteration we remove any of
+                                    // the data that was associcated with the
+                                    // headers.
+                                    if(i == 0)
+                                    {
+                                        expected =
+                                            expected - (header_length_ % cs);
+                                        // The `beast2::async_read_some` will
+                                        // always read move from the wire
+                                        // immediately after the headers, even
+                                        // if we have a partial body in memory
+                                        // already. This should be removable
+                                        // once `async_read_some` changes.
+                                        if(expected < cs)
+                                        {
+                                            expected += cs;
+                                        }
+                                    }
+                                    expected = std::min(
+                                        expected, body_length_ - total);
+                                    expected = std::min(bs, expected);
+                                    BOOST_TEST_EQ(
+                                        n,
+                                        expected); // because of ts.read_size(x)
+                                    if(n != expected)
+                                    {
+                                        std::cerr << "cs: " << cs << " i: " << i
+                                                  << "\n"
+                                                  << std::endl;
+                                    }
+                                    buf.commit(n);
+                                    total += n;
+                                }
+                            });
+                        auto count = test::run(ioc);
+                        if(i > 0)
+                        {
+                            BOOST_TEST_EQ(count, 1);
+                        }
+                        BOOST_TEST(pr.got_header());
                     }
-                    BOOST_TEST(pr.got_header());
+
+                    BOOST_TEST(pr.is_complete());
+                    BOOST_TEST_EQ(buf.size(), body_length_);
+                    BOOST_TEST_EQ(total, body_length_);
+
+                    std::string result(test_to_string(buf.data()));
+
+                    BOOST_TEST(result == body_);
+                    BOOST_TEST_EQ(result.size(), body_length_);
                 }
-
-                BOOST_TEST(pr.is_complete());
-                BOOST_TEST_EQ(buf.size(), body_length_);
-                BOOST_TEST_EQ(total, body_length_);
-
-                std::string result(test_to_string(buf.data()));
-
-                BOOST_TEST(result == body_);
-                BOOST_TEST_EQ(result.size(), body_length_);
             }
         }
 
