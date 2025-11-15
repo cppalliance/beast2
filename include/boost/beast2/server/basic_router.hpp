@@ -130,34 +130,17 @@ protected:
     BOOST_BEAST2_DECL any_router(any_router const&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router&&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router const&) noexcept;
-
     BOOST_BEAST2_DECL std::size_t count() const noexcept;
-
-    BOOST_BEAST2_DECL
-    route_result
-    dispatch_impl(
-        http_proto::method,
-        urls::url_view const&,
-        basic_request&, basic_response&) const;
-
-    BOOST_BEAST2_DECL
-    route_result
-    dispatch_impl(
-        basic_request&, basic_response&) const;
-
-    // VFALCO consider using cached request and response references
-    BOOST_BEAST2_DECL
-    route_result
-    resume(
-        basic_request&, basic_response&,
-        route_result const& ec) const;
-
-    BOOST_BEAST2_DECL void use_impl(
-        core::string_view, handler_list const&);
-    BOOST_BEAST2_DECL layer& make_route(
-        core::string_view pattern);
+    BOOST_BEAST2_DECL layer& make_route(core::string_view pattern);
+    BOOST_BEAST2_DECL void append_impl(core::string_view, handler_list const&);
     BOOST_BEAST2_DECL void append_impl(layer&,
         http_proto::method, handler_list const&);
+    BOOST_BEAST2_DECL route_result resume_impl(
+        basic_request&, basic_response&, route_result const& ec) const;
+    BOOST_BEAST2_DECL route_result dispatch_impl(http_proto::method,
+        urls::url_view const&, basic_request&, basic_response&) const;
+    BOOST_BEAST2_DECL route_result dispatch_impl(
+        basic_request&, basic_response&) const;
 
     impl* impl_ = nullptr;
 };
@@ -395,7 +378,7 @@ public:
         core::string_view pattern,
         H1&& h1, HN... hn)
     {
-        use_impl(pattern,
+        append_impl(pattern,
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
@@ -440,7 +423,7 @@ public:
         // All handlers must have the error handler signature
         BOOST_STATIC_ASSERT(
             detail::is_error_handlers<Req, Res, H1, HN...>::value);
-        use_impl(pattern,
+        append_impl(pattern,
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
