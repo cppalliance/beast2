@@ -142,9 +142,11 @@ protected:
     BOOST_BEAST2_DECL route_result resume_impl(
         basic_request&, basic_response&, route_result const& ec) const;
     BOOST_BEAST2_DECL route_result dispatch_impl(http_proto::method,
-        urls::url_view const&, basic_request&, basic_response&) const;
+        core::string_view, urls::url_view const&,
+            basic_request&, basic_response&) const;
     BOOST_BEAST2_DECL route_result dispatch_impl(
         basic_request&, basic_response&) const;
+    route_result do_dispatch(basic_request&, basic_response&) const;
 
     impl* impl_ = nullptr;
 };
@@ -445,8 +447,7 @@ public:
         @param pattern The path expression to match against request
         targets. This may include parameters or wildcards following
         the router's pattern syntax.
-        @return A reference to a fluent route interface for chaining
-        handler registrations.
+        @return A fluent route interface for chaining handler registrations.
     */
     auto
     route(
@@ -460,8 +461,8 @@ public:
         Creates a new route for the given pattern and appends one or more
         handlers that run when the route matches, regardless of HTTP method.
         A new route object is created even if the pattern already exists.
-        Handlers execute in registration order. Returns a reference to
-        @ref fluent_route for chaining.
+        Handlers execute in registration order. Returns a @ref fluent_route
+        for chaining.
     
         @code
         router.route("/status")
@@ -495,7 +496,7 @@ public:
         another route with the same pattern already exists. Handlers are
         executed in the order of registration.
 
-        @param method The HTTP method to match.
+        @param verb The HTTP method to match.
         @param pattern The path expression to match against request
         targets. This may include parameters or wildcards following
         the router's pattern syntax.
@@ -505,12 +506,23 @@ public:
     // VFALCO constrain that all are handlers and not error handlers
     template<class H1, class... HN>
     void add(
-        http_proto::method method,
+        http_proto::method verb,
         core::string_view pattern,
         H1&& h1, HN&&... hn)
     {
         this->route(pattern).add(
-            method,
+            verb,
+            std::forward<H1>(h1),
+            std::forward<HN>(hn)...);
+    }
+    template<class H1, class... HN>
+    void add(
+        core::string_view verb,
+        core::string_view pattern,
+        H1&& h1, HN&&... hn)
+    {
+        this->route(pattern).add(
+            verb,
             std::forward<H1>(h1),
             std::forward<HN>(hn)...);
     }
@@ -520,31 +532,39 @@ public:
 
     auto
     dispatch(
-        http_proto::method method,
+        http_proto::method verb,
         urls::url_view const& url,
         Req& req, Res& res) ->
             route_result
     {
+        if(verb == http_proto::method::unknown)
+            detail::throw_invalid_argument();
+        return dispatch_impl(verb,
+            core::string_view(), url, req, res);
+    }
+
+    auto
+    dispatch(
+        core::string_view verb,
+        urls::url_view const& url,
+        Req& req, Res& res) ->
+            route_result
+    {
+        // verb cannot be empty
+        if(verb.empty())
+            detail::throw_invalid_argument();
         return dispatch_impl(
-            method, url, req, res);
+            http_proto::method::unknown,
+                verb, url, req, res);
     }
 
     auto
     resume(
-        Req& req,
-        Res& res,
+        Req& req, Res& res,
         route_result const& ec) const ->
             route_result
     {
-#if 0
-        st.pos = 0;
-        st.ec = ec;
-        return dispatch_impl(&req, res);
-#endif
-        (void)req;
-        (void)res;
-        (void)ec;
-        return beast2::route::close; // VFALCO FIXME
+        return resume_impl(req, res, ec);
     }
 
 private:
@@ -612,9 +632,9 @@ public:
         These handlers run in the order of registration relative to
         other method-specific handlers on the same route.
 
-        This function returns a reference to the current
-        @ref fluent_route, allowing additional method registrations
-        to be chained. For example:
+        This function returns a @ref fluent_route, allowing
+        additional method registrations to be chained.
+        For example:
         @code
         router.route("/resource")
             .all(log_request)
@@ -625,13 +645,13 @@ public:
         @param h1 The first handler to invoke when the route matches.
         @param hn Additional handlers, invoked sequentially after
         @p h1 in registration order.
-        @return A reference to the fluent route interface for further
+        @return The fluent route interface for further
         chained handler registrations.
     */
     template<class H1, class... HN>
     auto all(
         H1&& h1, HN&&... hn) ->
-            fluent_route&
+            fluent_route
     {
         owner_.add_impl(e_, core::string_view(),
             make_handler_list(
@@ -649,7 +669,7 @@ public:
 
         Handlers are executed in the order of registration relative to
         other handlers for the same route and method. The function
-        returns a reference to the current @ref fluent_route, allowing
+        returns the @ref fluent_route, allowing
         additional method registrations to be chained. For example:
         @code
         router.route("/item")
@@ -662,15 +682,15 @@ public:
         both match.
         @param hn Additional handlers, invoked sequentially after
         @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
+        @return The fluent route interface for further
+            chained handler registrations.
         @ref http_proto::method::unknown.
     */
     template<class H1, class... HN>
     auto add(
         http_proto::method verb,
         H1&& h1, HN&&... hn) ->
-            fluent_route&
+            fluent_route
     {
         owner_.add_impl(e_, verb,
             make_handler_list(
@@ -683,7 +703,7 @@ public:
     auto add(
         core::string_view verb,
         H1&& h1, HN&&... hn) ->
-            fluent_route&
+            fluent_route
     {
         // all methods if verb.empty()==true
         owner_.add_impl(e_, verb,

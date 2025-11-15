@@ -40,12 +40,12 @@ message(
 {
     switch(static_cast<route>(code))
     {
-    case route::send:       return "http_proto::route::send";
+    case route::close:      return "http_proto::route::close";
+    case route::complete:   return "http_proto::route::complete";
+    case route::detach:     return "http_proto::route::detach";
     case route::next:       return "http_proto::route::next";
     case route::next_route: return "http_proto::route::next_route";
-    case route::close:      return "http_proto::route::close";
-    case route::detach:     return "http_proto::route::detach";
-    case route::complete:   return "http_proto::route::complete";
+    case route::send:       return "http_proto::route::send";
     default:
         return "http_proto::route::?";
     }

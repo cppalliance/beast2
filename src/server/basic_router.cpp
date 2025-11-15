@@ -21,6 +21,7 @@
 
 namespace boost {
 namespace beast2 {
+
 namespace detail {
 
 //------------------------------------------------
@@ -46,6 +47,16 @@ pattern     target      path(use)    path(get)
 any_router::any_handler::~any_handler() = default;
 
 //------------------------------------------------
+
+/*
+static
+void
+make_lower(std::string& s)
+{
+    for(auto& c : s)
+        c = grammar::to_lower(c);
+}
+*/
 
 // decode all percent escapes
 static
@@ -249,8 +260,9 @@ struct any_router::layer
     {
         handler_ptr handler;
 
-        // only for end rotues
-        http_proto::method verb;
+        // only for end routes
+        http_proto::method verb =
+            http_proto::method::unknown;
         std::string verb_str;
         bool all;
 
@@ -276,14 +288,24 @@ struct any_router::layer
             core::string_view verb_str_,
             handler_ptr h) noexcept
             : handler(std::move(h))
-            , verb(http_proto::method::unknown)
-            , verb_str(verb_str_)
+            , verb(http_proto::string_to_method(verb_str_))
             , all(false)
         {
-            // convert to lower case for comparisons
-            // VFALCO This is questionable
-            for(auto& c : verb_str)
-                c = grammar::to_lower(c);
+            if(verb != http_proto::method::unknown)
+                return;
+            verb_str = verb_str_;
+        }
+
+        bool match_method(
+            basic_request const& req) const noexcept
+        {
+            if(all)
+                return true;
+            if(verb != http_proto::method::unknown)
+                return req.verb_ == verb;
+            if(req.verb_ != http_proto::method::unknown)
+                return false;
+            return req.verb_str_ == verb_str;
         }
     };
 
@@ -455,17 +477,7 @@ add_impl(
         return;
     }
 
-    auto verb = http_proto::string_to_method(verb_str);
-    if(verb != http_proto::method::unknown)
-    {
-        // known method string, use enum instead
-        for(std::size_t i = 0; i < handlers.n; ++i)
-            e.entries.emplace_back(verb,
-                std::move(handlers.p[i]));
-        return;
-    }
-
-    // custom method string
+    // possibly custom string
     for(std::size_t i = 0; i < handlers.n; ++i)
         e.entries.emplace_back(verb_str,
             std::move(handlers.p[i]));
@@ -498,11 +510,11 @@ resume_impl(
     if(req.addedSlash_)
         req.path.remove_suffix(1);
 
-    res.resume_ = res.pos_;
+    // resume_ was set in the handler's wrapper
+    BOOST_ASSERT(res.resume_ == res.pos_);
     res.pos_ = 0;
     res.ec_ = ec;
-
-    return dispatch_impl(req, res);
+    return do_dispatch(req, res);
 }
 
 // top-level dispatch that gets called first
@@ -510,13 +522,26 @@ route_result
 any_router::
 dispatch_impl(
     http_proto::method verb,
+    core::string_view verb_str,
     urls::url_view const& url,
     basic_request& req,
     basic_response& res) const
 {
+    // VFALCO we could reuse the string storage by not clearing them
     req = {};
+    if(verb == http_proto::method::unknown)
+    {
+        BOOST_ASSERT(! verb_str.empty());
+        verb = http_proto::string_to_method(verb_str);
+        if(verb == http_proto::method::unknown)
+            req.verb_str_ = verb_str;
+    }
+    else
+    {
+        BOOST_ASSERT(verb_str.empty());
+    }
     req.verb_ = verb;
-    req.verb_str_ = {};
+
     // VFALCO use reusing-StringToken
     req.decoded_path_ =
         pct_decode_path(url.encoded_path());
@@ -531,7 +556,7 @@ dispatch_impl(
 
     res = {};
 
-    return dispatch_impl(req, res);
+    return do_dispatch(req, res);
 }
 
 // recursive dispatch
@@ -547,7 +572,7 @@ dispatch_impl(
         if(res.resume_ > 0)
         {
             auto const n = i.count(); // handlers in layer
-            if(res.pos_ + n > res.resume_)
+            if(res.pos_ + n < res.resume_)
             {
                 res.pos_ += n; // skip layer
                 continue;
@@ -579,21 +604,17 @@ dispatch_impl(
             if(res.resume_)
             {
                 auto const n = e.handler->count();
-                if(res.pos_ + n > res.resume_)
+                if(res.pos_ + n < res.resume_)
                 {
                     res.pos_ += n; // skip entry
                     continue;
                 }
-                // repeat match for assertion
-                BOOST_ASSERT(
-                    e.verb == http_proto::method::unknown ||
-                    e.verb == req.verb_);
+                BOOST_ASSERT(e.match_method(req));
             }
             else if(i.match.end)
             {
-                // verb has to match for routes 
-                if( e.verb != http_proto::method::unknown &&
-                    e.verb != req.verb_)
+                // check verb for match 
+                if(! e.match_method(req))
                 {
                     res.pos_ += e.handler->count(); // skip entry
                     continue;
@@ -645,7 +666,7 @@ dispatch_impl(
             {
                 // middleware can't return next_route
                 if(! i.match.end)
-                    detail::throw_logic_error();
+                    detail::throw_invalid_argument();
                 while(++it != i.entries.end())
                     res.pos_ += it->handler->count();
                 break; // skip remaining entries
@@ -659,10 +680,27 @@ dispatch_impl(
         mr.restore_path(req);
     }
 
-    // VFALCO if we are in error mode we should probably
-    // return the error code instead. And if not, we might
-    // want to return error::unhandled_route (?)
     return route::next;
+}
+
+route_result
+any_router::
+do_dispatch(
+    basic_request& req,
+    basic_response& res) const
+{
+    auto rv = dispatch_impl(req, res);
+    BOOST_ASSERT(&rv.category() == &detail::route_cat);
+    BOOST_ASSERT(rv != route::next_route);
+    if(rv != route::next)
+        return rv;
+    if(! res.ec_.failed())
+    {
+        // unhandled route
+        return route::next;
+    }
+    // error condition
+    return res.ec_;
 }
 
 } // detail

@@ -41,13 +41,30 @@ using route_result = system::error_code;
 */
 enum class route
 {
-    /** The request was handled.
+    /** The handler requests that the connection be closed.
 
-        The route handler processed the request and prepared
-        the response serializer. The caller will send the response
-        before reading the next request or closing the connection.
+        No further requests will be processed. The caller should
+        close the connection once the current response, if any,
+        has been sent.
     */
-    send,
+    close = 1,
+
+    /** The handler completed the request.
+
+        The response has been fully transmitted, and no further
+        handlers or routes will be invoked. The caller should continue
+        by either reading the next request on a persistent connection
+        or closing the session if it is not keep-alive.
+    */
+    complete,
+
+    /** The handler detached from the session.
+
+        Ownership of the session or stream has been transferred to
+        the handler. The caller will not perform further I/O or manage
+        the connection after this return value.
+    */
+    detach,
 
     /** The handler declined to process the request.
 
@@ -55,6 +72,9 @@ enum class route
         continues invoking the remaining handlers in the same route
         until one returns @ref send. If none do, the caller proceeds
         to evaluate the next matching route.
+
+        This value is returned by @ref basic_router::dispatch if no
+        handlers in any route handle the request.
     */
     next,
 
@@ -67,30 +87,13 @@ enum class route
     */
     next_route,
 
-    /** The handler requests that the connection be closed.
+    /** The request was handled.
 
-        No further requests will be processed. The caller should
-        close the connection once the current response, if any,
-        has been sent.
+        The route handler processed the request and prepared
+        the response serializer. The caller will send the response
+        before reading the next request or closing the connection.
     */
-    close,
-
-    /** The handler detached from the session.
-
-        Ownership of the session or stream has been transferred to
-        the handler. The caller will not perform further I/O or manage
-        the connection after this return value.
-    */
-    detach,
-
-    /** The handler completed the request.
-
-        The response has been fully transmitted, and no further
-        handlers or routes will be invoked. The caller should continue
-        by either reading the next request on a persistent connection
-        or closing the session if it is not keep-alive.
-    */
-    complete
+    send
 };
 
 //------------------------------------------------
@@ -291,7 +294,7 @@ private:
     struct match_result;
     http_proto::method verb_ =
         http_proto::method::unknown;
-    core::string_view verb_str_;
+    std::string verb_str_;
     std::string decoded_path_;
     bool addedSlash_ = false;
 };
