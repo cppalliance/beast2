@@ -32,9 +32,9 @@ class any_router;
 
 // handler kind constants
 // 0 = unrecognized
-// 1 = regular
-// 2 = router
-// 3 = error
+// 1 = normal handler (Req&, Res&)
+// 2 = error handler  (Req&, Res&, error_code)
+// 3 = sub-router
 
 template<class T,
     class Req, class Res, class = void>
@@ -52,49 +52,49 @@ struct get_handler_kind<T, Req, Res,
 {
 };
 
-// route_result( Req&, Res&, basic_response& )
-template<class T, class Req, class Res>
-struct get_handler_kind<T, Req, Res,
-    typename std::enable_if<detail::derived_from<
-        any_router, T>::value>::type>
-    : std::integral_constant<int, 2>
-{
-};
-
 // route_result( Req&, Res&, system::error_code )
 template<class T, class Req, class Res>
 struct get_handler_kind<T, Req, Res,
     typename std::enable_if<detail::is_invocable<
         T, route_result, Req&, Res&,
             system::error_code const>::value>::type>
+    : std::integral_constant<int, 2>
+{
+};
+
+// route_result( Req&, Res&, basic_response& )
+template<class T, class Req, class Res>
+struct get_handler_kind<T, Req, Res,
+    typename std::enable_if<detail::derived_from<
+        any_router, T>::value>::type>
     : std::integral_constant<int, 3>
 {
 };
 
 template<class Req, class Res, class T>
-struct is_error_handler
-    : std::integral_constant<bool,
-    get_handler_kind<T, Req, Res>::value == 3>
-{
-};
-
-template<class Req, class Res, class... HN>
-struct is_error_handlers
-    : all_true<is_error_handler<Req, Res, typename
-            std::decay<HN>::type>::value...>
-{
-};
-
-template<class Req, class Res, class T>
-struct is_route_handler
+struct is_handler
     : std::integral_constant<bool,
     get_handler_kind<T, Req, Res>::value == 1>
 {
 };
 
 template<class Req, class Res, class... HN>
-struct is_route_handlers
-    : all_true<is_route_handler<Req, Res, typename
+struct is_handlers
+    : all_true<is_handler<Req, Res, typename
+            std::decay<HN>::type>::value...>
+{
+};
+
+template<class Req, class Res, class T>
+struct is_error_handler
+    : std::integral_constant<bool,
+    get_handler_kind<T, Req, Res>::value == 2>
+{
+};
+
+template<class Req, class Res, class... HN>
+struct is_error_handlers
+    : all_true<is_error_handler<Req, Res, typename
             std::decay<HN>::type>::value...>
 {
 };
@@ -729,13 +729,13 @@ private:
     std::size_t count(
         std::integral_constant<int, 2>) const noexcept
     {
-        return 1 + h.count();
+        return 1;
     }
 
     std::size_t count(
         std::integral_constant<int, 3>) const noexcept
     {
-        return 1;
+        return 1 + h.count();
     }
 
     route_result invoke(Req&, Res&,
@@ -758,21 +758,10 @@ private:
         return rv;
     }
 
-    // any_router
-    route_result invoke(Req& req, Res& res,
-        std::integral_constant<int, 2>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(! ec.failed())
-            return h.dispatch_impl(req, res);
-        return beast2::route::next;
-    }
-
     // (Req&, Res&, error_code)
     route_result
     invoke(Req& req, Res& res,
-        std::integral_constant<int, 3>) const
+        std::integral_constant<int, 2>) const
     {
         auto const& ec = static_cast<
             basic_response const&>(res).ec_;
@@ -785,6 +774,17 @@ private:
             return rv;
         res.resume_ = 0; // revert
         return rv;
+    }
+
+    // any_router
+    route_result invoke(Req& req, Res& res,
+        std::integral_constant<int, 3>) const
+    {
+        auto const& ec = static_cast<
+            basic_response const&>(res).ec_;
+        if(! ec.failed())
+            return h.dispatch_impl(req, res);
+        return beast2::route::next;
     }
 };
 

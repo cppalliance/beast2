@@ -55,16 +55,16 @@ struct basic_router_test
         BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 1);
         BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value != 1);
 
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h2, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h3, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h4, Req, Res>::value == 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h5, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h6, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h7, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 3);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value == 3);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h2, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h3, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h4, Req, Res>::value == 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h5, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h6, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h7, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value == 2);
     }
 
 #if 0
