@@ -427,6 +427,10 @@ add_impl(
     http_proto::method verb,
     handler_list const& handlers)
 {
+    // cannot be unknown
+    if(verb == http_proto::method::unknown)
+        detail::throw_invalid_argument();
+
     e.entries.reserve(e.entries.size() + handlers.n);
     for(std::size_t i = 0; i < handlers.n; ++i)
         e.entries.emplace_back(verb,
@@ -441,24 +445,29 @@ add_impl(
     handler_list const& handlers)
 {
     e.entries.reserve(e.entries.size() + handlers.n);
-    if(! verb_str.empty())
+
+    if(verb_str.empty())
     {
-        auto verb = http_proto::string_to_method(verb_str);
-        if(verb != http_proto::method::unknown)
-        {
-            for(std::size_t i = 0; i < handlers.n; ++i)
-                e.entries.emplace_back(verb,
-                    std::move(handlers.p[i]));
-            return;
-        }
+        // all
         for(std::size_t i = 0; i < handlers.n; ++i)
-            e.entries.emplace_back(verb_str,
+            e.entries.emplace_back(
                 std::move(handlers.p[i]));
         return;
     }
-    // all
+
+    auto verb = http_proto::string_to_method(verb_str);
+    if(verb != http_proto::method::unknown)
+    {
+        // known method string, use enum instead
+        for(std::size_t i = 0; i < handlers.n; ++i)
+            e.entries.emplace_back(verb,
+                std::move(handlers.p[i]));
+        return;
+    }
+
+    // custom method string
     for(std::size_t i = 0; i < handlers.n; ++i)
-        e.entries.emplace_back(
+        e.entries.emplace_back(verb_str,
             std::move(handlers.p[i]));
 }
 

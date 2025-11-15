@@ -256,6 +256,9 @@ class basic_router : public detail::any_router
     BOOST_CORE_STATIC_ASSERT(
         detail::derived_from<basic_response, Res>::value);
 
+    template<class T>
+    using is_handler = detail::get_handler_kind<T, Req, Res>;
+
 public:
     /** The type of request object used in handlers
 
@@ -335,128 +338,50 @@ public:
     {
     }
 
-    /** Add one or more global middleware handlers.
-
-        Each handler registered with this function runs for every incoming
-        request, regardless of its HTTP method or path. Handlers execute in
-        the order they were added, and may return @ref route::next to transfer
-        control to the subsequent handler in the chain.
-
-        This is equivalent to writing:
-        @code
-        use( "/", h1, hn... );
-        @endcode
-
-        @par Constraints
-        `h1` must not be convertible to `core::string_view`.
-
-        @param h1 The first middleware handler.
-        @param hn Additional middleware handlers.
-    */
-    template<class H1, class... HN
-        , class = typename std::enable_if<! std::is_convertible<
-            H1, core::string_view>::value>::type
-    >
-    void use(H1&& h1, HN&&... hn)
-    {
-        use(core::string_view(),
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-
-    /** Register one or more global error handlers.
-
-        Installs error handlers that are invoked when an unhandled
-        error occurs during request processing, regardless of the
-        request path. Handlers execute in the order of registration
-        and are called only when the response contains a failing
-        error code.
-
-        Each handler may return any failing @ref system::error_code,
-        which is equivalent to calling @code res.next(ec); @endcode
-        with `ec.failed() == true`. Returning @ref route::next
-        indicates that control should proceed to the next matching
-        error handler. Returning a different failing code replaces
-        the current error and continues dispatch in error mode
-        using that new code.
-
-        This overload registers the handlers at the root scope (`"/"`),
-        equivalent to calling @ref err(core::string_view, HN&&...) with
-        a path argument of `"/"`.
-
-        @param h1 The first error handler to install.
-        @param hn Additional error handlers to install, invoked in
-        declaration order.
-
-        @par Handler requirements
-        Each handler must be callable with the signature:
-        @code
-        route_result(Request&, Response&, system::error_code)
-        @endcode
-        The handler is invoked only when the response has a failing
-        error code. Handlers execute in sequence until one returns a
-        result other than @ref route::next.
-    */
-#if 0
-    template<class H1, class... HN
-        , class = typename std::enable_if<! std::is_convertible<
-            H1, core::string_view>::value>::type
-    >
-    void err(H1&& h1, HN&&... hn)
-    {
-        err(core::string_view(),
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-#endif
-
     /** Add one or more middleware handlers for a path prefix.
 
-        Each handler registered with this function runs for every request
-        whose path begins with the specified prefix, regardless of the
-        request method. The prefix match is not strict: middleware attached
-        to `"/api"` will also match `"/api/users"` and `"/api/data"`.
-        Handlers execute in the order they were added, and may call `next()`
-        to transfer control to the subsequent handler.
+        Each handler registered with this function participates in the
+        routing and error-dispatch process for requests whose path begins
+        with the specified prefix, as described in the @ref basic_router
+        class documentation. Handlers execute in the order they are added
+        and may return @ref route::next to transfer control to the
+        subsequent handler in the chain.
 
-        This function behaves analogously to `app.use(path, ...)` in
-        Express.js. The registered middleware executes for requests matching
-        the prefix, and when registered before route handlers for the same
-        prefix, runs prior to those routes.
+        The prefix match is not strict: middleware attached to `"/api"`
+        will also match `"/api/users"` and `"/api/data"`. When registered
+        before route handlers for the same prefix, middleware runs before
+        those routes. This is analogous to `app.use(path, ...)` in
+        Express.js.
 
         @par Example
         @code
         router.use("/api",
             [](Request& req, Response& res)
             {
-                if(!authenticate(req))
-                    return res.setStatus(401), res.end("Unauthorized");
-                return res.next();
+                if (!authenticate(req))
+                {
+                    res.status(401);
+                    res.set_body("Unauthorized");
+                    return route::done;
+                }
+                return route::next;
             },
             [](Request&, Response& res)
             {
-                res.setHeader("X-Powered-By", "MyServer");
+                res.set_header("X-Powered-By", "MyServer");
+                return route::next;
             });
         @endcode
 
-        @par Constraints
-        - `pattern` must be a valid path prefix; it may be empty to indicate
-          the root scope.
-        - Each handler must be callable with the signature  
-          `void(Request&, Response&, NextHandler)`.
-        - Each handler must be copy- or move-constructible, depending on how
-          it is passed.
+        @par Preconditions
+        @p `pattern` must be a valid path prefix; it may be empty to
+            indicate the root scope.
 
-        @throws Any exception thrown by a handler during execution.
-
-        @param pattern  The path prefix to match. Middleware runs for any
-            request whose path begins with this prefix.
-        @param h1  The first middleware handler to install.
-        @param hn  Additional middleware handlers to install, executed in
-            declaration order.
-
-        @return (none)
+        @param pattern The pattern to match.
+        @param h1 The first handler to install.
+        @param hn Additional handlers to install.
     */
+    // VFALCO constrain that all are valid handlers
     template<class H1, class... HN>
     void use(
         core::string_view pattern,
@@ -468,52 +393,47 @@ public:
                 std::forward<HN>(hn)...));
     }
 
-    /** Register one or more error handlers for a path prefix.
+    /** Add one or more global middleware handlers.
 
-        Adds error handlers that are invoked when an unhandled error
-        occurs during request processing for any request whose path
-        begins with the specified prefix. Handlers execute in the order
-        of registration and are called only when the response contains
-        a failing error code.
+        Each handler registered with this function participates in the
+        routing and error-dispatch process as described in the class
+        documentation for @ref basic_router. Handlers execute in the
+        order they were added, and may return @ref route::next to transfer
+        control to the subsequent handler in the chain.
 
-        Each handler may return any failing @ref system::error_code,
-        which is equivalent to calling @code res.next(ec); @endcode
-        with `ec.failed() == true`. Returning @ref route::next indicates
-        that control should proceed to the next matching error handler.
-        Returning a different failing code replaces the current error
-        and continues dispatch in error mode using that new code.
-
-        @param pattern The path prefix to match. Error handlers run for
-        any request whose path begins with this prefix. If the pattern
-        is empty, it defaults to `"/"`.
-        @param h1 The first error handler to install.
-        @param hn Additional error handlers to install, invoked in
-        registration order.
-
-        @par Handler requirements
-        Each handler must be callable with the signature:
+        This is equivalent to writing:
         @code
-        route_result(Request&, Response&, system::error_code)
+        use( "/", h1, hn... );
         @endcode
-        The handler is invoked only when the response has a failing
-        error code. Handlers execute in sequence until one returns a
-        result other than @ref route::next.
+
+        @par Example
+        @code
+        router.use(
+            [](Request&, Response& res)
+            {
+                res.m.erase( "X-Powered-By" );
+                return route::next;
+            });
+        @endcode
+
+        @par Constraints
+        `h1` is a valid handler type
+
+        @param h1 The first middleware handler.
+        @param hn Additional middleware handlers.
     */
-    template<class H1, class... HN>
-    void err(
-        core::string_view pattern,
-        H1&& h1, HN... hn)
+    template<class H1, class... HN
+        // VFALCO constrain that all are valid handlers
+        , class = typename std::enable_if<is_handler<H1>::value>::type
+    >
+    void use(H1&& h1, HN&&... hn)
     {
-        // All handlers must have the error handler signature
-        BOOST_STATIC_ASSERT(
-            detail::is_error_handlers<Req, Res, H1, HN...>::value);
-        add_impl(pattern,
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
+        use(core::string_view(),
+            std::forward<H1>(h1),
+            std::forward<HN>(hn)...);
     }
 
-    /** Create a new route for the specified path pattern.
+    /** Return a fluent route for the specified path pattern.
 
         Adds a new route to the router for the given pattern.
         A new route object is always created, even if another
@@ -535,33 +455,6 @@ public:
         return fluent_route(*this, pattern);
     }
 
-    /** Register handlers for a specific HTTP method and path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming requests
-        whose targets match that pattern and whose method matches the
-        specified value. A new route object is always created, even if
-        another route with the same pattern already exists. Handlers are
-        executed in the order of registration.
-
-        @param method The HTTP method to match.
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after @p h1 in registration order.
-    */
-    template<class H1, class... HN>
-    void add(
-        http_proto::method method,
-        core::string_view pattern,
-        H1&& h1, HN&&... hn)
-    {
-        append(false, method, pattern,
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-
     /** Register handlers for all HTTP methods matching a path pattern.
     
         Creates a new route for the given pattern and appends one or more
@@ -580,8 +473,9 @@ public:
         @param pattern The path pattern to match.
         @param h1 The first handler to add.
         @param hn Additional handlers, invoked after @p h1 in registration order.
-        @return A reference to @ref fluent_route for additional registrations.
+        @return A @ref fluent_route for additional registrations.
     */
+    // VFALCO constrain that all are handlers and not error handlers
     template<class H1, class... HN>
     auto all(
         core::string_view pattern,
@@ -592,116 +486,35 @@ public:
             std::forward<HN>(hn)...);
     }
 
-    /** Register handlers for HTTP GET requests matching a path pattern.
+    /** Register handlers for a specific HTTP method and path pattern.
 
         Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming HEAD
-        requests whose targets match that pattern. A new route object
-        is always created, even if another route with the same pattern
-        already exists. Handlers are executed in the order of
-        registration.
+        one or more handlers that will be invoked for incoming requests
+        whose targets match that pattern and whose method matches the
+        specified value. A new route object is always created, even if
+        another route with the same pattern already exists. Handlers are
+        executed in the order of registration.
 
-        This function returns a @ref fluent_route
-        reference, allowing additional method registrations to be
-        chained on the same route. For example:
-        @code
-        router.route("/status")
-            .head(check_headers)
-            .get(send_status);
-        @endcode
-
+        @param method The HTTP method to match.
         @param pattern The path expression to match against request
         targets. This may include parameters or wildcards following
         the router's pattern syntax.
         @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
+        @param hn Additional handlers, invoked sequentially after @p h1 in registration order.
     */
+    // VFALCO constrain that all are handlers and not error handlers
     template<class H1, class... HN>
-    auto get(
+    void add(
+        http_proto::method method,
         core::string_view pattern,
-        H1&& h1, HN&&... hn) -> fluent_route
+        H1&& h1, HN&&... hn)
     {
-        return this->route(pattern).get(
+        this->route(pattern).add(
+            method,
             std::forward<H1>(h1),
             std::forward<HN>(hn)...);
     }
 
-    /** Register handlers for HTTP HEAD requests matching a path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming HEAD
-        requests whose targets match that pattern. A new route object
-        is always created, even if another route with the same pattern
-        already exists. Handlers are executed in the order of
-        registration.
-
-        This function returns a @ref fluent_route
-        reference, allowing additional method registrations to be
-        chained on the same route. For example:
-        @code
-        router.route("/status")
-            .head(check_headers)
-            .get(send_status);
-        @endcode
-
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
-    */
-    template<class H1, class... HN>
-    auto head(
-        core::string_view pattern,
-        H1&& h1, HN&&... hn) -> fluent_route
-    {
-        return this->route(pattern).head(
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-
-    /** Register handlers for HTTP POST requests matching a path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming POST
-        requests whose targets match that pattern. A new route object
-        is always created, even if another route with the same pattern
-        already exists. Handlers are executed in the order of
-        registration.
-
-        The returned @ref fluent_route reference allows additional
-        method registrations to be chained on the same route. For
-        example:
-        @code
-        router.route("/submit")
-            .post(process_form)
-            .get(show_form);
-        @endcode
-
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
-    */
-    template<class H1, class... HN>
-    auto post(
-        core::string_view pattern,
-        H1&& h1, HN&&... hn) -> fluent_route
-    {
-        return this->route(pattern).post(
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
 
     //--------------------------------------------
 
@@ -900,48 +713,6 @@ class basic_router<Req, Res>::
 public:
     fluent_route(fluent_route const&) = default;
 
-    /** Register handlers for a specific HTTP method.
-
-        Adds one or more handlers to be invoked when a request matches
-        this route and uses the specified HTTP method. The method must
-        not be @ref http_proto::method::unknown; attempting to register
-        handlers with that value will throw an exception.
-
-        Handlers are executed in the order of registration relative to
-        other handlers for the same route and method. The function
-        returns a reference to the current @ref fluent_route, allowing
-        additional method registrations to be chained. For example:
-        @code
-        router.route("/item")
-            .add(http_proto::method::put, update_item)
-            .add(http_proto::method::delete_, remove_item);
-        @endcode
-
-        @param verb The HTTP method for which to register the handlers.
-        @param h1 The first handler to invoke when the route and method
-        both match.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
-        @throws system_error Thrown if @p verb is
-        @ref http_proto::method::unknown.
-    */
-    template<class H1, class... HN>
-    auto add(
-        http_proto::method verb,
-        H1&& h1, HN&&... hn) ->
-            fluent_route&
-    {
-        if(verb == http_proto::method::unknown)
-            detail::throw_invalid_argument();
-        owner_.append(e_, verb,
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
-        return *this;
-    }
-
     /** Register handlers that apply to all HTTP methods.
 
         Adds one or more handlers that will be invoked for any request
@@ -970,124 +741,60 @@ public:
         H1&& h1, HN&&... hn) ->
             fluent_route&
     {
-        owner_.append(e_, core::string_view(),
+        owner_.add_impl(e_, core::string_view(),
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
         return *this;
     }
 
-    /** Register handlers for HTTP GET requests matching a path pattern.
+    /** Register handlers for a specific HTTP method.
 
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming HEAD
-        requests whose targets match that pattern. A new route object
-        is always created, even if another route with the same pattern
-        already exists. Handlers are executed in the order of
-        registration.
+        Adds one or more handlers to be invoked when a request matches
+        this route and uses the specified HTTP method. The method must
+        not be @ref http_proto::method::unknown; attempting to register
+        handlers with that value will throw an exception.
 
-        This function returns a @ref fluent_route
-        reference, allowing additional method registrations to be
-        chained on the same route. For example:
+        Handlers are executed in the order of registration relative to
+        other handlers for the same route and method. The function
+        returns a reference to the current @ref fluent_route, allowing
+        additional method registrations to be chained. For example:
         @code
-        router.route("/status")
-            .head(check_headers)
-            .get(send_status);
+        router.route("/item")
+            .add(http_proto::method::put, update_item)
+            .add(http_proto::method::delete_, remove_item);
         @endcode
 
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
+        @param verb The HTTP method for which to register the handlers.
+        @param h1 The first handler to invoke when the route and method
+        both match.
         @param hn Additional handlers, invoked sequentially after
         @p h1 in registration order.
         @return A reference to the fluent route interface for further
         chained handler registrations.
+        @ref http_proto::method::unknown.
     */
     template<class H1, class... HN>
-    auto get(
+    auto add(
+        http_proto::method verb,
         H1&& h1, HN&&... hn) ->
             fluent_route&
     {
-        owner_.append(e_, http_proto::method::get,
+        owner_.add_impl(e_, verb,
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
         return *this;
     }
 
-    /** Register handlers for HTTP HEAD requests matching a path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming HEAD
-        requests whose targets match that pattern. A new route object
-        is always created, even if another route with the same pattern
-        already exists. Handlers are executed in the order of
-        registration.
-
-        This function returns a @ref fluent_route
-        reference, allowing additional method registrations to be
-        chained on the same route. For example:
-        @code
-        router.route("/status")
-            .head(check_headers)
-            .get(send_status);
-        @endcode
-
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
-    */
     template<class H1, class... HN>
-    auto head(
+    auto add(
+        core::string_view verb,
         H1&& h1, HN&&... hn) ->
             fluent_route&
     {
-        owner_.append(e_, http_proto::method::head,
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
-        return *this;
-    }
-
-    /** Register handlers for HTTP POST requests matching a path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming POST
-        requests whose targets match that pattern. A new route object
-        is always created, even if another route with the same pattern
-        already exists. Handlers are executed in the order of
-        registration.
-
-        The returned @ref fluent_route reference allows additional
-        method registrations to be chained on the same route. For
-        example:
-        @code
-        router.route("/submit")
-            .post(process_form)
-            .get(show_form);
-        @endcode
-
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
-    */
-    template<class H1, class... HN>
-    auto post(
-        H1&& h1, HN&&... hn) ->
-            fluent_route&
-    {
-        owner_.append(e_, http_proto::method::post,
+        // all methods if verb.empty()==true
+        owner_.add_impl(e_, verb,
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));

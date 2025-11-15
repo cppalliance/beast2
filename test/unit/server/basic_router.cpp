@@ -561,6 +561,7 @@ struct basic_router_test
 
     void testErr()
     {
+        auto const GET = http_proto::method::get;
         system::error_code ec1 =
             http_proto::error::bad_connection;
         system::error_code ec2 =
@@ -639,7 +640,7 @@ struct basic_router_test
         // route-level vs. router-level
         {
             test_router r;
-            r.route("/").get(return_err(ec1));
+            r.route("/").add(GET, return_err(ec1));
             r.use(send_err(ec1));
             get(r, "/");
         }
@@ -670,39 +671,40 @@ struct basic_router_test
 
     void testRoute()
     {
+        auto const GET = http_proto::method::get;
         {
             test_router r;
-            r.get("/", called());
+            r.add(GET, "/", called());
             get(r,"/");
         }
         {
             test_router r;
-            r.get("/x", not_called());
+            r.add(GET, "/x", not_called());
             get(r,"/");
         }
         {
             test_router r;
-            r.get("/x", called());
-            r.get("/x", not_called());
+            r.add(GET, "/x", called());
+            r.add(GET, "/x", not_called());
             get(r,"/x");
         }
         {
             test_router r;
-            r.get("/x",
+            r.add(GET, "/x",
                 called(),
                 not_called());
             get(r,"/x");
         }
         {
             test_router r;
-            r.get("/x", return_next());
-            r.get("/x", called());
-            r.get("/x", not_called());
+            r.add(GET, "/x", return_next());
+            r.add(GET, "/x", called());
+            r.add(GET, "/x", not_called());
             get(r,"/x");
         }
         {
             test_router r;
-            r.get("/x",
+            r.add(GET, "/x",
                 return_next(),
                 called(),
                 not_called());

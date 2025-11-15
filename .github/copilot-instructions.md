@@ -1,9 +1,8 @@
-omit tparam for function parameters.
-doc comments are concise.
-doc @ref all public symbols in current file.
-tparam, param, return, throws always at the end, in that order.
+no tparam for params.
+comments are concise.
+@ref public symbols.
+tparam, param, return, throws come last, in order.
 newline after brief.
 indent subsequent multiline tparam,param,return,throws.
-
-
-
+@li for list items.
+don't doc void return.
