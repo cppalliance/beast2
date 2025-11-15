@@ -8,7 +8,7 @@
 //
 
 // Test that header file is self-contained.
-#include <boost/beast2/server/router_state.hpp>
+#include <boost/beast2/server/router_types.hpp>
 
 #include "test_suite.hpp"
 

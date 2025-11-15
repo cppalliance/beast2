@@ -12,6 +12,7 @@
 #include <boost/beast2/server/route_handler.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
+#include <boost/url/grammar/ci_string.hpp>
 #include <boost/url/grammar/hexdig_chars.hpp>
 #include <boost/assert.hpp>
 #include <atomic>
@@ -246,9 +247,44 @@ struct any_router::layer
 {
     struct entry
     {
-        http_proto::method verb;
-        //core:string_view verb // custom verb
         handler_ptr handler;
+
+        // only for end rotues
+        http_proto::method verb;
+        std::string verb_str;
+        bool all;
+
+        explicit entry(
+            handler_ptr h) noexcept
+            : handler(std::move(h))
+            , all(true)
+        {
+        }
+
+        entry(
+            http_proto::method verb_,
+            handler_ptr h) noexcept
+            : handler(std::move(h))
+            , verb(verb_)
+            , all(false)
+        {
+            BOOST_ASSERT(verb !=
+                http_proto::method::unknown);
+        }
+
+        entry(
+            core::string_view verb_str_,
+            handler_ptr h) noexcept
+            : handler(std::move(h))
+            , verb(http_proto::method::unknown)
+            , verb_str(verb_str_)
+            , all(false)
+        {
+            // convert to lower case for comparisons
+            // VFALCO This is questionable
+            for(auto& c : verb_str)
+                c = grammar::to_lower(c);
+        }
     };
 
     matcher match;
@@ -262,8 +298,7 @@ struct any_router::layer
     {
         entries.reserve(handlers.n);
         for(std::size_t i = 0; i < handlers.n; ++i)
-            entries.push_back({ middleware,
-                std::move(handlers.p[i]) });
+            entries.emplace_back(std::move(handlers.p[i]));
     }
 
     // route layer
@@ -345,38 +380,102 @@ operator=(any_router const& other) noexcept
     return *this;
 }
 
-// top-level dispatch gets called first
-route_result
+//------------------------------------------------
+
+std::size_t
 any_router::
-dispatch_impl(
-    http_proto::method verb,
-    urls::url_view const& url,
-    basic_request& req,
-    basic_response& res) const
+count() const noexcept
 {
-    req = {};
-    req.verb_ = verb;
-    req.verb_str_ = {};
-    // VFALCO use reusing-StringToken
-    req.decoded_path_ =
-        pct_decode_path(url.encoded_path());
-    BOOST_ASSERT(! req.decoded_path_.empty());
-    req.base_path = { req.decoded_path_.data(), 0 };
-    req.path = req.decoded_path_;
-    if(req.decoded_path_.back() != '/')
-    {
-        req.decoded_path_.push_back('/');
-        req.addedSlash_ = true;
-    }
-
-    res = {};
-
-    return dispatch_impl(req, res);
+    std::size_t n = 0;
+    for(auto const& i : impl_->layers)
+        for(auto const& e : i.entries)
+            n += e.handler->count();
+    return n;
 }
 
 auto
 any_router::
-resume(
+new_layer(
+    core::string_view pattern) -> layer&
+{
+    // delete the last route if it is empty,
+    // this happens if they call route() without
+    // adding anything
+    if(! impl_->layers.empty() &&
+        impl_->layers.back().entries.empty())
+        impl_->layers.pop_back();
+    impl_->layers.emplace_back(pattern);
+    return impl_->layers.back();
+};
+
+void
+any_router::
+add_impl(
+    core::string_view pattern,
+    handler_list const& handlers)
+{
+    if( pattern.empty())
+        pattern = "/";
+    impl_->layers.emplace_back(
+        pattern, std::move(handlers));
+}
+
+void
+any_router::
+add_impl(
+    layer& e,
+    http_proto::method verb,
+    handler_list const& handlers)
+{
+    // cannot be unknown
+    if(verb == http_proto::method::unknown)
+        detail::throw_invalid_argument();
+
+    e.entries.reserve(e.entries.size() + handlers.n);
+    for(std::size_t i = 0; i < handlers.n; ++i)
+        e.entries.emplace_back(verb,
+            std::move(handlers.p[i]));
+}
+
+void
+any_router::
+add_impl(
+    layer& e,
+    core::string_view verb_str,
+    handler_list const& handlers)
+{
+    e.entries.reserve(e.entries.size() + handlers.n);
+
+    if(verb_str.empty())
+    {
+        // all
+        for(std::size_t i = 0; i < handlers.n; ++i)
+            e.entries.emplace_back(
+                std::move(handlers.p[i]));
+        return;
+    }
+
+    auto verb = http_proto::string_to_method(verb_str);
+    if(verb != http_proto::method::unknown)
+    {
+        // known method string, use enum instead
+        for(std::size_t i = 0; i < handlers.n; ++i)
+            e.entries.emplace_back(verb,
+                std::move(handlers.p[i]));
+        return;
+    }
+
+    // custom method string
+    for(std::size_t i = 0; i < handlers.n; ++i)
+        e.entries.emplace_back(verb_str,
+            std::move(handlers.p[i]));
+}
+
+//------------------------------------------------
+
+auto
+any_router::
+resume_impl(
     basic_request& req, basic_response& res,
     route_result const& ec) const ->
         route_result
@@ -406,55 +505,33 @@ resume(
     return dispatch_impl(req, res);
 }
 
-void
+// top-level dispatch that gets called first
+route_result
 any_router::
-use_impl(
-    core::string_view pattern,
-    handler_list const& handlers)
-{
-    if( pattern.empty())
-        pattern = "/";
-    impl_->layers.emplace_back(
-        pattern, std::move(handlers));
-}
-
-auto
-any_router::
-make_route(
-    core::string_view pattern) -> layer&
-{
-    // delete the last route if it is empty
-    if(! impl_->layers.empty() &&
-        impl_->layers.back().entries.empty())
-        impl_->layers.pop_back();
-    impl_->layers.emplace_back(pattern);
-    return impl_->layers.back();
-};
-
-void
-any_router::
-append_impl(
-    layer& e,
+dispatch_impl(
     http_proto::method verb,
-    handler_list const& handlers)
+    urls::url_view const& url,
+    basic_request& req,
+    basic_response& res) const
 {
-    e.entries.reserve(e.entries.size() + handlers.n);
-    for(std::size_t i = 0; i < handlers.n; ++i)
-        e.entries.push_back({ verb,
-            std::move(handlers.p[i]) });
-}
+    req = {};
+    req.verb_ = verb;
+    req.verb_str_ = {};
+    // VFALCO use reusing-StringToken
+    req.decoded_path_ =
+        pct_decode_path(url.encoded_path());
+    BOOST_ASSERT(! req.decoded_path_.empty());
+    req.base_path = { req.decoded_path_.data(), 0 };
+    req.path = req.decoded_path_;
+    if(req.decoded_path_.back() != '/')
+    {
+        req.decoded_path_.push_back('/');
+        req.addedSlash_ = true;
+    }
 
-//------------------------------------------------
+    res = {};
 
-std::size_t
-any_router::
-count() const noexcept
-{
-    std::size_t n = 0;
-    for(auto const& i : impl_->layers)
-        for(auto const& e : i.entries)
-            n += e.handler->count();
-    return n;
+    return dispatch_impl(req, res);
 }
 
 // recursive dispatch
