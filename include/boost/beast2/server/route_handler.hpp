@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/detail/except.hpp>
-#include <boost/beast2/server/router_state.hpp>
+#include <boost/beast2/server/router_types.hpp>
 #include <boost/http_proto/request_parser.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/response.hpp>        // VFALCO forward declare?
 #include <boost/http_proto/serializer.hpp>      // VFALCO forward declare?

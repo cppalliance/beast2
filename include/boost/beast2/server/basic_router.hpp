@@ -13,7 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/detail/call_traits.hpp>
 #include <boost/beast2/detail/type_traits.hpp>
-#include <boost/beast2/server/router_state.hpp>
+#include <boost/beast2/server/router_types.hpp>
 #include <boost/beast2/server/route_handler.hpp>
 #include <boost/http_proto/method.hpp>
 #include <boost/url/url_view.hpp>
