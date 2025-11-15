@@ -7,7 +7,7 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/server/router_state.hpp>
+#include <boost/beast2/server/router_types.hpp>
 #include <boost/http_proto/string_body.hpp>
 #include <boost/assert.hpp>
 #include <cstring>

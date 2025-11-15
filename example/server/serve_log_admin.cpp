@@ -119,8 +119,8 @@ serve_log_admin(
     polystore& ps)
 {
     router r;
-    r.get("/", serve_log_page(ps));
-    r.get("/submit", handle_submit(ps));
+    r.add(http_proto::method::get, "/", serve_log_page(ps));
+    r.add(http_proto::method::get, "/submit", handle_submit(ps));
     return r;
 }
 
