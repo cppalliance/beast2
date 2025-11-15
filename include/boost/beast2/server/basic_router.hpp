@@ -397,6 +397,7 @@ public:
         error code. Handlers execute in sequence until one returns a
         result other than @ref route::next.
     */
+#if 0
     template<class H1, class... HN
         , class = typename std::enable_if<! std::is_convertible<
             H1, core::string_view>::value>::type
@@ -407,6 +408,7 @@ public:
             std::forward<H1>(h1),
             std::forward<HN>(hn)...);
     }
+#endif
 
     /** Add one or more middleware handlers for a path prefix.
 
@@ -561,30 +563,24 @@ public:
     }
 
     /** Register handlers for all HTTP methods matching a path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming requests
-        whose targets match that pattern, regardless of the HTTP method.
-        A new route object is always created, even if another route with
-        the same pattern already exists. Handlers are executed in the
-        order of registration.
-        This function returns a @ref fluent_route
-        reference, allowing additional method registrations to be
-        chained on the same route. For example:
+    
+        Creates a new route for the given pattern and appends one or more
+        handlers that run when the route matches, regardless of HTTP method.
+        A new route object is created even if the pattern already exists.
+        Handlers execute in registration order. Returns a reference to
+        @ref fluent_route for chaining.
+    
         @code
         router.route("/status")
             .head(check_headers)
             .get(send_status)
             .all(log_access);
         @endcode
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return A reference to the fluent route interface for further
-        chained handler registrations.
+    
+        @param pattern The path pattern to match.
+        @param h1 The first handler to add.
+        @param hn Additional handlers, invoked after @p h1 in registration order.
+        @return A reference to @ref fluent_route for additional registrations.
     */
     template<class H1, class... HN>
     auto all(

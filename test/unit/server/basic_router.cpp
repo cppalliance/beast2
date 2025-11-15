@@ -95,7 +95,7 @@ struct basic_router_test
         auto rv = grammar::parse(s, t);
         if(! BOOST_TEST_EQ(rv.has_error(), true))
             return;
-        BOOST_TEST_EQ(rv.error(), ec);
+        BOOST_TEST_EQ(rv.useor(), ec);
     };
 
     static void lit(core::string_view s)
@@ -567,12 +567,12 @@ struct basic_router_test
             http_proto::error::bad_content_length;
         {
             test_router r;
-            r.err(not_called_err());
+            r.use(not_called_err());
             get(r,"/");
         }
         {
             test_router r;
-            r.err("", not_called_err());
+            r.use("", not_called_err());
             get(r,"/");
         }
         {
@@ -607,15 +607,15 @@ struct basic_router_test
         {
             test_router r;
             r.use("/api", return_err(ec1));
-            r.err("/api", send_err(ec1));
-            r.err("/x", not_called_err());
+            r.use("/api", send_err(ec1));
+            r.use("/x", not_called_err());
             get(r, "/api");
         }
         {
             test_router r;
             r.use("/x", return_err(ec1));
-            r.err("/api", not_called_err());
-            r.err("/x", send_err(ec1));
+            r.use("/api", not_called_err());
+            r.use("/x", send_err(ec1));
             get(r, "/x/data");
         }
 
@@ -623,8 +623,8 @@ struct basic_router_test
         {
             test_router r;
             r.use(return_err(ec1));
-            r.err(replace_err(ec2));
-            r.err(send_err(ec2));
+            r.use(replace_err(ec2));
+            r.use(send_err(ec2));
             get(r, "/");
         }
 
@@ -632,7 +632,7 @@ struct basic_router_test
             test_router r;
             r.use(return_err(ec1));
             r.use(not_called());
-            r.err(send_err(ec1));
+            r.use(send_err(ec1));
             get(r, "/");
         }
 
@@ -640,7 +640,7 @@ struct basic_router_test
         {
             test_router r;
             r.route("/").get(return_err(ec1));
-            r.err(send_err(ec1));
+            r.use(send_err(ec1));
             get(r, "/");
         }
 
@@ -648,22 +648,22 @@ struct basic_router_test
         {
             test_router api;
             api.use(return_err(ec1));
-            api.err(send_err(ec1));
+            api.use(send_err(ec1));
 
             test_router root;
             root.use("/api", api);
-            root.err(not_called_err());
+            root.use(not_called_err());
             get(root, "/api");
         }
         {
             test_router api;
             api.use(return_err(ec1));
-            api.err(next_err(ec1));
+            api.use(next_err(ec1));
 
             test_router root;
             root.use("/api", api);
-            root.err(send_err(ec1));
-            root.err(not_called_err());
+            root.use(send_err(ec1));
+            root.use(not_called_err());
             get(root, "/api");
         }
     }
