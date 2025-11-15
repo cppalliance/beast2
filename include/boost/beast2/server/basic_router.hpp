@@ -424,7 +424,7 @@ public:
     */
     template<class H1, class... HN
         // VFALCO constrain that all are valid handlers
-        , class = typename std::enable_if<is_handler<H1>::value>::type
+        , class = typename std::enable_if<is_handler<H1>::value != 0>::type
     >
     void use(H1&& h1, HN&&... hn)
     {
@@ -598,114 +598,6 @@ private:
 
 //-----------------------------------------------
 
-// wrapper for route handlers
-template<class Req, class Res>
-template<class H>
-struct basic_router<Req, Res>::
-    handler_impl : any_handler
-{
-    typename std::decay<H>::type h;
-
-    template<class... Args>
-    explicit handler_impl(Args&&... args)
-        : h(std::forward<Args>(args)...)
-    {
-    }
-
-    std::size_t
-    count() const noexcept override
-    {
-        return count(
-            detail::get_handler_kind<
-                decltype(h), Req, Res>{});
-    }
-
-    route_result
-    invoke(
-        basic_request& req,
-        basic_response& res) const override
-    {
-        return invoke(
-            static_cast<Req&>(req),
-            static_cast<Res&>(res),
-            detail::get_handler_kind<
-                decltype(h), Req, Res>{});
-    }
-
-private:
-    std::size_t count(
-        std::integral_constant<int, 0>) = delete;
-
-    std::size_t count(
-        std::integral_constant<int, 1>) const noexcept
-    {
-        return 1;
-    }
-
-    std::size_t count(
-        std::integral_constant<int, 2>) const noexcept
-    {
-        return 1;
-    }
-
-    std::size_t count(
-        std::integral_constant<int, 3>) const noexcept
-    {
-        return 1 + h.count();
-    }
-
-    route_result invoke(Req&, Res&,
-        std::integral_constant<int, 0>) const = delete;
-
-    // (Req, Res)
-    route_result invoke(Req& req, Res& res,
-        std::integral_constant<int, 1>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(ec.failed())
-            return beast2::route::next;
-        // avoid racing on res.resume_
-        res.resume_ = res.pos_;
-        auto rv = h(req, res);
-        if(rv == beast2::route::detach)
-            return rv;
-        res.resume_ = 0; // revert
-        return rv;
-    }
-
-    // (Req&, Res&, error_code)
-    route_result
-    invoke(Req& req, Res& res,
-        std::integral_constant<int, 2>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(! ec.failed())
-            return beast2::route::next;
-        // avoid racing on res.resume_
-        res.resume_ = res.pos_;
-        auto rv = h(req, res, ec);
-        if(rv == beast2::route::detach)
-            return rv;
-        res.resume_ = 0; // revert
-        return rv;
-    }
-
-    // any_router
-    route_result invoke(Req& req, Res& res,
-        std::integral_constant<int, 3>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(! ec.failed())
-            return h.dispatch_impl(req, res);
-        return beast2::route::next;
-    }
-};
-
-//-----------------------------------------------
-
 template<class Req, class Res>
 class basic_router<Req, Res>::
     fluent_route
@@ -813,6 +705,114 @@ private:
 
     layer& e_;
     basic_router& owner_;
+};
+
+//-----------------------------------------------
+
+// wrapper for route handlers
+template<class Req, class Res>
+template<class H>
+struct basic_router<Req, Res>::
+    handler_impl : any_handler
+{
+    typename std::decay<H>::type h;
+
+    template<class... Args>
+    explicit handler_impl(Args&&... args)
+        : h(std::forward<Args>(args)...)
+    {
+    }
+
+    std::size_t
+    count() const noexcept override
+    {
+        return count(
+            detail::get_handler_kind<
+                decltype(h), Req, Res>{});
+    }
+
+    route_result
+    invoke(
+        basic_request& req,
+        basic_response& res) const override
+    {
+        return invoke(
+            static_cast<Req&>(req),
+            static_cast<Res&>(res),
+            detail::get_handler_kind<
+                decltype(h), Req, Res>{});
+    }
+
+private:
+    std::size_t count(
+        std::integral_constant<int, 0>) = delete;
+
+    std::size_t count(
+        std::integral_constant<int, 1>) const noexcept
+    {
+        return 1;
+    }
+
+    std::size_t count(
+        std::integral_constant<int, 2>) const noexcept
+    {
+        return 1;
+    }
+
+    std::size_t count(
+        std::integral_constant<int, 3>) const noexcept
+    {
+        return 1 + h.count();
+    }
+
+    route_result invoke(Req&, Res&,
+        std::integral_constant<int, 0>) const = delete;
+
+    // (Req, Res)
+    route_result invoke(Req& req, Res& res,
+        std::integral_constant<int, 1>) const
+    {
+        auto const& ec = static_cast<
+            basic_response const&>(res).ec_;
+        if(ec.failed())
+            return beast2::route::next;
+        // avoid racing on res.resume_
+        res.resume_ = res.pos_;
+        auto rv = h(req, res);
+        if(rv == beast2::route::detach)
+            return rv;
+        res.resume_ = 0; // revert
+        return rv;
+    }
+
+    // (Req&, Res&, error_code)
+    route_result
+    invoke(Req& req, Res& res,
+        std::integral_constant<int, 2>) const
+    {
+        auto const& ec = static_cast<
+            basic_response const&>(res).ec_;
+        if(! ec.failed())
+            return beast2::route::next;
+        // avoid racing on res.resume_
+        res.resume_ = res.pos_;
+        auto rv = h(req, res, ec);
+        if(rv == beast2::route::detach)
+            return rv;
+        res.resume_ = 0; // revert
+        return rv;
+    }
+
+    // any_router
+    route_result invoke(Req& req, Res& res,
+        std::integral_constant<int, 3>) const
+    {
+        auto const& ec = static_cast<
+            basic_response const&>(res).ec_;
+        if(! ec.failed())
+            return h.dispatch_impl(req, res);
+        return beast2::route::next;
+    }
 };
 
 } // beast2
