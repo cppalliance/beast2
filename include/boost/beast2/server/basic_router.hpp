@@ -133,11 +133,11 @@ protected:
     BOOST_BEAST2_DECL any_router& operator=(any_router&&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router const&) noexcept;
     BOOST_BEAST2_DECL std::size_t count() const noexcept;
-    BOOST_BEAST2_DECL layer& make_route(core::string_view pattern);
-    BOOST_BEAST2_DECL void append_impl(core::string_view, handler_list const&);
-    BOOST_BEAST2_DECL void append_impl(layer&,
+    BOOST_BEAST2_DECL layer& new_layer(core::string_view pattern);
+    BOOST_BEAST2_DECL void add_impl(core::string_view, handler_list const&);
+    BOOST_BEAST2_DECL void add_impl(layer&,
         http_proto::method, handler_list const&);
-    BOOST_BEAST2_DECL void append_impl(layer&,
+    BOOST_BEAST2_DECL void add_impl(layer&,
         core::string_view, handler_list const&);
     BOOST_BEAST2_DECL route_result resume_impl(
         basic_request&, basic_response&, route_result const& ec) const;
@@ -394,7 +394,7 @@ public:
         core::string_view pattern,
         H1&& h1, HN... hn)
     {
-        append_impl(pattern,
+        add_impl(pattern,
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
@@ -439,7 +439,7 @@ public:
         // All handlers must have the error handler signature
         BOOST_STATIC_ASSERT(
             detail::is_error_handlers<Req, Res, H1, HN...>::value);
-        append_impl(pattern,
+        add_impl(pattern,
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
@@ -675,7 +675,7 @@ private:
         http_proto::method verb,
         handler_list const& handlers)
     {
-        append_impl(e, verb, handlers);
+        add_impl(e, verb, handlers);
     }
 };
 
@@ -995,7 +995,7 @@ private:
     fluent_route(
         basic_router& owner,
         core::string_view pattern)
-        : e_(owner.make_route(pattern))
+        : e_(owner.new_layer(pattern))
         , owner_(owner)
     {
     }

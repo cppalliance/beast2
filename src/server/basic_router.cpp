@@ -395,7 +395,7 @@ count() const noexcept
 
 auto
 any_router::
-make_route(
+new_layer(
     core::string_view pattern) -> layer&
 {
     // delete the last route if it is empty,
@@ -410,7 +410,7 @@ make_route(
 
 void
 any_router::
-append_impl(
+add_impl(
     core::string_view pattern,
     handler_list const& handlers)
 {
@@ -422,7 +422,7 @@ append_impl(
 
 void
 any_router::
-append_impl(
+add_impl(
     layer& e,
     http_proto::method verb,
     handler_list const& handlers)
@@ -435,7 +435,7 @@ append_impl(
 
 void
 any_router::
-append_impl(
+add_impl(
     layer& e,
     core::string_view verb_str,
     handler_list const& handlers)
