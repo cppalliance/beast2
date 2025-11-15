@@ -12,6 +12,7 @@
 #include <boost/beast2/server/route_handler.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
+#include <boost/url/grammar/ci_string.hpp>
 #include <boost/url/grammar/hexdig_chars.hpp>
 #include <boost/assert.hpp>
 #include <atomic>
@@ -246,9 +247,44 @@ struct any_router::layer
 {
     struct entry
     {
-        http_proto::method verb;
-        //core:string_view verb // custom verb
         handler_ptr handler;
+
+        // only for end rotues
+        http_proto::method verb;
+        std::string verb_str;
+        bool all;
+
+        explicit entry(
+            handler_ptr h) noexcept
+            : handler(std::move(h))
+            , all(true)
+        {
+        }
+
+        entry(
+            http_proto::method verb_,
+            handler_ptr h) noexcept
+            : handler(std::move(h))
+            , verb(verb_)
+            , all(false)
+        {
+            BOOST_ASSERT(verb !=
+                http_proto::method::unknown);
+        }
+
+        entry(
+            core::string_view verb_str_,
+            handler_ptr h) noexcept
+            : handler(std::move(h))
+            , verb(http_proto::method::unknown)
+            , verb_str(verb_str_)
+            , all(false)
+        {
+            // convert to lower case for comparisons
+            // VFALCO This is questionable
+            for(auto& c : verb_str)
+                c = grammar::to_lower(c);
+        }
     };
 
     matcher match;
@@ -262,8 +298,7 @@ struct any_router::layer
     {
         entries.reserve(handlers.n);
         for(std::size_t i = 0; i < handlers.n; ++i)
-            entries.push_back({ middleware,
-                std::move(handlers.p[i]) });
+            entries.emplace_back(std::move(handlers.p[i]));
     }
 
     // route layer
@@ -363,7 +398,9 @@ any_router::
 make_route(
     core::string_view pattern) -> layer&
 {
-    // delete the last route if it is empty
+    // delete the last route if it is empty,
+    // this happens if they call route() without
+    // adding anything
     if(! impl_->layers.empty() &&
         impl_->layers.back().entries.empty())
         impl_->layers.pop_back();
@@ -392,8 +429,37 @@ append_impl(
 {
     e.entries.reserve(e.entries.size() + handlers.n);
     for(std::size_t i = 0; i < handlers.n; ++i)
-        e.entries.push_back({ verb,
-            std::move(handlers.p[i]) });
+        e.entries.emplace_back(verb,
+            std::move(handlers.p[i]));
+}
+
+void
+any_router::
+append_impl(
+    layer& e,
+    core::string_view verb_str,
+    handler_list const& handlers)
+{
+    e.entries.reserve(e.entries.size() + handlers.n);
+    if(! verb_str.empty())
+    {
+        auto verb = http_proto::string_to_method(verb_str);
+        if(verb != http_proto::method::unknown)
+        {
+            for(std::size_t i = 0; i < handlers.n; ++i)
+                e.entries.emplace_back(verb,
+                    std::move(handlers.p[i]));
+            return;
+        }
+        for(std::size_t i = 0; i < handlers.n; ++i)
+            e.entries.emplace_back(verb_str,
+                std::move(handlers.p[i]));
+        return;
+    }
+    // all
+    for(std::size_t i = 0; i < handlers.n; ++i)
+        e.entries.emplace_back(
+            std::move(handlers.p[i]));
 }
 
 //------------------------------------------------

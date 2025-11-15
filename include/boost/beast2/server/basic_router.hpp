@@ -105,9 +105,6 @@ struct is_error_handlers
 class any_router
 {
 protected:
-    static constexpr http_proto::method
-        middleware = http_proto::method::unknown;
-
     struct BOOST_SYMBOL_VISIBLE any_handler
     {
         BOOST_BEAST2_DECL virtual ~any_handler();
@@ -140,6 +137,8 @@ protected:
     BOOST_BEAST2_DECL void append_impl(core::string_view, handler_list const&);
     BOOST_BEAST2_DECL void append_impl(layer&,
         http_proto::method, handler_list const&);
+    BOOST_BEAST2_DECL void append_impl(layer&,
+        core::string_view, handler_list const&);
     BOOST_BEAST2_DECL route_result resume_impl(
         basic_request&, basic_response&, route_result const& ec) const;
     BOOST_BEAST2_DECL route_result dispatch_impl(http_proto::method,
@@ -867,7 +866,7 @@ public:
         H1&& h1, HN&&... hn) ->
             fluent_route&
     {
-        owner_.append(e_, http_proto::method::unknown,
+        owner_.append(e_, core::string_view(),
             make_handler_list(
                 std::forward<H1>(h1),
                 std::forward<HN>(hn)...));
