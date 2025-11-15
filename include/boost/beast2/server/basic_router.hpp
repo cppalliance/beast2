@@ -104,25 +104,30 @@ struct is_error_handlers
 // implementation for all routers
 class any_router
 {
-public:
-    void operator()() = delete;
-
 protected:
     static constexpr http_proto::method
         middleware = http_proto::method::unknown;
 
-    struct any_handler;
+    struct BOOST_SYMBOL_VISIBLE any_handler
+    {
+        BOOST_BEAST2_DECL virtual ~any_handler();
+        virtual std::size_t count() const noexcept = 0;
+        virtual route_result invoke(
+            basic_request&, basic_response&) const = 0;
+    };
+
     using handler_ptr = std::unique_ptr<any_handler>;
-    using match_result = basic_request::match_result;
-    struct matcher;
-    struct layer;
-    struct impl;
 
     struct handler_list
     {
         std::size_t n;
         handler_ptr* p;
     };
+
+    using match_result = basic_request::match_result;
+    struct matcher;
+    struct layer;
+    struct impl;
 
     BOOST_BEAST2_DECL ~any_router();
     BOOST_BEAST2_DECL any_router();
@@ -144,19 +149,6 @@ protected:
 
     impl* impl_ = nullptr;
 };
-
-//------------------------------------------------
-
-struct BOOST_SYMBOL_VISIBLE
-    any_router::any_handler
-{
-    BOOST_BEAST2_DECL virtual ~any_handler();
-    virtual std::size_t count() const noexcept = 0;
-    virtual route_result invoke(
-        basic_request&, basic_response&) const = 0;
-};
-
-//------------------------------------------------
 
 } // detail
 
@@ -213,9 +205,11 @@ public:
 
     /** The type of response object used in handlers
 
-        Route handlers must have this invocable signature
+        Route handlers and error handlers must have these
+        invocable signatures respectively:
         @code
-        system::error_code(Req&, Res&)
+        route_result(Req&, Res&)
+        route_result(Req&, Res&, system::error_code)
         @endcode
     */
     using response_type = Res;
@@ -245,7 +239,24 @@ public:
     */
     basic_router() = default;
 
-    /** Constructor
+    /** Construct a router from another router with compatible types.
+
+        This constructs a router that shares the same underlying routing
+        state as another router whose request and response types are base
+        classes of `Req` and `Res`, respectively.
+
+        The resulting router participates in shared ownership of the
+        implementation; copying the router does not duplicate routes or
+        handlers, and changes visible through one router are visible
+        through all routers that share the same underlying state.
+
+        @par Constraints
+        `Req` must be derived from `OtherReq`, and `Res` must be
+        derived from `OtherRes`.
+
+        @tparam OtherReq The request type of the source router.
+        @tparam OtherRes The response type of the source router.
+        @param other The router to copy.
     */
     template<
         class OtherReq, class OtherRes,
@@ -263,13 +274,19 @@ public:
 
         Each handler registered with this function runs for every incoming
         request, regardless of its HTTP method or path. Handlers execute in
-        the order they were added, and may call `next()` to transfer control
-        to the subsequent handler in the chain.
+        the order they were added, and may return @ref route::next to transfer
+        control to the subsequent handler in the chain.
 
-        This is equivalent to writing
+        This is equivalent to writing:
         @code
         use( "/", h1, hn... );
         @endcode
+
+        @par Constraints
+        `h1` must not be convertible to `core::string_view`.
+
+        @param h1 The first middleware handler.
+        @param hn Additional middleware handlers.
     */
     template<class H1, class... HN
         , class = typename std::enable_if<! std::is_convertible<
