@@ -28,7 +28,7 @@ struct basic_router_test
 {
     void compileTimeTests()
     {
-        struct Req {};
+        struct Req : basic_request {};
         struct Res : basic_response {};
 
         BOOST_CORE_STATIC_ASSERT(std::is_copy_assignable<basic_router<Req, Res>>::value);

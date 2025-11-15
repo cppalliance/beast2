@@ -24,7 +24,7 @@
 namespace boost {
 namespace beast2 {
 
-//------------------------------------------------
+//-----------------------------------------------
 
 namespace detail {
 
@@ -99,7 +99,7 @@ struct is_error_handlers
 {
 };
 
-//------------------------------------------------
+//-----------------------------------------------
 
 // implementation for all routers
 class any_router
@@ -151,24 +151,19 @@ protected:
 
 } // detail
 
-//------------------------------------------------
+//-----------------------------------------------
 
-/** A container for HTTP route handlers
+/** A container for HTTP route handlers.
 
-    The basic_router class template is used to
-    store and invoke route handlers based on
-    the request method and path.
-    Handlers are added to the router using
-    the member functions such as @ref get,
-    @ref post, and @ref all.
-    Handlers are invoked by calling the
-    function call operator with a request
-    and response object.
+    `basic_router` objects store and dispatch route handlers based on the
+    HTTP method and path of an incoming request. Routes are added with a
+    path pattern and an associated handler, and the router is then used to
+    dispatch the appropriate handler.
 
-    Express treats all route definitions as decoded path patterns, not raw
-    URL-encoded ones. So a literal %2F in the pattern string is indistinguishable
-    from a literal / once Express builds the layer. Therefore "/x%2Fz" is
-    the same as "/x/z"
+    Patterns used to create route definitions have percent-decoding applied
+    when handlers are mounted. A literal "%2F" in the pattern string is
+    indistinguishable from a literal '/'. For example, "/x%2Fz" is the
+    same as "/x/z" when used as a pattern.
 
     @par Example
     @code
@@ -183,21 +178,92 @@ protected:
         });
     @endcode
 
+    Router objects are lightweight, shared references to their contents.
+    Copies of a router obtained through construction, conversion, or
+    assignment do not create new instances; they all refer to the same
+    underlying data.
+
+    @par Handlers
+    Regular handlers are invoked for matching routes and have this
+    equivalent signature:
+    @code
+    route_result handler( Req& req, Res& res )
+    @endcode
+
+    The return value is a @ref route_result used to indicate the desired
+    action through @ref route enum values, or to indicate that a failure
+    occurred. Failures are represented by error codes for which
+    `system::error_code::failed()` returns `true`.
+
+    When a failing error code is produced and remains unhandled, the
+    router enters error-dispatching mode. In this mode, only error
+    handlers are invoked. Error handlers are registered globally or
+    for specific paths and execute in the order of registration whenever
+    a failing error code is present in the response.
+
+    Error handlers have this equivalent signature:
+    @code
+    route_result error_handler( Req& req, Res& res, system::error_code ec )
+    @endcode
+
+    Each error handler may return any failing @ref system::error_code,
+    which is equivalent to calling:
+    @code
+    res.next(ec); // with ec.failed() == true
+    @endcode
+    Returning @ref route::next indicates that control should proceed to
+    the next matching error handler. Returning a different failing code
+    replaces the current error and continues dispatch in error mode using
+    that new code. Error handlers are invoked until one returns a result
+    other than @ref route::next.
+
+    @par Handler requirements
+    Regular handlers must be callable with:
+    @code
+    route_result( Req&, Res& )
+    @endcode
+
+    Error handlers must be callable with:
+    @code
+    route_result( Req&, Res&, system::error_code )
+    @endcode
+    Error handlers are invoked only when the response has a failing
+    error code, and execute in sequence until one returns a result
+    other than @ref route::next.
+
+    @par Thread Safety
+    Member functions marked `const` such as @ref dispatch and @ref resume
+    may be called concurrently on routers that refer to the same data.
+    Modification of routers through calls to non-`const` member functions
+    is not thread-safe and must not be performed concurrently with any
+    other member function.
+
+    @par Constraints
+    `Req` must be publicly derived from @ref basic_request.
+    `Res` must be publicly derived from @ref basic_response.
+
     @tparam Req The type of request object.
     @tparam Res The type of response object.
 */
 template<class Req, class Res>
 class basic_router : public detail::any_router
 {
+    // Req must be publicly derived from basic_request
+    BOOST_CORE_STATIC_ASSERT(
+        detail::derived_from<basic_request, Req>::value);
+
+    // Res must be publicly derived from basic_response
     BOOST_CORE_STATIC_ASSERT(
         detail::derived_from<basic_response, Res>::value);
 
 public:
     /** The type of request object used in handlers
 
-        Route handlers must have this invocable signature
+        Route handlers and error handlers must have these
+        invocable signatures respectively:
         @code
-        system::error_code(Req&, Res&)
+        route_result(Req&, Res&)
+        route_result(Req&, Res&, system::error_code)
         @endcode
     */
     using request_type = Req;
@@ -467,6 +533,22 @@ public:
         return fluent_route(*this, pattern);
     }
 
+    /** Register handlers for a specific HTTP method and path pattern.
+
+        Creates a new route for the specified pattern and attaches
+        one or more handlers that will be invoked for incoming requests
+        whose targets match that pattern and whose method matches the
+        specified value. A new route object is always created, even if
+        another route with the same pattern already exists. Handlers are
+        executed in the order of registration.
+
+        @param method The HTTP method to match.
+        @param pattern The path expression to match against request
+        targets. This may include parameters or wildcards following
+        the router's pattern syntax.
+        @param h1 The first handler to invoke when the route matches.
+        @param hn Additional handlers, invoked sequentially after @p h1 in registration order.
+    */
     template<class H1, class... HN>
     void add(
         http_proto::method method,
@@ -478,6 +560,32 @@ public:
             std::forward<HN>(hn)...);
     }
 
+    /** Register handlers for all HTTP methods matching a path pattern.
+
+        Creates a new route for the specified pattern and attaches
+        one or more handlers that will be invoked for incoming requests
+        whose targets match that pattern, regardless of the HTTP method.
+        A new route object is always created, even if another route with
+        the same pattern already exists. Handlers are executed in the
+        order of registration.
+        This function returns a @ref fluent_route
+        reference, allowing additional method registrations to be
+        chained on the same route. For example:
+        @code
+        router.route("/status")
+            .head(check_headers)
+            .get(send_status)
+            .all(log_access);
+        @endcode
+        @param pattern The path expression to match against request
+        targets. This may include parameters or wildcards following
+        the router's pattern syntax.
+        @param h1 The first handler to invoke when the route matches.
+        @param hn Additional handlers, invoked sequentially after
+        @p h1 in registration order.
+        @return A reference to the fluent route interface for further
+        chained handler registrations.
+    */
     template<class H1, class... HN>
     auto all(
         core::string_view pattern,
@@ -679,7 +787,7 @@ private:
     }
 };
 
-//------------------------------------------------
+//-----------------------------------------------
 
 // wrapper for route handlers
 template<class Req, class Res>
@@ -787,7 +895,7 @@ private:
     }
 };
 
-//------------------------------------------------
+//-----------------------------------------------
 
 template<class Req, class Res>
 class basic_router<Req, Res>::
