@@ -108,26 +108,39 @@ pct_decode(
     for(;;)
     {
         if(it == end)
-            return result;
+            break;
         if(*it != '%')
         {
             result.push_back(*it++);
             continue;
         }
-        if(++it == end)
-            break;
+        ++it;
+#if 0
+        // pct_string_view can never have invalid pct-encodings
+        if(it == end)
+            goto invalid;
+#endif
         auto d0 = urls::grammar::hexdig_value(*it++);
+#if 0
+        // pct_string_view can never have invalid pct-encodings
         if( d0 < 0 ||
             it == end)
-            break;
+            goto invalid;
+#endif
         auto d1 = urls::grammar::hexdig_value(*it++);
+#if 0
+        // pct_string_view can never have invalid pct-encodings
         if(d1 < 0)
-            break;
+            goto invalid;
+#endif
         result.push_back(d0 * 16 + d1);
     }
+    return result;
+#if 0
+invalid:
     // can't get here, as received a pct_string_view
-    detail::throw_invalid_argument(
-        "bad percent encoding");
+    detail::throw_invalid_argument();
+#endif
 }
 
 // decode all percent escapes except slashes '/' and '\'
@@ -144,21 +157,31 @@ pct_decode_path(
     for(;;)
     {
         if(it == end)
-            return result;
+            break;
         if(*it != '%')
         {
             result.push_back(*it++);
             continue;
         }
-        if(++it == end)
-            break;
+        ++it;
+#if 0
+        // pct_string_view can never have invalid pct-encodings
+        if(it == end)
+            goto invalid;
+#endif
         auto d0 = urls::grammar::hexdig_value(*it++);
+#if 0
+        // pct_string_view can never have invalid pct-encodings
         if( d0 < 0 ||
             it == end)
-            break;
+            goto invalid;
+#endif
         auto d1 = urls::grammar::hexdig_value(*it++);
+#if 0
+        // pct_string_view can never have invalid pct-encodings
         if(d1 < 0)
-            break;
+            goto invalid;
+#endif
         char c = d0 * 16 + d1;
         if( c != '/' &&
             c != '\\')
@@ -168,9 +191,12 @@ pct_decode_path(
         }
         result.append(it - 3, 3);
     }
+    return result;
+#if 0
+invalid:
     // can't get here, as received a pct_string_view
-    detail::throw_invalid_argument(
-        "bad percent encoding");
+    detail::throw_invalid_argument();
+#endif
 }
 
 //------------------------------------------------
@@ -301,7 +327,7 @@ struct any_router::matcher
             // require full match
             if( it != end_ ||
                 pit != pend)
-            return false;
+                return false;
         }
         else if(pit != pend)
         {
