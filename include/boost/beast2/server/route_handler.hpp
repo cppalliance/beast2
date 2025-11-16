@@ -13,6 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/polystore.hpp>
 #include <boost/beast2/server/router_types.hpp>
+#include <boost/http_proto/request.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/request_parser.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/response.hpp>        // VFALCO forward declare?
 #include <boost/http_proto/serializer.hpp>      // VFALCO forward declare?
@@ -40,24 +41,19 @@ struct Request : basic_request
     */
     urls::url_view url;
 
-    http_proto::request_base const& m;
-    http_proto::request_parser& pr;
+    /** The HTTP request message
+    */
+    http_proto::request message;
+
+    /** The HTTP request parser
+        This can be used to take over reading the body.
+    */
+    http_proto::request_parser parser;
 
     /** A container for storing arbitrary data associated with the request.
-
         This starts out empty for each new request.
     */
     polystore data;
-
-    //-------------------------------------------
-
-    Request(
-        http_proto::request_base const& m_,
-        http_proto::request_parser& pr_)
-        : m(m_)
-        , pr(pr_)
-    {
-    }
 };
 
 //-----------------------------------------------
@@ -66,9 +62,19 @@ struct Request : basic_request
 */
 struct Response : basic_response
 {
-    http_proto::response& m;
-    http_proto::serializer& sr;
+    /** The HTTP response message
+    */
+    http_proto::response message;
 
+    /** The HTTP response serializer
+    */
+    http_proto::serializer serializer;
+
+    /** The detacher for this session.
+        This can be used to detach from the
+        session and take over managing the
+        connection.
+    */
     detacher detach;
 
     /** A container for storing arbitrary data associated with the session.
@@ -123,16 +129,6 @@ struct Response : basic_response
     BOOST_BEAST2_DECL
     Response&
     set_body(std::string s);
-
-    //-------------------------------------------
-
-    Response(
-        http_proto::response& m_,
-        http_proto::serializer& sr_) noexcept
-        : m(m_)
-        , sr(sr_)
-    {
-    }
 };
 
 } // beast2

@@ -28,12 +28,8 @@ struct route_handler_test
         core::string_view url,
         route_result rv0 = route::send)
     {
-        http_proto::request reqm;
-        http_proto::request_parser pr;
-        Request req(reqm, pr);
-        http_proto::response resm;
-        http_proto::serializer sr;
-        Response res(resm, sr);
+        Request req;
+        Response res;
         auto rv = r.dispatch(
             verb, urls::url_view(url), req, res);
         if(BOOST_TEST_EQ(rv.message(), rv0.message()))

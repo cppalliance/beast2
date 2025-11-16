@@ -111,13 +111,13 @@ operator()(
         system::error_code
 {
     std::string body;
-    prepare_error(res.m, body,
-        http_proto::status::moved_permanently, req.m);
-    urls::url u1(req.m.target());
+    prepare_error(res.message, body,
+        http_proto::status::moved_permanently, req.message);
+    urls::url u1(req.message.target());
     u1.set_scheme_id(urls::scheme::https);
     u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
-    res.m.append(http_proto::field::location, u1.buffer());
-    res.sr.start(res.m,
+    res.message.append(http_proto::field::location, u1.buffer());
+    res.serializer.start(res.message,
         http_proto::string_body( std::move(body)));
     return {};
 }

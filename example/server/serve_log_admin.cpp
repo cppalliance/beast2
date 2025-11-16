@@ -73,7 +73,7 @@ public:
         format_to(s, "</html>\n");
 
         res.status(http_proto::status::ok);
-        res.m.set(http_proto::field::content_type, "text/html; charset=UTF-8");
+        res.message.set(http_proto::field::content_type, "text/html; charset=UTF-8");
         res.set_body(std::move(s));
         return error::success;
     }
@@ -101,7 +101,7 @@ public:
         Response& res) const
     {
         res.status(http_proto::status::ok);
-        res.m.set(http_proto::field::content_type, "plain/text; charset=UTF-8");
+        res.message.set(http_proto::field::content_type, "plain/text; charset=UTF-8");
         res.set_body("submit");
         return error::success;
     }

@@ -29,7 +29,7 @@ Response::
 status(
     http_proto::status code)
 {
-    m.set_start_line(code, m.version());
+    message.set_start_line(code, message.version());
     return *this;
 }
 
@@ -37,19 +37,20 @@ Response&
 Response::
 set_body(std::string s)
 {
-    if(! m.exists(http_proto::field::content_type))
+    if(! message.exists(http_proto::field::content_type))
     {
         // VFALCO TODO detect Content-Type
-        m.set(http_proto::field::content_type,
+        message.set(http_proto::field::content_type,
             "text/plain; charset=UTF-8");
     }
 
-    if(!m.exists(http_proto::field::content_length))
+    if(!message.exists(http_proto::field::content_length))
     {
-        m.set_payload_size(s.size());
+        message.set_payload_size(s.size());
     }
 
-    sr.start(m, http_proto::string_body(std::string(s)));
+    serializer.start(message,
+        http_proto::string_body(std::string(s)));
 
     return *this;
 }

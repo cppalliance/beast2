@@ -413,7 +413,7 @@ public:
         router.use(
             [](Request&, Response& res)
             {
-                res.m.erase( "X-Powered-By" );
+                res.message.erase( "X-Powered-By" );
                 return route::next;
             });
         @endcode

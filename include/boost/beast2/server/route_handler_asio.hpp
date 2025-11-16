@@ -12,26 +12,25 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/route_handler.hpp>
+#include <type_traits>
 
 namespace boost {
 namespace beast2 {
 
 /** Response object for Asio HTTP route handlers
 */
-template<class Stream>
+template<class AsyncStream>
 struct ResponseAsio : Response
 {
-    using stream_type = Stream;
+    using stream_type = typename std::decay<AsyncStream>::type;
 
-    Stream& stream;
+    AsyncStream stream;
 
     template<class... Args>
     explicit
     ResponseAsio(
-        Stream& stream_,
         Args&&... args)
-        : Response(std::forward<Args>(args)...)
-        , stream(stream_)
+        : stream(std::forward<Args>(args)...)
     {
     }
 };

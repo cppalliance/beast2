@@ -20,7 +20,7 @@ namespace beast2 {
 
 class application;
 
-template<class Stream>
+template<class AsyncStream>
 class http_server
 {
 public:
@@ -28,7 +28,7 @@ public:
 
     http_server() = default;
 
-    router_asio<Stream> wwwroot;
+    router_asio<AsyncStream&> wwwroot;
 
     /** Run the server
 

@@ -11,8 +11,8 @@
 #define BOOST_BEAST2_SERVER_PLAIN_WORKER_HPP
 
 #include <boost/beast2/server/http_session.hpp>
-#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/call_mf.hpp>
+#include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/server/workers.hpp>
 #include <boost/beast2/application.hpp>
 #include <boost/beast2/logger.hpp>
@@ -42,7 +42,7 @@ public:
     plain_worker(
         workers_base& wb,
         Executor0 const& ex,
-        router_asio<stream_type> rr);
+        router_asio<stream_type&> rr);
 
     application& app() noexcept
     {
@@ -90,7 +90,7 @@ plain_worker<Executor, Protocol>::
 plain_worker(
     workers_base& wb,
     Executor0 const& ex,
-    router_asio<stream_type> rr)
+    router_asio<stream_type&> rr)
     : http_session<stream_type>(
         wb.app(),
         stream_,
