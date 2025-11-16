@@ -306,15 +306,6 @@ private:
 */
 class basic_response
 {
-public:
-    route_result next() const noexcept
-    {
-        return route::next;
-    }
-
-    route_result next(system::error_code const& ec);
-    route_result fail(system::error_code const& ec);
-
 private:
     friend class detail::any_router;
     template<class, class>

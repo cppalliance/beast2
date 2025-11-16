@@ -175,7 +175,6 @@ on_read(
     //
 
     preq_.reset(new Request(
-        *this->pconfig_,
         pr_.get(),
         pr_));
 

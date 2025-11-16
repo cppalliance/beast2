@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/detail/except.hpp>
+#include <boost/beast2/polystore.hpp>
 #include <boost/beast2/server/router_types.hpp>
 #include <boost/http_proto/request_parser.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/response.hpp>        // VFALCO forward declare?
@@ -43,20 +43,27 @@ struct Request : basic_request
     */
     urls::url_view url;
 
-    acceptor_config port;
     http_proto::request_base const& m;
     http_proto::request_parser& pr;
 
+    /** A container for storing arbitrary data associated with the request.
+
+        This starts out empty for each new request.
+    */
+    polystore data;
+
+    //-------------------------------------------
+
     Request(
-        acceptor_config port_,
         http_proto::request_base const& m_,
         http_proto::request_parser& pr_)
-        : port(port_)
-        , m(m_)
+        : m(m_)
         , pr(pr_)
     {
     }
 };
+
+//-----------------------------------------------
 
 /** Response object for HTTP route handlers
 */
@@ -67,11 +74,42 @@ struct Response : basic_response
 
     detacher detach;
 
-    /*
-    bool send(core::string_view);
-    bool error(system::error_code);
-    bool status(http_proto::status);
+    /** A container for storing arbitrary data associated with the session.
+
+        This starts out empty for each new session.
     */
+    polystore data;
+
+    route_result close() const noexcept
+    {
+        return route::close;
+    }
+
+    route_result complete() const noexcept
+    {
+        return route::complete;
+    }
+
+    route_result next() const noexcept
+    {
+        return route::next;
+    }
+
+    route_result next_route() const noexcept
+    {
+        return route::next_route;
+    }
+
+    route_result send() const noexcept
+    {
+        return route::send;
+    }
+
+    BOOST_BEAST2_DECL
+    route_result
+    fail(system::error_code const& ec);
+
+    // route_result send(core::string_view);
 
     /** Set the status code of the response.
         @par Example
@@ -89,10 +127,7 @@ struct Response : basic_response
     Response&
     set_body(std::string s);
 
-    route_result next() const noexcept;
-    route_result next(system::error_code const& ec ) const;
-
-    //--------------------------------------------
+    //-------------------------------------------
 
     Response(
         http_proto::response& m_,

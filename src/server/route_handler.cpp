@@ -15,6 +15,15 @@
 namespace boost {
 namespace beast2 {
 
+route_result
+Response::
+fail(system::error_code const& ec)
+{
+    if(! ec.failed())
+        detail::throw_invalid_argument();
+    return ec;
+}
+
 Response&
 Response::
 status(
