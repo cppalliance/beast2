@@ -15,7 +15,7 @@
 namespace boost {
 namespace beast2 {
 
-struct router_state_test
+struct router_types_test
 {
     void run()
     {
@@ -23,8 +23,8 @@ struct router_state_test
 };
 
 TEST_SUITE(
-    router_state_test,
-    "boost.beast2.server.basic_response");
+    router_types_test,
+    "boost.http_proto.server.router_types");
 
 } // beast2
 } // boost

@@ -17,10 +17,7 @@
 #include <boost/http_proto/response.hpp>        // VFALCO forward declare?
 #include <boost/http_proto/serializer.hpp>      // VFALCO forward declare?
 #include <boost/url/url_view.hpp>
-#include <boost/url/segments_encoded_view.hpp>
-#include <boost/core/detail/string_view.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/assert.hpp>
 
 namespace boost {
 namespace beast2 {
