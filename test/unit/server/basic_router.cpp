@@ -1451,6 +1451,18 @@ struct basic_router_test
             BOOST_TEST_THROWS(r.resume(req, res, route::detach),
                 std::invalid_argument);
         }
+
+        // invalid detach
+        {
+            test_router r;
+            r.use(fail(route::detach));
+            Req req;
+            Res res;
+            auto rv1 = r.dispatch(GET, urls::url_view("/"), req, res);
+            BOOST_TEST(rv1 == route::detach);
+            BOOST_TEST_THROWS(r.resume(req, res, system::error_code()),
+                std::invalid_argument);
+        }
     }
 
     void run()

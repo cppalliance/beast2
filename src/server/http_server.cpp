@@ -8,7 +8,7 @@
 //
 
 #include <boost/beast2/server/http_server.hpp>
-#include <boost/beast2/server/http_session.hpp>
+#include <boost/beast2/server/http_stream.hpp>
 #include <boost/beast2/server/plain_worker.hpp>
 #include <boost/beast2/application.hpp>
 #include <boost/beast2/asio_io_context.hpp>

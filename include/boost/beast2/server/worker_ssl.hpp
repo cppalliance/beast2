@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST2_SERVER_WORKER_SSL_HPP
 #define BOOST_BEAST2_SERVER_WORKER_SSL_HPP
 
-#include <boost/beast2/server/http_session.hpp>
+#include <boost/beast2/server/http_stream.hpp>
 #include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/beast2/server/logger.hpp>
@@ -38,7 +38,7 @@ template<
     class Executor,
     class Protocol = asio::ip::tcp
 >
-class worker_ssl : public http_session<
+class worker_ssl : public http_stream<
     ssl_stream<asio::basic_stream_socket<Protocol, Executor>>
 >
 {
@@ -116,7 +116,7 @@ worker_ssl(
     Executor0 const& ex,
     asio::ssl::context& ssl_ctx,
     router_asio<stream_type> rr)
-    : http_session<stream_type>(
+    : http_stream<stream_type>(
         wb.app(),
         stream_,
         std::move(rr),
@@ -151,7 +151,7 @@ on_accept(acceptor_config const* pconfig)
     // VFALCO TODO timeout
     stream_.set_ssl(pconfig->is_ssl);
     if(! pconfig->is_ssl)
-        return this->do_session(*pconfig);
+        return this->on_accept(*pconfig);
     return stream_.stream().async_handshake(
         asio::ssl::stream_base::server,
         asio::prepend(call_mf(
@@ -172,7 +172,7 @@ on_handshake(
         "{} worker_ssl::on_handshake",
         this->id());
 
-    this->do_session(*pconfig);
+    this->on_accept(*pconfig);
 }
 
 template<class Executor, class Protocol>

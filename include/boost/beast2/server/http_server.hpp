@@ -12,7 +12,6 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
 namespace boost {

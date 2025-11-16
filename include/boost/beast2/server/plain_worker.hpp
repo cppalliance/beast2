@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST2_SERVER_PLAIN_WORKER_HPP
 #define BOOST_BEAST2_SERVER_PLAIN_WORKER_HPP
 
-#include <boost/beast2/server/http_session.hpp>
+#include <boost/beast2/server/http_stream.hpp>
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/server/workers.hpp>
@@ -26,7 +26,7 @@ namespace beast2 {
 
 template<class Executor, class Protocol>
 class plain_worker
-    : public http_session<
+    : public http_stream<
         asio::basic_stream_socket<Protocol, Executor>
     >
 {
@@ -91,7 +91,7 @@ plain_worker(
     workers_base& wb,
     Executor0 const& ex,
     router_asio<stream_type&> rr)
-    : http_session<stream_type>(
+    : http_stream<stream_type>(
         wb.app(),
         stream_,
         std::move(rr),
@@ -123,7 +123,7 @@ on_accept(acceptor_config const* pconfig)
 {
     BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
     // VFALCO TODO timeout
-    this->do_session(*pconfig);
+    this->on_stream_begin(*pconfig);
 }
 
 template<class Executor, class Protocol>

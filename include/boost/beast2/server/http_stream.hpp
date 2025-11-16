@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_HTTP_SESSION_HPP
-#define BOOST_BEAST2_SERVER_HTTP_SESSION_HPP
+#ifndef BOOST_BEAST2_SERVER_HTTP_STREAM_HPP
+#define BOOST_BEAST2_SERVER_HTTP_STREAM_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/application.hpp>
@@ -33,20 +33,47 @@ namespace boost {
 namespace beast2 {
 
 //------------------------------------------------
-/*
 
-*/
-/** Mixin for delivering responses to HTTP requests
+/** An HTTP server stream which routes requests to handlers and sends reesponses.
+
+    An object of this type wraps an asynchronous Boost.ASIO stream and implements
+    a high level server connection which reads HTTP requests, routes them to
+    handlers installed in a router, and sends the HTTP response.
+
+    @par Requires
+    `AsyncStream` must satisfy <em>AsyncReadStream</em> and <em>AsyncWriteStream</em>
+
+    @tparam AsyncStream The type of asynchronous stream.
 */
 template<class AsyncStream>
-class http_session
+class http_stream
     : private detacher::owner
 {
 public:
-    http_session(
+    /** Constructor.
+        
+        This initializes a new HTTP connection object that operates on
+        the given stream, uses the specified router to dispatch incoming
+        requests, and calls the supplied completion function when the
+        connection closes or fails.
+
+        Construction does not start any I/O; call @ref on_stream_begin when
+        the stream is connected to the remote peer to begin reading
+        requests and processing them.
+
+        @param app The owning application, used to access shared services
+            such as logging and protocol objects.
+        @param stream The underlying asynchronous stream to read from
+            and write to. The caller is responsible for maintaining its
+            lifetime for the duration of the session.
+        @param routes The router used to dispatch incoming HTTP requests.
+        @param close_fn The function invoked when the connection is closed
+            or an unrecoverable error occurs.
+    */
+    http_stream(
         application& app,
         AsyncStream& stream,
-        router_asio<AsyncStream&> rr,
+        router_asio<AsyncStream&> routes,
         any_lambda<void(system::error_code)> close_fn);
 
     /** Called to start a new HTTP session
@@ -54,7 +81,7 @@ public:
         The stream must be in a connected,
         correct state for a new session.
     */
-    void do_session(acceptor_config const& config);
+    void on_stream_begin(acceptor_config const& config);
 
 private:
     void do_read();
@@ -86,7 +113,7 @@ protected:
     section sect_;
     std::size_t id_ = 0;
     AsyncStream& stream_;
-    router_asio<AsyncStream&> rr_;
+    router_asio<AsyncStream&> routes_;
     any_lambda<void(system::error_code)> close_;
     acceptor_config const* pconfig_ = nullptr;
 
@@ -100,13 +127,13 @@ protected:
 //------------------------------------------------
 
 template<class AsyncStream>
-http_session<AsyncStream>::
-http_session(
+http_stream<AsyncStream>::
+http_stream(
     application& app,
     AsyncStream& stream,
-    router_asio<AsyncStream&> rr,
+    router_asio<AsyncStream&> routes,
     any_lambda<void(system::error_code)> close)
-    : sect_(use_log_service(app).get_section("http_session"))
+    : sect_(use_log_service(app).get_section("http_stream"))
     , id_(
         []() noexcept
         {
@@ -114,7 +141,7 @@ http_session(
             return ++n;
         }())
     , stream_(stream)
-    , rr_(std::move(rr))
+    , routes_(std::move(routes))
     , close_(close)
     , res_(stream_)
 {
@@ -131,8 +158,8 @@ http_session(
 */
 template<class AsyncStream>
 void
-http_session<AsyncStream>::
-do_session(
+http_stream<AsyncStream>::
+on_stream_begin(
     acceptor_config const& config)
 {
     pconfig_ = &config;
@@ -142,18 +169,18 @@ do_session(
 
 template<class AsyncStream>
 void
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 do_read()
 {
     req_.parser.start();
     res_.serializer.reset();
     beast2::async_read(stream_, req_.parser,
-        call_mf(&http_session::on_read, this));
+        call_mf(&http_stream::on_read, this));
 }
 
 template<class AsyncStream>
 void 
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 on_read(
     system::error_code ec,
     std::size_t bytes_transferred)
@@ -161,10 +188,10 @@ on_read(
     (void)bytes_transferred;
 
     if(ec.failed())
-        return do_fail("http_session::on_read", ec);
+        return do_fail("http_stream::on_read", ec);
 
     LOG_TRC(this->sect_)(
-        "{} http_session::on_read bytes={}",
+        "{} http_stream::on_read bytes={}",
         this->id(), bytes_transferred);
 
     BOOST_ASSERT(req_.parser.is_complete());
@@ -207,7 +234,7 @@ on_read(
 
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
-    ec = rr_.dispatch(req_.message.method(), req_.url, req_, res_);
+    ec = routes_.dispatch(req_.message.method(), req_.url, req_, res_);
     if(ec == route::send)
         goto do_write;
 
@@ -247,12 +274,12 @@ do_write:
     }
 
     beast2::async_write(stream_, res_.serializer,
-        call_mf(&http_session::on_write, this));
+        call_mf(&http_stream::on_write, this));
 }
 
 template<class AsyncStream>
 void 
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 on_write(
     system::error_code const& ec,
     std::size_t bytes_transferred)
@@ -260,12 +287,12 @@ on_write(
     (void)bytes_transferred;
 
     if(ec.failed())
-        return do_fail("http_session::on_write", ec);
+        return do_fail("http_stream::on_write", ec);
 
     BOOST_ASSERT(res_.serializer.is_done());
 
     LOG_TRC(this->sect_)(
-        "{} http_session::on_write bytes={}",
+        "{} http_stream::on_write bytes={}",
         this->id(), bytes_transferred);
 
     if(res_.message.keep_alive())
@@ -281,7 +308,7 @@ on_write(
 
 template<class AsyncStream>
 void 
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 do_fail(
     core::string_view s, system::error_code const& ec)
 {
@@ -298,7 +325,7 @@ do_fail(
 
 template<class AsyncStream>
 auto
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 do_detach() ->
     resumer
 {
@@ -315,18 +342,18 @@ do_detach() ->
 
 template<class AsyncStream>
 void
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 do_resume(system::error_code const& ec)
 {
     asio::dispatch(
         stream_.get_executor(),
         asio::prepend(call_mf(
-            &http_session::do_resume2, this), ec));
+            &http_stream::do_resume2, this), ec));
 }
 
 template<class AsyncStream>
 void
-http_session<AsyncStream>::
+http_stream<AsyncStream>::
 do_resume2(system::error_code ec)
 {
     BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
@@ -336,7 +363,7 @@ do_resume2(system::error_code ec)
 
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
-    ec = rr_.resume(req_, res_, ec);
+    ec = routes_.resume(req_, res_, ec);
 
     if(ec == route::detach)
     {
@@ -350,7 +377,7 @@ do_resume2(system::error_code ec)
         // give a default error response?
     }
     beast2::async_write(stream_, res_.serializer,
-        call_mf(&http_session::on_write, this));
+        call_mf(&http_stream::on_write, this));
 }
 
 } // beast2
