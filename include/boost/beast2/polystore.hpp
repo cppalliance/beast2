@@ -18,6 +18,8 @@
 #include <boost/core/detail/static_assert.hpp>
 #include <memory>
 #include <type_traits>
+#include <unordered_map>
+#include <vector>
 
 namespace boost {
 namespace beast2 {
@@ -91,9 +93,31 @@ public:
     ~polystore();
 
     /** Constructor
+        The moved-from container will be empty.
     */
     BOOST_BEAST2_DECL
-    polystore();
+    polystore(polystore&& other) noexcept;
+
+    /** Assignment operator
+        The moved-from container will be empty.
+        @return A reference to `*this`.
+    */
+    BOOST_BEAST2_DECL
+    polystore& operator=(polystore&& other) noexcept;
+
+    /** Constructor
+        The container is initially empty.
+    */
+    polystore() = default;
+
+    /** Remove and destroy all objects in the container.
+
+        All stored objects are destroyed in the reverse order
+        of construction. The container is left empty.
+    */
+    BOOST_BEAST2_DECL
+    void
+    clear() noexcept;
 
     /** Return a pointer to the object associated with type `T`, or `nullptr`
 
@@ -482,14 +506,37 @@ private:
             any_impl<T>(std::forward<Args>(args)...));
     }
 
+    void destroy() noexcept;
     BOOST_BEAST2_DECL any& get(std::size_t i);
     BOOST_BEAST2_DECL void* find(
         detail::type_info const& ti) const noexcept;
     BOOST_BEAST2_DECL void* insert_impl(any_ptr,
         key const* = nullptr, std::size_t = 0);
 
-    struct impl;
-    impl* impl_;
+    struct hash
+    {
+        std::size_t operator()(
+            detail::type_info const* p) const noexcept
+        {
+            return p->hash_code();
+        }
+    };
+
+    struct eq
+    {
+        bool operator()(
+            detail::type_info const* p0,
+            detail::type_info const* p1) const noexcept
+        {
+            return *p0 == *p1;
+        }
+    };
+
+    std::vector<any_ptr> v_;
+    std::unordered_map<
+        detail::type_info const*,
+            void*, hash, eq> m_;
+
 };
 
 //------------------------------------------------

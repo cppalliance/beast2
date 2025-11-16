@@ -8,58 +8,51 @@
 //
 
 #include <boost/beast2/polystore.hpp>
-#include <boost/assert.hpp>
-#include <unordered_map>
-#include <vector>
+#include <utility>
 
 namespace boost {
 namespace beast2 {
-
-struct polystore::impl
-{
-    struct hash
-    {
-        std::size_t operator()(
-            detail::type_info const* p) const noexcept
-        {
-            return p->hash_code();
-        }
-    };
-
-    struct eq
-    {
-        bool operator()(
-            detail::type_info const* p0,
-            detail::type_info const* p1) const noexcept
-        {
-            return *p0 == *p1;
-        }
-    };
-
-    std::vector<any_ptr> v;
-    std::unordered_map<
-        detail::type_info const*, void*, hash, eq> m;
-
-    ~impl()
-    {
-        // destroy in reverse order
-        while(! v.empty())
-            v.resize(v.size() - 1);
-    }
-};
 
 polystore::any::~any() = default;
 
 polystore::
 ~polystore()
 {
-    delete impl_;
+    destroy();
 }
 
 polystore::
-polystore()
-    : impl_(new impl)
+polystore(
+    polystore&& other) noexcept
 {
+    using std::swap;
+    swap(v_, other.v_);
+    swap(m_, other.m_);
+}
+
+polystore&
+polystore::
+operator=(
+    polystore&& other) noexcept
+{
+    if(this != &other)
+    {
+        using std::swap;
+        polystore tmp(std::move(*this));
+        swap(v_, tmp.v_);
+        swap(m_, tmp.m_);
+        swap(v_, other.v_);
+        swap(m_, other.m_);
+    }
+    return *this;
+}
+
+void
+polystore::
+clear() noexcept
+{
+    destroy();
+    m_.clear();
 }
 
 auto
@@ -67,14 +60,23 @@ polystore::
 get_elements() noexcept ->
     elements
 {
-    return elements(impl_->v.size(), *this);
+    return elements(v_.size(), *this);
+}
+
+void
+polystore::
+destroy() noexcept
+{
+    // destroy in reverse order
+    for(auto n = v_.size(); n--;)
+        v_.resize(n);
 }
 
 auto
 polystore::
 get(std::size_t i) -> any&
 {
-    return *impl_->v[i];
+    return *v_[i];
 }
 
 void*
@@ -82,8 +84,8 @@ polystore::
 find(
     detail::type_info const& ti) const noexcept
 {
-    auto const it = impl_->m.find(&ti);
-    if(it == impl_->m.end())
+    auto const it = m_.find(&ti);
+    if(it == m_.end())
         return nullptr;
     return it->second;
 }
@@ -98,25 +100,25 @@ insert_impl(
         any_ptr p;
         key const* k;
         std::size_t n;
-        polystore::impl* pi;
+        polystore& ps;
         std::size_t i = 0;
 
         do_insert(
             any_ptr p_,
             key const* k_,
             std::size_t n_,
-            polystore::impl* pi_)
-            : p(std::move(p_)), k(k_), n(n_), pi(pi_)
+            polystore& ps_)
+            : p(std::move(p_)), k(k_), n(n_), ps(ps_)
         {
             // ensure emplace_back can't fail
-            pi->v.reserve(pi->v.size() + 1);
+            ps.v_.reserve(ps.v_.size() + 1);
 
             for(;i < n;++i)
-                if(! pi->m.emplace(k[i].ti, k[i].p).second)
+                if(! ps.m_.emplace(k[i].ti, k[i].p).second)
                     detail::throw_invalid_argument(
                         "polystore: duplicate key");
 
-            pi->v.emplace_back(std::move(p));
+            ps.v_.emplace_back(std::move(p));
         }
 
         ~do_insert()
@@ -124,12 +126,12 @@ insert_impl(
             if(i == n)
                 return;
             while(i--)
-                pi->m.erase(k[i].ti);
+                ps.m_.erase(k[i].ti);
         }
     };
 
     auto const pt = p->get();
-    do_insert(std::move(p), k, n, impl_);
+    do_insert(std::move(p), k, n, *this);
     return pt;
 }
 
