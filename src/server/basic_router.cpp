@@ -556,6 +556,9 @@ dispatch_impl(
 
     res = {};
 
+    // we cannot do anything after do_dispatch returns,
+    // other than return the route_result, or else we
+    // could race with the detached operation trying to resume.
     return do_dispatch(req, res);
 }
 
@@ -631,7 +634,13 @@ dispatch_impl(
                 // res.pos_ can be incremented further
                 // inside the above call to invoke.
                 if(rv == route::detach)
+                {
+                    // It is essential that we return immediately, without
+                    // doing anything after route::detach is returned,
+                    // otherwise we could race with the detached operation
+                    // attempting to call resume().
                     return rv;
+                }
             }
             else
             {
@@ -693,7 +702,11 @@ do_dispatch(
     BOOST_ASSERT(&rv.category() == &detail::route_cat);
     BOOST_ASSERT(rv != route::next_route);
     if(rv != route::next)
+    {
+        // when rv == route::detach we must return immediately,
+        // without attempting to perform any additional operations.
         return rv;
+    }
     if(! res.ec_.failed())
     {
         // unhandled route
