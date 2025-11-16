@@ -420,6 +420,9 @@ any_router::
 new_layer(
     core::string_view pattern) -> layer&
 {
+    // the pattern must not be empty
+    if(pattern.empty())
+        detail::throw_invalid_argument();
     // delete the last route if it is empty,
     // this happens if they call route() without
     // adding anything

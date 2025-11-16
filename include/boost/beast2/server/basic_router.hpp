@@ -24,87 +24,24 @@
 namespace boost {
 namespace beast2 {
 
+template<class, class>
+class basic_router;
+
 //-----------------------------------------------
 
 namespace detail {
 
 class any_router;
 
-// handler kind constants
-// 0 = unrecognized
-// 1 = normal handler (Req&, Res&)
-// 2 = error handler  (Req&, Res&, error_code)
-// 3 = sub-router
-
-template<class T,
-    class Req, class Res, class = void>
-struct get_handler_kind
-    : std::integral_constant<int, 0>
-{
-};
-
-// route_result( Req&, Res& )
-template<class T, class Req, class Res>
-struct get_handler_kind<T, Req, Res,
-    typename std::enable_if<detail::is_invocable<
-        T, route_result, Req&, Res&>::value>::type>
-    : std::integral_constant<int, 1>
-{
-};
-
-// route_result( Req&, Res&, system::error_code )
-template<class T, class Req, class Res>
-struct get_handler_kind<T, Req, Res,
-    typename std::enable_if<detail::is_invocable<
-        T, route_result, Req&, Res&,
-            system::error_code const>::value>::type>
-    : std::integral_constant<int, 2>
-{
-};
-
-// route_result( Req&, Res&, basic_response& )
-template<class T, class Req, class Res>
-struct get_handler_kind<T, Req, Res,
-    typename std::enable_if<detail::derived_from<
-        any_router, T>::value>::type>
-    : std::integral_constant<int, 3>
-{
-};
-
-template<class Req, class Res, class T>
-struct is_handler
-    : std::integral_constant<bool,
-    get_handler_kind<T, Req, Res>::value == 1>
-{
-};
-
-template<class Req, class Res, class... HN>
-struct is_handlers
-    : all_true<is_handler<Req, Res, typename
-            std::decay<HN>::type>::value...>
-{
-};
-
-template<class Req, class Res, class T>
-struct is_error_handler
-    : std::integral_constant<bool,
-    get_handler_kind<T, Req, Res>::value == 2>
-{
-};
-
-template<class Req, class Res, class... HN>
-struct is_error_handlers
-    : all_true<is_error_handler<Req, Res, typename
-            std::decay<HN>::type>::value...>
-{
-};
-
 //-----------------------------------------------
 
 // implementation for all routers
 class any_router
 {
-protected:
+private:
+    template<class, class>
+    friend class beast2::basic_router;
+
     struct BOOST_SYMBOL_VISIBLE any_handler
     {
         BOOST_BEAST2_DECL virtual ~any_handler();
@@ -233,6 +170,12 @@ protected:
     error code, and execute in sequence until one returns a result
     other than @ref route::next.
 
+    The prefix match is not strict: middleware attached to `"/api"`
+    will also match `"/api/users"` and `"/api/data"`. When registered
+    before route handlers for the same prefix, middleware runs before
+    those routes. This is analogous to `app.use(path, ...)` in
+    Express.js.
+
     @par Thread Safety
     Member functions marked `const` such as @ref dispatch and @ref resume
     may be called concurrently on routers that refer to the same data.
@@ -258,29 +201,65 @@ class basic_router : public detail::any_router
     BOOST_CORE_STATIC_ASSERT(
         detail::derived_from<basic_response, Res>::value);
 
+    // 0 = unrecognized
+    // 1 = normal handler (Req&, Res&)
+    // 2 = error handler  (Req&, Res&, error_code)
+    // 4 = basic_router<Req, Res>
+
+    template<class T, class = void>
+    struct handler_type
+        : std::integral_constant<int, 0>
+    {
+    };
+
+    // route_result( Req&, Res& ) const
     template<class T>
-    using is_handler = detail::get_handler_kind<T, Req, Res>;
+    struct handler_type<T, typename
+        std::enable_if<std::is_convertible<
+            decltype(std::declval<T const&>()(
+                std::declval<Req&>(),
+                std::declval<Res&>())),
+            route_result>::value
+        >::type> : std::integral_constant<int, 1> {};
+
+    // route_result( Req&, Res&, system::error_code const& ) const
+    template<class T>
+    struct handler_type<T, typename
+        std::enable_if<std::is_convertible<
+            decltype(std::declval<T const&>()(
+                std::declval<Req&>(),
+                std::declval<Res&>(),
+                std::declval<system::error_code const&>())),
+            route_result>::value
+        >::type> : std::integral_constant<int, 2> {};
+
+    // basic_router<Req, Res>
+    template<class T>
+    struct handler_type<T, typename
+        std::enable_if<
+            std::is_base_of<any_router, T>::value &&
+            std::is_convertible<T const volatile*,
+                any_router const volatile*>::value &&
+            std::is_constructible<T, basic_router<Req, Res>>::value
+        >::type> : std::integral_constant<int, 4> {};
+
+    template<std::size_t Mask, class... Ts>
+    struct handler_check : std::true_type {};
+
+    template<std::size_t Mask, class T0, class... Ts>
+    struct handler_check<Mask, T0, Ts...>
+        : std::conditional<
+              ( (handler_type<T0>::value & Mask) != 0 ),
+              handler_check<Mask, Ts...>,
+              std::false_type
+          >::type {};
 
 public:
     /** The type of request object used in handlers
-
-        Route handlers and error handlers must have these
-        invocable signatures respectively:
-        @code
-        route_result(Req&, Res&)
-        route_result(Req&, Res&, system::error_code)
-        @endcode
     */
     using request_type = Req;
 
     /** The type of response object used in handlers
-
-        Route handlers and error handlers must have these
-        invocable signatures respectively:
-        @code
-        route_result(Req&, Res&)
-        route_result(Req&, Res&, system::error_code)
-        @endcode
     */
     using response_type = Res;
 
@@ -289,8 +268,6 @@ public:
         This type represents a single route within the router and
         provides a chainable API for registering handlers associated
         with particular HTTP methods or for all methods collectively.
-        Instances of this type are returned by @ref basic_router::route
-        and remain valid for the lifetime of the parent router.
 
         Typical usage registers one or more handlers for a route:
         @code
@@ -300,8 +277,7 @@ public:
             .all(log_access);
         @endcode
 
-        Each call appends handlers in registration order, preserving
-        the same semantics as Express.js routes.
+        Each call appends handlers in registration order.
     */
     class fluent_route;
 
@@ -349,12 +325,6 @@ public:
         and may return @ref route::next to transfer control to the
         subsequent handler in the chain.
 
-        The prefix match is not strict: middleware attached to `"/api"`
-        will also match `"/api/users"` and `"/api/data"`. When registered
-        before route handlers for the same prefix, middleware runs before
-        those routes. This is analogous to `app.use(path, ...)` in
-        Express.js.
-
         @par Example
         @code
         router.use("/api",
@@ -364,7 +334,7 @@ public:
                 {
                     res.status(401);
                     res.set_body("Unauthorized");
-                    return route::done;
+                    return route::send;
                 }
                 return route::next;
             },
@@ -380,28 +350,30 @@ public:
             indicate the root scope.
 
         @param pattern The pattern to match.
-        @param h1 The first handler to install.
-        @param hn Additional handlers to install.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
     */
-    // VFALCO constrain that all are valid handlers
     template<class H1, class... HN>
     void use(
         core::string_view pattern,
         H1&& h1, HN... hn)
     {
-        add_impl(pattern,
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler,
+        // error handler, or router.
+        BOOST_CORE_STATIC_ASSERT(handler_check<7, H1, HN...>::value);
+        add_impl(pattern, make_handler_list(
+            std::forward<H1>(h1), std::forward<HN>(hn)...));
     }
 
     /** Add one or more global middleware handlers.
-
+        
         Each handler registered with this function participates in the
-        routing and error-dispatch process as described in the class
-        documentation for @ref basic_router. Handlers execute in the
-        order they were added, and may return @ref route::next to transfer
-        control to the subsequent handler in the chain.
+        routing and error-dispatch process as described in the
+        @ref basic_router class documentation. Handlers execute in the
+        order they are added and may return @ref route::next to transfer
+        control to the next handler in the chain.
 
         This is equivalent to writing:
         @code
@@ -413,26 +385,120 @@ public:
         router.use(
             [](Request&, Response& res)
             {
-                res.message.erase( "X-Powered-By" );
+                res.message.erase("X-Powered-By");
                 return route::next;
             });
         @endcode
 
         @par Constraints
-        `h1` is a valid handler type
+        @li `h1` must not be convertible to @ref core::string_view.
 
-        @param h1 The first middleware handler.
-        @param hn Additional middleware handlers.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
     */
     template<class H1, class... HN
-        // VFALCO constrain that all are valid handlers
-        , class = typename std::enable_if<is_handler<H1>::value != 0>::type
-    >
+        , class = typename std::enable_if<
+            ! std::is_convertible<H1, core::string_view>::value>::type>
     void use(H1&& h1, HN&&... hn)
     {
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler,
+        // error handler, or router.
+        BOOST_CORE_STATIC_ASSERT(handler_check<7, H1, HN...>::value);
         use(core::string_view(),
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
+            std::forward<H1>(h1), std::forward<HN>(hn)...);
+    }
+
+    /** Add handlers for all HTTP methods matching a path pattern.
+        
+        This registers regular handlers for the specified path pattern,
+        participating in dispatch as described in the @ref basic_router
+        class documentation. Handlers run when the route matches,
+        regardless of HTTP method, and execute in registration order.
+        Error handlers and routers cannot be passed here. A new route
+        object is created even if the pattern already exists.
+
+        @code
+        router.route("/status")
+            .head(check_headers)
+            .get(send_status)
+            .all(log_access);
+        @endcode
+
+        @par Preconditions
+        @p `pattern` must be a valid path pattern; it must not be empty.
+
+        @param pattern The path pattern to match.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
+    */
+    template<class H1, class... HN>
+    void all(
+        core::string_view pattern,
+        H1&& h1, HN&&... hn)
+    {
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler.
+        // Error handlers and routers cannot be passed here.
+        BOOST_CORE_STATIC_ASSERT(handler_check<1, H1, HN...>::value);
+        this->route(pattern).all(
+            std::forward<H1>(h1), std::forward<HN>(hn)...);
+    }
+
+    /** Add one or more route handlers for a method and pattern.
+        
+        This registers regular handlers for the specified HTTP verb and
+        path pattern, participating in dispatch as described in the
+        @ref basic_router class documentation. Error handlers and
+        routers cannot be passed here.
+
+        @param verb The known HTTP method to match.
+        @param pattern The path pattern to match.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
+    */
+    template<class H1, class... HN>
+    void add(
+        http_proto::method verb,
+        core::string_view pattern,
+        H1&& h1, HN&&... hn)
+    {
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler.
+        // Error handlers and routers cannot be passed here.
+        BOOST_CORE_STATIC_ASSERT(handler_check<1, H1, HN...>::value);
+        this->route(pattern).add(verb,
+            std::forward<H1>(h1), std::forward<HN>(hn)...);
+    }
+
+    /** Add one or more route handlers for a method and pattern.
+        
+        This registers regular handlers for the specified HTTP verb and
+        path pattern, participating in dispatch as described in the
+        @ref basic_router class documentation. Error handlers and
+        routers cannot be passed here.
+
+        @param verb The HTTP method string to match.
+        @param pattern The path pattern to match.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
+    */
+    template<class H1, class... HN>
+    void add(
+        core::string_view verb,
+        core::string_view pattern,
+        H1&& h1, HN&&... hn)
+    {
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler.
+        // Error handlers and routers cannot be passed here.
+        BOOST_CORE_STATIC_ASSERT(handler_check<1, H1, HN...>::value);
+        this->route(pattern).add(verb,
+            std::forward<H1>(h1), std::forward<HN>(hn)...);
     }
 
     /** Return a fluent route for the specified path pattern.
@@ -446,7 +512,7 @@ public:
 
         @param pattern The path expression to match against request
         targets. This may include parameters or wildcards following
-        the router's pattern syntax.
+        the router's pattern syntax. May not be empty.
         @return A fluent route interface for chaining handler registrations.
     */
     auto
@@ -456,85 +522,33 @@ public:
         return fluent_route(*this, pattern);
     }
 
-    /** Register handlers for all HTTP methods matching a path pattern.
-    
-        Creates a new route for the given pattern and appends one or more
-        handlers that run when the route matches, regardless of HTTP method.
-        A new route object is created even if the pattern already exists.
-        Handlers execute in registration order. Returns a @ref fluent_route
-        for chaining.
-    
-        @code
-        router.route("/status")
-            .head(check_headers)
-            .get(send_status)
-            .all(log_access);
-        @endcode
-    
-        @param pattern The path pattern to match.
-        @param h1 The first handler to add.
-        @param hn Additional handlers, invoked after @p h1 in registration order.
-        @return A @ref fluent_route for additional registrations.
-    */
-    // VFALCO constrain that all are handlers and not error handlers
-    template<class H1, class... HN>
-    auto all(
-        core::string_view pattern,
-        H1&& h1, HN&&... hn) -> fluent_route
-    {
-        return this->route(pattern).all(
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-
-    /** Register handlers for a specific HTTP method and path pattern.
-
-        Creates a new route for the specified pattern and attaches
-        one or more handlers that will be invoked for incoming requests
-        whose targets match that pattern and whose method matches the
-        specified value. A new route object is always created, even if
-        another route with the same pattern already exists. Handlers are
-        executed in the order of registration.
-
-        @param verb The HTTP method to match.
-        @param pattern The path expression to match against request
-        targets. This may include parameters or wildcards following
-        the router's pattern syntax.
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after @p h1 in registration order.
-    */
-    // VFALCO constrain that all are handlers and not error handlers
-    template<class H1, class... HN>
-    void add(
-        http_proto::method verb,
-        core::string_view pattern,
-        H1&& h1, HN&&... hn)
-    {
-        this->route(pattern).add(
-            verb,
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-    template<class H1, class... HN>
-    void add(
-        core::string_view verb,
-        core::string_view pattern,
-        H1&& h1, HN&&... hn)
-    {
-        this->route(pattern).add(
-            verb,
-            std::forward<H1>(h1),
-            std::forward<HN>(hn)...);
-    }
-
-
     //--------------------------------------------
 
+    /** Dispatch a request to the appropriate handler.
+        
+        This runs the routing and error-dispatch logic for the given HTTP
+        method and target URL, as described in the @ref basic_router class
+        documentation.
+
+        @par Thread Safety
+        This function may be called concurrently on the same object along
+        with other `const` member functions. Each concurrent invocation
+        must use distinct request and response objects.
+
+        @param verb The HTTP method to match. This must not be
+            @ref http_proto::method::unknown.
+        @param url The full request target used for route matching.
+        @param req The request to pass to handlers.
+        @param res The response to pass to handlers.
+        @return The @ref route_result describing how routing completed.
+        @throws std::invalid_argument If @p verb is
+            @ref http_proto::method::unknown.
+    */
     auto
     dispatch(
         http_proto::method verb,
         urls::url_view const& url,
-        Req& req, Res& res) ->
+        Req& req, Res& res) const ->
             route_result
     {
         if(verb == http_proto::method::unknown)
@@ -543,6 +557,25 @@ public:
             core::string_view(), url, req, res);
     }
 
+    /** Dispatch a request to the appropriate handler using a method string.
+        
+        This runs the routing and error-dispatch logic for the given HTTP
+        method string and target URL, as described in the @ref basic_router
+        class documentation. This overload is intended for method tokens
+        that are not represented by @ref http_proto::method.
+
+        @par Thread Safety
+        This function may be called concurrently on the same object along
+        with other `const` member functions. Each concurrent invocation
+        must use distinct request and response objects.
+
+        @param verb The HTTP method string to match. This must not be empty.
+        @param url The full request target used for route matching.
+        @param req The request to pass to handlers.
+        @param res The response to pass to handlers.
+        @return The @ref route_result describing how routing completed.
+        @throws std::invalid_argument If @p verb is empty.
+    */
     auto
     dispatch(
         core::string_view verb,
@@ -558,18 +591,138 @@ public:
                 verb, url, req, res);
     }
 
+    /** Resume dispatch after a detached handler.
+        
+        This continues routing after a previous call to @ref dispatch
+        returned @ref route::detach. It recreates the routing state and
+        resumes as if the handler that detached had instead returned
+        the specified @p ec from its body. The regular routing and
+        error-dispatch logic then proceeds as described in the
+        @ref basic_router class documentation. For example, if @p ec is
+        @ref route::next, the next matching handlers are invoked.
+
+        @par Thread Safety
+        This function may be called concurrently on the same object along
+        with other `const` member functions. Each concurrent invocation
+        must use distinct request and response objects.
+
+        @param req The request to pass to handlers.
+        @param res The response to pass to handlers.
+        @param rv The @ref route_result to resume with, as if returned
+            by the detached handler.
+        @return The @ref route_result describing how routing completed.
+    */
     auto
     resume(
         Req& req, Res& res,
-        route_result const& ec) const ->
+        route_result const& rv) const ->
             route_result
     {
-        return resume_impl(req, res, ec);
+        return resume_impl(req, res, rv);
     }
 
 private:
-    template<class T>
-    struct handler_impl;
+    // wrapper for route handlers
+    template<class H>
+    struct handler_impl : any_handler
+    {
+        typename std::decay<H>::type h;
+
+        template<class... Args>
+        explicit handler_impl(Args&&... args)
+            : h(std::forward<Args>(args)...)
+        {
+        }
+
+        std::size_t
+        count() const noexcept override
+        {
+            return count(
+                handler_type<decltype(h)>{});
+        }
+
+        route_result
+        invoke(
+            basic_request& req,
+            basic_response& res) const override
+        {
+            return invoke(
+                static_cast<Req&>(req),
+                static_cast<Res&>(res),
+                handler_type<decltype(h)>{});
+        }
+
+    private:
+        std::size_t count(
+            std::integral_constant<int, 0>) = delete;
+
+        std::size_t count(
+            std::integral_constant<int, 1>) const noexcept
+        {
+            return 1;
+        }
+
+        std::size_t count(
+            std::integral_constant<int, 2>) const noexcept
+        {
+            return 1;
+        }
+
+        std::size_t count(
+            std::integral_constant<int, 4>) const noexcept
+        {
+            return 1 + h.count();
+        }
+
+        route_result invoke(Req&, Res&,
+            std::integral_constant<int, 0>) const = delete;
+
+        // (Req, Res)
+        route_result invoke(Req& req, Res& res,
+            std::integral_constant<int, 1>) const
+        {
+            auto const& ec = static_cast<
+                basic_response const&>(res).ec_;
+            if(ec.failed())
+                return beast2::route::next;
+            // avoid racing on res.resume_
+            res.resume_ = res.pos_;
+            auto rv = h(req, res);
+            if(rv == beast2::route::detach)
+                return rv;
+            res.resume_ = 0; // revert
+            return rv;
+        }
+
+        // (Req&, Res&, error_code)
+        route_result
+        invoke(Req& req, Res& res,
+            std::integral_constant<int, 2>) const
+        {
+            auto const& ec = static_cast<
+                basic_response const&>(res).ec_;
+            if(! ec.failed())
+                return beast2::route::next;
+            // avoid racing on res.resume_
+            res.resume_ = res.pos_;
+            auto rv = h(req, res, ec);
+            if(rv == beast2::route::detach)
+                return rv;
+            res.resume_ = 0; // revert
+            return rv;
+        }
+
+        // any_router
+        route_result invoke(Req& req, Res& res,
+            std::integral_constant<int, 4>) const
+        {
+            auto const& ec = static_cast<
+                basic_response const&>(res).ec_;
+            if(! ec.failed())
+                return h.dispatch_impl(req, res);
+            return beast2::route::next;
+        }
+    };
 
     template<std::size_t N>
     struct handler_list_impl : handler_list
@@ -625,16 +778,16 @@ class basic_router<Req, Res>::
 public:
     fluent_route(fluent_route const&) = default;
 
-    /** Register handlers that apply to all HTTP methods.
+    /** Add handlers that apply to all HTTP methods.
+        
+        This registers regular handlers that run for any request matching
+        the route's pattern, regardless of HTTP method. Handlers are
+        appended to the route's handler sequence and are invoked in
+        registration order whenever a preceding handler returns
+        @ref route::next. Error handlers and routers cannot be passed here.
 
-        Adds one or more handlers that will be invoked for any request
-        whose method is not matched by a more specific registration.
-        These handlers run in the order of registration relative to
-        other method-specific handlers on the same route.
-
-        This function returns a @ref fluent_route, allowing
-        additional method registrations to be chained.
-        For example:
+        This function returns a @ref fluent_route, allowing additional
+        method registrations to be chained. For example:
         @code
         router.route("/resource")
             .all(log_request)
@@ -642,49 +795,39 @@ public:
             .post(update_resource);
         @endcode
 
-        @param h1 The first handler to invoke when the route matches.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return The fluent route interface for further
-        chained handler registrations.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
+        @return The @ref fluent_route for further chained registrations.
     */
     template<class H1, class... HN>
     auto all(
         H1&& h1, HN&&... hn) ->
             fluent_route
     {
-        owner_.add_impl(e_, core::string_view(),
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler.
+        // Error handlers and routers cannot be passed here.
+        BOOST_CORE_STATIC_ASSERT(handler_check<1, H1, HN...>::value);
+        owner_.add_impl(e_, core::string_view(), make_handler_list(
+            std::forward<H1>(h1), std::forward<HN>(hn)...));
         return *this;
     }
 
-    /** Register handlers for a specific HTTP method.
+    /** Add handlers for a specific HTTP method.
+        
+        This registers regular handlers for the given method on the
+        current route, participating in dispatch as described in the
+        @ref basic_router class documentation. Handlers are appended
+        to the route's handler sequence and invoked in registration
+        order whenever a preceding handler returns @ref route::next.
+        Error handlers and routers cannot be passed here.
 
-        Adds one or more handlers to be invoked when a request matches
-        this route and uses the specified HTTP method. The method must
-        not be @ref http_proto::method::unknown; attempting to register
-        handlers with that value will throw an exception.
-
-        Handlers are executed in the order of registration relative to
-        other handlers for the same route and method. The function
-        returns the @ref fluent_route, allowing
-        additional method registrations to be chained. For example:
-        @code
-        router.route("/item")
-            .add(http_proto::method::put, update_item)
-            .add(http_proto::method::delete_, remove_item);
-        @endcode
-
-        @param verb The HTTP method for which to register the handlers.
-        @param h1 The first handler to invoke when the route and method
-        both match.
-        @param hn Additional handlers, invoked sequentially after
-        @p h1 in registration order.
-        @return The fluent route interface for further
-            chained handler registrations.
-        @ref http_proto::method::unknown.
+        @param verb The HTTP method to match.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
+        @return The @ref fluent_route for further chained registrations.
     */
     template<class H1, class... HN>
     auto add(
@@ -692,24 +835,47 @@ public:
         H1&& h1, HN&&... hn) ->
             fluent_route
     {
-        owner_.add_impl(e_, verb,
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler.
+        // Error handlers and routers cannot be passed here.
+        BOOST_CORE_STATIC_ASSERT(handler_check<1, H1, HN...>::value);
+        owner_.add_impl(e_, verb, make_handler_list(
+            std::forward<H1>(h1), std::forward<HN>(hn)...));
         return *this;
     }
 
+    /** Add handlers for a method name.
+        
+        This registers regular handlers for the given HTTP method string
+        on the current route, participating in dispatch as described in
+        the @ref basic_router class documentation. This overload is
+        intended for methods not represented by @ref http_proto::method.
+        Handlers are appended to the route's handler sequence and invoked
+        in registration order whenever a preceding handler returns
+        @ref route::next.
+
+        @par Constraints
+        @li Each handler must be a regular handler; error handlers and
+            routers cannot be passed.
+
+        @param verb The HTTP method string to match.
+        @param h1 The first handler to add.
+        @param hn Additional handlers to add, invoked after @p h1 in
+            registration order.
+        @return The @ref fluent_route for further chained registrations.
+    */
     template<class H1, class... HN>
     auto add(
         core::string_view verb,
         H1&& h1, HN&&... hn) ->
             fluent_route
     {
-        // all methods if verb.empty()==true
-        owner_.add_impl(e_, verb,
-            make_handler_list(
-                std::forward<H1>(h1),
-                std::forward<HN>(hn)...));
+        // If you get a compile error on this line it means that
+        // one or more of the provided types is not a valid handler.
+        // Error handlers and routers cannot be passed here.
+        BOOST_CORE_STATIC_ASSERT(handler_check<1, H1, HN...>::value);
+        owner_.add_impl(e_, verb, make_handler_list(
+            std::forward<H1>(h1), std::forward<HN>(hn)...));
         return *this;
     }
 
@@ -725,114 +891,6 @@ private:
 
     layer& e_;
     basic_router& owner_;
-};
-
-//-----------------------------------------------
-
-// wrapper for route handlers
-template<class Req, class Res>
-template<class H>
-struct basic_router<Req, Res>::
-    handler_impl : any_handler
-{
-    typename std::decay<H>::type h;
-
-    template<class... Args>
-    explicit handler_impl(Args&&... args)
-        : h(std::forward<Args>(args)...)
-    {
-    }
-
-    std::size_t
-    count() const noexcept override
-    {
-        return count(
-            detail::get_handler_kind<
-                decltype(h), Req, Res>{});
-    }
-
-    route_result
-    invoke(
-        basic_request& req,
-        basic_response& res) const override
-    {
-        return invoke(
-            static_cast<Req&>(req),
-            static_cast<Res&>(res),
-            detail::get_handler_kind<
-                decltype(h), Req, Res>{});
-    }
-
-private:
-    std::size_t count(
-        std::integral_constant<int, 0>) = delete;
-
-    std::size_t count(
-        std::integral_constant<int, 1>) const noexcept
-    {
-        return 1;
-    }
-
-    std::size_t count(
-        std::integral_constant<int, 2>) const noexcept
-    {
-        return 1;
-    }
-
-    std::size_t count(
-        std::integral_constant<int, 3>) const noexcept
-    {
-        return 1 + h.count();
-    }
-
-    route_result invoke(Req&, Res&,
-        std::integral_constant<int, 0>) const = delete;
-
-    // (Req, Res)
-    route_result invoke(Req& req, Res& res,
-        std::integral_constant<int, 1>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(ec.failed())
-            return beast2::route::next;
-        // avoid racing on res.resume_
-        res.resume_ = res.pos_;
-        auto rv = h(req, res);
-        if(rv == beast2::route::detach)
-            return rv;
-        res.resume_ = 0; // revert
-        return rv;
-    }
-
-    // (Req&, Res&, error_code)
-    route_result
-    invoke(Req& req, Res& res,
-        std::integral_constant<int, 2>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(! ec.failed())
-            return beast2::route::next;
-        // avoid racing on res.resume_
-        res.resume_ = res.pos_;
-        auto rv = h(req, res, ec);
-        if(rv == beast2::route::detach)
-            return rv;
-        res.resume_ = 0; // revert
-        return rv;
-    }
-
-    // any_router
-    route_result invoke(Req& req, Res& res,
-        std::integral_constant<int, 3>) const
-    {
-        auto const& ec = static_cast<
-            basic_response const&>(res).ec_;
-        if(! ec.failed())
-            return h.dispatch_impl(req, res);
-        return beast2::route::next;
-    }
 };
 
 } // beast2

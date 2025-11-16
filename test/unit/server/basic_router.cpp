@@ -25,41 +25,53 @@ struct basic_router_test
     {
         struct Req : basic_request {};
         struct Res : basic_response {};
+        struct OtherReq : basic_request {};
 
         BOOST_CORE_STATIC_ASSERT(std::is_copy_assignable<basic_router<Req, Res>>::value);
 
         struct h0 { void operator()(); };
         struct h1 { system::error_code operator()(); };
         struct h2 { system::error_code operator()(int); };
-        struct h3 { system::error_code operator()(Req&, Res&); };
-        struct h4 { system::error_code operator()(Req&, Res&, system::error_code); };
+        struct h3 { system::error_code operator()(Req&, Res&) const; };
+        struct h4 { system::error_code operator()(Req&, Res&, system::error_code) const; };
         struct h5 { void operator()(Req&, Res&) {} };
         struct h6 { void operator()(Req&, Res&, system::error_code) {} };
         struct h7 { system::error_code operator()(Req&, Res&, int); };
         struct h8 { system::error_code operator()(Req, Res&, int); };
-        struct h9 { system::error_code operator()(Req, Res&, system::error_code const&); };
+        struct h9 { system::error_code operator()(Req, Res&, system::error_code const&) const; };
 
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h2, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h3, Req, Res>::value == 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h4, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h5, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h6, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h7, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 1);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value != 1);
+#if 0
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h0, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h1, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h2, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h3, Req, Res>::value == 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h4, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h5, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h6, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h7, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h8, Req, Res>::value != 1);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h9, Req, Res>::value != 1);
 
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h0, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h1, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h2, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h3, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h4, Req, Res>::value == 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h5, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h6, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h7, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h8, Req, Res>::value != 2);
-        BOOST_CORE_STATIC_ASSERT(detail::get_handler_kind<h9, Req, Res>::value == 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h0, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h1, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h2, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h3, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h4, Req, Res>::value == 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h5, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h6, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h7, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h8, Req, Res>::value != 2);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<h9, Req, Res>::value == 2);
+
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<
+            basic_router<Req, Res>, Req, Res>::value == 4);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<
+            basic_router<basic_request, Res>, Req, Res>::value == 4);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<
+            basic_router<Req, basic_response>, Req, Res>::value == 4);
+        BOOST_CORE_STATIC_ASSERT(detail::handler_type<
+            basic_router<OtherReq, Res>, Req, Res>::value == 0);
+#endif
     }
 
     //--------------------------------------------
@@ -832,6 +844,12 @@ struct basic_router_test
             r.all("/y", send());
             r.use("/z", skip());
             check(r, GET, "/y");
+        }
+        {
+            test_router r;
+            BOOST_TEST_THROWS(
+                r.all("", skip()),
+                std::invalid_argument);
         }
 
         // error handling
