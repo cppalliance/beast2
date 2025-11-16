@@ -336,11 +336,47 @@ struct basic_router_test
 
     //--------------------------------------------
 
-    void testEmpty()
+    // special members
+    void testSpecial()
     {
-        // routers with no layers
-        test_router r;
-        check(r, "/", route::next);
+        // default construction
+        {
+            test_router r;
+            check(r, "/", route::next);
+        }
+
+        // copy construction
+        {
+            test_router r0;
+            r0.use(send());
+            check(r0, "/");
+            test_router r1(r0);
+            check(r1, "/");
+            check(r0, "/");
+        }
+
+        // move assignment
+        {
+            test_router r0;
+            r0.use(send());
+            check(r0, "/");
+            test_router r1;
+            check(r1, "/", route::next);
+            r1 = std::move(r0);
+            check(r1, "/");
+        }
+
+        // copy assignment
+        {
+            test_router r0;
+            r0.use(send());
+            check(r0, "/");
+            test_router r1;
+            check(r1, "/", route::next);
+            r1 = r0;
+            check(r1, "/");
+            check(r0, "/");
+        }
     }
 
     void testUse()
@@ -889,6 +925,64 @@ struct basic_router_test
                 err_send(er2));
             check(r, POST, "/");
         }
+
+        // request with known method, custom route
+        {
+            test_router r;
+            r.route("/")
+                .add("BEAUCOMP", skip());
+            check(r, GET, "/", route::next);
+        }
+
+        // clean up empty routes
+        {
+            test_router r;
+            r.route("/empty");
+            r.route("/not-empty")
+                .add(GET, send());
+            check(r, "/empty", route::next);
+            check(r, "/not-empty");
+        }
+
+        // bad verb
+        {
+            test_router r;
+            BOOST_TEST_THROWS(
+                r.route("/").add(http_proto::method::unknown, skip()),
+                std::invalid_argument);
+        }
+
+        // skip route on error
+        {
+            test_router r;
+            r.route("/")
+                .add(GET, next())
+                .add(GET, fail(er))
+                .add(GET, skip())
+                .all(skip())
+                .add(POST, skip());
+            r.route("/")
+                .all(skip());
+            r.use(err_send(er));
+            check(r, GET, "/");
+        }
+
+        // skip route on next_route
+        {
+            test_router r;
+            r.route("/")
+                .add(GET, next())
+                .add(GET, next())
+                .add(GET, fail(route::next_route))
+                .add(GET, skip())
+                .add(GET, skip())
+                .add(GET, skip())
+                .add(GET, skip())
+                .all(skip());
+            r.route("/")
+                .add(GET, send());
+            check(r, GET, "/");
+        }
     }
 
     void testSubRouter()
@@ -1140,6 +1234,42 @@ struct basic_router_test
         path("/api/", "/api/v0", "/v0");
     }
 
+    void testPctDecode()
+    {
+        static auto const GET = http_proto::method::get;
+
+        // slash
+        {
+            test_router r;
+            r.add(GET, "/auth/login", skip());
+            check(r, "/auth%2flogin", route::next);
+        }
+
+        // backslash
+        {
+            test_router r;
+            r.add(GET, "/auth\\login", skip());
+            check(r, "/auth%5clogin", route::next);
+        }
+
+        // unreserved
+        {
+            test_router r;
+            r.add(GET, "/a", send());
+            check(r, "/%61");
+        }
+        {
+            test_router r;
+            r.add(GET, "/%61", send());
+            check(r, "/%61");
+        }
+        {
+            test_router r;
+            r.add(GET, "/%61", send());
+            check(r, "/a");
+        }
+    }
+
     void testDetach()
     {
         static auto const GET = http_proto::method::get;
@@ -1190,16 +1320,82 @@ struct basic_router_test
             auto rv2 = r.resume(req, res, route::next);
             BOOST_TEST(rv2 == route::send);
         }
+
+        // return values
+        {
+            test_router r;
+            r.use(fail(route::detach));
+            Req req;
+            Res res;
+            {
+                auto rv1 = r.dispatch(GET, urls::url_view("/"), req, res);
+                BOOST_TEST(rv1 == route::detach);
+                auto rv2 = r.resume(req, res, route::send);
+                BOOST_TEST(rv2 == route::send);
+            }
+            {
+                auto rv1 = r.dispatch(GET, urls::url_view("/"), req, res);
+                BOOST_TEST(rv1 == route::detach);
+                auto rv2 = r.resume(req, res, route::close);
+                BOOST_TEST(rv2 == route::close);
+            }
+            {
+                auto rv1 = r.dispatch(GET, urls::url_view("/"), req, res);
+                BOOST_TEST(rv1 == route::detach);
+                auto rv2 = r.resume(req, res, route::complete);
+                BOOST_TEST(rv2 == route::complete);
+            }
+            {
+                auto rv1 = r.dispatch(GET, urls::url_view("/"), req, res);
+                BOOST_TEST(rv1 == route::detach);
+                BOOST_TEST_THROWS(r.resume(req, res, system::error_code()),
+                    std::invalid_argument);
+            }
+        }
+
+        // path restoration
+        {
+            test_router r;
+            r.use(next());
+            r.use("/api", []{
+                test_router r;
+                r.use(
+                    next(),
+                    fail(route::detach),
+                    path("/api", "/"),
+                    next());
+                return r; }());
+            r.use("/api", send());
+            Req req;
+            Res res;
+            auto rv1 = r.dispatch(GET, urls::url_view("/api"), req, res);
+            BOOST_TEST(rv1 == route::detach);
+            auto rv2 = r.resume(req, res, route::next);
+            BOOST_TEST(rv2 == route::send);
+        }
+
+        // detach on resume
+        {
+            test_router r;
+            r.use(fail(route::detach));
+            Req req;
+            Res res;
+            auto rv1 = r.dispatch(GET, urls::url_view("/"), req, res);
+            BOOST_TEST(rv1 == route::detach);
+            BOOST_TEST_THROWS(r.resume(req, res, route::detach),
+                std::invalid_argument);
+        }
     }
 
     void run()
     {
-        testEmpty();
+        testSpecial();
         testUse();
         testRoute();
         testSubRouter();
         testErr();
         testPath();
+        testPctDecode();
         testDetach();
     }
 };

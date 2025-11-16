@@ -64,7 +64,34 @@ std::string
 pct_decode(
     urls::pct_string_view s)
 {
-    return core::string_view(s); // for now
+    std::string result;
+    core::string_view sv(s);
+    result.reserve(s.size());
+    auto it = sv.data();
+    auto const end = it + sv.size();
+    for(;;)
+    {
+        if(it == end)
+            return result;
+        if(*it != '%')
+        {
+            result.push_back(*it++);
+            continue;
+        }
+        if(++it == end)
+            break;
+        auto d0 = urls::grammar::hexdig_value(*it++);
+        if( d0 < 0 ||
+            it == end)
+            break;
+        auto d1 = urls::grammar::hexdig_value(*it++);
+        if(d1 < 0)
+            break;
+        result.push_back(d0 * 16 + d1);
+    }
+    // can't get here, as received a pct_string_view
+    detail::throw_invalid_argument(
+        "bad percent encoding");
 }
 
 // decode all percent escapes except slashes '/' and '\'
@@ -96,7 +123,7 @@ pct_decode_path(
         auto d1 = urls::grammar::hexdig_value(*it++);
         if(d1 < 0)
             break;
-        char c = d0 * 4 + d1;
+        char c = d0 * 16 + d1;
         if( c != '/' &&
             c != '\\')
         {
@@ -105,6 +132,7 @@ pct_decode_path(
         }
         result.append(it - 3, 3);
     }
+    // can't get here, as received a pct_string_view
     detail::throw_invalid_argument(
         "bad percent encoding");
 }
@@ -179,7 +207,7 @@ struct any_router::matcher
         bool strict)
         : end(end_)
         , decoded_pat_(
-            [&]
+            [&pat]
             {
                 auto s = pct_decode(pat);
                 if( s.size() > 1
