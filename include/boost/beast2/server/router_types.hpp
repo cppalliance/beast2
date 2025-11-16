@@ -297,7 +297,11 @@ private:
     std::string verb_str_;
     std::string decoded_path_;
     bool addedSlash_ = false;
+    bool case_sensitive = false;
+    bool strict = false;
 };
+
+//-----------------------------------------------
 
 /** Base class for response objects
 
@@ -314,6 +318,7 @@ private:
     std::size_t pos_ = 0;
     std::size_t resume_ = 0;
     system::error_code ec_;
+    unsigned int opt_ = 0;
 };
 
 } // beast2

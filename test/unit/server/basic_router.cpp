@@ -377,6 +377,15 @@ struct basic_router_test
             check(r1, "/");
             check(r0, "/");
         }
+
+        // options
+        {
+            // make sure this compiles
+            test_router r(router_options()
+                .case_sensitive(true)
+                .merge_params(true)
+                .strict(false));
+        }
     }
 
     void testUse()
@@ -686,6 +695,25 @@ struct basic_router_test
                 err_skip(),
                 skip());
             check(r,"/y");
+        }
+
+        // case sensitivity
+        {
+            test_router r(router_options()
+                .case_sensitive(true));
+            r.use("/x", skip());
+            check(r, "/X", route::next);
+        }
+        {
+            test_router r(router_options()
+                .case_sensitive(false));
+            r.use("/x", send());
+            check(r, "/X");
+        }
+        {
+            test_router r;
+            r.use("/x", send());
+            check(r, "/X");
         }
     }
 
@@ -1084,6 +1112,44 @@ struct basic_router_test
             check(r, POST, "/api/user");
         }
 
+        // nested options
+        {
+            test_router r(router_options()
+                .case_sensitive(true));
+            r.use("/api", []{
+                test_router r;
+                r.route("/USER")
+                    .add(GET, skip());
+                r.route("/user")
+                    .add(GET, send());
+                return r; }());
+            check(r, "/api/user");
+        }
+        {
+            test_router r(router_options()
+                .case_sensitive(true));
+            r.use("/api", []{
+                test_router r(router_options()
+                    .case_sensitive(false));
+                r.route("/USER")
+                    .add(GET, send());
+                r.route("/user")
+                    .add(GET, skip());
+                return r; }());
+            check(r, "/api/user");
+        }
+        {
+            test_router r;
+            r.use("/api", []{
+                test_router r(router_options()
+                    .case_sensitive(true));
+                r.route("/USER")
+                    .add(GET, send());
+                r.route("/user")
+                    .add(GET, skip());
+                return r; }());
+            check(r, "/api/USER");
+        }
     }
 
     void testErr()

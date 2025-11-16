@@ -24,6 +24,42 @@ namespace beast2 {
 
 namespace detail {
 
+// VFALCO Temporarily here until Boost.URL merges the fix
+static
+bool
+ci_is_equal(
+    core::string_view s0,
+    core::string_view s1) noexcept
+{
+    auto n = s0.size();
+    if(s1.size() != n)
+        return false;
+    auto p1 = s0.data();
+    auto p2 = s1.data();
+    char a, b;
+    // fast loop
+    while(n--)
+    {
+        a = *p1++;
+        b = *p2++;
+        if(a != b)
+            goto slow;
+    }
+    return true;
+    do
+    {
+        a = *p1++;
+        b = *p2++;
+    slow:
+        if( grammar::to_lower(a) !=
+            grammar::to_lower(b))
+            return false;
+    }
+    while(n--);
+    return true;
+}
+
+
 //------------------------------------------------
 /*
 
@@ -202,9 +238,7 @@ struct any_router::matcher
 
     matcher(
         core::string_view pat,
-        bool end_,
-        bool ignoreCase,
-        bool strict)
+        bool end_)
         : end(end_)
         , decoded_pat_(
             [&pat]
@@ -215,13 +249,8 @@ struct any_router::matcher
                     s.pop_back();
                 return s;
             }())
-        , ignoreCase_(ignoreCase)
-        , strict_(strict)
         , slash_(pat == "/")
     {
-        (void)ignoreCase_;
-        (void)strict_;
-
         if(! slash_)
             pv_ = grammar::parse(
                 decoded_pat_, path_rule).value();
@@ -249,9 +278,21 @@ struct any_router::matcher
         while(it != end_ && pit != pend)
         {
             // prefix has to match
-            if(! core::string_view(
-                    it, end_).starts_with(pit->prefix))
-                return false;
+            auto s = core::string_view(it, end_);
+            if(! req.case_sensitive)
+            {
+                if(pit->prefix.size() > s.size())
+                    return false;
+                s = s.substr(0, pit->prefix.size());
+                //if(! grammar::ci_is_equal(s, pit->prefix))
+                if(! ci_is_equal(s, pit->prefix))
+                    return false;
+            }
+            else
+            {
+                if(! s.starts_with(pit->prefix))
+                    return false;
+            }
             it += pit->prefix.size();
             ++pit;
         }
@@ -275,8 +316,6 @@ struct any_router::matcher
 private:
     stable_string decoded_pat_;
     path_rule_t::value_type pv_;
-    bool ignoreCase_;
-    bool strict_;
     bool slash_;
 };
 
@@ -344,7 +383,7 @@ struct any_router::layer
     layer(
         core::string_view pat,
         handler_list handlers)
-        : match(pat, false, false, false)
+        : match(pat, false)
     {
         entries.reserve(handlers.n);
         for(std::size_t i = 0; i < handlers.n; ++i)
@@ -354,7 +393,7 @@ struct any_router::layer
     // route layer
     explicit layer(
         core::string_view pat)
-        : match(pat, true, false, false)
+        : match(pat, true)
     {
     }
 
@@ -373,6 +412,13 @@ struct any_router::impl
 {
     std::atomic<std::size_t> refs{1};
     std::vector<layer> layers;
+    opt_flags opt;
+
+    explicit impl(
+        opt_flags opt_) noexcept
+        : opt(opt_)
+    {
+    }
 };
 
 //------------------------------------------------
@@ -387,8 +433,9 @@ any_router::
 }
 
 any_router::
-any_router()
-    : impl_(new impl)
+any_router(
+    opt_flags opt)
+    : impl_(new impl(opt))
 {
 }
 
@@ -559,6 +606,7 @@ dispatch_impl(
     basic_response& res) const
 {
     // VFALCO we could reuse the string storage by not clearing them
+    // set req.case_sensitive, req.strict to default of false
     req = {};
     if(verb == http_proto::method::unknown)
     {
@@ -572,7 +620,6 @@ dispatch_impl(
         BOOST_ASSERT(verb_str.empty());
     }
     req.verb_ = verb;
-
     // VFALCO use reusing-StringToken
     req.decoded_path_ =
         pct_decode_path(url.encoded_path());
@@ -584,6 +631,8 @@ dispatch_impl(
         req.decoded_path_.push_back('/');
         req.addedSlash_ = true;
     }
+    BOOST_ASSERT(req.case_sensitive == false);
+    BOOST_ASSERT(req.strict == false);
 
     res = {};
 
@@ -600,6 +649,50 @@ dispatch_impl(
     basic_request& req,
     basic_response& res) const
 {
+    // options are recursive and need to be restored on
+    // exception or when returning to a calling router.
+    struct option_saver
+    {
+        option_saver(
+            basic_request& req) noexcept
+            : req_(&req)
+            , case_sensitive_(req.case_sensitive)
+            , strict_(req.strict)
+        {
+        }
+
+        ~option_saver()
+        {
+            if(! req_)
+                return;
+            req_->case_sensitive = case_sensitive_;
+            req_->strict = strict_;
+        };
+
+        void cancel() noexcept
+        {
+            req_ = nullptr;
+        }
+
+    private:
+        basic_request* req_;
+        bool case_sensitive_;
+        bool strict_;
+    };
+
+    option_saver restore_options(req);
+
+    // inherit or apply options
+    if((impl_->opt & 2) != 0)
+        req.case_sensitive = true;
+    else if((impl_->opt & 4) != 0)
+        req.case_sensitive = false;
+
+    if((impl_->opt & 8) != 0)
+        req.strict = true;
+    else if((impl_->opt & 16) != 0)
+        req.strict = false;
+
     match_result mr;
     for(auto const& i : impl_->layers)
     {
@@ -670,6 +763,7 @@ dispatch_impl(
                     // doing anything after route::detach is returned,
                     // otherwise we could race with the detached operation
                     // attempting to call resume().
+                    restore_options.cancel();
                     return rv;
                 }
             }

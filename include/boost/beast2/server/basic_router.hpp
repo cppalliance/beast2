@@ -27,6 +27,106 @@ namespace beast2 {
 template<class, class>
 class basic_router;
 
+/** Configuration options for routers.
+*/
+struct router_options
+{
+    /** Constructor
+
+        Routers constructed with default options inherit the values of
+        @ref case_sensitive and @ref strict from the parent router.
+        If there is no parent, both default to `false`.
+        The value of @ref merge_params always defaults to `false`
+        and is never inherited.
+    */
+    router_options() = default;
+
+    /** Set whether to merge parameters from parent routers.
+
+        This setting controls whether route parameters defined on parent
+        routers are made available in nested routers. It is not inherited
+        and always defaults to `false`.
+
+        @par Example
+        @code
+        router r(router_options()
+            .merge_params(true)
+            .case_sensitive(true)
+            .strict(false));
+        @endcode
+
+        @param value `true` to merge parameters from parent routers.
+        @return A reference to `*this` for chaining.
+    */
+    router_options&
+    merge_params(
+        bool value) noexcept
+    {
+        v_ = (v_ & ~1) | (value ? 1 : 0);
+        return *this;
+    }
+
+    /** Set whether pattern matching is case-sensitive.
+
+        When this option is not set explicitly, the value is inherited
+        from the parent router or defaults to `false` if there is no parent.
+
+        @par Example
+        @code
+        router r(router_options()
+            .case_sensitive(true)
+            .strict(true));
+        @endcode
+
+        @param value `true` to perform case-sensitive path matching.
+        @return A reference to `*this` for chaining.
+    */
+    router_options&
+    case_sensitive(
+        bool value) noexcept
+    {
+        if(value)
+            v_ = (v_ & ~6) | 2;
+        else
+            v_ = (v_ & ~6) | 4;
+        return *this;
+    }
+
+    /** Set whether pattern matching is strict.
+
+        When this option is not set explicitly, the value is inherited
+        from the parent router or defaults to `false` if there is no parent.
+        Strict matching treats a trailing slash as significant:
+        the pattern `"/api"` matches `"/api"` but not `"/api/"`.
+        When strict matching is disabled, these paths are treated
+        as equivalent.
+
+        @par Example
+        @code
+        router r(router_options()
+            .strict(true)
+            .case_sensitive(false));
+        @endcode
+
+        @param value `true` to enable strict path matching.
+        @return A reference to `*this` for chaining.
+    */
+    router_options&
+    strict(
+        bool value) noexcept
+    {
+        if(value)
+            v_ = (v_ & ~24) | 8;
+        else
+            v_ = (v_ & ~24) | 16;
+        return *this;
+    }
+
+private:
+    template<class, class> friend class basic_router;
+    unsigned int v_ = 0;
+};
+
 //-----------------------------------------------
 
 namespace detail {
@@ -41,6 +141,7 @@ class any_router
 private:
     template<class, class>
     friend class beast2::basic_router;
+    using opt_flags = unsigned int;
 
     struct BOOST_SYMBOL_VISIBLE any_handler
     {
@@ -64,7 +165,7 @@ private:
     struct impl;
 
     BOOST_BEAST2_DECL ~any_router();
-    BOOST_BEAST2_DECL any_router();
+    BOOST_BEAST2_DECL any_router(opt_flags);
     BOOST_BEAST2_DECL any_router(any_router&&) noexcept;
     BOOST_BEAST2_DECL any_router(any_router const&) noexcept;
     BOOST_BEAST2_DECL any_router& operator=(any_router&&) noexcept;
@@ -282,8 +383,22 @@ public:
     class fluent_route;
 
     /** Constructor
+
+        Creates an empty router with the specified configuration.
+        Routers constructed with default options inherit the values
+        of @ref router_options::case_sensitive and
+        @ref router_options::strict from the parent router, or default
+        to `false` if there is no parent. The value of
+        @ref router_options::merge_params defaults to `false` and
+        is never inherited.
+
+        @param options The configuration options to use.
     */
-    basic_router() = default;
+    explicit
+    basic_router(router_options options = {})
+        : any_router(options.v_)
+    {
+    }
 
     /** Construct a router from another router with compatible types.
 
