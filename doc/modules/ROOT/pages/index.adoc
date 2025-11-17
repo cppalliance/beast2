@@ -8,29 +8,29 @@
 // Official repository: https://github.com/cppalliance/buffers
 //
 
-= Boost.Http.Io
+= Boost.Beast2
 
-Boost.Http.Io is a portable, low-level C++ library which implements the HTTP/1
-protocol using Boost.Asio networking.
-
-Boost.Http.Io offers these features:
+This is a portable C++ library which implements the HTTP/1 protocol using
+Boost.HTTP.Proto and Boost.Asio. The library is distinguished by these
+provided features:
 
 * Require only C++11
+* Works without exceptions
 * Fast compilation, few templates
 
 == Requirements
 
 * Requires Boost and a compiler supporting at least C++11
-* Aliases for standard types use their Boost equivalents
-* Link to a built static or dynamic Boost library, or use header-only (see below)
+* Link to a static or dynamically linked version of this library
+* Supports `-fno-exceptions`, detected automatically
 
 == Tested Compilers
 
 Boost.Buffers has been tested with the following compilers:
 
-* clang: 3.8, 4, 5, 6, 7, 8, 9, 10, 11, 12
-* gcc: 4.8, 4.9, 5, 6, 7, 8, 9, 10, 11
-* msvc: 14.1, 14.2, 14.3
+* gcc: 5 to 14 (except 8.0.1)
+* clang: 3.9, 4 to 18
+* msvc: 14.1 to 14.42
 
 == Quality Assurance
 
