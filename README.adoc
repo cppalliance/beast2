@@ -5,9 +5,9 @@
 |https://github.com/cppalliance/beast2/tree/master[`master`]
 |https://github.com/cppalliance/beast2/tree/develop[`develop`]
 
-|https://develop.http-io.cpp.al/[Docs]
-|https://master.http-io.cpp.al/[image:https://img.shields.io/badge/docs-master-brightgreen.svg[Documentation]]
-|https://develop.http-io.cpp.al/[image:https://img.shields.io/badge/docs-develop-brightgreen.svg[Documentation]]
+|https://develop.beast2.cpp.al/[Docs]
+|https://master.beast2.cpp.al/[image:https://img.shields.io/badge/docs-master-brightgreen.svg[Documentation]]
+|https://develop.beast2.cpp.al/[image:https://img.shields.io/badge/docs-develop-brightgreen.svg[Documentation]]
 
 |https://github.com/[GitHub Actions]
 |https://github.com/cppalliance/beast2/actions/workflows/ci.yml?query=branch%3Amaster[image:https://github.com/cppalliance/beast2/actions/workflows/ci.yml/badge.svg?branch=master[CI]]

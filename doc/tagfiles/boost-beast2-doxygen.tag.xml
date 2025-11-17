@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tagfile>
+<compound kind="namespace">
+  <name>boost::beast2</name>
+  <filename>boost/beast2.adoc</filename>
+  <member kind="function">
+    <type>auto</type>
+    <name>async_read</name>
+    <anchorfile>boost/beast2/async_read.adoc</anchorfile>
+    <anchor/>
+    <arglist>(AsyncReadStream&amp; s, http_proto::parser&amp; pr, CompletionToken&amp;&amp; token)</arglist>
+  </member>
+  <member kind="function">
+    <type>auto</type>
+    <name>async_read_header</name>
+    <anchorfile>boost/beast2/async_read_header.adoc</anchorfile>
+    <anchor/>
+    <arglist>(AsyncReadStream&amp; s, http_proto::parser&amp; pr, CompletionToken&amp;&amp; token)</arglist>
+  </member>
+  <member kind="function">
+    <type>auto</type>
+    <name>async_read_some</name>
+    <anchorfile>boost/beast2/async_read_some.adoc</anchorfile>
+    <anchor/>
+    <arglist>(AsyncReadStream&amp; s, http_proto::parser&amp; pr, CompletionToken&amp;&amp; token)</arglist>
+  </member>
+  <member kind="function">
+    <type>auto</type>
+    <name>async_write</name>
+    <anchorfile>boost/beast2/async_write.adoc</anchorfile>
+    <anchor/>
+    <arglist>(AsyncWriteStream&amp; dest, http_proto::serializer&amp; sr, CompletionToken&amp;&amp; token)</arglist>
+  </member>
+  <member kind="function">
+    <type>auto</type>
+    <name>async_write_some</name>
+    <anchorfile>boost/beast2/async_write_some.adoc</anchorfile>
+    <anchor/>
+    <arglist>(AsyncWriteStream&amp; dest, http_proto::serializer&amp; sr, CompletionToken&amp;&amp; token)</arglist>
+  </member>
+</compound>
+</tagfile>

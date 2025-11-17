@@ -1,0 +1,2545 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tagfile>
+<compound kind="namespace">
+  <name>boost::http_proto</name>
+  <filename>boost/http_proto.adoc</filename>
+  <class kind="class">boost::http_proto::grammar</class>
+  <class kind="class">boost::http_proto::is_sink</class>
+  <class kind="class">boost::http_proto::is_source</class>
+  <class kind="class">boost::http_proto::fields</class>
+  <class kind="class">boost::http_proto::fields_base</class>
+  <class kind="class">boost::http_proto::file</class>
+  <class kind="class">boost::http_proto::file_sink</class>
+  <class kind="class">boost::http_proto::file_source</class>
+  <class kind="class">boost::http_proto::header_limits</class>
+  <class kind="class">boost::http_proto::message_base</class>
+  <class kind="class">boost::http_proto::metadata</class>
+  <class kind="class">boost::http_proto::parameter</class>
+  <class kind="class">boost::http_proto::parser</class>
+  <class kind="class">boost::http_proto::quoted_token_view</class>
+  <class kind="class">boost::http_proto::request</class>
+  <class kind="class">boost::http_proto::request_base</class>
+  <class kind="class">boost::http_proto::request_parser</class>
+  <class kind="class">boost::http_proto::response</class>
+  <class kind="class">boost::http_proto::response_base</class>
+  <class kind="class">boost::http_proto::response_parser</class>
+  <class kind="class">boost::http_proto::serializer</class>
+  <class kind="class">boost::http_proto::sink</class>
+  <class kind="class">boost::http_proto::source</class>
+  <class kind="class">boost::http_proto::static_request</class>
+  <class kind="class">boost::http_proto::static_response</class>
+  <class kind="class">boost::http_proto::string_body</class>
+  <class kind="class">boost::http_proto::upgrade_protocol</class>
+  <class kind="class">boost::http_proto::condition</class>
+  <class kind="class">boost::http_proto::content_coding</class>
+  <class kind="class">boost::http_proto::error</class>
+  <class kind="class">boost::http_proto::field</class>
+  <class kind="class">boost::http_proto::file_mode</class>
+  <class kind="class">boost::http_proto::method</class>
+  <class kind="class">boost::http_proto::payload</class>
+  <class kind="class">boost::http_proto::status</class>
+  <class kind="class">boost::http_proto::status_class</class>
+  <class kind="class">boost::http_proto::version</class>
+  <class kind="class">boost::http_proto::swap</class>
+  <class kind="class">boost::http_proto::to_status_class</class>
+  <class kind="class">boost::http_proto::to_string</class>
+  <class kind="class">boost::http_proto::operator&lt;&lt;</class>
+  <class kind="class">boost::http_proto::parameter_rule</class>
+  <class kind="class">boost::http_proto::quoted_token_rule</class>
+  <class kind="class">boost::http_proto::tchars</class>
+  <class kind="class">boost::http_proto::token_rule</class>
+  <class kind="class">boost::http_proto::upgrade_protocol_rule</class>
+  <class kind="class">boost::http_proto::upgrade_rule</class>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>combine_field_values</name>
+    <anchorfile>boost/http_proto/combine_field_values.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const fields_base::subrange&amp; vr, grammar::recycled_ptr&lt;std::string&gt;&amp; temp)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>install_parser_service</name>
+    <anchorfile>boost/http_proto/install_parser_service.adoc</anchorfile>
+    <anchor/>
+    <arglist>(rts::context&amp; ctx, const parser::config_base&amp; cfg)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>install_serializer_service</name>
+    <anchorfile>boost/http_proto/install_serializer_service.adoc</anchorfile>
+    <anchor/>
+    <arglist>(rts::context&amp; ctx, const serializer::config&amp; cfg)</arglist>
+  </member>
+  <member kind="function">
+    <type>status</type>
+    <name>int_to_status</name>
+    <anchorfile>boost/http_proto/int_to_status.adoc</anchorfile>
+    <anchor/>
+    <arglist>(unsigned int v)</arglist>
+  </member>
+  <member kind="function">
+    <type>implementation_defined::list_rule_t&lt;Rule&gt;</type>
+    <name>list_rule</name>
+    <anchorfile>boost/http_proto/list_rule.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const Rule&amp; r, std::size_t n, std::size_t m)</arglist>
+  </member>
+  <member kind="function">
+    <type>system::error_code</type>
+    <name>make_error_code</name>
+    <anchorfile>boost/http_proto/make_error_code.adoc</anchorfile>
+    <anchor/>
+    <arglist>(error ev)</arglist>
+  </member>
+  <member kind="function">
+    <type>system::error_condition</type>
+    <name>make_error_condition</name>
+    <anchorfile>boost/http_proto/make_error_condition.adoc</anchorfile>
+    <anchor/>
+    <arglist>(condition c)</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>obsolete_reason</name>
+    <anchorfile>boost/http_proto/obsolete_reason.adoc</anchorfile>
+    <anchor/>
+    <arglist>(status v)</arglist>
+  </member>
+  <member kind="function">
+    <type>boost::optional&lt;field&gt;</type>
+    <name>string_to_field</name>
+    <anchorfile>boost/http_proto/string_to_field.adoc</anchorfile>
+    <anchor/>
+    <arglist>(core::string_view s)</arglist>
+  </member>
+  <member kind="function">
+    <type>method</type>
+    <name>string_to_method</name>
+    <anchorfile>boost/http_proto/string_to_method.adoc</anchorfile>
+    <anchor/>
+    <arglist>(core::string_view s)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::grammar</name>
+  <filename>boost/http_proto/grammar.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::is_sink</name>
+  <filename>boost/http_proto/is_sink.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::is_source</name>
+  <filename>boost/http_proto/is_source.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::fields</name>
+  <filename>boost/http_proto/fields.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>swap</name>
+    <anchorfile>boost/http_proto/fields/swap.adoc</anchorfile>
+    <anchor/>
+    <arglist>(fields&amp; other)</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::fields_base</name>
+  <filename>boost/http_proto/fields_base.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~fields_base</name>
+    <anchorfile>boost/http_proto/fields_base/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::file</name>
+  <filename>boost/http_proto/file.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~file</name>
+    <anchorfile>boost/http_proto/file/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>file&amp;</type>
+    <name>operator=</name>
+    <anchorfile>boost/http_proto/file/operator_assign.adoc</anchorfile>
+    <anchor/>
+    <arglist>(file&amp;&amp; other)</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>is_open</name>
+    <anchorfile>boost/http_proto/file/is_open.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::file_sink</name>
+  <filename>boost/http_proto/file_sink.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~file_sink</name>
+    <anchorfile>boost/http_proto/file_sink/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>results</type>
+    <name>write</name>
+    <anchorfile>boost/http_proto/sink/write.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const ConstBufferSequence&amp; bs, bool more)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::file_source</name>
+  <filename>boost/http_proto/file_source.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~file_source</name>
+    <anchorfile>boost/http_proto/file_source/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>results</type>
+    <name>read</name>
+    <anchorfile>boost/http_proto/source/read.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const MutableBufferSequence&amp; bs)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::header_limits</name>
+  <filename>boost/http_proto/header_limits.adoc</filename>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>valid_space_needed</name>
+    <anchorfile>boost/http_proto/header_limits/valid_space_needed.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::message_base</name>
+  <filename>boost/http_proto/message_base.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::metadata</name>
+  <filename>boost/http_proto/metadata.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/metadata/2constructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::parameter</name>
+  <filename>boost/http_proto/parameter.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::parser</name>
+  <filename>boost/http_proto/parser.adoc</filename>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>body</name>
+    <anchorfile>boost/http_proto/parser/body.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>commit</name>
+    <anchorfile>boost/http_proto/parser/commit.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>commit_eof</name>
+    <anchorfile>boost/http_proto/parser/commit_eof.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>consume_body</name>
+    <anchorfile>boost/http_proto/parser/consume_body.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>got_header</name>
+    <anchorfile>boost/http_proto/parser/got_header.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>is_complete</name>
+    <anchorfile>boost/http_proto/parser/is_complete.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>parse</name>
+    <anchorfile>boost/http_proto/parser/parse.adoc</anchorfile>
+    <anchor/>
+    <arglist>(system::error_code&amp; ec)</arglist>
+  </member>
+  <member kind="function">
+    <type>mutable_buffers_type</type>
+    <name>prepare</name>
+    <anchorfile>boost/http_proto/parser/prepare.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_buffers_type</type>
+    <name>pull_body</name>
+    <anchorfile>boost/http_proto/parser/pull_body.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>release_buffered_data</name>
+    <anchorfile>boost/http_proto/parser/release_buffered_data.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reset</name>
+    <anchorfile>boost/http_proto/parser/reset.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_body_limit</name>
+    <anchorfile>boost/http_proto/parser/set_body_limit.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start</name>
+    <anchorfile>boost/http_proto/parser/start.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>~parser</name>
+    <anchorfile>boost/http_proto/parser/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>is_body_set</name>
+    <anchorfile>boost/http_proto/parser/is_body_set.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const static_request&amp;</type>
+    <name>safe_get_request</name>
+    <anchorfile>boost/http_proto/parser/safe_get_request.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const static_response&amp;</type>
+    <name>safe_get_response</name>
+    <anchorfile>boost/http_proto/parser/safe_get_response.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start_impl</name>
+    <anchorfile>boost/http_proto/parser/start_impl.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool )</arglist>
+  </member>
+  <member kind="function">
+    <type>detail::workspace&amp;</type>
+    <name>ws</name>
+    <anchorfile>boost/http_proto/parser/ws.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::quoted_token_view</name>
+  <filename>boost/http_proto/quoted_token_view.adoc</filename>
+  <member kind="function">
+    <type>quoted_token_view&amp;</type>
+    <name>operator=</name>
+    <anchorfile>boost/http_proto/quoted_token_view/operator_assign-07.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const quoted_token_view&amp; other)</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reference</type>
+    <name>at</name>
+    <anchorfile>boost/http_proto/quoted_token_view/at.adoc</anchorfile>
+    <anchor/>
+    <arglist>(size_type pos)</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reference</type>
+    <name>back</name>
+    <anchorfile>boost/http_proto/quoted_token_view/back.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/quoted_token_view/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_iterator</type>
+    <name>cbegin</name>
+    <anchorfile>boost/http_proto/quoted_token_view/cbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_iterator</type>
+    <name>cend</name>
+    <anchorfile>boost/http_proto/quoted_token_view/cend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>size_type</type>
+    <name>copy</name>
+    <anchorfile>boost/http_proto/quoted_token_view/copy.adoc</anchorfile>
+    <anchor/>
+    <arglist>(char* s, size_type n, size_type pos)</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reverse_iterator</type>
+    <name>crbegin</name>
+    <anchorfile>boost/http_proto/quoted_token_view/crbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reverse_iterator</type>
+    <name>crend</name>
+    <anchorfile>boost/http_proto/quoted_token_view/crend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_pointer</type>
+    <name>data</name>
+    <anchorfile>boost/http_proto/quoted_token_view/data.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>empty</name>
+    <anchorfile>boost/http_proto/quoted_token_view/empty.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/quoted_token_view/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reference</type>
+    <name>front</name>
+    <anchorfile>boost/http_proto/quoted_token_view/front.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>has_escapes</name>
+    <anchorfile>boost/http_proto/quoted_token_view/has_escapes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>size_type</type>
+    <name>length</name>
+    <anchorfile>boost/http_proto/quoted_token_view/length.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>size_type</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/quoted_token_view/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reference</type>
+    <name>operator[]</name>
+    <anchorfile>boost/http_proto/quoted_token_view/operator_subs.adoc</anchorfile>
+    <anchor/>
+    <arglist>(size_type pos)</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/quoted_token_view/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/quoted_token_view/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>size_type</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/quoted_token_view/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>substr</name>
+    <anchorfile>boost/http_proto/quoted_token_view/substr.adoc</anchorfile>
+    <anchor/>
+    <arglist>(size_type pos, size_type n)</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>unescaped_size</name>
+    <anchorfile>boost/http_proto/quoted_token_view/unescaped_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::string</type>
+    <name>operator basic_string&lt;char&gt;</name>
+    <anchorfile>boost/http_proto/quoted_token_view/2conversion-042.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::string_view</type>
+    <name>operator basic_string_view&lt;char&gt;</name>
+    <anchorfile>boost/http_proto/quoted_token_view/2conversion-04e.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>string_view_base&amp;</type>
+    <name>operator=</name>
+    <anchorfile>boost/http_proto/quoted_token_view/operator_assign-0e.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const string_view_base&amp; other)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>swap</name>
+    <anchorfile>boost/http_proto/quoted_token_view/swap.adoc</anchorfile>
+    <anchor/>
+    <arglist>(string_view_base&amp; s)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::request</name>
+  <filename>boost/http_proto/request.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::method</type>
+    <name>method</name>
+    <anchorfile>boost/http_proto/request_base/method.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>method_text</name>
+    <anchorfile>boost/http_proto/request_base/method_text.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_expect_100_continue</name>
+    <anchorfile>boost/http_proto/request_base/set_expect_100_continue.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool b)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_target</name>
+    <anchorfile>boost/http_proto/request_base/set_target.adoc</anchorfile>
+    <anchor/>
+    <arglist>(core::string_view s)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_version</name>
+    <anchorfile>boost/http_proto/request_base/set_version.adoc</anchorfile>
+    <anchor/>
+    <arglist>(http_proto::version v)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>swap</name>
+    <anchorfile>boost/http_proto/request/swap.adoc</anchorfile>
+    <anchor/>
+    <arglist>(request&amp; other)</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>target</name>
+    <anchorfile>boost/http_proto/request_base/target.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::request_base</name>
+  <filename>boost/http_proto/request_base.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::method</type>
+    <name>method</name>
+    <anchorfile>boost/http_proto/request_base/method.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>method_text</name>
+    <anchorfile>boost/http_proto/request_base/method_text.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_expect_100_continue</name>
+    <anchorfile>boost/http_proto/request_base/set_expect_100_continue.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool b)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_target</name>
+    <anchorfile>boost/http_proto/request_base/set_target.adoc</anchorfile>
+    <anchor/>
+    <arglist>(core::string_view s)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_version</name>
+    <anchorfile>boost/http_proto/request_base/set_version.adoc</anchorfile>
+    <anchor/>
+    <arglist>(http_proto::version v)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>target</name>
+    <anchorfile>boost/http_proto/request_base/target.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_start_line_impl</name>
+    <anchorfile>boost/http_proto/request_base/set_start_line_impl.adoc</anchorfile>
+    <anchor/>
+    <arglist>(http_proto::method m, core::string_view ms, core::string_view t, http_proto::version v)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::request_parser</name>
+  <filename>boost/http_proto/request_parser.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~request_parser</name>
+    <anchorfile>boost/http_proto/request_parser/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>body</name>
+    <anchorfile>boost/http_proto/parser/body.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>commit</name>
+    <anchorfile>boost/http_proto/parser/commit.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>commit_eof</name>
+    <anchorfile>boost/http_proto/parser/commit_eof.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>consume_body</name>
+    <anchorfile>boost/http_proto/parser/consume_body.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>const static_request&amp;</type>
+    <name>get</name>
+    <anchorfile>boost/http_proto/request_parser/get.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>got_header</name>
+    <anchorfile>boost/http_proto/parser/got_header.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>is_complete</name>
+    <anchorfile>boost/http_proto/parser/is_complete.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>parse</name>
+    <anchorfile>boost/http_proto/parser/parse.adoc</anchorfile>
+    <anchor/>
+    <arglist>(system::error_code&amp; ec)</arglist>
+  </member>
+  <member kind="function">
+    <type>mutable_buffers_type</type>
+    <name>prepare</name>
+    <anchorfile>boost/http_proto/parser/prepare.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_buffers_type</type>
+    <name>pull_body</name>
+    <anchorfile>boost/http_proto/parser/pull_body.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>release_buffered_data</name>
+    <anchorfile>boost/http_proto/parser/release_buffered_data.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reset</name>
+    <anchorfile>boost/http_proto/parser/reset.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_body_limit</name>
+    <anchorfile>boost/http_proto/parser/set_body_limit.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start</name>
+    <anchorfile>boost/http_proto/parser/start.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::response</name>
+  <filename>boost/http_proto/response.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>reason</name>
+    <anchorfile>boost/http_proto/response_base/reason.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::status</type>
+    <name>status</name>
+    <anchorfile>boost/http_proto/response_base/status.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>unsigned short</type>
+    <name>status_int</name>
+    <anchorfile>boost/http_proto/response_base/status_int.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>swap</name>
+    <anchorfile>boost/http_proto/response/swap.adoc</anchorfile>
+    <anchor/>
+    <arglist>(response&amp; other)</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::response_base</name>
+  <filename>boost/http_proto/response_base.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>reason</name>
+    <anchorfile>boost/http_proto/response_base/reason.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::status</type>
+    <name>status</name>
+    <anchorfile>boost/http_proto/response_base/status.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>unsigned short</type>
+    <name>status_int</name>
+    <anchorfile>boost/http_proto/response_base/status_int.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_start_line_impl</name>
+    <anchorfile>boost/http_proto/response_base/set_start_line_impl.adoc</anchorfile>
+    <anchor/>
+    <arglist>(http_proto::status sc, unsigned short si, core::string_view reason, http_proto::version v)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::response_parser</name>
+  <filename>boost/http_proto/response_parser.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~response_parser</name>
+    <anchorfile>boost/http_proto/response_parser/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>body</name>
+    <anchorfile>boost/http_proto/parser/body.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>commit</name>
+    <anchorfile>boost/http_proto/parser/commit.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>commit_eof</name>
+    <anchorfile>boost/http_proto/parser/commit_eof.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>consume_body</name>
+    <anchorfile>boost/http_proto/parser/consume_body.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>const static_response&amp;</type>
+    <name>get</name>
+    <anchorfile>boost/http_proto/response_parser/get.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>got_header</name>
+    <anchorfile>boost/http_proto/parser/got_header.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>is_complete</name>
+    <anchorfile>boost/http_proto/parser/is_complete.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>parse</name>
+    <anchorfile>boost/http_proto/parser/parse.adoc</anchorfile>
+    <anchor/>
+    <arglist>(system::error_code&amp; ec)</arglist>
+  </member>
+  <member kind="function">
+    <type>mutable_buffers_type</type>
+    <name>prepare</name>
+    <anchorfile>boost/http_proto/parser/prepare.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_buffers_type</type>
+    <name>pull_body</name>
+    <anchorfile>boost/http_proto/parser/pull_body.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>release_buffered_data</name>
+    <anchorfile>boost/http_proto/parser/release_buffered_data.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reset</name>
+    <anchorfile>boost/http_proto/parser/reset.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_body_limit</name>
+    <anchorfile>boost/http_proto/parser/set_body_limit.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start</name>
+    <anchorfile>boost/http_proto/parser/start.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start_head_response</name>
+    <anchorfile>boost/http_proto/response_parser/start_head_response.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::serializer</name>
+  <filename>boost/http_proto/serializer.adoc</filename>
+  <member kind="function">
+    <type>void</type>
+    <name>~serializer</name>
+    <anchorfile>boost/http_proto/serializer/2destructor.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>consume</name>
+    <anchorfile>boost/http_proto/serializer/consume.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>is_done</name>
+    <anchorfile>boost/http_proto/serializer/is_done.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>system::result&lt;const_buffers_type&gt;</type>
+    <name>prepare</name>
+    <anchorfile>boost/http_proto/serializer/prepare.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reset</name>
+    <anchorfile>boost/http_proto/serializer/reset.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>stream</type>
+    <name>start_stream</name>
+    <anchorfile>boost/http_proto/serializer/start_stream.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const message_base&amp; m)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start_buffers</name>
+    <anchorfile>boost/http_proto/serializer/start_buffers.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const message_base&amp; , cbs_gen&amp; )</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start_init</name>
+    <anchorfile>boost/http_proto/serializer/start_init.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const message_base&amp; )</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>start_source</name>
+    <anchorfile>boost/http_proto/serializer/start_source.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const message_base&amp; , source&amp; )</arglist>
+  </member>
+  <member kind="function">
+    <type>detail::workspace&amp;</type>
+    <name>ws</name>
+    <anchorfile>boost/http_proto/serializer/ws.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::sink</name>
+  <filename>boost/http_proto/sink.adoc</filename>
+  <member kind="function">
+    <type>results</type>
+    <name>write</name>
+    <anchorfile>boost/http_proto/sink/write.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const ConstBufferSequence&amp; bs, bool more)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::source</name>
+  <filename>boost/http_proto/source.adoc</filename>
+  <member kind="function">
+    <type>results</type>
+    <name>read</name>
+    <anchorfile>boost/http_proto/source/read.adoc</anchorfile>
+    <anchor/>
+    <arglist>(const MutableBufferSequence&amp; bs)</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::static_request</name>
+  <filename>boost/http_proto/static_request.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::method</type>
+    <name>method</name>
+    <anchorfile>boost/http_proto/request_base/method.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>method_text</name>
+    <anchorfile>boost/http_proto/request_base/method_text.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_expect_100_continue</name>
+    <anchorfile>boost/http_proto/request_base/set_expect_100_continue.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool b)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_target</name>
+    <anchorfile>boost/http_proto/request_base/set_target.adoc</anchorfile>
+    <anchor/>
+    <arglist>(core::string_view s)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_version</name>
+    <anchorfile>boost/http_proto/request_base/set_version.adoc</anchorfile>
+    <anchor/>
+    <arglist>(http_proto::version v)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>target</name>
+    <anchorfile>boost/http_proto/request_base/target.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::static_response</name>
+  <filename>boost/http_proto/static_response.adoc</filename>
+  <member kind="function">
+    <type>iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/fields_base/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>buffer</name>
+    <anchorfile>boost/http_proto/fields_base/buffer.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>chunked</name>
+    <anchorfile>boost/http_proto/message_base/chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>clear</name>
+    <anchorfile>boost/http_proto/fields_base/clear.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/fields_base/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>bool</type>
+    <name>keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const http_proto::metadata&amp;</type>
+    <name>metadata</name>
+    <anchorfile>boost/http_proto/message_base/metadata.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::payload</type>
+    <name>payload</name>
+    <anchorfile>boost/http_proto/message_base/payload.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>uint64_t</type>
+    <name>payload_size</name>
+    <anchorfile>boost/http_proto/message_base/payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rbegin</name>
+    <anchorfile>boost/http_proto/fields_base/rbegin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>core::string_view</type>
+    <name>reason</name>
+    <anchorfile>boost/http_proto/response_base/reason.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>reverse_iterator</type>
+    <name>rend</name>
+    <anchorfile>boost/http_proto/fields_base/rend.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>reserve_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/reserve_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_chunked</name>
+    <anchorfile>boost/http_proto/message_base/set_chunked.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_content_length</name>
+    <anchorfile>boost/http_proto/message_base/set_content_length.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_keep_alive</name>
+    <anchorfile>boost/http_proto/message_base/set_keep_alive.adoc</anchorfile>
+    <anchor/>
+    <arglist>(bool value)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_max_capacity_in_bytes</name>
+    <anchorfile>boost/http_proto/fields_base/set_max_capacity_in_bytes.adoc</anchorfile>
+    <anchor/>
+    <arglist>(std::size_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>set_payload_size</name>
+    <anchorfile>boost/http_proto/message_base/set_payload_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>(uint64_t n)</arglist>
+  </member>
+  <member kind="function">
+    <type>void</type>
+    <name>shrink_to_fit</name>
+    <anchorfile>boost/http_proto/fields_base/shrink_to_fit.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>size</name>
+    <anchorfile>boost/http_proto/fields_base/size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::status</type>
+    <name>status</name>
+    <anchorfile>boost/http_proto/response_base/status.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>unsigned short</type>
+    <name>status_int</name>
+    <anchorfile>boost/http_proto/response_base/status_int.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>http_proto::version</type>
+    <name>version</name>
+    <anchorfile>boost/http_proto/message_base/version.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>std::size_t</type>
+    <name>max_size</name>
+    <anchorfile>boost/http_proto/fields_base/max_size.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::string_body</name>
+  <filename>boost/http_proto/string_body.adoc</filename>
+  <member kind="function">
+    <type>const_iterator</type>
+    <name>begin</name>
+    <anchorfile>boost/http_proto/string_body/begin.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+  <member kind="function">
+    <type>const_iterator</type>
+    <name>end</name>
+    <anchorfile>boost/http_proto/string_body/end.adoc</anchorfile>
+    <anchor/>
+    <arglist>()</arglist>
+  </member>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::upgrade_protocol</name>
+  <filename>boost/http_proto/upgrade_protocol.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::condition</name>
+  <filename>boost/http_proto/condition.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::content_coding</name>
+  <filename>boost/http_proto/content_coding.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::error</name>
+  <filename>boost/http_proto/error.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::field</name>
+  <filename>boost/http_proto/field.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::file_mode</name>
+  <filename>boost/http_proto/file_mode.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::method</name>
+  <filename>boost/http_proto/method.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::payload</name>
+  <filename>boost/http_proto/payload.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::status</name>
+  <filename>boost/http_proto/status.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::status_class</name>
+  <filename>boost/http_proto/status_class.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::version</name>
+  <filename>boost/http_proto/version.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::swap</name>
+  <filename>boost/http_proto/swap-0e.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::to_status_class</name>
+  <filename>boost/http_proto/to_status_class-08.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::to_string</name>
+  <filename>boost/http_proto/to_string-0078.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::operator&lt;&lt;</name>
+  <filename>boost/http_proto/operator_lshift-0f.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::parameter_rule</name>
+  <filename>boost/http_proto/parameter_rule.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::quoted_token_rule</name>
+  <filename>boost/http_proto/quoted_token_rule.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::tchars</name>
+  <filename>boost/http_proto/tchars.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::token_rule</name>
+  <filename>boost/http_proto/token_rule.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::upgrade_protocol_rule</name>
+  <filename>boost/http_proto/upgrade_protocol_rule.adoc</filename>
+</compound>
+<compound kind="class">
+  <name>boost::http_proto::upgrade_rule</name>
+  <filename>boost/http_proto/upgrade_rule.adoc</filename>
+</compound>
+</tagfile>
