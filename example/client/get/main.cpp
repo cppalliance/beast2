@@ -324,7 +324,7 @@ private:
     void
     on_read(
         system::error_code ec,
-        std::size_t bytes_transferred)
+        std::size_t /*bytes_transferred*/)
     {
         if(ec)
             return fail(ec, "read");

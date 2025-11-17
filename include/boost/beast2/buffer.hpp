@@ -11,7 +11,6 @@
 #define BOOST_BEAST2_BUFFER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http_proto/buffer.hpp>
 #include <boost/asio/buffer.hpp>
 #include <cstdlib>
 #include <iterator>
