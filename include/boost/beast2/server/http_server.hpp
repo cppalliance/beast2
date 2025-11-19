@@ -12,12 +12,11 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/router_asio.hpp>
+#include <boost/rts/application.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
 namespace boost {
 namespace beast2 {
-
-class application;
 
 template<class AsyncStream>
 class http_server
@@ -44,7 +43,7 @@ public:
 BOOST_BEAST2_DECL
 auto
 install_plain_http_server(
-    application& app,
+    rts::application& app,
     char const* addr,
     unsigned short port,
     std::size_t num_workers) ->

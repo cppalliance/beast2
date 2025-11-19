@@ -11,7 +11,6 @@
 #define BOOST_BEAST2_SERVER_HTTP_STREAM_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/application.hpp>
 #include <boost/beast2/log_service.hpp>
 #include <boost/beast2/format.hpp>
 #include <boost/beast2/read.hpp>
@@ -22,6 +21,7 @@
 #include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/detail/except.hpp>
+#include <boost/rts/application.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -71,7 +71,7 @@ public:
             or an unrecoverable error occurs.
     */
     http_stream(
-        application& app,
+        rts::application& app,
         AsyncStream& stream,
         router_asio<AsyncStream&> routes,
         any_lambda<void(system::error_code)> close_fn);
@@ -129,7 +129,7 @@ protected:
 template<class AsyncStream>
 http_stream<AsyncStream>::
 http_stream(
-    application& app,
+    rts::application& app,
     AsyncStream& stream,
     router_asio<AsyncStream&> routes,
     any_lambda<void(system::error_code)> close)

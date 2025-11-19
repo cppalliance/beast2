@@ -10,12 +10,12 @@
 #include "certificate.hpp"
 #include "serve_detached.hpp"
 #include "serve_log_admin.hpp"
-#include <boost/beast2/application.hpp>
 #include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
+#include <boost/rts/application.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/rts/brotli/decode.hpp>
@@ -27,7 +27,7 @@
 namespace boost {
 namespace beast2 {
 
-void install_services(application& app)
+void install_services(rts::application& app)
 {
 #ifdef BOOST_RTS_HAS_BROTLI
     rts::brotli::install_decode_service(app);
@@ -57,7 +57,7 @@ int server_main( int argc, char* argv[] )
             return EXIT_FAILURE;
         }
 
-        application app;
+        rts::application app;
 
         install_services(app);
 

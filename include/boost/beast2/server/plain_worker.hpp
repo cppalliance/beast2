@@ -14,9 +14,9 @@
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/server/workers.hpp>
-#include <boost/beast2/application.hpp>
 #include <boost/beast2/logger.hpp>
 #include <boost/beast2/read.hpp>
+#include <boost/rts/application.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/prepend.hpp>
@@ -44,7 +44,7 @@ public:
         Executor0 const& ex,
         router_asio<stream_type&> rr);
 
-    application& app() noexcept
+    rts::application& app() noexcept
     {
         return wb_.app();
     }

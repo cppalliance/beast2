@@ -31,7 +31,6 @@
 #include <boost/beast2/test/fail_count.hpp>
 #include <boost/beast2/test/stream.hpp>
 #include <boost/beast2/test/tcp.hpp>
-#include <boost/beast2/application.hpp>
 #include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/buffer.hpp>
 #include <boost/beast2/client.hpp>
