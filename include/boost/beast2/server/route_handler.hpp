@@ -11,8 +11,8 @@
 #define BOOST_BEAST2_SERVER_ROUTE_HANDLER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/polystore.hpp>
 #include <boost/beast2/server/router_types.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/http_proto/request.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/request_parser.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/response.hpp>        // VFALCO forward declare?
@@ -53,7 +53,7 @@ struct Request : basic_request
     /** A container for storing arbitrary data associated with the request.
         This starts out empty for each new request.
     */
-    polystore data;
+    rts::polystore data;
 };
 
 //-----------------------------------------------
@@ -81,7 +81,7 @@ struct Response : basic_response
 
         This starts out empty for each new session.
     */
-    polystore data;
+    rts::polystore data;
 
     route_result close() const noexcept
     {

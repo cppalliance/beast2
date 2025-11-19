@@ -13,7 +13,7 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/rts/zlib/inflate.hpp>
 
 #include <functional>
@@ -33,10 +33,10 @@ public:
     session(
         asio::io_context& ioc,
         asio::ssl::context& ssl_ctx,
-        const rts::context& rts_ctx)
+        rts::polystore& ctx)
         : client_(
             urls::url("https://ethereum.publicnode.com"),
-            rts_ctx,
+            ctx,
             ioc.get_executor(),
             ssl_ctx)
     {
@@ -233,9 +233,9 @@ main(int, char*[])
         // The SSL context is required, and holds certificates
         asio::ssl::context ssl_ctx(asio::ssl::context::tls_client);
 
-        // RTS context holds optional deflate and
+        // holds optional deflate and
         // required configuration services
-        rts::context rts_ctx;
+        rts::polystore rts_ctx;
 
         // Install parser service
         {

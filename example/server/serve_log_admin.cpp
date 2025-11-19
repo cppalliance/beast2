@@ -23,7 +23,7 @@ class serve_log_page
 {
 public:
     serve_log_page(
-        polystore& ps)
+        rts::polystore& ps)
         : ls_(use_log_service(ps))
     {
     }
@@ -90,7 +90,7 @@ class handle_submit
 {
 public:
     handle_submit(
-        polystore& ps)
+        rts::polystore& ps)
         : ls_(use_log_service(ps))
     {
     }
@@ -116,7 +116,7 @@ private:
 
 router
 serve_log_admin(
-    polystore& ps)
+    rts::polystore& ps)
 {
     router r;
     r.add(http_proto::method::get, "/", serve_log_page(ps));

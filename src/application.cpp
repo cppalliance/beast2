@@ -29,7 +29,6 @@ struct application::impl
 {
     std::mutex m;
     state st = state::none;
-    rts::context services;
 };
 
 application::
@@ -116,13 +115,6 @@ stop()
         std::lock_guard<std::mutex> lock(impl_->m);
         impl_->st = state::stopped;
     }
-}
-
-rts::context&
-application::
-services() noexcept
-{
-    return impl_->services;
 }
 
 } // beast2

@@ -18,7 +18,7 @@
 #include <boost/http_proto/response_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/rts/zlib/inflate.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
@@ -50,7 +50,7 @@ public:
     session(
         asio::io_context& ioc,
         asio::ssl::context& ssl_ctx,
-        const rts::context& rts_ctx)
+        rts::polystore& rts_ctx)
         : ssl_ctx_(ssl_ctx)
         , stream_(ioc, ssl_ctx)
         , resolver_(ioc)
@@ -440,9 +440,9 @@ main(int argc, char* argv[])
     // The SSL context is required, and holds certificates
     asio::ssl::context ssl_ctx(asio::ssl::context::tls_client);
 
-    // RTS context holds optional deflate and
+    // holds optional deflate and
     // required configuration services
-    rts::context rts_ctx;
+    rts::polystore rts_ctx;
 
     // Install parser service
     {

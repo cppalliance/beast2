@@ -11,15 +11,15 @@
 #define BOOST_BEAST2_SERVER_SERVE_LOG_ADMIN_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/polystore.hpp>
 #include <boost/beast2/server/router.hpp>
+#include <boost/rts/polystore.hpp>
 
 namespace boost {
 namespace beast2 {
 
 router
 serve_log_admin(
-    polystore& ps);
+    rts::polystore& ps);
 
 } // beast2
 } // boost

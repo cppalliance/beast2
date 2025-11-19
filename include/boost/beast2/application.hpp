@@ -11,8 +11,7 @@
 #define BOOST_BEAST2_APPLICATION_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/polystore.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 #include <memory>
 #include <type_traits>
 
@@ -27,11 +26,9 @@ namespace beast2 {
     `start()` on each part. When @ref stop is called, each part has its
     `stop()` member invoked. And when the application object is destroyed,
     all the parts are destroyed in reverse order of construction.
-
-    The server also contains an `rts::services` collection VFALCO TODO
 */
 class BOOST_SYMBOL_VISIBLE
-    application : public polystore
+    application : public rts::polystore
 {
 public:
     application(application const&) = delete;
@@ -68,8 +65,6 @@ public:
     */
     BOOST_BEAST2_DECL
     void join();
-
-    BOOST_BEAST2_DECL rts::context& services() noexcept;
 
 private:
     enum state : char;

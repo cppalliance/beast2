@@ -11,8 +11,8 @@
 #define BOOST_BEAST2_LOG_SERVICE_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/polystore.hpp>
 #include <boost/beast2/logger.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <vector>
 
@@ -47,7 +47,7 @@ public:
 BOOST_BEAST2_DECL
 log_service&
 use_log_service(
-    polystore& ps);
+    rts::polystore& ps);
 
 } // beast2
 } // boost

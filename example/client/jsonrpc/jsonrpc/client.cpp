@@ -21,7 +21,7 @@
 #include <boost/http_proto/string_body.hpp>
 #include <boost/json/parse.hpp>
 #include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/rts/zlib/inflate.hpp>
 #include <boost/url/url_view.hpp>
 
@@ -385,7 +385,7 @@ public:
 client::
 client(
     urls::url endpoint,
-    const rts::context& rts_ctx,
+    rts::polystore& rts_ctx,
     asio::any_io_executor exec,
     asio::ssl::context& ssl_ctx)
     : client(
@@ -398,7 +398,7 @@ client(
 client::
 client(
     urls::url endpoint,
-    const rts::context& rts_ctx,
+    rts::polystore& rts_ctx,
     std::unique_ptr<any_stream> stream)
     : stream_(std::move(stream))
     , endpoint_(std::move(endpoint))
@@ -416,10 +416,10 @@ client(
     req_.append(field::accept, "application/json");
     req_.append(field::user_agent, "Boost.Http.Io");
 
-    if(rts_ctx.has_service<rts::brotli::decode_service>())
+    if(rts_ctx.find<rts::brotli::decode_service>() != nullptr)
         req_.append(field::accept_encoding, "br");
 
-    if(rts_ctx.has_service<rts::zlib::inflate_service>())
+    if(rts_ctx.find<rts::zlib::inflate_service>() != nullptr)
         req_.append(field::accept_encoding, "deflate, gzip");
 
     pr_.reset();

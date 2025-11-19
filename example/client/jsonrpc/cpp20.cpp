@@ -17,7 +17,7 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/rts/zlib/inflate.hpp>
 
 #include <iostream>
@@ -27,7 +27,7 @@ using namespace boost;
 asio::awaitable<void>
 co_main(
     asio::ssl::context& ssl_ctx,
-    const rts::context& rts_ctx)
+    rts::polystore& rts_ctx)
 {
     using dec_float = multiprecision::cpp_dec_float_50;
     const auto to_int = [](std::string_view s)
@@ -147,7 +147,7 @@ main(int, char*[])
 
         // RTS context holds optional deflate and
         // required configuration services
-        rts::context rts_ctx;
+        rts::polystore rts_ctx;
 
         // Install parser service
         {

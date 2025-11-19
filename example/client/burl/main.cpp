@@ -344,7 +344,7 @@ perform_request(
     boost::optional<cookie_jar>& cookie_jar,
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
-    rts::context& rts_ctx,
+    rts::polystore& rts_ctx,
     message msg,
     request_opt request_opt)
 {
@@ -758,7 +758,7 @@ co_main(int argc, char* argv[])
 
     auto executor      = co_await asio::this_coro::executor;
     auto task_group    = ::task_group{ executor, oc.parallel_max };
-    auto rts_ctx       = rts::context{};
+    auto rts_ctx       = rts::polystore{};
     auto cookie_jar    = boost::optional<::cookie_jar>{};
     auto header_output = boost::optional<any_ostream>{};
     auto exp_cookies   = std::string{};

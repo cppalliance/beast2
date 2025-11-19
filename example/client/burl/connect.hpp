@@ -15,7 +15,7 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/context.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 #include <boost/url/url.hpp>
 
 namespace asio       = boost::asio;
@@ -27,7 +27,7 @@ asio::awaitable<void>
 connect(
     const operation_config& oc,
     ssl::context& ssl_ctx,
-    rts::context& rts_ctx,
+    rts::polystore& rts_ctx,
     any_stream& stream,
     urls::url url);
 

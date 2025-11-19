@@ -43,7 +43,7 @@ private:
 
 log_service&
 use_log_service(
-    polystore& ps)
+    rts::polystore& ps)
 {
     return ps.try_emplace<log_service_impl>();
 }

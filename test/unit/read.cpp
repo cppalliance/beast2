@@ -17,7 +17,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/buffers/copy.hpp>
 #include <boost/buffers/make_buffer.hpp>
-#include <boost/rts/context.hpp>
+#include <boost/rts/polystore.hpp>
 
 #include "test_helpers.hpp"
 
@@ -36,7 +36,7 @@ public:
     testAsyncReadSome()
     {
         boost::asio::io_context ioc;
-        rts::context rts_ctx;
+        boost::rts::polystore rts_ctx;
         http_proto::install_parser_service(rts_ctx, {});
 
         // async_read_some completes when the parser reads
@@ -185,7 +185,7 @@ public:
     testAsyncRead()
     {
         boost::asio::io_context ioc;
-        rts::context rts_ctx;
+        rts::polystore rts_ctx;
         http_proto::install_parser_service(rts_ctx, {});
 
         // async_read completes when the parser reads

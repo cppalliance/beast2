@@ -145,9 +145,9 @@ http_stream(
     , close_(close)
     , res_(stream_)
 {
-    req_.parser = http_proto::request_parser(app.services());
+    req_.parser = http_proto::request_parser(app);
 
-    res_.serializer = http_proto::serializer(app.services());
+    res_.serializer = http_proto::serializer(app);
     res_.detach = detacher(*this);
 }
 

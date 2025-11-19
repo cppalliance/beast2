@@ -30,19 +30,19 @@ namespace beast2 {
 void install_services(application& app)
 {
 #ifdef BOOST_RTS_HAS_BROTLI
-    rts::brotli::install_decode_service(app.services());
-    rts::brotli::install_encode_service(app.services());
+    rts::brotli::install_decode_service(app);
+    rts::brotli::install_encode_service(app);
 #endif
 
 #ifdef BOOST_RTS_HAS_ZLIB
-    rts::zlib::install_deflate_service(app.services());
-    rts::zlib::install_inflate_service(app.services());
+    rts::zlib::install_deflate_service(app);
+    rts::zlib::install_inflate_service(app);
 #endif
 
     // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
-    http_proto::install_parser_service(app.services(),
+    http_proto::install_parser_service(app,
         http_proto::request_parser::config());
-    http_proto::install_serializer_service(app.services(),
+    http_proto::install_serializer_service(app,
         http_proto::serializer::config());
 }
 
