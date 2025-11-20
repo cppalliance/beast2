@@ -11,7 +11,9 @@
 #define BOOST_BEAST2_FORMAT_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/detail/except.hpp>
 #include <boost/core/detail/string_view.hpp>
+
 #include <memory>
 #include <ostream>
 #include <streambuf>
@@ -46,21 +48,59 @@ struct format_impl
     next()
     {
         has_placeholder = false;
+        bool unmatched_open = false;
+        bool unmatched_close = false;
         while (p != end)
         {
-            if (*p++ != '{')
-                continue;
-            if (p == end)
-                break;
-            if (*p++ == '}')
+            if(unmatched_open)
             {
-                core::string_view seg(
-                    p0, (p - 2) - p0);
-                p0 = p;
-                has_placeholder = true;
-                return seg;
+                if(*p == '{')
+                {
+                    p++;
+                    core::string_view seg(p0, (p - 1) - p0);
+                    p0 = p;
+                    return seg;
+                }
+                if(*p == '}')
+                {
+                    p++;
+                    core::string_view seg(p0, (p - 2) - p0);
+                    p0 = p;
+                    has_placeholder = true;
+                    return seg;
+                }
+                detail::throw_invalid_argument(
+                    "invalid format string, unmatched {");
             }
+            if(unmatched_close)
+            {
+                if(*p == '}')
+                {
+                    p++;
+                    core::string_view seg(p0, (p - 1) - p0);
+                    p0 = p;
+                    return seg;
+                }
+                detail::throw_invalid_argument(
+                    "invalid format string, unmatched }");
+            }
+            if (*p == '{')
+            {
+                unmatched_open = true;
+            }
+            if(*p == '}')
+            {
+                unmatched_close = true;
+            }
+            p++;
         }
+        if (unmatched_open)
+            detail::throw_invalid_argument(
+                "invalid format string, unmatched {");
+        if(unmatched_close)
+            detail::throw_invalid_argument(
+                "invalid format string, unmatched }");
+
         core::string_view seg(
             p0, end - p0);
         p0 = end;
@@ -71,10 +111,14 @@ struct format_impl
     void do_arg(Arg const& arg)
     {
         core::string_view seg = next();
-        if (seg.size())
-            os.write(seg.data(), static_cast<
-                std::streamsize>(seg.size()));
-        if (has_placeholder)
+        while(seg.size())
+        {
+            os.write(seg.data(), static_cast<std::streamsize>(seg.size()));
+            if(has_placeholder)
+                break;
+            seg = next();
+        }
+        if(has_placeholder)
             os << arg;
     };
 
@@ -83,9 +127,18 @@ struct format_impl
     {
         using expander = int[];
         (void)expander{0, (do_arg(args), 0)...};
-        if (p0 < end)
-            os.write(p0, static_cast<
-                std::streamsize>(end - p0));
+
+        core::string_view seg;
+        do
+        {
+            seg = next();
+            if(has_placeholder)
+                detail::throw_invalid_argument(
+                    "too few format arguments provided");
+            if(seg.size())
+                os.write(seg.data(), static_cast<std::streamsize>(seg.size()));
+        }
+        while(seg.size());
     }
 };
 
