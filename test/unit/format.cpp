@@ -28,22 +28,49 @@ struct format_test
         BOOST_TEST_EQ(s, match);
     }
 
+    template<class... Args>
+    void e(
+        core::string_view match,
+        core::string_view fs,
+        Args const&... args)
+    {
+        BOOST_TEST_THROWS(f(match, fs, args...), std::invalid_argument);
+    }
+
     void run()
     {
+        // Bad format strings, string arg.
+        e("{}",     "{}");
+        e("{",      "{");
+        e("}",      "}");
+        e("}{",     "}{");
+        e("{",      "{",      "x");
+        e("}",      "}",      "x");
+        e("}{",     "}{",     "x");
+        e("{",      "{",      "x");
+        e("}",      "}",      "x");
+        e("}{",     "}{",     "x");
+        e("1{}2{}3","1{}2{}3");
+        e("1a2{}3", "1{}2{}3", "a");
+
+        // Good format strings, string arg.
         f("x",      "x");
-        f("{}",     "{}");
-        f("{",      "{");
-        f("}",      "}");
-        f("}{",     "}{");
+        f("{",      "{{");
+        f("}",      "}}");
+        f("}{",     "}}{{");
         f("x",      "x");
         f("x",      "{}",     "x");
-        f("{",      "{",      "x");
-        f("}",      "}",      "x");
-        f("}{",     "}{",     "x");
-        f("1{}2{}3","1{}2{}3");
-        f("1a2{}3", "1{}2{}3", "a");
+        f("x",      "{}",     "x");
+        f("{",      "{{",     "x");
+        f("}",      "}}",     "x");
+        f("}{",     "}}{{",   "x");
         f("1a2b3",  "1{}2{}3", "a", "b");
+        f("1a2b3",  "1{}2{}3", "a", "b", "c");
         f("hello world!", "hello {}!", "world");
+        f("hello world! {} ", "hello {}! {{}} ", "world");
+
+        // Good format string, char arg
+        f("x",      "{}",     'x');
     }
 };
 
