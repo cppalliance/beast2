@@ -44,6 +44,9 @@ struct format_test
         f("1a2{}3", "1{}2{}3", "a");
         f("1a2b3",  "1{}2{}3", "a", "b");
         f("hello world!", "hello {}!", "world");
+
+        // dummy entry to force a ci run
+        f("x", "x");
     }
 };
 
