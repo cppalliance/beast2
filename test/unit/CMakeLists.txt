@@ -7,35 +7,25 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
-set(EXTRAFILES
-    ../../../url/extra/test_suite/test_main.cpp
-    ../../../url/extra/test_suite/test_suite.cpp
-    ../../../url/extra/test_suite/test_suite.hpp
-    #../../../url/include/boost/url/url.natvis
-    )
+add_subdirectory(../../../url/extra/test_suite test_suite)
 
 file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp)
 list(APPEND PFILES
     CMakeLists.txt
-    Jamfile
-    )
+    Jamfile)
 
-find_package(OpenSSL REQUIRED)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
-source_group("_extra" FILES ${EXTRAFILES})
-add_executable(boost_beast2_tests ${PFILES} ${EXTRAFILES})
-target_include_directories(boost_beast2_tests
-    PRIVATE
-    .
-    ../../
-    ../../example/include
-    ../../../url/extra/test_suite
-)
-target_link_libraries(boost_beast2_tests PRIVATE
-    OpenSSL::SSL
-    Boost::beast
-    Boost::beast2
-    )
 
-add_test(NAME boost_beast2_tests COMMAND boost_beast2_tests)
+add_executable(boost_beast2_tests ${PFILES})
+target_include_directories(boost_beast2_tests PRIVATE . ../../)
+find_package(OpenSSL REQUIRED)
+target_link_libraries(boost_beast2_tests PRIVATE
+    boost_url_test_suite_with_main
+    OpenSSL::SSL
+    Boost::beast2)
+
+# Register individual tests with CTest
+boost_url_test_suite_discover_tests(boost_beast2_tests)
+
+# Add the main test target to Boost's test suite
 add_dependencies(tests boost_beast2_tests)
