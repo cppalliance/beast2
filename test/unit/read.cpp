@@ -17,7 +17,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/buffers/copy.hpp>
 #include <boost/buffers/make_buffer.hpp>
-#include <boost/rts/polystore.hpp>
+#include <boost/capy/polystore.hpp>
 
 #include "test_helpers.hpp"
 
@@ -36,14 +36,14 @@ public:
     testAsyncReadSome()
     {
         boost::asio::io_context ioc;
-        boost::rts::polystore rts_ctx;
-        http_proto::install_parser_service(rts_ctx, {});
+        boost::capy::polystore capy_ctx;
+        http_proto::install_parser_service(capy_ctx, {});
 
         // async_read_some completes when the parser reads
         // the header section of the message.
         {
             test::stream ts(ioc, msg);
-            http_proto::response_parser pr(rts_ctx);
+            http_proto::response_parser pr(capy_ctx);
             pr.reset();
             pr.start();
 
@@ -84,7 +84,7 @@ public:
         {
             test::fail_count fc(11, asio::error::network_down);
             test::stream ts(ioc, fc, msg);
-            http_proto::response_parser pr(rts_ctx);
+            http_proto::response_parser pr(capy_ctx);
             pr.reset();
             pr.start();
 
@@ -108,7 +108,7 @@ public:
         // async_read_some reports parser errors
         {
             test::stream ts(ioc, msg);
-            http_proto::response_parser pr(rts_ctx);
+            http_proto::response_parser pr(capy_ctx);
             pr.reset();
             pr.start();
 
@@ -129,7 +129,7 @@ public:
         {
             test::stream ts(ioc);
             asio::cancellation_signal c_signal;
-            http_proto::response_parser pr(rts_ctx);
+            http_proto::response_parser pr(capy_ctx);
             pr.reset();
             pr.start();
 
@@ -185,14 +185,14 @@ public:
     testAsyncRead()
     {
         boost::asio::io_context ioc;
-        rts::polystore rts_ctx;
-        http_proto::install_parser_service(rts_ctx, {});
+        capy::polystore capy_ctx;
+        http_proto::install_parser_service(capy_ctx, {});
 
         // async_read completes when the parser reads
         // the entire message.
         {
             test::stream ts(ioc, msg);
-            http_proto::response_parser pr(rts_ctx);
+            http_proto::response_parser pr(capy_ctx);
             pr.reset();
             pr.start();
 
@@ -223,7 +223,7 @@ public:
                 [&]()
                 {
                     test::stream ts(ioc);
-                    http_proto::response_parser pr(rts_ctx);
+                    http_proto::response_parser pr(capy_ctx);
                     pr.reset();
                     pr.start();
 

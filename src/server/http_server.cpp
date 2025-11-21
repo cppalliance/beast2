@@ -11,7 +11,7 @@
 #include <boost/beast2/server/http_stream.hpp>
 #include <boost/beast2/server/plain_worker.hpp>
 #include <boost/beast2/asio_io_context.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -24,7 +24,7 @@ class http_server_impl
 {
 public:
     http_server_impl(
-        rts::application& app,
+        capy::application& app,
         std::size_t num_workers)
         : ioc_(install_single_threaded_asio_io_context(app))
         , w_(app,
@@ -74,7 +74,7 @@ private:
 
 auto
 install_plain_http_server(
-    rts::application& app,
+    capy::application& app,
     char const* addr,
     unsigned short port,
     std::size_t num_workers) ->

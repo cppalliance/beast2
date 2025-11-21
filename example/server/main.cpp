@@ -15,28 +15,28 @@
 #include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
-#include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/brotli/encode.hpp>
-#include <boost/rts/zlib/deflate.hpp>
-#include <boost/rts/zlib/inflate.hpp>
+#include <boost/capy/brotli/decode.hpp>
+#include <boost/capy/brotli/encode.hpp>
+#include <boost/capy/zlib/deflate.hpp>
+#include <boost/capy/zlib/inflate.hpp>
 #include <iostream>
 
 namespace boost {
 namespace beast2 {
 
-void install_services(rts::application& app)
+void install_services(capy::application& app)
 {
-#ifdef BOOST_RTS_HAS_BROTLI
-    rts::brotli::install_decode_service(app);
-    rts::brotli::install_encode_service(app);
+#ifdef BOOST_CAPY_HAS_BROTLI
+    capy::brotli::install_decode_service(app);
+    capy::brotli::install_encode_service(app);
 #endif
 
-#ifdef BOOST_RTS_HAS_ZLIB
-    rts::zlib::install_deflate_service(app);
-    rts::zlib::install_inflate_service(app);
+#ifdef BOOST_CAPY_HAS_ZLIB
+    capy::zlib::install_deflate_service(app);
+    capy::zlib::install_inflate_service(app);
 #endif
 
     // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
@@ -57,7 +57,7 @@ int server_main( int argc, char* argv[] )
             return EXIT_FAILURE;
         }
 
-        rts::application app;
+        capy::application app;
 
         install_services(app);
 

@@ -153,7 +153,7 @@ connect_socks5_proxy(
 asio::awaitable<void>
 connect_http_proxy(
     const operation_config& oc,
-    rts::polystore& rts_ctx,
+    capy::polystore& capy_ctx,
     asio::ip::tcp::socket& stream,
     const urls::url_view& url,
     const urls::url_view& proxy)
@@ -190,8 +190,8 @@ connect_http_proxy(
         request.set(field::proxy_authorization, basic_auth);
     }
 
-    auto serializer = http_proto::serializer{ rts_ctx };
-    auto parser     = http_proto::response_parser{ rts_ctx };
+    auto serializer = http_proto::serializer{ capy_ctx };
+    auto parser     = http_proto::response_parser{ capy_ctx };
 
     serializer.start(request);
     co_await beast2::async_write(stream, serializer);
@@ -225,7 +225,7 @@ asio::awaitable<void>
 connect(
     const operation_config& oc,
     ssl::context& ssl_ctx,
-    rts::polystore& rts_ctx,
+    capy::polystore& capy_ctx,
     any_stream& stream,
     urls::url url)
 {
@@ -261,7 +261,7 @@ connect(
     {
         if(oc.proxy.scheme() == "http")
         {
-            co_await connect_http_proxy(oc, rts_ctx, socket, url, oc.proxy);
+            co_await connect_http_proxy(oc, capy_ctx, socket, url, oc.proxy);
         }
         else if(oc.proxy.scheme() == "socks5")
         {

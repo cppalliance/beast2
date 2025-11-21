@@ -12,7 +12,7 @@
 #include <boost/asio/bind_cancellation_slot.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/buffers/make_buffer.hpp>
-#include <boost/rts/polystore.hpp>
+#include <boost/capy/polystore.hpp>
 
 #include "test_helpers.hpp"
 #include <boost/beast2/test/stream.hpp>
@@ -105,11 +105,11 @@ public:
 // issues (this needs to happen before the parser pr_ is constructed)
 struct ctx_base
 {
-    rts::polystore rts_ctx_;
+    capy::polystore capy_ctx_;
 
     ctx_base()
     {
-        http_proto::install_parser_service(rts_ctx_, {});
+        http_proto::install_parser_service(capy_ctx_, {});
     }
 };
 
@@ -142,7 +142,7 @@ struct single_tester : public ctx_base
 
     single_tester()
         : ts_(ioc_, msg_)
-        , pr_(rts_ctx_)
+        , pr_(capy_ctx_)
         , buf_(&s_)
         , brs_(ts_, pr_)
     {

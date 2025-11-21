@@ -36,12 +36,12 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
         target_link_libraries(beast2_example_client_burl crypt32)
     endif()
 
-    if (TARGET Boost::rts_zlib)
-        target_link_libraries(beast2_example_client_burl Boost::rts_zlib)
+    if (TARGET Boost::capy_zlib)
+        target_link_libraries(beast2_example_client_burl Boost::capy_zlib)
     endif()
 
-    if (TARGET Boost::rts_brotli)
-        target_link_libraries(beast2_example_client_burl Boost::rts_brotli)
+    if (TARGET Boost::capy_brotli)
+        target_link_libraries(beast2_example_client_burl Boost::capy_brotli)
     endif()
 
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

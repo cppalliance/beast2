@@ -31,8 +31,8 @@
 #include <boost/buffers.hpp>
 #include <boost/beast2.hpp>
 #include <boost/http_proto.hpp>
-#include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/zlib/inflate.hpp>
+#include <boost/capy/brotli/decode.hpp>
+#include <boost/capy/zlib/inflate.hpp>
 #include <boost/scope/scope_exit.hpp>
 #include <boost/scope/scope_fail.hpp>
 #include <boost/url/parse.hpp>
@@ -44,16 +44,16 @@ namespace beast2   = boost::beast2;
 namespace scope    = boost::scope;
 using system_error = boost::system::system_error;
 
-#ifdef BOOST_RTS_HAS_ZLIB
-constexpr bool rts_has_zlib = true;
+#ifdef BOOST_CAPY_HAS_ZLIB
+constexpr bool capy_has_zlib = true;
 #else
-constexpr bool rts_has_zlib = false;
+constexpr bool capy_has_zlib = false;
 #endif
 
-#ifdef BOOST_RTS_HAS_BROTLI
-constexpr bool rts_has_brotli = true;
+#ifdef BOOST_CAPY_HAS_BROTLI
+constexpr bool capy_has_brotli = true;
 #else
-constexpr bool rts_has_brotli = false;
+constexpr bool capy_has_brotli = false;
 #endif
 
 void
@@ -286,10 +286,10 @@ create_request(
             value.append(encoding);
         };
 
-        if constexpr(rts_has_brotli)
+        if constexpr(capy_has_brotli)
             append("br");
 
-        if constexpr(rts_has_zlib)
+        if constexpr(capy_has_zlib)
         {
             append("deflate");
             append("gzip");
@@ -344,15 +344,15 @@ perform_request(
     boost::optional<cookie_jar>& cookie_jar,
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
-    rts::polystore& rts_ctx,
+    capy::polystore& capy_ctx,
     message msg,
     request_opt request_opt)
 {
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto parser     = http_proto::response_parser{ rts_ctx };
-    auto serializer = http_proto::serializer{ rts_ctx };
+    auto parser     = http_proto::response_parser{ capy_ctx };
+    auto serializer = http_proto::serializer{ capy_ctx };
 
     urls::url url = [&]()
     {
@@ -464,7 +464,7 @@ perform_request(
 
         co_await asio::co_spawn(
             executor,
-            connect(oc, ssl_ctx, rts_ctx, stream, url),
+            connect(oc, ssl_ctx, capy_ctx, stream, url),
             asio::cancel_after(oc.connect_timeout));
 
         if(oc.recvpersecond)
@@ -758,7 +758,7 @@ co_main(int argc, char* argv[])
 
     auto executor      = co_await asio::this_coro::executor;
     auto task_group    = ::task_group{ executor, oc.parallel_max };
-    auto rts_ctx       = rts::polystore{};
+    auto capy_ctx       = capy::polystore{};
     auto cookie_jar    = boost::optional<::cookie_jar>{};
     auto header_output = boost::optional<any_ostream>{};
     auto exp_cookies   = std::string{};
@@ -774,25 +774,25 @@ co_main(int argc, char* argv[])
         http_proto::response_parser::config cfg;
         cfg.body_limit = oc.max_filesize;
         cfg.min_buffer = 1024 * 1024;
-        if constexpr(rts_has_brotli)
+        if constexpr(capy_has_brotli)
         {
             cfg.apply_brotli_decoder  = true;
-            rts::brotli::install_decode_service(rts_ctx);
+            capy::brotli::install_decode_service(capy_ctx);
         }
-        if constexpr(rts_has_zlib)
+        if constexpr(capy_has_zlib)
         {
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            rts::zlib::install_inflate_service(rts_ctx);
+            capy::zlib::install_inflate_service(capy_ctx);
         }
-        http_proto::install_parser_service(rts_ctx, cfg);
+        http_proto::install_parser_service(capy_ctx, cfg);
     }
 
     // serializer service
     {
         http_proto::serializer::config cfg;
         cfg.payload_buffer = 1024 * 1024;
-        http_proto::install_serializer_service(rts_ctx, cfg);
+        http_proto::install_serializer_service(capy_ctx, cfg);
     }
 
     if(!oc.headerfile.empty())
@@ -830,7 +830,7 @@ co_main(int argc, char* argv[])
                     cookie_jar,
                     exp_cookies,
                     ssl_ctx,
-                    rts_ctx,
+                    capy_ctx,
                     oc.msg,
                     ropt.value());
             };

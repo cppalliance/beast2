@@ -12,9 +12,9 @@
 #include "eth_methods.hpp"
 
 #include <boost/asio/io_context.hpp>
-#include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/polystore.hpp>
-#include <boost/rts/zlib/inflate.hpp>
+#include <boost/capy/brotli/decode.hpp>
+#include <boost/capy/polystore.hpp>
+#include <boost/capy/zlib/inflate.hpp>
 
 #include <functional>
 #include <iostream>
@@ -33,7 +33,7 @@ public:
     session(
         asio::io_context& ioc,
         asio::ssl::context& ssl_ctx,
-        rts::polystore& ctx)
+        capy::polystore& ctx)
         : client_(
             urls::url("https://ethereum.publicnode.com"),
             ctx,
@@ -235,26 +235,26 @@ main(int, char*[])
 
         // holds optional deflate and
         // required configuration services
-        rts::polystore rts_ctx;
+        capy::polystore capy_ctx;
 
         // Install parser service
         {
             http_proto::response_parser::config cfg;
             cfg.min_buffer = 64 * 1024;
-        #ifdef BOOST_RTS_HAS_BROTLI
+        #ifdef BOOST_CAPY_HAS_BROTLI
             cfg.apply_brotli_decoder  = true;
-            rts::brotli::install_decode_service(rts_ctx);
+            capy::brotli::install_decode_service(capy_ctx);
         #endif
-        #ifdef BOOST_RTS_HAS_ZLIB
+        #ifdef BOOST_CAPY_HAS_ZLIB
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            rts::zlib::install_inflate_service(rts_ctx);
+            capy::zlib::install_inflate_service(capy_ctx);
         #endif
-            http_proto::install_parser_service(rts_ctx, cfg);
+            http_proto::install_parser_service(capy_ctx, cfg);
         }
 
         // Install serializer service with default configuration
-        http_proto::install_serializer_service(rts_ctx, {});
+        http_proto::install_serializer_service(capy_ctx, {});
 
         // Root certificates used for verification
         ssl_ctx.set_default_verify_paths();
@@ -262,7 +262,7 @@ main(int, char*[])
         // Verify the remote server's certificate
         ssl_ctx.set_verify_mode(asio::ssl::verify_peer);
 
-        session s(ioc, ssl_ctx, rts_ctx);
+        session s(ioc, ssl_ctx, capy_ctx);
         s.run();
 
         ioc.run();

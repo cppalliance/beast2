@@ -41,9 +41,9 @@ common_install () {
     popd
   fi
 
-  if [ ! -d "$BOOST_ROOT/libs/rts" ]; then
+  if [ ! -d "$BOOST_ROOT/libs/capy" ]; then
     pushd $BOOST_ROOT/libs
-    git clone https://github.com/cppalliance/rts -b $BOOST_BRANCH --depth 1
+    git clone https://github.com/cppalliance/capy -b $BOOST_BRANCH --depth 1
     popd
   fi
 
@@ -133,9 +133,9 @@ if [ ! -d "$BOOST_ROOT/libs/buffers" ]; then
   popd
 fi
 
-if [ ! -d "$BOOST_ROOT/libs/rts" ]; then
+if [ ! -d "$BOOST_ROOT/libs/capy" ]; then
   pushd $BOOST_ROOT/libs
-  git clone https://github.com/cppalliance/rts -b $BOOST_BRANCH --depth 1
+  git clone https://github.com/cppalliance/capy -b $BOOST_BRANCH --depth 1
   popd
 fi
 

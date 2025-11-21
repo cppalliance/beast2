@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/logger.hpp>
-#include <boost/rts/polystore.hpp>
+#include <boost/capy/polystore.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <vector>
 
@@ -47,7 +47,7 @@ public:
 BOOST_BEAST2_DECL
 log_service&
 use_log_service(
-    rts::polystore& ps);
+    capy::polystore& ps);
 
 } // beast2
 } // boost

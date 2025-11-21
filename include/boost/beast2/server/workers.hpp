@@ -13,7 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/log_service.hpp>
 #include <boost/beast2/server/fixed_array.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/dispatch.hpp>
@@ -29,7 +29,7 @@ public:
     BOOST_BEAST2_DECL
     virtual ~workers_base();
 
-    virtual rts::application& app() noexcept = 0;
+    virtual capy::application& app() noexcept = 0;
     virtual void do_idle(void* worker) = 0;
 };
 
@@ -84,7 +84,7 @@ public:
     */
     template<class Executor1, class... Args>
     workers(
-        rts::application& app,
+        capy::application& app,
         Executor1 const& ex,
         unsigned concurrency,
         std::size_t num_workers,
@@ -112,14 +112,14 @@ private:
     struct acceptor;
     struct worker;
 
-    rts::application& app() noexcept override;
+    capy::application& app() noexcept override;
     void do_idle(void*) override;
     void do_accepts();
     void on_accept(acceptor*, worker*,
         system::error_code const&);
     void do_stop();
 
-    rts::application& app_;
+    capy::application& app_;
     section sect_;
     executor_type ex_;
     fixed_array<worker> vw_;
@@ -176,7 +176,7 @@ template<class Worker>
 template<class Executor1, class... Args>
 workers<Worker>::
 workers(
-    rts::application& app,
+    capy::application& app,
     Executor1 const& ex,
     unsigned concurrency,
     std::size_t num_workers,
@@ -194,7 +194,7 @@ workers(
 }
 
 template<class Worker>
-rts::application&
+capy::application&
 workers<Worker>::
 app() noexcept
 {

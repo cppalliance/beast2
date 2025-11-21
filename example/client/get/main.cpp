@@ -17,9 +17,9 @@
 #include <boost/http_proto/request.hpp>
 #include <boost/http_proto/response_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
-#include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/polystore.hpp>
-#include <boost/rts/zlib/inflate.hpp>
+#include <boost/capy/brotli/decode.hpp>
+#include <boost/capy/polystore.hpp>
+#include <boost/capy/zlib/inflate.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
 
@@ -50,12 +50,12 @@ public:
     session(
         asio::io_context& ioc,
         asio::ssl::context& ssl_ctx,
-        rts::polystore& rts_ctx)
+        capy::polystore& capy_ctx)
         : ssl_ctx_(ssl_ctx)
         , stream_(ioc, ssl_ctx)
         , resolver_(ioc)
-        , sr_(rts_ctx)
-        , pr_(rts_ctx)
+        , sr_(capy_ctx)
+        , pr_(capy_ctx)
     {
     }
 
@@ -74,10 +74,10 @@ public:
             url.authority().encoded_host_and_port().decode());
 
         // Enable compression
-    #ifdef BOOST_RTS_HAS_BROTLI
+    #ifdef BOOST_CAPY_HAS_BROTLI
         req_.append(field::accept_encoding, "br");
     #endif
-    #ifdef BOOST_RTS_HAS_ZLIB
+    #ifdef BOOST_CAPY_HAS_ZLIB
         req_.append(field::accept_encoding, "deflate, gzip");
     #endif
 
@@ -442,27 +442,27 @@ main(int argc, char* argv[])
 
     // holds optional deflate and
     // required configuration services
-    rts::polystore rts_ctx;
+    capy::polystore capy_ctx;
 
     // Install parser service
     {
         http_proto::response_parser::config cfg;
         cfg.body_limit = std::uint64_t(-1);
         cfg.min_buffer = 64 * 1024;
-    #ifdef BOOST_RTS_HAS_BROTLI
+    #ifdef BOOST_CAPY_HAS_BROTLI
         cfg.apply_brotli_decoder  = true;
-        rts::brotli::install_decode_service(rts_ctx);
+        capy::brotli::install_decode_service(capy_ctx);
     #endif
-    #ifdef BOOST_RTS_HAS_ZLIB
+    #ifdef BOOST_CAPY_HAS_ZLIB
         cfg.apply_deflate_decoder = true;
         cfg.apply_gzip_decoder    = true;
-        rts::zlib::install_inflate_service(rts_ctx);
+        capy::zlib::install_inflate_service(capy_ctx);
     #endif
-        http_proto::install_parser_service(rts_ctx, cfg);
+        http_proto::install_parser_service(capy_ctx, cfg);
     }
 
     // Install serializer service with default configuration
-    http_proto::install_serializer_service(rts_ctx, {});
+    http_proto::install_serializer_service(capy_ctx, {});
 
     // Root certificates used for verification
     ssl_ctx.set_default_verify_paths();
@@ -476,7 +476,7 @@ main(int argc, char* argv[])
     if(!url.has_authority())
         goto help;
 
-    session s(ioc, ssl_ctx, rts_ctx);
+    session s(ioc, ssl_ctx, capy_ctx);
     s.run(url);
 
     ioc.run();

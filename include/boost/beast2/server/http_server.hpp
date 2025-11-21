@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
 namespace boost {
@@ -43,7 +43,7 @@ public:
 BOOST_BEAST2_DECL
 auto
 install_plain_http_server(
-    rts::application& app,
+    capy::application& app,
     char const* addr,
     unsigned short port,
     std::size_t num_workers) ->
