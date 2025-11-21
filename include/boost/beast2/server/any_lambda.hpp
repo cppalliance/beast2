@@ -54,7 +54,7 @@ template<class R, class... Args>
 struct any_lambda<R(Args...)>
 {
 private:
-    // Adjust as desired — must fit your expected lambdas
+    // Adjust as desired ï¿½ must fit your expected lambdas
     static constexpr std::size_t BufferSize = detail::max_sizeof_mfp();
     static constexpr std::size_t BufferAlign = alignof(std::max_align_t);
 
@@ -63,7 +63,7 @@ private:
     using MoveFn   = void(*)(void*, void*);
     using DestroyFn= void(*)(void*);
 
-    typename std::aligned_storage<BufferSize, BufferAlign>::type buffer;
+    alignas(BufferAlign) unsigned char buffer[BufferSize];
     InvokeFn invoke = nullptr;
     CopyFn copy = nullptr;
     MoveFn move = nullptr;
