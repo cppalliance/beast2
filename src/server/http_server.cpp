@@ -25,11 +25,17 @@ class http_server_impl
 public:
     http_server_impl(
         capy::application& app,
+        http_proto::prepared_parser_config const& cfg,
         std::size_t num_workers)
         : ioc_(install_single_threaded_asio_io_context(app))
-        , w_(app,
-            ioc_.get_executor(), 1, num_workers,
-            ioc_.get_executor(), this->wwwroot)
+        , w_(
+            app,
+            ioc_.get_executor(),
+            1,
+            num_workers,
+            ioc_.get_executor(),
+            cfg,
+            this->wwwroot)
     {
     }
 
@@ -75,6 +81,7 @@ private:
 auto
 install_plain_http_server(
     capy::application& app,
+    http_proto::parser_config const& cfg,
     char const* addr,
     unsigned short port,
     std::size_t num_workers) ->
@@ -85,7 +92,7 @@ install_plain_http_server(
     using stream_type = asio::basic_stream_socket<
         asio::ip::tcp, asio::io_context::executor_type>;
     auto& srv = app.emplace<http_server_impl<stream_type>>(
-        app, num_workers);
+        app, cfg.prepare(), num_workers);
     srv.add_port(addr, port);
     return srv;
 }

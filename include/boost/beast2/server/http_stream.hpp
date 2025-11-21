@@ -72,6 +72,7 @@ public:
     */
     http_stream(
         capy::application& app,
+        http_proto::prepared_parser_config const& cfg,
         AsyncStream& stream,
         router_asio<AsyncStream&> routes,
         any_lambda<void(system::error_code)> close_fn);
@@ -130,6 +131,7 @@ template<class AsyncStream>
 http_stream<AsyncStream>::
 http_stream(
     capy::application& app,
+    http_proto::prepared_parser_config const& cfg,
     AsyncStream& stream,
     router_asio<AsyncStream&> routes,
     any_lambda<void(system::error_code)> close)
@@ -145,7 +147,7 @@ http_stream(
     , close_(close)
     , res_(stream_)
 {
-    req_.parser = http_proto::request_parser(app);
+    req_.parser = http_proto::request_parser(cfg);
 
     res_.serializer = http_proto::serializer(app);
     res_.detach = detacher(*this);

@@ -176,6 +176,7 @@ connect_http_proxy(
         return rs;
     }();
 
+    http_proto::parser_config cfg(http_proto::role::client, capy_ctx);
     request.set_method(http_proto::method::connect);
     request.set_target(host_port);
     request.set(field::host, host_port);
@@ -191,7 +192,7 @@ connect_http_proxy(
     }
 
     auto serializer = http_proto::serializer{ capy_ctx };
-    auto parser     = http_proto::response_parser{ capy_ctx };
+    auto parser     = http_proto::response_parser(cfg.prepare());
 
     serializer.start(request);
     co_await beast2::async_write(stream, serializer);

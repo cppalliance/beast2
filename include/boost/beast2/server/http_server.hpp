@@ -44,6 +44,7 @@ BOOST_BEAST2_DECL
 auto
 install_plain_http_server(
     capy::application& app,
+    http_proto::parser_config const& cfg,
     char const* addr,
     unsigned short port,
     std::size_t num_workers) ->

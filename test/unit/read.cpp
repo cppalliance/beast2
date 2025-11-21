@@ -37,13 +37,13 @@ public:
     {
         boost::asio::io_context ioc;
         boost::capy::polystore capy_ctx;
-        http_proto::install_parser_service(capy_ctx, {});
+        http_proto::parser_config cfg(http_proto::role::client, capy_ctx);
 
         // async_read_some completes when the parser reads
         // the header section of the message.
         {
             test::stream ts(ioc, msg);
-            http_proto::response_parser pr(capy_ctx);
+            http_proto::response_parser pr(cfg.prepare());
             pr.reset();
             pr.start();
 
@@ -84,7 +84,7 @@ public:
         {
             test::fail_count fc(11, asio::error::network_down);
             test::stream ts(ioc, fc, msg);
-            http_proto::response_parser pr(capy_ctx);
+            http_proto::response_parser pr(cfg.prepare());
             pr.reset();
             pr.start();
 
@@ -108,7 +108,7 @@ public:
         // async_read_some reports parser errors
         {
             test::stream ts(ioc, msg);
-            http_proto::response_parser pr(capy_ctx);
+            http_proto::response_parser pr(cfg.prepare());
             pr.reset();
             pr.start();
 
@@ -129,7 +129,7 @@ public:
         {
             test::stream ts(ioc);
             asio::cancellation_signal c_signal;
-            http_proto::response_parser pr(capy_ctx);
+            http_proto::response_parser pr(cfg.prepare());
             pr.reset();
             pr.start();
 
@@ -186,13 +186,13 @@ public:
     {
         boost::asio::io_context ioc;
         capy::polystore capy_ctx;
-        http_proto::install_parser_service(capy_ctx, {});
+        http_proto::parser_config cfg(http_proto::role::client, capy_ctx);
 
         // async_read completes when the parser reads
         // the entire message.
         {
             test::stream ts(ioc, msg);
-            http_proto::response_parser pr(capy_ctx);
+            http_proto::response_parser pr(cfg.prepare());
             pr.reset();
             pr.start();
 
@@ -223,7 +223,7 @@ public:
                 [&]()
                 {
                     test::stream ts(ioc);
-                    http_proto::response_parser pr(capy_ctx);
+                    http_proto::response_parser pr(cfg.prepare());
                     pr.reset();
                     pr.start();
 

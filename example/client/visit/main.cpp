@@ -204,7 +204,8 @@ struct worker
         executor_type ex,
         boost::capy::polystore& ctx)
         : sock(ex)
-        , pr(ctx)
+        , pr(boost::http_proto::parser_config(
+            boost::http_proto::role::client, ctx).prepare())
     {
         sock.open(boost::asio::ip::tcp::v4());
     }
@@ -277,9 +278,6 @@ main(int argc, char* argv[])
     (void)argv;
 
     boost::capy::polystore ctx;
-    boost::http_proto::parser::config_base cfg;
-    boost::http_proto::install_parser_service(ctx, cfg);
-
     boost::asio::io_context ioc;
 
     worker w(ioc.get_executor(), ctx);

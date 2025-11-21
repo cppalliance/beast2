@@ -237,21 +237,18 @@ main(int, char*[])
         // required configuration services
         capy::polystore capy_ctx;
 
-        // Install parser service
-        {
-            http_proto::response_parser::config cfg;
-            cfg.min_buffer = 64 * 1024;
-        #ifdef BOOST_CAPY_HAS_BROTLI
-            cfg.apply_brotli_decoder  = true;
-            capy::brotli::install_decode_service(capy_ctx);
-        #endif
-        #ifdef BOOST_CAPY_HAS_ZLIB
-            cfg.apply_deflate_decoder = true;
-            cfg.apply_gzip_decoder    = true;
-            capy::zlib::install_inflate_service(capy_ctx);
-        #endif
-            http_proto::install_parser_service(capy_ctx, cfg);
-        }
+        // Set up parser config
+        http_proto::parser_config cfg(http_proto::role::client, capy_ctx);
+        cfg.min_buffer = 64 * 1024;
+    #ifdef BOOST_CAPY_HAS_BROTLI
+        cfg.apply_brotli_decoder  = true;
+        capy::brotli::install_decode_service(capy_ctx);
+    #endif
+    #ifdef BOOST_CAPY_HAS_ZLIB
+        cfg.apply_deflate_decoder = true;
+        cfg.apply_gzip_decoder    = true;
+        capy::zlib::install_inflate_service(capy_ctx);
+    #endif
 
         // Install serializer service with default configuration
         http_proto::install_serializer_service(capy_ctx, {});

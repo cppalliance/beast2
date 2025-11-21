@@ -348,10 +348,12 @@ perform_request(
     message msg,
     request_opt request_opt)
 {
+    http_proto::parser_config cfg(
+        http_proto::role::client, capy_ctx);
     using field     = http_proto::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto parser     = http_proto::response_parser{ capy_ctx };
+    auto parser     = http_proto::response_parser( cfg.prepare() );
     auto serializer = http_proto::serializer{ capy_ctx };
 
     urls::url url = [&]()
@@ -771,7 +773,7 @@ co_main(int argc, char* argv[])
 
     // parser service
     {
-        http_proto::response_parser::config cfg;
+        http_proto::parser_config cfg(http_proto::role::client, capy_ctx);
         cfg.body_limit = oc.max_filesize;
         cfg.min_buffer = 1024 * 1024;
         if constexpr(capy_has_brotli)
