@@ -106,10 +106,13 @@ public:
 struct ctx_base
 {
     capy::polystore capy_ctx_;
+    http_proto::prepared_parser_config cfg_;
 
     ctx_base()
+        : cfg_(http_proto::parser_config(
+            http_proto::role::client,
+                capy_ctx_).prepare())
     {
-        http_proto::install_parser_service(capy_ctx_, {});
     }
 };
 
@@ -142,7 +145,7 @@ struct single_tester : public ctx_base
 
     single_tester()
         : ts_(ioc_, msg_)
-        , pr_(capy_ctx_)
+        , pr_(cfg_)
         , buf_(&s_)
         , brs_(ts_, pr_)
     {

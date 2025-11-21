@@ -42,6 +42,7 @@ public:
     plain_worker(
         workers_base& wb,
         Executor0 const& ex,
+        http_proto::prepared_parser_config const& cfg,
         router_asio<stream_type&> rr);
 
     capy::application& app() noexcept
@@ -90,9 +91,11 @@ plain_worker<Executor, Protocol>::
 plain_worker(
     workers_base& wb,
     Executor0 const& ex,
+    http_proto::prepared_parser_config const& cfg,
     router_asio<stream_type&> rr)
     : http_stream<stream_type>(
         wb.app(),
+        cfg,
         stream_,
         std::move(rr),
         [this](system::error_code const& ec)

@@ -403,7 +403,7 @@ client(
     : stream_(std::move(stream))
     , endpoint_(std::move(endpoint))
     , sr_(capy_ctx)
-    , pr_(capy_ctx)
+    , pr_(http_proto::parser_config(http_proto::role::client, capy_ctx).prepare())
     , req_(http_proto::method::post, "/")
 {
     using field = http_proto::field;

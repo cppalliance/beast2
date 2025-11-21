@@ -40,8 +40,6 @@ void install_services(capy::application& app)
 #endif
 
     // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
-    http_proto::install_parser_service(app,
-        http_proto::request_parser::config());
     http_proto::install_serializer_service(app,
         http_proto::serializer::config());
 }
@@ -63,6 +61,8 @@ int server_main( int argc, char* argv[] )
 
         auto& srv = install_plain_http_server(
             app,
+            http_proto::parser_config(
+                http_proto::role::server, app),
             argv[1],
             (unsigned short)std::atoi(argv[2]),
             std::atoi(argv[4]));

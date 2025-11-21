@@ -50,12 +50,13 @@ public:
     session(
         asio::io_context& ioc,
         asio::ssl::context& ssl_ctx,
-        capy::polystore& capy_ctx)
+        capy::polystore& capy_ctx,
+        http_proto::prepared_parser_config cfg)
         : ssl_ctx_(ssl_ctx)
         , stream_(ioc, ssl_ctx)
         , resolver_(ioc)
         , sr_(capy_ctx)
-        , pr_(capy_ctx)
+        , pr_(cfg)
     {
     }
 
@@ -444,22 +445,20 @@ main(int argc, char* argv[])
     // required configuration services
     capy::polystore capy_ctx;
 
-    // Install parser service
-    {
-        http_proto::response_parser::config cfg;
-        cfg.body_limit = std::uint64_t(-1);
-        cfg.min_buffer = 64 * 1024;
-    #ifdef BOOST_CAPY_HAS_BROTLI
-        cfg.apply_brotli_decoder  = true;
-        capy::brotli::install_decode_service(capy_ctx);
-    #endif
-    #ifdef BOOST_CAPY_HAS_ZLIB
-        cfg.apply_deflate_decoder = true;
-        cfg.apply_gzip_decoder    = true;
-        capy::zlib::install_inflate_service(capy_ctx);
-    #endif
-        http_proto::install_parser_service(capy_ctx, cfg);
-    }
+    // Configure parser
+    http_proto::parser_config cfg(
+        http_proto::role::client, capy_ctx);
+    cfg.body_limit = std::uint64_t(-1);
+    cfg.min_buffer = 64 * 1024;
+#ifdef BOOST_CAPY_HAS_BROTLI
+    cfg.apply_brotli_decoder  = true;
+    capy::brotli::install_decode_service(capy_ctx);
+#endif
+#ifdef BOOST_CAPY_HAS_ZLIB
+    cfg.apply_deflate_decoder = true;
+    cfg.apply_gzip_decoder    = true;
+    capy::zlib::install_inflate_service(capy_ctx);
+#endif
 
     // Install serializer service with default configuration
     http_proto::install_serializer_service(capy_ctx, {});
@@ -476,7 +475,7 @@ main(int argc, char* argv[])
     if(!url.has_authority())
         goto help;
 
-    session s(ioc, ssl_ctx, capy_ctx);
+    session s(ioc, ssl_ctx, capy_ctx, cfg.prepare());
     s.run(url);
 
     ioc.run();
