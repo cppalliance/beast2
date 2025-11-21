@@ -39,7 +39,7 @@ class multipart_form
 
     // boundary with extra "--" prefix and postfix.
     std::array<char, 2 + 46 + 2> storage_;
-    std::vector<part> parts_;
+    std::vector<part> pacapy_;
 
 public:
     class source;
@@ -71,7 +71,7 @@ public:
 class multipart_form::source : public http_proto::source
 {
     const multipart_form* form_;
-    std::vector<part>::const_iterator it_{ form_->parts_.begin() };
+    std::vector<part>::const_iterator it_{ form_->pacapy_.begin() };
     int step_           = 0;
     std::uint64_t skip_ = 0;
 

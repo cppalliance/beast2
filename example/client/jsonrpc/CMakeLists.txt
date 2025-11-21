@@ -44,11 +44,11 @@ set_property(TARGET beast2_example_client_jsonrpc_cpp11
 target_link_libraries(beast2_example_client_jsonrpc_cpp11
     PRIVATE
     beast2_example_client_jsonrpc_lib)
-if (TARGET Boost::rts_zlib)
-    target_link_libraries(beast2_example_client_jsonrpc_cpp11 PRIVATE Boost::rts_zlib)
+if (TARGET Boost::capy_zlib)
+    target_link_libraries(beast2_example_client_jsonrpc_cpp11 PRIVATE Boost::capy_zlib)
 endif()
-if (TARGET Boost::rts_brotli)
-    target_link_libraries(beast2_example_client_jsonrpc_cpp11 PRIVATE Boost::rts_brotli)
+if (TARGET Boost::capy_brotli)
+    target_link_libraries(beast2_example_client_jsonrpc_cpp11 PRIVATE Boost::capy_brotli)
 endif()
 
 # CPP20 Example
@@ -59,10 +59,10 @@ if (CMAKE_CXX_STANDARD EQUAL 20)
     target_link_libraries(beast2_example_client_jsonrpc_cpp20
         PRIVATE
         beast2_example_client_jsonrpc_lib)
-    if (TARGET Boost::rts_zlib)
-        target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::rts_zlib)
+    if (TARGET Boost::capy_zlib)
+        target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::capy_zlib)
     endif()
-    if (TARGET Boost::rts_brotli)
-        target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::rts_brotli)
+    if (TARGET Boost::capy_brotli)
+        target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::capy_brotli)
     endif()
 endif ()

@@ -35,11 +35,11 @@ if (WIN32)
     target_link_libraries(beast2_server_example crypt32)
 endif()
 
-if (TARGET Boost::rts_zlib)
-    target_link_libraries(beast2_server_example Boost::rts_zlib)
+if (TARGET Boost::capy_zlib)
+    target_link_libraries(beast2_server_example Boost::capy_zlib)
 endif()
 
-if (TARGET Boost::rts_brotli)
-    target_link_libraries(beast2_server_example Boost::rts_brotli)
+if (TARGET Boost::capy_brotli)
+    target_link_libraries(beast2_server_example Boost::capy_brotli)
 endif()
 

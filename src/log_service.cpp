@@ -43,7 +43,7 @@ private:
 
 log_service&
 use_log_service(
-    rts::polystore& ps)
+    capy::polystore& ps)
 {
     return ps.try_emplace<log_service_impl>();
 }

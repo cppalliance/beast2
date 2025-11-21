@@ -18,8 +18,8 @@ lib user32 ;
 project
     : requirements
       <library>/boost/beast2//boost_beast2
-      [ ac.check-library /boost/rts//boost_rts_zlib : <library>/boost/rts//boost_rts_zlib : ]
-      [ ac.check-library /boost/rts//boost_rts_brotli : <library>/boost/rts//boost_rts_brotli : ]
+      [ ac.check-library /boost/capy//boost_capy_zlib : <library>/boost/capy//boost_capy_zlib : ]
+      [ ac.check-library /boost/capy//boost_capy_brotli : <library>/boost/capy//boost_capy_brotli : ]
       [ ac.check-library /openssl//ssl : <library>/openssl//ssl/<link>shared : <build>no ]
       [ ac.check-library /openssl//crypto : <library>/openssl//crypto/<link>shared : <build>no ]
       <target-os>windows:<library>advapi32

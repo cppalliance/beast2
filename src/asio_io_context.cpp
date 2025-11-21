@@ -9,7 +9,7 @@
 
 #include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/server/call_mf.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <thread>
@@ -33,7 +33,7 @@ public:
     }
 
     asio_io_context_impl(
-        rts::application& app,
+        capy::application& app,
         int num_threads)
         : app_(app)
         , num_threads_(num_threads)
@@ -102,7 +102,7 @@ private:
         app_.stop();
     }
 
-    rts::application& app_;
+    capy::application& app_;
     int num_threads_;
     asio::io_context ioc_;
     asio::signal_set sigs_;
@@ -120,7 +120,7 @@ asio_io_context::
 
 auto
 install_single_threaded_asio_io_context(
-    rts::application& app) ->
+    capy::application& app) ->
         asio_io_context&
 {
     return app.emplace<
@@ -129,7 +129,7 @@ install_single_threaded_asio_io_context(
 
 auto
 install_multi_threaded_asio_io_context(
-    rts::application& app,
+    capy::application& app,
     int num_threads) ->
         asio_io_context&
 {

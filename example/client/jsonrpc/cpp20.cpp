@@ -16,9 +16,9 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/rts/brotli/decode.hpp>
-#include <boost/rts/polystore.hpp>
-#include <boost/rts/zlib/inflate.hpp>
+#include <boost/capy/brotli/decode.hpp>
+#include <boost/capy/polystore.hpp>
+#include <boost/capy/zlib/inflate.hpp>
 
 #include <iostream>
 
@@ -27,7 +27,7 @@ using namespace boost;
 asio::awaitable<void>
 co_main(
     asio::ssl::context& ssl_ctx,
-    rts::polystore& rts_ctx)
+    capy::polystore& capy_ctx)
 {
     using dec_float = multiprecision::cpp_dec_float_50;
     const auto to_int = [](std::string_view s)
@@ -37,7 +37,7 @@ co_main(
 
     jsonrpc::client client(
         urls::url("https://ethereum.publicnode.com"),
-        rts_ctx,
+        capy_ctx,
         co_await asio::this_coro::executor,
         ssl_ctx);
 
@@ -145,28 +145,28 @@ main(int, char*[])
         // The SSL context is required, and holds certificates
         asio::ssl::context ssl_ctx(asio::ssl::context::tls_client);
 
-        // RTS context holds optional deflate and
+        // CAPY context holds optional deflate and
         // required configuration services
-        rts::polystore rts_ctx;
+        capy::polystore capy_ctx;
 
         // Install parser service
         {
             http_proto::response_parser::config cfg;
             cfg.min_buffer = 64 * 1024;
-        #ifdef BOOST_RTS_HAS_BROTLI
+        #ifdef BOOST_CAPY_HAS_BROTLI
             cfg.apply_brotli_decoder  = true;
-            rts::brotli::install_decode_service(rts_ctx);
+            capy::brotli::install_decode_service(capy_ctx);
         #endif
-        #ifdef BOOST_RTS_HAS_ZLIB
+        #ifdef BOOST_CAPY_HAS_ZLIB
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            rts::zlib::install_inflate_service(rts_ctx);
+            capy::zlib::install_inflate_service(capy_ctx);
         #endif
-            http_proto::install_parser_service(rts_ctx, cfg);
+            http_proto::install_parser_service(capy_ctx, cfg);
         }
 
         // Install serializer service with default configuration
-        http_proto::install_serializer_service(rts_ctx, {});
+        http_proto::install_serializer_service(capy_ctx, {});
 
         // Root certificates used for verification
         ssl_ctx.set_default_verify_paths();
@@ -176,7 +176,7 @@ main(int, char*[])
 
         asio::co_spawn(
             ioc,
-            co_main(ssl_ctx, rts_ctx),
+            co_main(ssl_ctx, capy_ctx),
             [](auto eptr)
             {
                 if(eptr)

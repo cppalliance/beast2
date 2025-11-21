@@ -16,7 +16,7 @@
 #include <boost/beast2/server/workers.hpp>
 #include <boost/beast2/logger.hpp>
 #include <boost/beast2/read.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/prepend.hpp>
@@ -44,7 +44,7 @@ public:
         Executor0 const& ex,
         router_asio<stream_type&> rr);
 
-    rts::application& app() noexcept
+    capy::application& app() noexcept
     {
         return wb_.app();
     }

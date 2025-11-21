@@ -37,7 +37,7 @@ else()
     date_time
     buffers
     core
-    rts
+    capy
     static_assert
     type_traits
     url

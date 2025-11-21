@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_ASIO_IO_CONTEXT_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/rts/application.hpp>
+#include <boost/capy/application.hpp>
 #include <boost/asio/io_context.hpp>
 
 namespace boost {
@@ -57,13 +57,13 @@ public:
 BOOST_BEAST2_DECL
 auto
 install_single_threaded_asio_io_context(
-    rts::application& app) ->
+    capy::application& app) ->
         asio_io_context&;
 
 BOOST_BEAST2_DECL
 auto
 install_multi_threaded_asio_io_context(
-    rts::application& app,
+    capy::application& app,
     int num_threads) ->
         asio_io_context&;
 

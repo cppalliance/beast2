@@ -840,11 +840,11 @@ jobs:
           repository: cppalliance/buffers
           ref: develop
 
-      - name: Clone Boost.RunTimeServices
+      - name: Clone Boost.Capy
         uses: actions/checkout@v3
         with:
-          path: rts-root
-          repository: cppalliance/rts
+          path: capy-root
+          repository: cppalliance/capy
           ref: develop
 
       - name: Setup C++
@@ -877,12 +877,12 @@ jobs:
             http-io-root
             http-proto-root
             buffers-root
-            rts-root
+            capy-root
           scan-modules-ignore: |
             beast2
             http_proto
             buffers
-            rts
+            capy
 
       - name: Install Packages (Windows)
         uses: alandefreitas/cpp-actions/package-install@v1.9.0
@@ -904,8 +904,8 @@ jobs:
           triplet=${{ matrix.x86 && 'x86-windows-static' || 'x64-windows' }}
           addrmdl=${{ matrix.x86 && '32' || '64' }}
 
-          # This is temporary until we move rts/build/brotli.jam to boost/tools/build
-          echo "import-search ${home}/boost-root/libs/rts/build ;" | sed 's/\/d\//D:\//g' >> user-config.jam
+          # This is temporary until we move capy/build/brotli.jam to boost/tools/build
+          echo "import-search ${home}/boost-root/libs/capy/build ;" | sed 's/\/d\//D:\//g' >> user-config.jam
 
           echo "using zlib    : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <dll-path>\"${home}/vcpkg-root/installed/${triplet}/bin\" <name>zlib                              : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
           echo "using brotli  : : <include>\"${home}/vcpkg-root/installed/${triplet}/include\" <search>\"${home}/vcpkg-root/installed/${triplet}/lib\" <dll-path>\"${home}/vcpkg-root/installed/${triplet}/bin\"                                         : <address-model>${addrmdl} ;" | sed 's/\/d\//D:\//g' >> user-config.jam
@@ -959,7 +959,7 @@ jobs:
           cp -r "$workspace_root"/http-io-root "libs/$module"
           cp -r "$workspace_root"/http-proto-root libs/http_proto
           cp -r "$workspace_root"/buffers-root libs/buffers
-          cp -r "$workspace_root"/rts-root libs/rts
+          cp -r "$workspace_root"/capy-root libs/capy
 
       - name: Boost B2 Workflow
         uses: alandefreitas/cpp-actions/b2-workflow@v1.9.0
@@ -1187,11 +1187,11 @@ jobs:
           repository: cppalliance/buffers
           ref: develop
 
-      - name: Clone Boost.RunTimeServices
+      - name: Clone Boost.Capy
         uses: actions/checkout@v3
         with:
-          path: rts-root
-          repository: cppalliance/rts
+          path: capy-root
+          repository: cppalliance/capy
           ref: develop
 
       - name: Clone Boost
@@ -1205,12 +1205,12 @@ jobs:
             http-io-root
             http-proto-root
             buffers-root
-            rts-root
+            capy-root
           scan-modules-ignore: |
             beast2
             http_proto
             buffers
-            rts
+            capy
 
       - name: Patch Boost
         id: patch
@@ -1245,7 +1245,7 @@ jobs:
           cp -r "$workspace_root"/http-io-root "libs/$module"
           cp -r "$workspace_root"/http-proto-root libs/http_proto
           cp -r "$workspace_root"/buffers-root libs/buffers
-          cp -r "$workspace_root"/rts-root libs/rts
+          cp -r "$workspace_root"/capy-root libs/capy
 
       - uses: actions/setup-node@v4
         with:

@@ -73,7 +73,7 @@ multipart_form::append(
 {
     auto size = is_file ? fs::file_size(value) : value.size();
 
-    parts_.push_back(
+    pacapy_.push_back(
         { is_file,
           std::move(name),
           std::move(value),
@@ -102,7 +102,7 @@ std::uint64_t
 multipart_form::content_length() const noexcept
 {
     auto rs = std::uint64_t{};
-    for(const auto& part : parts_)
+    for(const auto& part : pacapy_)
     {
         rs += storage_.size() - 2; // --boundary
         rs += content_disposition_.size();
@@ -199,7 +199,7 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         return true;
     };
 
-    while(it_ != form_->parts_.end())
+    while(it_ != form_->pacapy_.end())
     {
         switch(step_)
         {
