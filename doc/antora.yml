@@ -13,8 +13,6 @@ ext:
     config: doc/mrdocs.yml
   cpp-tagfiles:
     files:
-      - file: ./doc/tagfiles/boost-beast2-doxygen.tag.xml
-        base_url: 'xref:reference:'
       - file: ./doc/tagfiles/boost-http_proto-doxygen.tag.xml
         base_url: 'xref:reference:'
     using-namespaces:
