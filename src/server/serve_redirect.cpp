@@ -26,7 +26,7 @@ namespace beast2 {
 
 //------------------------------------------------
 
-/// Returns the current system time formatted as an HTTP-date per RFC 9110 ง5.6.7.
+/// Returns the current system time formatted as an HTTP-date per RFC 9110 ยง5.6.7.
 /// Example: "Sat, 11 Oct 2025 02:12:34 GMT"
 static
 std::string
@@ -52,7 +52,9 @@ make_http_date()
     };
 
     // Format strictly according to RFC 9110 (fixed-width, English locale)
-    char buf[40];
+    /// AMLALE: zero out buffer with = `= {0};`
+    char buf[40] = {0};
+
     std::snprintf(
         buf, sizeof(buf),
         "%s, %02d %s %04d %02d:%02d:%02d GMT",

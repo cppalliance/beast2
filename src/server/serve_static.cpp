@@ -30,6 +30,7 @@ get_extension(
     return path.substr(pos);
 }
 
+/// AMLALE: Based on: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
 static
 core::string_view
 mime_type(
@@ -39,7 +40,8 @@ mime_type(
     auto ext = get_extension(path);
     if(ci_is_equal(ext, ".htm"))  return "text/html";
     if(ci_is_equal(ext, ".html")) return "text/html";
-    if(ci_is_equal(ext, ".php"))  return "text/html";
+    if(ci_is_equal(ext, ".xhtml")) return "text/xhtml+xml";
+    if(ci_is_equal(ext, ".php"))  return "application/x-httpd-php";
     if(ci_is_equal(ext, ".css"))  return "text/css";
     if(ci_is_equal(ext, ".txt"))  return "text/plain";
     if(ci_is_equal(ext, ".js"))   return "application/javascript";
@@ -50,6 +52,7 @@ mime_type(
     if(ci_is_equal(ext, ".png"))  return "image/png";
     if(ci_is_equal(ext, ".jpe"))  return "image/jpeg";
     if(ci_is_equal(ext, ".jpeg")) return "image/jpeg";
+    if(ci_is_equal(ext, ".webp")) return "image/webp";
     if(ci_is_equal(ext, ".jpg"))  return "image/jpeg";
     if(ci_is_equal(ext, ".gif"))  return "image/gif";
     if(ci_is_equal(ext, ".bmp"))  return "image/bmp";
@@ -58,7 +61,12 @@ mime_type(
     if(ci_is_equal(ext, ".tif"))  return "image/tiff";
     if(ci_is_equal(ext, ".svg"))  return "image/svg+xml";
     if(ci_is_equal(ext, ".svgz")) return "image/svg+xml";
-    return "application/text";
+    if(ci_is_equal(ext, ".rar")) return "application/vnd.rar";
+    if(ci_is_equal(ext, ".zip")) return "application/zip";
+    if(ci_is_equal(ext, ".7z")) return "application/x-7z-compressed";
+    /// AMLALE: Actual value for all other cases should use this MIME. We can't know for sure if the mime_type is gonna be textual.
+    /// AMLALE: So i'm defaulting to this one. (Instead of text/plain)
+    return "application/octet-stream";
 }
 
 #if 0
