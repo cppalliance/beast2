@@ -15,6 +15,8 @@
 #include <boost/capy/application.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
+#include <string>
+
 namespace boost {
 namespace beast2 {
 
@@ -40,13 +42,39 @@ public:
 
 //------------------------------------------------
 
+/**
+    @brief HTTP Configuration structure for 'install_plain_http_server'.
+*/
+struct http_config final {
+    ~http_config() = default;
+
+    http_config() = default;
+
+    std::size_t http_num_workers_{0UL};
+    std::string http_addr_{};
+    std::uint16_t http_port_{0U};
+
+    static http_config make_config(const char** argv)
+    {
+        http_config config{};
+     
+        if (!argv || *argv == nullptr) return config;
+     
+        config.http_num_workers_ = (unsigned short)std::atoi(argv[2]);
+        config.http_addr_ = argv[1];
+        config.http_port_ = std::atoi(argv[4]);
+
+        return config;
+    }
+};
+
+//------------------------------------------------
+
 BOOST_BEAST2_DECL
 auto
 install_plain_http_server(
     capy::application& app,
-    char const* addr,
-    unsigned short port,
-    std::size_t num_workers) ->
+    http_config& config) ->
         http_server<asio::basic_stream_socket<
             asio::ip::tcp,
             asio::io_context::executor_type>>&;

@@ -61,11 +61,11 @@ int server_main( int argc, char* argv[] )
 
         install_services(app);
 
+        http_config config = http_config::make_config(argv);
+        
         auto& srv = install_plain_http_server(
             app,
-            argv[1],
-            (unsigned short)std::atoi(argv[2]),
-            std::atoi(argv[4]));
+            config);
 
         //srv.wwwroot.use("/log", serve_log_admin(app));
         //srv.wwwroot.use("/alt", serve_static( argv[3] ));
