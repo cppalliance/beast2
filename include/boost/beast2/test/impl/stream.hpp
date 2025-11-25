@@ -16,7 +16,9 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/append.hpp>
 #include <boost/asio/associated_cancellation_slot.hpp>
+#include <boost/asio/defer.hpp>
 #include <boost/asio/dispatch.hpp>
+#include <boost/asio/executor.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/buffers/copy.hpp>
@@ -47,136 +49,252 @@ struct extract_executor_op<asio::any_io_executor>
         return ex;
     }
 };
+
+template<class Handler, class Buffers, bool Reader>
+class lambda_base
+{
+protected:
+    Handler h_;
+    boost::weak_ptr<detail::stream_state> iwp_;
+    boost::weak_ptr<detail::stream_state> owp_;
+    Buffers b_;
+    asio::executor_work_guard<
+        asio::associated_executor_t<Handler, asio::any_io_executor>>
+        wg2_;
+
+    class cancellation_handler
+    {
+    public:
+        explicit cancellation_handler(
+            boost::weak_ptr<detail::stream_state> wp)
+            : wp_(std::move(wp))
+        {
+        }
+
+        void
+        operator()(asio::cancellation_type type) const
+        {
+            if(type != asio::cancellation_type::none)
+            {
+                if(auto sp = wp_.lock())
+                {
+                    std::unique_ptr<stream_op_base> p;
+                    {
+                        std::lock_guard<std::mutex> lock(sp->m);
+                        if(Reader)
+                            p = std::move(sp->rop);
+                        else
+                            p = std::move(sp->wop);
+                    }
+                    if(p != nullptr)
+                        (*p)(asio::error::operation_aborted);
+                }
+            }
+        }
+
+    private:
+        boost::weak_ptr<detail::stream_state> wp_;
+    };
+
+public:
+    template<class Handler_>
+    lambda_base(
+        Handler_&& h,
+        boost::shared_ptr<detail::stream_state> const& in,
+        boost::weak_ptr<detail::stream_state> const& out,
+        Buffers const& b)
+        : h_(std::forward<Handler_>(h))
+        , iwp_(in)
+        , owp_(out)
+        , b_(b)
+        , wg2_(asio::get_associated_executor(h_, in->exec))
+    {
+        auto c_slot = asio::get_associated_cancellation_slot(h_);
+        if(c_slot.is_connected())
+            c_slot.template emplace<cancellation_handler>(iwp_);
+    }
+
+    using allocator_type = asio::associated_allocator_t<Handler>;
+
+    allocator_type
+    get_allocator() const noexcept
+    {
+        return asio::get_associated_allocator(h_);
+    }
+
+    using cancellation_slot_type =
+        asio::associated_cancellation_slot_t<Handler>;
+
+    cancellation_slot_type
+    get_cancellation_slot() const noexcept
+    {
+        return asio::get_associated_cancellation_slot(
+            h_, asio::cancellation_slot());
+    }
+};
+
 } // detail
 
 template<class Executor>
 template<class Handler, class Buffers>
-class basic_stream<Executor>::read_op : public detail::stream_read_op_base
+class basic_stream<Executor>::read_op : public detail::stream_op_base
 {
-    class lambda
+    class lambda : public detail::lambda_base<Handler, Buffers, true>
     {
-        Handler h_;
-        boost::weak_ptr<detail::stream_state> wp_;
-        Buffers b_;
-        asio::executor_work_guard<
-            asio::associated_executor_t<Handler, asio::any_io_executor>> wg2_;
-
-        class cancellation_handler
-        {
-        public:
-            explicit
-            cancellation_handler(
-                boost::weak_ptr<detail::stream_state> wp)
-                : wp_(std::move(wp))
-            {
-            }
-
-            void
-            operator()(asio::cancellation_type type) const
-            {
-                if(type != asio::cancellation_type::none)
-                {
-                    if(auto sp = wp_.lock())
-                    {
-                        std::unique_ptr<stream_read_op_base> p;
-                        {
-                            std::lock_guard<std::mutex> lock(sp->m);
-                            p = std::move(sp->op);
-                        }
-                        if(p != nullptr)
-                            (*p)(asio::error::operation_aborted);            
-                    }
-                }
-            }
-
-        private:
-            boost::weak_ptr<detail::stream_state> wp_;
-        };
-
     public:
-        template<class Handler_>
-        lambda(
-            Handler_&& h,
-            boost::shared_ptr<detail::stream_state> const& s,
-            Buffers const& b)
-            : h_(std::forward<Handler_>(h))
-            , wp_(s)
-            , b_(b)
-            , wg2_(asio::get_associated_executor(h_, s->exec))
-        {
-            auto c_slot = asio::get_associated_cancellation_slot(h_);
-            if (c_slot.is_connected())
-                c_slot.template emplace<cancellation_handler>(wp_);
-        }
-
-        using allocator_type = asio::associated_allocator_t<Handler>;
-
-        allocator_type get_allocator() const noexcept
-        {
-          return asio::get_associated_allocator(h_);
-        }
-
-        using cancellation_slot_type =
-            asio::associated_cancellation_slot_t<Handler>;
-
-        cancellation_slot_type
-        get_cancellation_slot() const noexcept
-        {
-            return asio::get_associated_cancellation_slot(h_,
-                asio::cancellation_slot());
-        }
+        using base = detail::lambda_base<Handler, Buffers, true>;
 
         void
         operator()(system::error_code ec)
         {
             std::size_t bytes_transferred = 0;
-            auto sp = wp_.lock();
+            auto sp = base::iwp_.lock();
             if(! sp)
             {
                 ec = asio::error::operation_aborted;
             }
-            if(! ec)
+            if(!ec)
             {
                 std::lock_guard<std::mutex> lock(sp->m);
-                BOOST_ASSERT(! sp->op);
+                BOOST_ASSERT(!sp->rop);
                 if(sp->b.size() > 0)
                 {
-                    bytes_transferred =
-                        buffers::copy(
-                            b_, sp->b.data(), sp->read_max);
+                    bytes_transferred = buffers::copy(
+                        base::b_,
+                        sp->b.data(),
+                        sp->read_max);
                     sp->b.consume(bytes_transferred);
                     sp->nread_bytes += bytes_transferred;
                 }
-                else if (buffers::size(b_) > 0)
+                else if(
+                    buffers::size(
+                        base::b_) > 0)
                 {
                     ec = asio::error::eof;
                 }
             }
 
-            asio::dispatch(wg2_.get_executor(),
-                asio::append(std::move(h_), ec, bytes_transferred));
-            wg2_.reset();
+            asio::dispatch(
+                base::wg2_.get_executor(),
+                asio::append(std::move(base::h_), ec, bytes_transferred));
+            base::wg2_.reset();
+            sp->rop.reset(nullptr);
+        }
+
+        template<class Handler_>
+        lambda(
+            Handler_&& h,
+            boost::shared_ptr<detail::stream_state> const& in,
+            boost::weak_ptr<detail::stream_state> const& out,
+            Buffers const& b)
+            : base(std::forward<Handler_>(h), in, out, b)
+        {
         }
     };
 
-    lambda fn_;
+    std::unique_ptr<lambda> fnp_;
     asio::executor_work_guard<asio::any_io_executor> wg1_;
 
 public:
     template<class Handler_>
     read_op(
         Handler_&& h,
-        boost::shared_ptr<detail::stream_state> const& s,
+        boost::shared_ptr<detail::stream_state> const& in,
+        boost::weak_ptr<detail::stream_state> const& out,
         Buffers const& b)
-        : fn_(std::forward<Handler_>(h), s, b)
-        , wg1_(s->exec)
+        : fnp_(new lambda(std::forward<Handler_>(h), in, out, b))
+        , wg1_(in->exec)
     {
     }
 
     void
     operator()(system::error_code ec) override
     {
-        asio::post(wg1_.get_executor(), asio::append(std::move(fn_), ec));
+        std::unique_ptr<lambda> fnp(std::move(fnp_));
+        if(fnp)
+            asio::post(
+                wg1_.get_executor(), asio::append(std::move(*fnp), ec));
+        wg1_.reset();
+    }
+};
+
+template<class Executor>
+template<class Handler, class Buffers>
+class basic_stream<Executor>::write_op : public detail::stream_op_base
+{
+    class lambda : public detail::lambda_base<Handler, Buffers, false>
+    {
+    public:
+        using base = detail::lambda_base<Handler, Buffers, false>;
+
+        void
+        operator()(system::error_code ec)
+        {
+            std::size_t bytes_transferred = 0;
+            auto isp = base::iwp_.lock();
+            if(!isp)
+            {
+                ec = asio::error::operation_aborted;
+            }
+            auto osp = base::owp_.lock();
+            if(!osp)
+            {
+                ec = asio::error::operation_aborted;
+            }
+            if(!ec)
+            {
+                // copy buffers
+                std::size_t n = std::min<std::size_t>(
+                    buffers::size(base::b_), isp->write_max);
+                {
+                    std::lock_guard<std::mutex> lock(osp->m);
+                    n = buffers::copy(osp->b.prepare(n), base::b_);
+                    osp->b.commit(n);
+                    osp->nwrite_bytes += n;
+                    osp->notify_read();
+                }
+                bytes_transferred = n;
+            }
+
+            asio::dispatch(
+                base::wg2_.get_executor(),
+                asio::append(std::move(base::h_), ec, bytes_transferred));
+            base::wg2_.reset();
+            isp->wop.reset(nullptr);
+        }
+
+        template<class Handler_>
+        lambda(
+            Handler_&& h,
+            boost::shared_ptr<detail::stream_state> const& in,
+            boost::weak_ptr<detail::stream_state> const& out,
+            Buffers const& b)
+            : base(std::forward<Handler_>(h), in, out, b)
+        {
+        }
+    };
+
+    std::unique_ptr<lambda> fnp_;
+    asio::executor_work_guard<asio::any_io_executor> wg1_;
+
+public:
+    template<class Handler_>
+    write_op(
+        Handler_&& h,
+        boost::shared_ptr<detail::stream_state> const& in,
+        boost::weak_ptr<detail::stream_state> const& out,
+        Buffers const& b)
+        : fnp_(new lambda(std::forward<Handler_>(h), in, out, b))
+        , wg1_(in->exec)
+    {
+    }
+
+    void
+    operator()(system::error_code ec) override
+    {
+        std::unique_ptr<lambda> fnp(std::move(fnp_));
+        if(fnp)
+            asio::post(wg1_.get_executor(), asio::append(std::move(*fnp), ec));
         wg1_.reset();
     }
 };
@@ -184,14 +302,14 @@ public:
 template<class Executor>
 struct basic_stream<Executor>::run_read_op
 {
-    boost::shared_ptr<detail::stream_state> const& in;
+    boost::shared_ptr<detail::stream_state> const& in_;
 
     using executor_type = typename basic_stream::executor_type;
 
     executor_type
     get_executor() const noexcept
     {
-        return detail::extract_executor_op<Executor>()(in->exec);
+        return detail::extract_executor_op<Executor>()(in_->exec);
     }
 
     template<
@@ -200,6 +318,7 @@ struct basic_stream<Executor>::run_read_op
     void
     operator()(
         ReadHandler&& h,
+        boost::weak_ptr<detail::stream_state> out,
         MutableBufferSequence const& buffers)
     {
         // If you get an error on the following line it means
@@ -207,14 +326,11 @@ struct basic_stream<Executor>::run_read_op
         // requirements for the handler.
 
         initiate_read(
-            in,
-            std::unique_ptr<detail::stream_read_op_base>{
-            new read_op<
+            in_,
+            out,
+            std::unique_ptr<detail::stream_op_base>{ new read_op<
                 typename std::decay<ReadHandler>::type,
-                MutableBufferSequence>(
-                    std::move(h),
-                    in,
-                    buffers)},
+                MutableBufferSequence>(std::move(h), in_, out, buffers) },
             buffers::size(buffers));
     }
 };
@@ -238,46 +354,20 @@ struct basic_stream<Executor>::run_write_op
     void
     operator()(
         WriteHandler&& h,
-        boost::weak_ptr<detail::stream_state> out_,
+        boost::weak_ptr<detail::stream_state> out,
         ConstBufferSequence const& buffers)
     {
         // If you get an error on the following line it means
         // that your handler does not meet the documented type
         // requirements for the handler.
 
-        ++in_->nwrite;
-        auto const upcall = [&](system::error_code ec, std::size_t n)
-        {
-            asio::post(in_->exec, asio::append(std::move(h), ec, n));
-        };
-
-        // test failure
-        system::error_code ec;
-        std::size_t n = 0;
-        if(in_->fc && in_->fc->fail(ec))
-            return upcall(ec, n);
-
-        // A request to write 0 bytes to a stream is a no-op.
-        if(buffers::size(buffers) == 0)
-            return upcall(ec, n);
-
-        // connection closed
-        auto out = out_.lock();
-        if(! out)
-            return upcall(asio::error::connection_reset, n);
-
-        // copy buffers
-        n = std::min<std::size_t>(
-            buffers::size(buffers), in_->write_max);
-        {
-            std::lock_guard<std::mutex> lock(out->m);
-            n = buffers::copy(out->b.prepare(n), buffers);
-            out->b.commit(n);
-            out->nwrite_bytes += n;
-            out->notify_read();
-        }
-        BOOST_ASSERT(! ec);
-        upcall(ec, n);
+        initiate_write(
+            in_,
+            out,
+            std::unique_ptr<detail::stream_op_base>{ new write_op<
+                typename std::decay<WriteHandler>::type,
+                ConstBufferSequence>(std::move(h), in_, out, buffers) },
+            buffers::size(buffers));
     }
 };
 
@@ -301,6 +391,7 @@ async_read_some(
         void(system::error_code, std::size_t)>(
             run_read_op{in_},
             handler,
+            out_,
             buffers);
 }
 
@@ -345,49 +436,95 @@ auto basic_stream<Executor>::get_executor() noexcept -> executor_type
     return detail::extract_executor_op<Executor>()(in_->exec);
 }
 
-
 //------------------------------------------------------------------------------
 
 template<class Executor>
-void basic_stream<Executor>::initiate_read(
-    boost::shared_ptr<detail::stream_state> const& in_,
-    std::unique_ptr<detail::stream_read_op_base>&& op,
+void
+basic_stream<Executor>::initiate_read(
+    boost::shared_ptr<detail::stream_state> const& in,
+    boost::weak_ptr<detail::stream_state> const& out,
+    std::unique_ptr<detail::stream_op_base>&& rop,
     std::size_t buf_size)
 {
-    std::unique_lock<std::mutex> lock(in_->m);
+    (void)out;
 
-    ++in_->nread;
-    if(in_->op != nullptr)
-        BOOST_THROW_EXCEPTION(
-            std::logic_error{"in_->op != nullptr"});
+    std::unique_lock<std::mutex> lock(in->m);
+
+    ++in->nread;
+    if(in->rop != nullptr)
+        BOOST_THROW_EXCEPTION(std::logic_error{ "in_->rop != nullptr" });
 
     // test failure
     system::error_code ec;
-    if(in_->fc && in_->fc->fail(ec))
+    if(in->fc && in->fc->fail(ec))
     {
         lock.unlock();
-        (*op)(ec);
+        (*rop)(ec);
         return;
     }
 
     // A request to read 0 bytes from a stream is a no-op.
-    if(buf_size == 0 || buffers::size(in_->b.data()) > 0)
+    if(buf_size == 0 || buffers::size(in->b.data()) > 0)
     {
         lock.unlock();
-        (*op)(ec);
+        (*rop)(ec);
         return;
     }
 
     // deliver error
-    if(in_->code != detail::stream_status::ok)
+    if(in->code != detail::stream_status::ok)
     {
         lock.unlock();
-        (*op)(asio::error::eof);
+        (*rop)(asio::error::eof);
         return;
     }
 
     // complete when bytes available or closed
-    in_->op = std::move(op);
+    in->rop = std::move(rop);
+}
+
+//------------------------------------------------------------------------------
+
+template<class Executor>
+void basic_stream<Executor>::initiate_write(
+    boost::shared_ptr<detail::stream_state> const& in,
+    boost::weak_ptr<detail::stream_state> const& out,
+    std::unique_ptr<detail::stream_op_base>&& wop,
+    std::size_t buf_size)
+{
+    {
+        std::unique_lock<std::mutex> lock(in->m);
+
+        ++in->nwrite;
+
+        // test failure
+        system::error_code ec;
+        if(in->fc && in->fc->fail(ec))
+        {
+            lock.unlock();
+            (*wop)(ec);
+            return;
+        }
+    }
+
+    // A request to write 0 bytes to a stream is a no-op.
+    if(buf_size == 0)
+    {
+        (*wop)(system::error_code{});
+        return;
+    }
+
+    // connection closed
+    auto osp = out.lock();
+    if(!osp)
+    {
+        (*wop)(asio::error::connection_reset);
+        return;
+    }
+
+    in->wop = std::move(wop);
+    //auto op = std::move(in_->wop);
+    in->wop->operator()(system::error_code{});
 }
 
 //------------------------------------------------------------------------------
