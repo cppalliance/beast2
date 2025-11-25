@@ -66,9 +66,9 @@ public:
 
 //------------------------------------------------------------------------------
 
-struct stream_read_op_base
+struct stream_op_base
 {
-    virtual ~stream_read_op_base() = default;
+    virtual ~stream_op_base() = default;
     virtual void operator()(system::error_code ec) = 0;
 };
 
@@ -89,8 +89,9 @@ struct stream_state
     std::mutex m;
     std::string storage;
     buffers::string_buffer b;
-    std::condition_variable cv;
-    std::unique_ptr<stream_read_op_base> op;
+    //std::condition_variable cv;
+    std::unique_ptr<stream_op_base> rop;
+    std::unique_ptr<stream_op_base> wop;
     stream_status code = stream_status::ok;
     fail_count* fc = nullptr;
     std::size_t nread = 0;
@@ -133,14 +134,17 @@ void
 stream_service::
 shutdown()
 {
-    std::vector<std::unique_ptr<detail::stream_read_op_base>> v;
-    std::lock_guard<std::mutex> g1(sp_->m_);
-    v.reserve(sp_->v_.size());
-    for(auto p : sp_->v_)
+    std::vector<std::unique_ptr<detail::stream_op_base>> v;
     {
-        std::lock_guard<std::mutex> g2(p->m);
-        v.emplace_back(std::move(p->op));
-        p->code = detail::stream_status::eof;
+        std::lock_guard<std::mutex> g1(sp_->m_);
+        v.reserve(2 * sp_->v_.size());
+        for(auto p : sp_->v_)
+        {
+            std::lock_guard<std::mutex> g2(p->m);
+            v.emplace_back(std::move(p->rop));
+            v.emplace_back(std::move(p->wop));
+            p->code = detail::stream_status::eof;
+        }
     }
 }
 
@@ -200,8 +204,11 @@ stream_state::
 ~stream_state()
 {
     // cancel outstanding read
-    if(op != nullptr)
-        (*op)(asio::error::operation_aborted);
+    if(rop != nullptr)
+        (*rop)(asio::error::operation_aborted);
+    // cancel outstanding write
+    if(wop != nullptr)
+        (*wop)(asio::error::operation_aborted);
 }
 
 inline
@@ -223,16 +230,13 @@ void
 stream_state::
 notify_read()
 {
-    if(op)
+    if(rop)
     {
-        auto op_ = std::move(op);
+        auto op_ = std::move(rop);
         op_->operator()(system::error_code{});
     }
-    else
-    {
-        cv.notify_all();
-    }
 }
+
 } // detail
 } // test
 } // beast2

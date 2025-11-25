@@ -131,6 +131,9 @@ private:
     template<class Handler, class Buffers>
     class read_op;
 
+    template<class Handler, class Buffers>
+    class write_op;
+
     struct run_read_op;
     struct run_write_op;
 
@@ -138,7 +141,16 @@ private:
     void
     initiate_read(
         boost::shared_ptr<detail::stream_state> const& in,
-        std::unique_ptr<detail::stream_read_op_base>&& op,
+        boost::weak_ptr<detail::stream_state> const& out,
+        std::unique_ptr<detail::stream_op_base>&& op,
+        std::size_t buf_size);
+
+    
+    static void
+    initiate_write(
+        boost::shared_ptr<detail::stream_state> const& in,
+        boost::weak_ptr<detail::stream_state> const& out,
+        std::unique_ptr<detail::stream_op_base>&& op,
         std::size_t buf_size);
 
 #if ! BOOST_BEAST2_DOXYGEN

@@ -54,6 +54,9 @@ public:
 
         BOOST_ASIO_CORO_REENTER(*this)
         {
+            self.reset_cancellation_state(
+                asio::enable_total_cancellation());
+
             rv = sr_.prepare();
             if(! rv)
             {
@@ -117,8 +120,17 @@ public:
     {
         BOOST_ASIO_CORO_REENTER(*this)
         {
+            self.reset_cancellation_state(asio::enable_total_cancellation());
+
             do
             {
+                if(!!self.cancelled())
+                {
+                    ec = asio::error::operation_aborted;
+
+                    break; // goto upcall
+                }
+
                 BOOST_ASIO_CORO_YIELD
                 {
                     BOOST_ASIO_HANDLER_LOCATION((
@@ -128,12 +140,13 @@ public:
                         dest_, sr_, std::move(self));
                 }
                 n_ += bytes_transferred;
+
                 if(ec.failed())
-                    break;
+                    break; // goto upcall
             }
             while(! sr_.is_done());
 
-            // upcall
+            // upcall:
             self.complete(ec, n_ );
         }
     }
