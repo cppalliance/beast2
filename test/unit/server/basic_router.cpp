@@ -717,6 +717,18 @@ struct basic_router_test
         }
     }
 
+    void testDispatch()
+    {
+        // dispatch
+        {
+            test_router r;
+            r.use(skip());
+            BOOST_TEST_THROWS(
+                check(r, http_proto::method::unknown, "/", route::next),
+                std::invalid_argument);
+        }
+    }
+
     void testRoute()
     {
         static auto const GET = http_proto::method::get;
@@ -1469,6 +1481,7 @@ struct basic_router_test
     {
         testSpecial();
         testUse();
+        testDispatch();
         testRoute();
         testSubRouter();
         testErr();
