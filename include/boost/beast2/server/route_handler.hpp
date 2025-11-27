@@ -19,6 +19,7 @@
 #include <boost/http_proto/serializer.hpp>      // VFALCO forward declare?
 #include <boost/url/url_view.hpp>
 #include <boost/system/error_code.hpp>
+#include <memory>
 
 namespace boost {
 namespace beast2 {
@@ -28,6 +29,8 @@ struct acceptor_config
     bool is_ssl;
     bool is_admin;
 };
+
+//-----------------------------------------------
 
 /** Request object for HTTP route handlers
 */
@@ -83,6 +86,14 @@ struct Response : basic_response
     */
     capy::polystore data;
 
+    /** Reset the object for a new request.
+        This clears any state associated with
+        the previous request, preparing the object
+        for use with a new request.
+    */
+    BOOST_BEAST2_DECL void reset();
+
+#if 0
     route_result close() const noexcept
     {
         return route::close;
@@ -111,6 +122,7 @@ struct Response : basic_response
     BOOST_BEAST2_DECL
     route_result
     fail(system::error_code const& ec);
+#endif
 
     // route_result send(core::string_view);
 
@@ -129,6 +141,118 @@ struct Response : basic_response
     BOOST_BEAST2_DECL
     Response&
     set_body(std::string s);
+
+#if 0
+    /** Submit cooperative work.
+
+        This function detaches the current handler from the session,
+        and immediately invokes the specified function object @p f.
+        When the function returns normally, the seesion is resumed as
+        if the current handler had returned the same result. Otherwise, if
+        the function invokes @ref post again then an implementation-defined
+        yield operation is performed, possibly allowing other work to be
+        performed on the calling thread. When the function object is invoked,
+        it runs in the same context as the original handler invocation.
+
+        The function object @p f must have this equivalent signature:
+        @code
+        route_result( Response& );
+        @endcode
+
+        The function must not return @ref route::detach, or else an
+        exception is thrown.
+
+        @throws std::invalid_argument If the function returns @ref route::detach.
+    */
+    template<class F>
+    auto
+    post(F&& f) -> route_result
+    {
+        struct model : work
+        {
+            using handler = typename std::decay<F>::type;
+            handler f_;
+
+            model(F&& f)
+                : f_(std::forward<F>(f))
+            {
+            }
+
+            route_result invoke(
+                std::unique_ptr<work>& w,
+                Response& res) override
+            {
+                handler f(std::move(f_));
+                auto resume_ = this->resume;
+                w.reset();
+                return f(res);
+            }
+        };
+
+        struct bool_guard
+        {
+            bool* pb_;
+
+            bool_guard(bool& b) noexcept
+                : pb_(&b)
+            {
+            }
+
+            ~bool_guard()
+            {
+                if(pb_)
+                    *pb_ = false;
+            }
+
+            void reset() noexcept
+            {
+                pb_ = nullptr;
+            }
+        };
+
+        if(! in_work_)
+        {
+            // new work
+            bool_guard g(in_work_);
+            in_work_ = true;
+            auto rv = f(*this);
+            if(post_called_)
+            {
+                BOOST_ASSERT(rv == route::detach);
+                return rv;
+            }
+            if(rv == route::detach)
+                detail::throw_invalid_argument();
+            return rv;
+        }
+
+        return detach(
+            [&](resumer resume)
+            {
+                std::unique_ptr<work> p(
+                    new model(std::forward<F>(f)));
+                p->resume = resume;
+            });
+    }
+
+protected:
+    struct work
+    {
+        resumer resume;
+        virtual ~work() = default;
+        virtual route_result invoke(
+            std::unique_ptr<work>&,
+            Response&) = 0;
+    };
+    virtual route_result do_post(work& w)
+    {
+    }
+
+private:
+    bool in_work_ = false;
+    bool post_called_ = false;
+    work* work_ = nullptr;
+#endif
 };
 
 } // beast2

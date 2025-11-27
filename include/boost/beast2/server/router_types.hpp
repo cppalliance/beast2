@@ -203,8 +203,8 @@ public:
     /** Constructor
 
         Default constructed resume functions will
-        be empty. Invoking an empty resume function
-        yields undefined behavior.
+        be empty. An exception is thrown when
+        attempting to invoke an empty object.
     */
     resumer() = default;
 
@@ -234,14 +234,18 @@ public:
     /** Resume the session
 
         A session is resumed as if the detached
-        handler returned the error code in `ec`.
+        handler returned the route result in @p rv.
 
         @param ec The error code to resume with.
+
+        @throw std::invalid_argument If the object is empty.
     */
     void operator()(
-        system::error_code const& ec = {}) const
+        route_result const& rv) const
     {
-        p_->do_resume(ec);
+        if(! p_)
+            detail::throw_invalid_argument();
+        p_->do_resume(rv);
     }
 
 private:

@@ -15,6 +15,7 @@
 namespace boost {
 namespace beast2 {
 
+#if 0
 route_result
 Response::
 fail(system::error_code const& ec)
@@ -23,6 +24,7 @@ fail(system::error_code const& ec)
         detail::throw_invalid_argument();
     return ec;
 }
+#endif
 
 Response&
 Response::

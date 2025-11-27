@@ -90,6 +90,8 @@ private:
         system::error_code ec,
         std::size_t bytes_transferred);
 
+    void do_respond(route_result rv);
+
     void on_write(
         system::error_code const& ec,
         std::size_t bytes_transferred);
@@ -99,9 +101,9 @@ private:
 
     resumer do_detach() override;
 
-    void do_resume(system::error_code const& ec) override;
+    void do_resume(route_result const& ec) override;
 
-    void do_resume2(system::error_code ec);
+    void do_resume2(route_result ec);
 
 protected:
     std::string id() const
@@ -228,13 +230,22 @@ on_read(
                 http_proto::status::bad_request);
             res_.set_body(
                 "Bad Request: " + rv.error().message());
-            goto do_write;
+            return do_respond(rv.error());
         }
     }
 
     // invoke handlers for the route
     BOOST_ASSERT(! pwg_);
     ec = routes_.dispatch(req_.message.method(), req_.url, req_, res_);
+    do_respond(ec);
+}
+
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+do_respond(
+    route_result ec)
+{
     if(ec == route::send)
         goto do_write;
 
@@ -343,18 +354,18 @@ do_detach() ->
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
-do_resume(system::error_code const& ec)
+do_resume(route_result const& rv)
 {
     asio::dispatch(
         stream_.get_executor(),
         asio::prepend(call_mf(
-            &http_stream::do_resume2, this), ec));
+            &http_stream::do_resume2, this), rv));
 }
 
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
-do_resume2(system::error_code ec)
+do_resume2(route_result ec)
 {
     BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
 
