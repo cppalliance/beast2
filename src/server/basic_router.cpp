@@ -22,7 +22,7 @@
 namespace boost {
 namespace beast2 {
 
-namespace detail {
+//namespace detail {
 
 // VFALCO Temporarily here until Boost.URL merges the fix
 static
@@ -79,6 +79,7 @@ pattern     target      path(use)    path(get)
 */
 
 //------------------------------------------------
+
 
 any_router::any_handler::~any_handler() = default;
 
@@ -201,7 +202,7 @@ invalid:
 
 //------------------------------------------------
 
-} // detail
+//} // detail
 
 struct basic_request::
     match_result
@@ -255,7 +256,7 @@ private:
 
 //------------------------------------------------
 
-namespace detail {
+//namespace detail {
 
 // Matches a path against a pattern
 struct any_router::matcher
@@ -867,6 +868,7 @@ do_dispatch(
     return res.ec_;
 }
 
-} // detail
+//} // detail
+
 } // beast2
 } // boost

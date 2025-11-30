@@ -128,8 +128,8 @@ private:
 };
 
 //-----------------------------------------------
-
-namespace detail {
+ 
+//namespace detail {
 
 class any_router;
 
@@ -189,7 +189,7 @@ private:
     impl* impl_ = nullptr;
 };
 
-} // detail
+//} // detail
 
 //-----------------------------------------------
 
@@ -292,7 +292,7 @@ private:
     @tparam Res The type of response object.
 */
 template<class Req, class Res>
-class basic_router : public detail::any_router
+class basic_router : public /*detail::*/any_router
 {
     // Req must be publicly derived from basic_request
     BOOST_CORE_STATIC_ASSERT(

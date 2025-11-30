@@ -290,7 +290,7 @@ public:
     core::string_view path;
 
 private:
-    friend class detail::any_router;
+    friend class /*detail::*/any_router;
     struct match_result;
     http_proto::method verb_ =
         http_proto::method::unknown;
@@ -311,7 +311,7 @@ private:
 class basic_response
 {
 private:
-    friend class detail::any_router;
+    friend class /*detail::*/any_router;
     template<class, class>
     friend class basic_router;
 
