@@ -214,7 +214,7 @@ private:
         {
             res.status(http_proto::status::ok);
             res.set_body("Hello, world!");
-            return system::error_code{};
+            return route::send;
         });
     @endcode
 
