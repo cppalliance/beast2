@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/router_types.hpp>
-#include <boost/capy/polystore.hpp>
+#include <boost/capy/datastore.hpp>
 #include <boost/http_proto/request.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/request_parser.hpp>  // VFALCO forward declare?
 #include <boost/http_proto/response.hpp>        // VFALCO forward declare?
@@ -56,7 +56,7 @@ struct Request : basic_request
     /** A container for storing arbitrary data associated with the request.
         This starts out empty for each new request.
     */
-    capy::polystore data;
+    capy::datastore data;
 };
 
 //-----------------------------------------------
@@ -84,7 +84,7 @@ struct Response : basic_response
 
         This starts out empty for each new session.
     */
-    capy::polystore data;
+    capy::datastore data;
 
     /** Reset the object for a new request.
         This clears any state associated with
@@ -92,39 +92,6 @@ struct Response : basic_response
         for use with a new request.
     */
     BOOST_BEAST2_DECL void reset();
-
-#if 0
-    route_result close() const noexcept
-    {
-        return route::close;
-    }
-
-    route_result complete() const noexcept
-    {
-        return route::complete;
-    }
-
-    route_result next() const noexcept
-    {
-        return route::next;
-    }
-
-    route_result next_route() const noexcept
-    {
-        return route::next_route;
-    }
-
-    route_result send() const noexcept
-    {
-        return route::send;
-    }
-
-    BOOST_BEAST2_DECL
-    route_result
-    fail(system::error_code const& ec);
-#endif
-
-    // route_result send(core::string_view);
 
     /** Set the status code of the response.
         @par Example
@@ -142,118 +109,140 @@ struct Response : basic_response
     Response&
     set_body(std::string s);
 
-#if 0
+    // VFALCO this doc isn't quite right because it doesn't explain
+    // the possibility that post will return the final result immediately,
+    // and it needs to remind the user that calling a function which
+    // returns route_result means they have to return the value right away
+    // without doing anything else.
+    //
+    // VFALCO we have to detect calls to detach inside `f` and throw
+    //
     /** Submit cooperative work.
 
         This function detaches the current handler from the session,
         and immediately invokes the specified function object @p f.
-        When the function returns normally, the seesion is resumed as
-        if the current handler had returned the same result. Otherwise, if
-        the function invokes @ref post again then an implementation-defined
-        yield operation is performed, possibly allowing other work to be
-        performed on the calling thread. When the function object is invoked,
-        it runs in the same context as the original handler invocation.
+        When the function returns normally, the function object is
+        placed into an implementation-defined work queue to be invoked
+        again. Otherwise, if the function calls `resume(rv)` then the
+        session is resumed and behaves as if the original route handler
+        had returned the value `rv`.
+
+        When the function object is invoked, it runs in the same context
+        as the original handler invocation. If the function object
+        attempts to call @ref post again, or attempts to call @ref detach,
+        an exception is thrown.
 
         The function object @p f must have this equivalent signature:
         @code
-        route_result( Response& );
+        void ( resumer resume );
         @endcode
 
-        The function must not return @ref route::detach, or else an
-        exception is thrown.
-
-        @throws std::invalid_argument If the function returns @ref route::detach.
+        @param f The function object to invoke.
     */
     template<class F>
     auto
-    post(F&& f) -> route_result
-    {
-        struct model : work
-        {
-            using handler = typename std::decay<F>::type;
-            handler f_;
-
-            model(F&& f)
-                : f_(std::forward<F>(f))
-            {
-            }
-
-            route_result invoke(
-                std::unique_ptr<work>& w,
-                Response& res) override
-            {
-                handler f(std::move(f_));
-                auto resume_ = this->resume;
-                w.reset();
-                return f(res);
-            }
-        };
-
-        struct bool_guard
-        {
-            bool* pb_;
-
-            bool_guard(bool& b) noexcept
-                : pb_(&b)
-            {
-            }
-
-            ~bool_guard()
-            {
-                if(pb_)
-                    *pb_ = false;
-            }
-
-            void reset() noexcept
-            {
-                pb_ = nullptr;
-            }
-        };
-
-        if(! in_work_)
-        {
-            // new work
-            bool_guard g(in_work_);
-            in_work_ = true;
-            auto rv = f(*this);
-            if(post_called_)
-            {
-                BOOST_ASSERT(rv == route::detach);
-                return rv;
-            }
-            if(rv == route::detach)
-                detail::throw_invalid_argument();
-            return rv;
-        }
-
-        return detach(
-            [&](resumer resume)
-            {
-                std::unique_ptr<work> p(
-                    new model(std::forward<F>(f)));
-                p->resume = resume;
-            });
-    }
+    post(F&& f) -> route_result;
 
 protected:
-    struct work
+    /** A task to be invoked later
+    */
+    struct task
     {
-        resumer resume;
-        virtual ~work() = default;
-        virtual route_result invoke(
-            std::unique_ptr<work>&,
-            Response&) = 0;
-    };
-    virtual route_result do_post(work& w)
-    {
-    }
+        virtual ~task() = default;
 
-private:
-    bool in_work_ = false;
-    bool post_called_ = false;
-    work* work_ = nullptr;
-#endif
+        /** Invoke the task.
+
+            @return true if the task resumed the session.
+        */
+        virtual bool invoke() = 0;
+    };
+
+    /** Post task_ to be invoked later
+
+        Subclasses must schedule task_ to be invoked at an unspecified
+        point in the future.
+    */
+    BOOST_BEAST2_DECL
+    virtual void do_post();
+
+    std::unique_ptr<task> task_;
 };
+
+//-----------------------------------------------
+
+template<class F>
+auto
+Response::
+post(F&& f) -> route_result
+{
+    // task already posted
+    if(task_)
+        detail::throw_invalid_argument();
+
+    struct immediate : detacher::owner
+    {
+        route_result rv;
+        bool set = false;
+        void do_resume(
+            route_result const& rv_) override
+        {
+            rv = rv_;
+            set = true;
+        }
+    };
+
+    class model
+        : public task
+        , public detacher::owner
+    {
+    public:
+        model(Response& res,
+            F&& f, resumer resume)
+            : res_(res)
+            , f_(std::forward<F>(f))
+            , resume_(resume)
+        {
+        }
+
+        bool invoke() override
+        {
+            resumed_ = false;
+            // VFALCO analyze exception safety
+            f_(resumer(*this));
+            return resumed_;
+        }
+
+        void do_resume(
+            route_result const& rv) override
+        {
+            resumed_ = true;
+            resumer resume(resume_);
+            res_.task_.reset(); // destroys *this
+            resume(rv);
+        }
+
+    private:
+        Response& res_;
+        typename std::decay<F>::type f_;
+        resumer resume_;
+        bool resumed_;
+    };
+
+    // first call
+    immediate impl;
+    f(resumer(impl));
+    if(impl.set)
+        return impl.rv;
+
+    return detach(
+        [&](resumer resume)
+        {
+            task_ = std::unique_ptr<task>(new model(
+                *this, std::forward<F>(f), resume));
+            do_post();
+        });
+}
+
 
 } // beast2
 } // boost

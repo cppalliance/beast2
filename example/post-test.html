@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>POST Test</title>
+</head>
+<body>
+    <input type="text" id="url" value="http://localhost:80" size="40">
+    <button onclick="sendPost()">Send POST</button>
+    <pre id="status"></pre>
+
+    <script>
+    function generateData(size) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < size; i++) {
+            result += chars[i % chars.length];
+        }
+        return result;
+    }
+
+    async function sendPost() {
+        const url = document.getElementById('url').value;
+        const status = document.getElementById('status');
+        const data = generateData(256 * 1024);
+
+        status.textContent = 'Sending ' + data.length + ' bytes to ' + url + '...';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: data,
+                headers: { 'Content-Type': 'application/octet-stream' }
+            });
+            status.textContent = 'Response: ' + response.status + ' ' + response.statusText;
+        } catch (e) {
+            status.textContent = 'Error: ' + e.message;
+        }
+    }
+    </script>
+</body>
+</html>

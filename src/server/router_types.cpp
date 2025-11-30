@@ -71,5 +71,13 @@ route_cat_type route_cat;
 
 } // detail
 
+resumer
+detacher::
+owner::
+do_detach()
+{
+    detail::throw_logic_error();
+}
+
 } // beast2
 } // boost

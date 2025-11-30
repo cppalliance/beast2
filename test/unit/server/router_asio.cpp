@@ -12,6 +12,7 @@
 
 #include <boost/beast2/server/router.hpp>
 #include <boost/core/detail/static_assert.hpp>
+#include <boost/asio/any_io_executor.hpp>
 
 #include "test_suite.hpp"
 
@@ -22,6 +23,11 @@ namespace {
 
 struct Stream
 {
+    asio::any_io_executor
+    get_executor() const
+    {
+        return {};
+    }
 };
 
 BOOST_CORE_STATIC_ASSERT(

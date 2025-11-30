@@ -12,6 +12,7 @@
 
 #include <boost/beast2/server/basic_router.hpp>
 #include <boost/core/detail/static_assert.hpp>
+#include <boost/asio/any_io_executor.hpp>
 
 #include "test_suite.hpp"
 
@@ -22,6 +23,11 @@ struct route_handler_asio_test
 {
     struct stream
     {
+        asio::any_io_executor
+        get_executor() const
+        {
+            return {};
+        }
     };
 
     using test_router = basic_router<

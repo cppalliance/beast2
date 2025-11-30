@@ -140,6 +140,18 @@ make_error_code(route ev) noexcept
         detail::route_cat};
 }
 
+/** Return true if `rv` is a route result.
+
+    A @ref route_result can hold any error code,
+    and this function returns `true` only if `rv`
+    holds a value from the @ref route enumeration.
+*/
+inline bool is_route_result(
+    route_result rv) noexcept
+{
+    return &rv.category() == &detail::route_cat;
+}
+
 //------------------------------------------------
 
 class resumer;
@@ -156,7 +168,7 @@ public:
     */
     struct owner
     {
-        virtual resumer do_detach() = 0;
+        BOOST_BEAST2_DECL virtual resumer do_detach();
         virtual void do_resume(route_result const&) = 0;
     };
 

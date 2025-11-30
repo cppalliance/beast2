@@ -8,6 +8,7 @@
 //
 
 #include "certificate.hpp"
+#include "post_work.hpp"
 #include "serve_detached.hpp"
 #include "serve_log_admin.hpp"
 #include <boost/beast2/asio_io_context.hpp>
@@ -69,7 +70,8 @@ int server_main( int argc, char* argv[] )
 
         //srv.wwwroot.use("/log", serve_log_admin(app));
         //srv.wwwroot.use("/alt", serve_static( argv[3] ));
-        srv.wwwroot.use("/detach", serve_detached());
+        //srv.wwwroot.use("/detach", serve_detached());
+        //srv.wwwroot.use(post_work());
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();

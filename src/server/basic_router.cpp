@@ -832,7 +832,7 @@ dispatch_impl(
                 break; // skip remaining entries
             }
             // we must handle all route enums
-            BOOST_ASSERT(&rv.category() != &detail::route_cat);
+            BOOST_ASSERT(! is_route_result(rv));
             // handler must return non-successful error_code
             detail::throw_invalid_argument();
         }
@@ -850,7 +850,7 @@ do_dispatch(
     basic_response& res) const
 {
     auto rv = dispatch_impl(req, res);
-    BOOST_ASSERT(&rv.category() == &detail::route_cat);
+    BOOST_ASSERT(is_route_result(rv));
     BOOST_ASSERT(rv != route::next_route);
     if(rv != route::next)
     {
