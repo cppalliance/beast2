@@ -57,3 +57,8 @@ T default_value();
 - Concise, dry answers
 - Full files, not diffs
 - Accurate, compiling C++ code
+
+## Preconditions and Postconditions
+
+- The caller of any function returning a route_result must immediately return the route_result and cannot perform other actions
+- route handlers which return a route_result must never return a system::error_code which would return false from failed()
