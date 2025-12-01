@@ -113,15 +113,10 @@ namespace detail {
 struct BOOST_SYMBOL_VISIBLE route_cat_type
     : system::error_category
 {
-    BOOST_BEAST2_DECL const char* name(
-        ) const noexcept override;
-    BOOST_BEAST2_DECL std::string message(
-        int) const override;
+    BOOST_BEAST2_DECL const char* name() const noexcept override;
+    BOOST_BEAST2_DECL std::string message(int) const override;
     BOOST_BEAST2_DECL char const* message(
-        int, char*, std::size_t
-            ) const noexcept override;
-    bool failed( int ) const noexcept override
-         { return false; }
+        int, char*, std::size_t) const noexcept override;
     BOOST_SYSTEM_CONSTEXPR route_cat_type()
         : error_category(0x51c90d393754ecdf )
     {
@@ -140,6 +135,18 @@ make_error_code(route ev) noexcept
         detail::route_cat};
 }
 
+/** Return true if `rv` is a route result.
+
+    A @ref route_result can hold any error code,
+    and this function returns `true` only if `rv`
+    holds a value from the @ref route enumeration.
+*/
+inline bool is_route_result(
+    route_result rv) noexcept
+{
+    return &rv.category() == &detail::route_cat;
+}
+
 //------------------------------------------------
 
 class resumer;
@@ -154,9 +161,10 @@ class detacher
 public:
     /** Base class of the implementation
     */
-    struct owner
+    struct BOOST_SYMBOL_VISIBLE
+        owner
     {
-        virtual resumer do_detach() = 0;
+        BOOST_BEAST2_DECL virtual resumer do_detach();
         virtual void do_resume(route_result const&) = 0;
     };
 
@@ -186,7 +194,13 @@ public:
 
 private:
     friend resumer;
-    owner* p_ = nullptr;
+    // Clang doesn't consider uninstantiated templates
+    // when checking for unused private fields.
+    owner* p_
+    #if defined(__clang__)
+        __attribute__((unused))
+    #endif
+        = nullptr; 
 };
 
 //------------------------------------------------
@@ -203,8 +217,8 @@ public:
     /** Constructor
 
         Default constructed resume functions will
-        be empty. Invoking an empty resume function
-        yields undefined behavior.
+        be empty. An exception is thrown when
+        attempting to invoke an empty object.
     */
     resumer() = default;
 
@@ -234,18 +248,28 @@ public:
     /** Resume the session
 
         A session is resumed as if the detached
-        handler returned the error code in `ec`.
+        handler returned the route result in @p rv.
 
         @param ec The error code to resume with.
+
+        @throw std::invalid_argument If the object is empty.
     */
     void operator()(
-        system::error_code const& ec = {}) const
+        route_result const& rv) const
     {
-        p_->do_resume(ec);
+        if(! p_)
+            detail::throw_invalid_argument();
+        p_->do_resume(rv);
     }
 
 private:
-    detacher::owner* p_ = nullptr;
+    // Clang doesn't consider uninstantiated templates
+    // when checking for unused private fields.
+    detacher::owner* p_
+    #if defined(__clang__)
+        __attribute__((unused))
+    #endif
+        = nullptr; 
 };
 
 template<class F>

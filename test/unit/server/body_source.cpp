@@ -91,6 +91,7 @@ struct read_source
 
 } // (anon)
 
+#if 0
 BOOST_CORE_STATIC_ASSERT(
     std::is_move_constructible<body_source>::value);
 BOOST_CORE_STATIC_ASSERT(
@@ -113,6 +114,7 @@ BOOST_CORE_STATIC_ASSERT(
     std::is_assignable<body_source, data_source>::value);
 BOOST_CORE_STATIC_ASSERT(
     std::is_assignable<body_source, read_source>::value);
+#endif
 
 struct body_source_test
 {

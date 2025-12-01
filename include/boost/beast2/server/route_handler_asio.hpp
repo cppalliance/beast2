@@ -12,6 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/route_handler.hpp>
+#include <boost/asio/post.hpp>
 #include <type_traits>
 
 namespace boost {
@@ -20,8 +21,9 @@ namespace beast2 {
 /** Response object for Asio HTTP route handlers
 */
 template<class AsyncStream>
-struct ResponseAsio : Response
+class ResponseAsio : public Response
 {
+public:
     using stream_type = typename std::decay<AsyncStream>::type;
 
     AsyncStream stream;
@@ -33,7 +35,27 @@ struct ResponseAsio : Response
         : stream(std::forward<Args>(args)...)
     {
     }
+
+private:
+    void do_post() override;
 };
+
+//-----------------------------------------------
+
+template<class AsyncStream>
+void
+ResponseAsio<AsyncStream>::
+do_post()
+{
+    asio::post(
+        stream.get_executor(),
+        [&]
+        {
+            if(task_->invoke())
+                return;
+            do_post();
+        });
+}
 
 } // beast2
 } // boost

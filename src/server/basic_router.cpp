@@ -593,7 +593,7 @@ auto
 any_router::
 resume_impl(
     basic_request& req, basic_response& res,
-    route_result const& ec) const ->
+    route_result ec) const ->
         route_result
 {
     BOOST_ASSERT(res.resume_ > 0);
@@ -601,7 +601,7 @@ resume_impl(
         ec == route::close ||
         ec == route::complete)
         return ec;
-    if(&ec.category() != &detail::route_cat)
+    if(! is_route_result(ec))
     {
         // must indicate failure
         if(! ec.failed())
@@ -719,6 +719,9 @@ dispatch_impl(
     else if((impl_->opt & 16) != 0)
         req.strict = false;
 
+    // nested routers count as 1 call
+    //++res.pos_;
+
     match_result mr;
     for(auto const& i : impl_->layers)
     {
@@ -809,17 +812,6 @@ dispatch_impl(
                 rv == route::complete ||
                 rv == route::close)
                 return rv;
-            if(rv.failed())
-            {
-                // error handling mode
-                res.ec_ = rv;
-                if(! i.match.end)
-                    continue; // next entry
-                // routes don't have error handlers
-                while(++it != i.entries.end())
-                    res.pos_ += it->handler->count();
-                break; // skip remaining entries
-            }
             if(rv == route::next)
                 continue; // next entry
             if(rv == route::next_route)
@@ -832,9 +824,20 @@ dispatch_impl(
                 break; // skip remaining entries
             }
             // we must handle all route enums
-            BOOST_ASSERT(&rv.category() != &detail::route_cat);
-            // handler must return non-successful error_code
-            detail::throw_invalid_argument();
+            BOOST_ASSERT(! is_route_result(rv));
+            if(! rv.failed())
+            {
+                // handler must return non-successful error_code
+                detail::throw_invalid_argument();
+            }
+            // error handling mode
+            res.ec_ = rv;
+            if(! i.match.end)
+                continue; // next entry
+            // routes don't have error handlers
+            while(++it != i.entries.end())
+                res.pos_ += it->handler->count();
+            break; // skip remaining entries
         }
 
         mr.restore_path(req);
@@ -850,7 +853,7 @@ do_dispatch(
     basic_response& res) const
 {
     auto rv = dispatch_impl(req, res);
-    BOOST_ASSERT(&rv.category() == &detail::route_cat);
+    BOOST_ASSERT(is_route_result(rv));
     BOOST_ASSERT(rv != route::next_route);
     if(rv != route::next)
     {
