@@ -195,87 +195,424 @@ private:
 
 /** A container for HTTP route handlers.
 
-    `basic_router` objects store and dispatch route handlers based on the
-    HTTP method and path of an incoming request. Routes are added with a
-    path pattern and an associated handler, and the router is then used to
-    dispatch the appropriate handler.
+    The `basic_router` class provides a routing mechanism inspired by
+    Express.js, adapted to idiomatic C++. It stores and dispatches route
+    handlers based on HTTP method and path patterns, enabling modular
+    request processing through middleware chains and method-specific routes.
 
-    Patterns used to create route definitions have percent-decoding applied
-    when handlers are mounted. A literal "%2F" in the pattern string is
-    indistinguishable from a literal '/'. For example, "/x%2Fz" is the
-    same as "/x/z" when used as a pattern.
+    @par Core Concepts
 
-    @par Example
+    Like Express.js Router, `basic_router` allows you to define handlers
+    for specific HTTP methods and URL patterns. However, there are key
+    differences stemming from C++'s synchronous nature versus Node.js's
+    asynchronous I/O model:
+
+    @li In Express, `res.send()` initiates an asynchronous write and
+        returns immediately. In `basic_router`, handlers prepare the
+        response object completely and return @ref route::send, after
+        which the framework sends the response.
+
+    @li Express handlers implicitly end the request-response cycle by
+        calling response methods. C++ handlers explicitly return
+        @ref route_result values to control the dispatch flow.
+
+    @li Express relies on callbacks and promises for asynchronous
+        operations. `basic_router` supports detaching from the routing
+        context for async operations via @ref route::detach.
+
+    @par Router Structure and Shared Ownership
+
+    Router objects are lightweight, shared references to their underlying
+    routing state. Copies of a router obtained through construction,
+    conversion, or assignment do not duplicate routes or handlers; all
+    copies refer to the same data. This matches Express.js behavior where
+    router instances can be shared and reused.
+
     @code
-    using router_type = basic_router<Req, Res>;
     router_type router;
-    router.get("/hello",
-        [](Req& req, Res& res)
+    router.get("/users", get_users_handler);
+
+    router_type router_copy = router; // shares same routes
+    router_copy.get("/posts", get_posts_handler); // affects both routers
+    @endcode
+
+    @par Pattern Matching
+
+    Path patterns support parameters and follow similar conventions to
+    Express.js routes. Patterns undergo percent-decoding when handlers
+    are mounted, so `"/x%2Fz"` is treated identically to `"/x/z"`.
+
+    Unlike Express.js string patterns with special characters like `*`
+    and `?`, `basic_router` uses simpler prefix matching for middleware
+    and exact matching for routes. Future versions may expand pattern
+    support.
+
+    When pattern matching occurs, the matched portion becomes
+    `req.base_path` and the remaining portion becomes `req.path`,
+    analogous to Express's `req.baseUrl` and `req.path`.
+
+    @code
+    // Pattern: "/api"
+    // Request: "/api/users/123"
+    // During handler execution:
+    //   req.base_path == "/api"
+    //   req.path == "/users/123"
+    @endcode
+
+    @par Middleware with use()
+
+    The @ref use function registers middleware handlers that run for
+    requests matching a path prefix, similar to Express's `app.use()`.
+    Middleware executes in registration order and can perform
+    authentication, logging, header manipulation, or other cross-cutting
+    concerns.
+
+    Unlike routes, middleware uses prefix matching. A middleware mounted
+    at `"/api"` will match `"/api"`, `"/api/"`, `"/api/users"`, and any
+    other path beginning with `"/api"`.
+
+    @code
+    router.use("/api",
+        [](Request& req, Response& res)
         {
-            res.status(http_proto::status::ok);
-            res.set_body("Hello, world!");
-            return route::send;
+            // Authentication middleware
+            if (!is_authenticated(req))
+            {
+                res.status(http_proto::status::unauthorized);
+                res.set_body("Authentication required");
+                return route::send;
+            }
+            return route::next; // continue to next handler
+        },
+        [](Request& req, Response& res)
+        {
+            // Logging middleware
+            log_request(req);
+            return route::next;
         });
     @endcode
 
-    Router objects are lightweight, shared references to their contents.
-    Copies of a router obtained through construction, conversion, or
-    assignment do not create new instances; they all refer to the same
-    underlying data.
+    Global middleware (applying to all requests) is registered with
+    `use()` without a path or with `"/"`:
 
-    @par Handlers
-    Regular handlers are invoked for matching routes and have this
-    equivalent signature:
+    @code
+    router.use([](Request& req, Response& res)
+    {
+        res.message.set("X-Powered-By", "Beast2");
+        return route::next;
+    });
+    @endcode
+
+    @par Routes and HTTP Methods
+
+    Routes match specific HTTP methods and exact paths. Unlike middleware,
+    routes require complete path matches (unless configured otherwise via
+    @ref router_options::strict). Routes are added via method-specific
+    functions or the fluent @ref route interface.
+
+    @code
+    // Direct method registration
+    router.get("/users/:id", show_user_handler);
+    router.post("/users", create_user_handler);
+    router.put("/users/:id", update_user_handler);
+    router.delete("/users/:id", delete_user_handler);
+
+    // Fluent interface for multiple methods on same route
+    router.route("/status")
+        .get([](Request& req, Response& res)
+        {
+            res.set_body("OK");
+            return route::send;
+        })
+        .head([](Request& req, Response& res)
+        {
+            res.status(http_proto::status::ok);
+            return route::send;
+        });
+
+    // Handler for all methods
+    router.all("/debug", debug_handler);
+    @endcode
+
+    @par Handler Types and Signatures
+
+    `basic_router` supports three handler types:
+
+    @li **Regular handlers**: Process normal requests
     @code
     route_result handler( Req& req, Res& res )
     @endcode
 
-    The return value is a @ref route_result used to indicate the desired
-    action through @ref route enum values, or to indicate that a failure
-    occurred. Failures are represented by error codes for which
-    `system::error_code::failed()` returns `true`.
-
-    When a failing error code is produced and remains unhandled, the
-    router enters error-dispatching mode. In this mode, only error
-    handlers are invoked. Error handlers are registered globally or
-    for specific paths and execute in the order of registration whenever
-    a failing error code is present in the response.
-
-    Error handlers have this equivalent signature:
+    @li **Error handlers**: Handle error conditions
     @code
     route_result error_handler( Req& req, Res& res, system::error_code ec )
     @endcode
 
-    Each error handler may return any failing @ref system::error_code,
-    which is equivalent to calling:
+    @li **Nested routers**: Sub-routers for modular organization
     @code
-    res.next(ec); // with ec.failed() == true
+    router.use("/api", api_router);
     @endcode
-    Returning @ref route::next indicates that control should proceed to
-    the next matching error handler. Returning a different failing code
-    replaces the current error and continues dispatch in error mode using
-    that new code. Error handlers are invoked until one returns a result
+
+    @par Return Values and Control Flow
+
+    Handlers control routing flow by returning @ref route_result values.
+    This explicit control differs from Express.js, where calling response
+    methods implicitly ends processing.
+
+    @li @ref route::send - Response is ready; framework should send it
+    @li @ref route::next - Continue to next matching handler
+    @li @ref route::next_route - Skip remaining handlers in current route
+    @li @ref route::complete - Response already sent externally
+    @li @ref route::close - Close connection after response
+    @li @ref route::detach - Transfer ownership of connection to handler
+
+    Express.js comparison:
+    @code
+    // Express.js
+    app.get('/users', (req, res) => {
+        res.json({ users: [] }); // implicitly ends request
+    });
+
+    // basic_router equivalent
+    router.get("/users", [](Request& req, Response& res)
+    {
+        res.status(http_proto::status::ok);
+        res.set_body(R"({"users":[]})");
+        return route::send; // explicitly indicate response is ready
+    });
+    @endcode
+
+    The @ref route::next return value is analogous to Express's `next()`
+    function:
+
+    @code
+    // Express.js
+    app.use((req, res, next) => {
+        console.log('logging');
+        next(); // continue to next handler
+    });
+
+    // basic_router equivalent
+    router.use([](Request& req, Response& res)
+    {
+        log("processing request");
+        return route::next; // continue to next handler
+    });
+    @endcode
+
+    @par Error Handling
+
+    When a handler returns a failing error code (where
+    `system::error_code::failed()` returns `true`), the router enters
+    error-dispatching mode. In this mode, only error handlers are invoked,
+    similar to Express.js error middleware.
+
+    Error handlers have a three-parameter signature including the error
+    code. They execute in registration order until one returns a value
     other than @ref route::next.
 
-    @par Handler requirements
-    Regular handlers must be callable with:
     @code
-    route_result( Req&, Res& )
+    router.use("/api",
+        [](Request& req, Response& res)
+        {
+            if (!validate_request(req))
+                return make_error_code(errc::invalid_argument);
+            return route::next;
+        });
+
+    // Error handler (registered like middleware)
+    router.use([](Request& req, Response& res, system::error_code ec)
+    {
+        res.status(http_proto::status::internal_server_error);
+        res.set_body("Error: " + ec.message());
+        return route::send;
+    });
     @endcode
 
-    Error handlers must be callable with:
+    Express.js comparison:
     @code
-    route_result( Req&, Res&, system::error_code )
+    // Express.js error middleware (4 parameters)
+    app.use((err, req, res, next) => {
+        res.status(500).send('Error: ' + err.message);
+    });
     @endcode
-    Error handlers are invoked only when the response has a failing
-    error code, and execute in sequence until one returns a result
-    other than @ref route::next.
 
-    The prefix match is not strict: middleware attached to `"/api"`
-    will also match `"/api/users"` and `"/api/data"`. When registered
-    before route handlers for the same prefix, middleware runs before
-    those routes. This is analogous to `app.use(path, ...)` in
-    Express.js.
+    @par Execution Order
+
+    Handlers execute in registration order, forming a chain. This matches
+    Express.js behavior. Middleware registered first executes first;
+    routes are evaluated in definition order.
+
+    @code
+    router.use(logging_middleware);        // runs first
+    router.use("/api", auth_middleware);   // runs second for /api paths
+    router.get("/api/users", get_users);   // runs third for GET /api/users
+    router.use(error_handler);             // runs if errors occur
+    @endcode
+
+    @par Nested Routers
+
+    Routers can be mounted within other routers, enabling modular
+    application structure similar to Express.js Router:
+
+    @code
+    // Create a sub-router for user-related routes
+    basic_router<Request, Response> users_router;
+    users_router.get("/", list_users);
+    users_router.post("/", create_user);
+    users_router.get("/:id", show_user);
+
+    // Mount it on the main router
+    router.use("/users", users_router);
+
+    // These patterns now work:
+    // GET  /users      -> list_users
+    // POST /users      -> create_user
+    // GET  /users/123  -> show_user
+    @endcode
+
+    When a nested router processes a request, `req.base_path` reflects the
+    cumulative mount path, similar to Express's `req.baseUrl`.
+
+    @par Router Options
+
+    The @ref router_options class controls matching behavior:
+
+    @li **case_sensitive**: Whether path matching is case-sensitive
+        (default: `false`, inherited from parent)
+    @li **strict**: Whether trailing slashes are significant
+        (default: `false`, inherited from parent)
+    @li **merge_params**: Whether to inherit parent route parameters
+        (default: `false`, never inherited)
+
+    @code
+    router_options opts;
+    opts.case_sensitive(true).strict(true);
+    basic_router<Request, Response> router(opts);
+
+    // With strict=true:
+    // Pattern "/api" matches "/api" but NOT "/api/"
+    @endcode
+
+    @par Asynchronous Operations and Detaching
+
+    Express.js handlers can perform asynchronous I/O using callbacks,
+    promises, or async/await. In `basic_router`, handlers are synchronous
+    by default. For asynchronous operations, handlers can detach from the
+    routing context by returning @ref route::detach, then resume later:
+
+    @code
+    router.get("/slow", [](Request& req, Response& res)
+    {
+        return res.detach([&req, &res](resumer resume_fn)
+        {
+            // Perform async operation (e.g., with Asio)
+            async_database_query([resume_fn, &res](error_code ec, result r)
+            {
+                if (ec)
+                {
+                    resume_fn(ec); // resume with error
+                    return;
+                }
+                res.set_body(r.to_json());
+                resume_fn(route::send); // resume with success
+            });
+        });
+    });
+    @endcode
+
+    After detaching, the handler must eventually call the @ref resumer
+    function to continue routing. This is conceptually similar to Express's
+    asynchronous model but requires explicit management.
+
+    @par Complete Example
+
+    @code
+    #include <boost/beast2/server/basic_router.hpp>
+    #include <boost/beast2/server/route_handler.hpp>
+
+    using namespace boost::beast2;
+
+    // Create the router
+    basic_router<Request, Response> router;
+
+    // Global middleware - runs for all requests
+    router.use([](Request& req, Response& res)
+    {
+        log_request(req.url);
+        return route::next;
+    });
+
+    // Authentication middleware for /admin routes
+    router.use("/admin", [](Request& req, Response& res)
+    {
+        if (!check_admin_credentials(req))
+        {
+            res.status(http_proto::status::forbidden);
+            res.set_body("Access denied");
+            return route::send;
+        }
+        return route::next;
+    });
+
+    // Route handlers
+    router.get("/", [](Request& req, Response& res)
+    {
+        res.status(http_proto::status::ok);
+        res.set_body("Welcome!");
+        return route::send;
+    });
+
+    router.get("/hello/:name", [](Request& req, Response& res)
+    {
+        // In future versions, req.params["name"] would be available
+        res.status(http_proto::status::ok);
+        res.set_body("Hello!");
+        return route::send;
+    });
+
+    // Multiple handlers for one route
+    router.route("/users/:id")
+        .get([](Request& req, Response& res)
+        {
+            res.set_body(get_user_json(req));
+            return route::send;
+        })
+        .put([](Request& req, Response& res)
+        {
+            update_user(req);
+            res.status(http_proto::status::no_content);
+            return route::send;
+        })
+        .delete([](Request& req, Response& res)
+        {
+            delete_user(req);
+            res.status(http_proto::status::no_content);
+            return route::send;
+        });
+
+    // Error handler - runs when handlers return failing error codes
+    router.use([](Request& req, Response& res, system::error_code ec)
+    {
+        res.status(http_proto::status::internal_server_error);
+        res.set_body("Internal error: " + ec.message());
+        return route::send;
+    });
+
+    // Dispatch a request
+    Request req;
+    Response res;
+    auto result = router.dispatch(
+        http_proto::method::get,
+        urls::parse_uri("/hello/world").value(),
+        req, res);
+
+    if (result == route::send)
+    {
+        // Send response to client
+        send_response(res);
+    }
+    @endcode
 
     @par Thread Safety
     Member functions marked `const` such as @ref dispatch and @ref resume
@@ -290,6 +627,8 @@ private:
 
     @tparam Req The type of request object.
     @tparam Res The type of response object.
+
+    @see router_options, route_result, route, basic_request, basic_response
 */
 template<class Req, class Res>
 class basic_router : public /*detail::*/any_router
@@ -960,7 +1299,7 @@ public:
     }
 
     /** Add handlers for a method name.
-        
+
         This registers regular handlers for the given HTTP method string
         on the current route, participating in dispatch as described in
         the @ref basic_router class documentation. This overload is
