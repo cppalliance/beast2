@@ -80,8 +80,7 @@ pattern     target      path(use)    path(get)
 
 //------------------------------------------------
 
-
-any_router::any_handler::~any_handler() = default;
+any_router::any_handler::~any_handler() {}
 
 //------------------------------------------------
 
