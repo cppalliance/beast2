@@ -11,18 +11,15 @@
 #define BOOST_BEAST2_HPP
 
 #include <boost/beast2/server/any_lambda.hpp>
-#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/beast2/server/fixed_array.hpp>
 #include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/http_stream.hpp>
 //#include <boost/beast2/server/https_server.hpp>
 #include <boost/beast2/server/plain_worker.hpp>
-#include <boost/beast2/server/route_handler.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/beast2/server/router_types.hpp>
 #include <boost/beast2/server/serve_redirect.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 //#include <boost/beast2/server/worker_ssl.hpp>

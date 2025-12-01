@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_SERVE_REDIRECT_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/route_handler.hpp>
+#include <boost/http_proto/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -19,8 +19,10 @@ namespace beast2 {
 struct serve_redirect
 {
     BOOST_BEAST2_DECL
-    system::error_code
-    operator()(Request&, Response&) const;
+    http_proto::route_result
+    operator()(
+        http_proto::Request&,
+        http_proto::Response&) const;
 };
 
 } // beast2

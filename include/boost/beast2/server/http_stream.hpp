@@ -16,7 +16,6 @@
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/server/any_lambda.hpp>
-#include <boost/beast2/server/basic_router.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/router_asio.hpp>
 #include <boost/beast2/error.hpp>
@@ -26,6 +25,7 @@
 #include <boost/http_proto/response.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/http_proto/string_body.hpp>
+#include <boost/http_proto/server/basic_router.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/asio/prepend.hpp>
 
@@ -47,7 +47,7 @@ namespace beast2 {
 */
 template<class AsyncStream>
 class http_stream
-    : private detacher::owner
+    : private http_proto::detacher::owner
 {
 public:
     /** Constructor.
@@ -81,7 +81,7 @@ public:
         The stream must be in a connected,
         correct state for a new session.
     */
-    void on_stream_begin(acceptor_config const& config);
+    void on_stream_begin(http_proto::acceptor_config const& config);
 
 private:
     void do_read();
@@ -89,15 +89,15 @@ private:
         system::error_code ec,
         std::size_t bytes_transferred);
     void on_headers();
-    void do_dispatch(route_result rv = {});
-    void do_respond(route_result rv);
+    void do_dispatch(http_proto::route_result rv = {});
+    void do_respond(http_proto::route_result rv);
     void do_write();
     void on_write(
         system::error_code const& ec,
         std::size_t bytes_transferred);
     void on_complete();
-    resumer do_detach() override;
-    void do_resume(route_result const& ec) override;
+    http_proto::resumer do_detach() override;
+    void do_resume(http_proto::route_result const& ec) override;
     void do_close();
     void do_fail(core::string_view s,
         system::error_code const& ec);
@@ -116,12 +116,12 @@ protected:
     AsyncStream& stream_;
     router_asio<AsyncStream&> routes_;
     any_lambda<void(system::error_code)> close_;
-    acceptor_config const* pconfig_ = nullptr;
+    http_proto::acceptor_config const* pconfig_ = nullptr;
 
     using work_guard = asio::executor_work_guard<decltype(
         std::declval<AsyncStream&>().get_executor())>;
     std::unique_ptr<work_guard> pwg_;
-    Request req_;
+    http_proto::Request req_;
     ResponseAsio<AsyncStream&> res_;
 };
 
@@ -178,7 +178,7 @@ http_stream(
     req_.parser = http_proto::request_parser(app);
 
     res_.serializer = http_proto::serializer(app);
-    res_.detach = detacher(*this);
+    res_.detach = http_proto::detacher(*this);
 }
 
 // called to start a new HTTP session.
@@ -187,7 +187,7 @@ template<class AsyncStream>
 void
 http_stream<AsyncStream>::
 on_stream_begin(
-    acceptor_config const& config)
+    http_proto::acceptor_config const& config)
 {
     pconfig_ = &config;
 
@@ -268,7 +268,8 @@ on_headers()
 template<class AsyncStream>
 void 
 http_stream<AsyncStream>::
-do_dispatch(route_result rv)
+do_dispatch(
+    http_proto::route_result rv)
 {
     if(! rv.failed())
     {
@@ -289,16 +290,16 @@ template<class AsyncStream>
 void 
 http_stream<AsyncStream>::
 do_respond(
-    route_result rv)
+    http_proto::route_result rv)
 {
-    BOOST_ASSERT(rv != route::next_route);
+    BOOST_ASSERT(rv != http_proto::route::next_route);
 
-    if(rv == route::close)
+    if(rv == http_proto::route::close)
     {
         return do_close();
     }
 
-    if(rv == route::complete)
+    if(rv == http_proto::route::complete)
     {
         // VFALCO what if the connection was closed or keep-alive=false?
         // handler sendt the response?
@@ -306,7 +307,7 @@ do_respond(
         return on_write(system::error_code(), 0);
     }
 
-    if(rv == route::detach)
+    if(rv == http_proto::route::detach)
     {
         // didn't call res.detach()?
         if(! pwg_)
@@ -314,7 +315,7 @@ do_respond(
         return;
     }
 
-    if(rv == route::next)
+    if(rv == http_proto::route::next)
     {
         // unhandled request
         auto const status = http_proto::status::not_found;
@@ -322,11 +323,11 @@ do_respond(
         //res_.message.set_keep_alive(false); // VFALCO?
         res_.set_body(http_proto::to_string(status));
     }
-    else if(rv != route::send)
+    else if(rv != http_proto::route::send)
     {
         // error message of last resort
         BOOST_ASSERT(rv.failed());
-        BOOST_ASSERT(! is_route_result(rv));
+        BOOST_ASSERT(! http_proto::is_route_result(rv));
         res_.status(http_proto::status::internal_server_error);
         std::string s;
         format_to(s, "An internal server error occurred: {}", rv.message());
@@ -377,7 +378,7 @@ template<class AsyncStream>
 auto
 http_stream<AsyncStream>::
 do_detach() ->
-    resumer
+    http_proto::resumer
 {
     BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
 
@@ -387,14 +388,15 @@ do_detach() ->
 
     // VFALCO cancel timer
 
-    return resumer(*this);
+    return http_proto::resumer(*this);
 }
 
 // called by resume(rv)
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
-do_resume(route_result const& rv)
+do_resume(
+    http_proto::route_result const& rv)
 {
     asio::dispatch(
         stream_.get_executor(),

@@ -48,11 +48,11 @@ struct task
     std::size_t i = 10;
 
     void
-    operator()(resumer resume)
+    operator()(http_proto::resumer resume)
     {
         if(i--)
             return;
-        resume(route::next);
+        resume(http_proto::route::next);
     }
 };
 
@@ -60,11 +60,11 @@ struct task
 
 //------------------------------------------------
 
-route_result
+http_proto::route_result
 post_work::
 operator()(
-    Request&,
-    Response& res) const
+    http_proto::Request&,
+    http_proto::Response& res) const
 {
     return res.post(task());
 }

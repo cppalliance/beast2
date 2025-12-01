@@ -10,7 +10,7 @@
 // Test that header file is self-contained.
 #include <boost/beast2/server/route_handler_asio.hpp>
 
-#include <boost/beast2/server/basic_router.hpp>
+#include <boost/http_proto/server/basic_router.hpp>
 #include <boost/core/detail/static_assert.hpp>
 #include <boost/asio/any_io_executor.hpp>
 
@@ -30,15 +30,15 @@ struct route_handler_asio_test
         }
     };
 
-    using test_router = basic_router<
-        Request, ResponseAsio<stream>>;
+    using test_router = http_proto::basic_router<
+        http_proto::Request, ResponseAsio<stream>>;
 
     void check(
         test_router& r,
         core::string_view url,
-        route_result rv0 = route::send)
+        http_proto::route_result rv0 = http_proto::route::send)
     {
-        Request req;
+        http_proto::Request req;
         ResponseAsio<stream> res;
         auto rv = r.dispatch(
             http_proto::method::get,
@@ -50,13 +50,13 @@ struct route_handler_asio_test
     struct handler
     {
         template<class Stream>
-        route_result
+        http_proto::route_result
         operator()(
-            Request&,
+            http_proto::Request&,
             ResponseAsio<Stream>&) const
         {
             BOOST_TEST(true);
-            return route::send;
+            return http_proto::route::send;
         }
     };
 

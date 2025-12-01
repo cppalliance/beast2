@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_SERVE_STATIC_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/route_handler.hpp>
+#include <boost/http_proto/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -164,7 +164,9 @@ struct serve_static
         indicate the request was not handled.
     */
     BOOST_BEAST2_DECL
-    system::error_code operator()(Request&, Response&) const;
+    system::error_code operator()(
+        http_proto::Request&,
+        http_proto::Response&) const;
 
 private:
     struct impl;

@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_POST_WORK_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/route_handler.hpp>
+#include <boost/http_proto/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -20,8 +20,8 @@ struct post_work
 {
     system::error_code
     operator()(
-        Request&,
-        Response& res) const;
+        http_proto::Request&,
+        http_proto::Response& res) const;
 };
 
 } // beast2

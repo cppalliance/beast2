@@ -170,22 +170,22 @@ serve_static(
 auto
 serve_static::
 operator()(
-    Request& req,
-    Response& res) const ->
-        route_result
+    http_proto::Request& req,
+    http_proto::Response& res) const ->
+        http_proto::route_result
 {
     // Allow: GET, HEAD
     if( req.message.method() != http_proto::method::get &&
         req.message.method() != http_proto::method::head)
     {
         if(impl_->opt.fallthrough)
-            return route::next;
+            return http_proto::route::next;
 
         res.message.set_status(
             http_proto::status::method_not_allowed);
         res.message.set(http_proto::field::allow, "GET, HEAD");
         res.set_body("");
-        return route::send;
+        return http_proto::route::send;
     }
 
     // Build the path to the requested file
@@ -218,12 +218,12 @@ operator()(
         // send file
         res.serializer.start<http_proto::file_source>(
             res.message, std::move(f), size);
-        return route::send;
+        return http_proto::route::send;
     }
 
     if( ec == system::errc::no_such_file_or_directory &&
         ! impl_->opt.fallthrough)
-        return route::next;
+        return http_proto::route::next;
 
     BOOST_ASSERT(ec.failed());
     return ec;
