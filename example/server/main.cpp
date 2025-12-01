@@ -19,6 +19,7 @@
 #include <boost/capy/application.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
+#include <boost/http_proto/server/cors.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/brotli/encode.hpp>
 #include <boost/capy/zlib/deflate.hpp>
@@ -71,8 +72,9 @@ int server_main( int argc, char* argv[] )
         //srv.wwwroot.use("/log", serve_log_admin(app));
         //srv.wwwroot.use("/alt", serve_static( argv[3] ));
         //srv.wwwroot.use("/detach", serve_detached());
-        srv.wwwroot.use(post_work());
+        //srv.wwwroot.use(post_work());
         srv.wwwroot.use(
+            http_proto::cors(),
             []( http_proto::Request& req,
                 http_proto::Response& res) ->
                     http_proto::route_result
