@@ -178,7 +178,7 @@ private:
     BOOST_BEAST2_DECL void add_impl(layer&,
         core::string_view, handler_list const&);
     BOOST_BEAST2_DECL route_result resume_impl(
-        basic_request&, basic_response&, route_result const& ec) const;
+        basic_request&, basic_response&, route_result ec) const;
     BOOST_BEAST2_DECL route_result dispatch_impl(http_proto::method,
         core::string_view, urls::url_view const&,
             basic_request&, basic_response&) const;
@@ -733,7 +733,7 @@ public:
         route_result const& rv) const ->
             route_result
     {
-        return resume_impl(req, res, rv);
+         return resume_impl(req, res, rv);
     }
 
 private:
@@ -833,7 +833,8 @@ private:
         {
             auto const& ec = static_cast<
                 basic_response const&>(res).ec_;
-            if(! ec.failed())
+            if( res.resume_ > 0 ||
+                ! ec.failed())
                 return h.dispatch_impl(req, res);
             return beast2::route::next;
         }

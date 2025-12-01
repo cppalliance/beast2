@@ -15,13 +15,9 @@
 namespace boost {
 namespace beast2 {
 
-route_result
 Response::
-fail(system::error_code const& ec)
+~Response()
 {
-    if(! ec.failed())
-        detail::throw_invalid_argument();
-    return ec;
 }
 
 Response&
@@ -53,6 +49,17 @@ set_body(std::string s)
         http_proto::string_body(std::string(s)));
 
     return *this;
+}
+
+void
+Response::
+do_post()
+{
+    BOOST_ASSERT(task_);
+    // invoke until task resumes
+    for(;;)
+        if(task_->invoke())
+            break;
 }
 
 } // beast2

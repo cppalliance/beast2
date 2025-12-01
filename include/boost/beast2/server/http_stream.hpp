@@ -34,7 +34,7 @@ namespace beast2 {
 
 //------------------------------------------------
 
-/** An HTTP server stream which routes requests to handlers and sends reesponses.
+/** An HTTP server stream which routes requests to handlers and sends responses.
 
     An object of this type wraps an asynchronous Boost.ASIO stream and implements
     a high level server connection which reads HTTP requests, routes them to
@@ -85,23 +85,23 @@ public:
 
 private:
     void do_read();
-
     void on_read(
         system::error_code ec,
         std::size_t bytes_transferred);
-
+    void on_headers();
+    void do_dispatch(route_result rv = {});
+    void do_respond(route_result rv);
+    void do_write();
     void on_write(
         system::error_code const& ec,
         std::size_t bytes_transferred);
-
+    void on_complete();
+    resumer do_detach() override;
+    void do_resume(route_result const& ec) override;
+    void do_close();
     void do_fail(core::string_view s,
         system::error_code const& ec);
-
-    resumer do_detach() override;
-
-    void do_resume(system::error_code const& ec) override;
-
-    void do_resume2(system::error_code ec);
+    void clear() noexcept;
 
 protected:
     std::string id() const
@@ -110,6 +110,7 @@ protected:
     }
 
 protected:
+    struct resetter;
     section sect_;
     std::size_t id_ = 0;
     AsyncStream& stream_;
@@ -122,6 +123,35 @@ protected:
     std::unique_ptr<work_guard> pwg_;
     Request req_;
     ResponseAsio<AsyncStream&> res_;
+};
+
+//------------------------------------------------
+
+// for exception safety
+template<class AsyncStream>
+struct http_stream<AsyncStream>::
+    resetter
+{
+    ~resetter()
+    {
+        if(clear_)
+            owner_.clear();
+    }
+
+    explicit resetter(
+        http_stream<AsyncStream>& owner) noexcept
+        : owner_(owner)
+    {
+    }
+
+    void accept()
+    {
+        clear_ = false;
+    }
+
+private:
+    http_stream<AsyncStream>& owner_;
+    bool clear_ = true;
 };
 
 //------------------------------------------------
@@ -151,11 +181,8 @@ http_stream(
     res_.detach = detacher(*this);
 }
 
-/** Called to start a new HTTP session
-
-    The stream must be in a connected,
-    correct state for a new session.
-*/
+// called to start a new HTTP session.
+// the connection must be in the correct state already.
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
@@ -163,21 +190,25 @@ on_stream_begin(
     acceptor_config const& config)
 {
     pconfig_ = &config;
+
     req_.parser.reset();
+    res_.data.clear();
     do_read();
 }
 
+// begin reading the request
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
 do_read()
 {
     req_.parser.start();
-    res_.serializer.reset();
+
     beast2::async_read(stream_, req_.parser,
         call_mf(&http_stream::on_read, this));
 }
 
+// called when the read operation completes
 template<class AsyncStream>
 void 
 http_stream<AsyncStream>::
@@ -196,87 +227,128 @@ on_read(
 
     BOOST_ASSERT(req_.parser.is_complete());
 
-    //----------------------------------------
-    //
-    // set up Request and Response objects
-    //
+    on_headers();
+}
 
+// called to set up the response after reading the request
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+on_headers()
+{
+    // set up Request and Response objects
+    res_.serializer.reset();
     // VFALCO HACK for now we make a copy of the message
     req_.message = req_.parser.get();
-
-    // copy version
-    res_.message.set_version(req_.message.version());
-
-    // copy keep-alive setting
-    res_.message.set_start_line(
-        http_proto::status::ok, req_.parser.get().version());
-    res_.message.set_keep_alive(req_.parser.get().keep_alive());
+    //res_.message.set_version(req_.message.version());
+    res_.message.set_start_line( // VFALCO WTF
+        http_proto::status::ok, req_.message.version());
+    res_.message.set_keep_alive(req_.message.keep_alive());
+    res_.data.clear();
 
     // parse the URL
     {
-        auto rv = urls::parse_uri_reference(req_.parser.get().target());
-        if(rv.has_value())
-        {
-            req_.url = rv.value();
-            req_.base_path = "";
-            req_.path = std::string(rv->encoded_path());
-        }
-        else
+        auto rv = urls::parse_uri_reference(req_.message.target());
+        if(rv.has_error())
         {
             // error parsing URL
-            res_.status(
-                http_proto::status::bad_request);
-            res_.set_body(
-                "Bad Request: " + rv.error().message());
-            goto do_write;
+            res_.status(http_proto::status::bad_request);
+            res_.set_body("Bad Request: " + rv.error().message());
+            return do_respond(rv.error());
         }
+
+        req_.url = rv.value();
     }
 
     // invoke handlers for the route
-    BOOST_ASSERT(! pwg_);
-    ec = routes_.dispatch(req_.message.method(), req_.url, req_, res_);
-    if(ec == route::send)
-        goto do_write;
+    do_dispatch();
+}
 
-    if(ec == route::next)
+// called to dispatch or resume the route
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+do_dispatch(route_result rv)
+{
+    if(! rv.failed())
     {
-        // unhandled
-        res_.status(http_proto::status::not_found);
-        std::string s;
-        format_to(s, "The requested URL {} was not found on this server.", req_.url);
-        //res_.message.set_keep_alive(false); // VFALCO?
-        res_.set_body(s);
-        goto do_write;
+        BOOST_ASSERT(! pwg_); // can't be detached
+        rv = routes_.dispatch(
+            req_.message.method(), req_.url, req_, res_);
+    }
+    else
+    {
+        rv = routes_.resume(req_, res_, rv);
     }
 
-    if(ec == route::detach)
+    do_respond(rv);
+}
+
+// called after obtaining a route result
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+do_respond(
+    route_result rv)
+{
+    BOOST_ASSERT(rv != route::next_route);
+
+    if(rv == route::close)
     {
-        // make sure they called detach()
-        BOOST_ASSERT(pwg_);
-        return;
+        return do_close();
     }
 
-    // error message of last resort
+    if(rv == route::complete)
     {
-        BOOST_ASSERT(ec.failed());
-        res_.status(http_proto::status::internal_server_error);
-        std::string s;
-        format_to(s, "An internal server error occurred: {}", ec.message());
-        //res_.message.set_keep_alive(false); // VFALCO?
-        res_.set_body(s);
-    }
-
-do_write:
-    if(res_.serializer.is_done())
-    {
-        // happens when the handler sends the response
+        // VFALCO what if the connection was closed or keep-alive=false?
+        // handler sendt the response?
+        BOOST_ASSERT(res_.serializer.is_done());
         return on_write(system::error_code(), 0);
     }
 
+    if(rv == route::detach)
+    {
+        // didn't call res.detach()?
+        if(! pwg_)
+            detail::throw_logic_error();
+        return;
+    }
+
+    if(rv == route::next)
+    {
+        // unhandled request
+        auto const status = http_proto::status::not_found;
+        res_.status(status);
+        //res_.message.set_keep_alive(false); // VFALCO?
+        res_.set_body(http_proto::to_string(status));
+    }
+    else if(rv != route::send)
+    {
+        // error message of last resort
+        BOOST_ASSERT(rv.failed());
+        BOOST_ASSERT(! is_route_result(rv));
+        res_.status(http_proto::status::internal_server_error);
+        std::string s;
+        format_to(s, "An internal server error occurred: {}", rv.message());
+        res_.message.set_keep_alive(false); // VFALCO?
+        res_.set_body(s);
+    }
+
+    do_write();
+}
+
+// begin writing the response
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+do_write()
+{
+    BOOST_ASSERT(! res_.serializer.is_done());
     beast2::async_write(stream_, res_.serializer,
         call_mf(&http_stream::on_write, this));
 }
 
+// called when the write operation completes
 template<class AsyncStream>
 void 
 http_stream<AsyncStream>::
@@ -298,29 +370,7 @@ on_write(
     if(res_.message.keep_alive())
         return do_read();
 
-    // tidy up lingering objects
-    req_.parser.reset();
-    res_.serializer.reset();
-    res_.message.clear();
-
-    close_({});
-}
-
-template<class AsyncStream>
-void 
-http_stream<AsyncStream>::
-do_fail(
-    core::string_view s, system::error_code const& ec)
-{
-    LOG_TRC(this->sect_)("{}: {}", s, ec.message());
-
-    // tidy up lingering objects
-    req_.parser.reset();
-    res_.serializer.reset();
-    //res_.clear();
-    //preq_.reset();
-
-    close_(ec);
+    do_close();
 }
 
 template<class AsyncStream>
@@ -340,44 +390,58 @@ do_detach() ->
     return resumer(*this);
 }
 
+// called by resume(rv)
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
-do_resume(system::error_code const& ec)
+do_resume(route_result const& rv)
 {
     asio::dispatch(
         stream_.get_executor(),
-        asio::prepend(call_mf(
-            &http_stream::do_resume2, this), ec));
+        [this, rv]
+        {
+            BOOST_ASSERT(pwg_.get() != nullptr);
+            pwg_.reset();
+
+            do_dispatch(rv);
+        });
 }
 
+// called when a non-recoverable error occurs
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+do_fail(
+    core::string_view s, system::error_code const& ec)
+{
+    LOG_TRC(this->sect_)("{}: {}", s, ec.message());
+
+    // tidy up lingering objects
+    req_.parser.reset();
+    res_.serializer.reset();
+
+    close_(ec);
+}
+
+// end the session
 template<class AsyncStream>
 void
 http_stream<AsyncStream>::
-do_resume2(system::error_code ec)
+do_close()
 {
-    BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
+    clear();
+    close_({});
+}
 
-    BOOST_ASSERT(pwg_.get() != nullptr);
-    pwg_.reset();
-
-    // invoke handlers for the route
-    BOOST_ASSERT(! pwg_);
-    ec = routes_.resume(req_, res_, ec);
-
-    if(ec == route::detach)
-    {
-        // make sure they called detach()
-        BOOST_ASSERT(pwg_);
-        return;
-    }
-
-    if(ec.failed())
-    {
-        // give a default error response?
-    }
-    beast2::async_write(stream_, res_.serializer,
-        call_mf(&http_stream::on_write, this));
+// clear everything, releasing transient objects
+template<class AsyncStream>
+void
+http_stream<AsyncStream>::
+clear() noexcept
+{
+    req_.parser.reset();
+    res_.serializer.reset();
+    res_.message.clear();
 }
 
 } // beast2
