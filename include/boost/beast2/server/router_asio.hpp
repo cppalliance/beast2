@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTER_ASIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/basic_router.hpp>
+#include <boost/http_proto/server/basic_router.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 
 namespace boost {
@@ -20,7 +20,8 @@ namespace beast2 {
 /** The Asio-aware router type
 */
 template<class Stream>
-using router_asio = basic_router<Request, ResponseAsio<Stream>>;
+using router_asio = http_proto::basic_router<
+    http_proto::Request, ResponseAsio<Stream>>;
 
 } // beast2
 } // boost

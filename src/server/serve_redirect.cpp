@@ -106,9 +106,9 @@ prepare_error(
 auto
 serve_redirect::
 operator()(
-    Request& req,
-    Response& res) const ->
-        system::error_code
+    http_proto::Request& req,
+    http_proto::Response& res) const ->
+        http_proto::route_result
 {
     std::string body;
     prepare_error(res.message, body,
@@ -119,7 +119,7 @@ operator()(
     res.message.append(http_proto::field::location, u1.buffer());
     res.serializer.start(res.message,
         http_proto::string_body( std::move(body)));
-    return {};
+    return http_proto::route::send;
 }
 
 } // beast2

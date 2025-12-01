@@ -36,7 +36,7 @@ public:
     using socket_type =
         asio::basic_stream_socket<Protocol, Executor>;
     using stream_type = socket_type;
-    using acceptor_config = beast2::acceptor_config;
+    using acceptor_config = http_proto::acceptor_config;
 
     template<class Executor0>
     plain_worker(

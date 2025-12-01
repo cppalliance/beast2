@@ -73,11 +73,11 @@ int server_main( int argc, char* argv[] )
         //srv.wwwroot.use("/detach", serve_detached());
         srv.wwwroot.use(post_work());
         srv.wwwroot.use(
-            []( Request& req,
-                Response& res) ->
-                    route_result
+            []( http_proto::Request& req,
+                http_proto::Response& res) ->
+                    http_proto::route_result
             {
-                return route::next;
+                return http_proto::route::next;
             });
         srv.wwwroot.use("/", serve_static( argv[3] ));
 

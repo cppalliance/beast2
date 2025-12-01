@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTE_HANDLER_ASIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/route_handler.hpp>
+#include <boost/http_proto/server/route_handler.hpp>
 #include <boost/asio/post.hpp>
 #include <type_traits>
 
@@ -21,7 +21,7 @@ namespace beast2 {
 /** Response object for Asio HTTP route handlers
 */
 template<class AsyncStream>
-class ResponseAsio : public Response
+class ResponseAsio : public http_proto::Response
 {
 public:
     using stream_type = typename std::decay<AsyncStream>::type;

@@ -30,8 +30,8 @@ public:
 
     system::error_code
     operator()(
-        Request&,
-        Response& res) const
+        http_proto::Request&,
+        http_proto::Response& res) const
     {
         auto const v = ls_.get_sections();
         std::string s;
@@ -75,7 +75,7 @@ public:
         res.status(http_proto::status::ok);
         res.message.set(http_proto::field::content_type, "text/html; charset=UTF-8");
         res.set_body(std::move(s));
-        return error::success;
+        return http_proto::route::send;
     }
 
 private:
@@ -97,13 +97,13 @@ public:
 
     system::error_code
     operator()(
-        Request&,
-        Response& res) const
+        http_proto::Request&,
+        http_proto::Response& res) const
     {
         res.status(http_proto::status::ok);
         res.message.set(http_proto::field::content_type, "plain/text; charset=UTF-8");
         res.set_body("submit");
-        return error::success;
+        return http_proto::route::send;
     }
 
 private:
