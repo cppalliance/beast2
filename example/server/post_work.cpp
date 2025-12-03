@@ -63,10 +63,9 @@ struct task
 http_proto::route_result
 post_work::
 operator()(
-    http_proto::Request&,
-    http_proto::Response& res) const
+    http_proto::route_params& p) const
 {
-    return res.post(task());
+    return p.post(task());
 }
 
 } // beast2

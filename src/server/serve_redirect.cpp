@@ -106,18 +106,17 @@ prepare_error(
 auto
 serve_redirect::
 operator()(
-    http_proto::Request& req,
-    http_proto::Response& res) const ->
+    http_proto::route_params& p) const ->
         http_proto::route_result
 {
     std::string body;
-    prepare_error(res.message, body,
-        http_proto::status::moved_permanently, req.message);
-    urls::url u1(req.message.target());
+    prepare_error(p.res, body,
+        http_proto::status::moved_permanently, p.req);
+    urls::url u1(p.req.target());
     u1.set_scheme_id(urls::scheme::https);
     u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
-    res.message.append(http_proto::field::location, u1.buffer());
-    res.serializer.start(res.message,
+    p.res.append(http_proto::field::location, u1.buffer());
+    p.serializer.start(p.res,
         http_proto::string_body( std::move(body)));
     return http_proto::route::send;
 }

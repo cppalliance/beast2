@@ -30,8 +30,7 @@ public:
 
     system::error_code
     operator()(
-        http_proto::Request&,
-        http_proto::Response& res) const
+        http_proto::route_params& p) const
     {
         auto const v = ls_.get_sections();
         std::string s;
@@ -72,9 +71,9 @@ public:
         format_to(s, "</body>\n");
         format_to(s, "</html>\n");
 
-        res.status(http_proto::status::ok);
-        res.message.set(http_proto::field::content_type, "text/html; charset=UTF-8");
-        res.set_body(std::move(s));
+        p.status(http_proto::status::ok);
+        p.res.set(http_proto::field::content_type, "text/html; charset=UTF-8");
+        p.set_body(std::move(s));
         return http_proto::route::send;
     }
 
@@ -97,12 +96,11 @@ public:
 
     system::error_code
     operator()(
-        http_proto::Request&,
-        http_proto::Response& res) const
+        http_proto::route_params& p) const
     {
-        res.status(http_proto::status::ok);
-        res.message.set(http_proto::field::content_type, "plain/text; charset=UTF-8");
-        res.set_body("submit");
+        p.status(http_proto::status::ok);
+        p.res.set(http_proto::field::content_type, "plain/text; charset=UTF-8");
+        p.set_body("submit");
         return http_proto::route::send;
     }
 
