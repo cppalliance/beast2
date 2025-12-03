@@ -21,7 +21,7 @@ namespace beast2 {
 */
 template<class Stream>
 using router_asio = http_proto::basic_router<
-    http_proto::Request, ResponseAsio<Stream>>;
+    asio_route_params<Stream>>;
 
 } // beast2
 } // boost

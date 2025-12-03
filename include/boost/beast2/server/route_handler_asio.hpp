@@ -18,10 +18,11 @@
 namespace boost {
 namespace beast2 {
 
-/** Response object for Asio HTTP route handlers
+/** Route parameters object for Asio HTTP route handlers
 */
 template<class AsyncStream>
-class ResponseAsio : public http_proto::Response
+class asio_route_params
+    : public http_proto::route_params
 {
 public:
     using stream_type = typename std::decay<AsyncStream>::type;
@@ -30,7 +31,7 @@ public:
 
     template<class... Args>
     explicit
-    ResponseAsio(
+    asio_route_params(
         Args&&... args)
         : stream(std::forward<Args>(args)...)
     {
@@ -44,7 +45,7 @@ private:
 
 template<class AsyncStream>
 void
-ResponseAsio<AsyncStream>::
+asio_route_params<AsyncStream>::
 do_post()
 {
     asio::post(

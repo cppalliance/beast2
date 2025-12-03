@@ -262,6 +262,7 @@ struct route_seg
     core::string_view constraint;
     char ptype = 0; // ':' | '?' | NULL
     char modifier = 0;
+    char term; // param terminator or NULL
 };
 
 struct param_segment_rule_t
@@ -343,6 +344,15 @@ struct path_rule_t
                     return rv1.error();
                 route_seg rs = rv1.value();
                 rs.prefix = { it2, it1 };
+                if(it != end)
+                {
+                    if( *it == ':' ||
+                        *it == '*')
+                    {
+                        // can't have ":id:id"
+                        return grammar::error::syntax;
+                    }
+                }
                 rv.segs.push_back(rs);
                 it1 = it;
                 continue;

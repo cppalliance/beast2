@@ -75,9 +75,8 @@ int server_main( int argc, char* argv[] )
         //srv.wwwroot.use(post_work());
         srv.wwwroot.use(
             http_proto::cors(),
-            []( http_proto::Request& req,
-                http_proto::Response& res) ->
-                    http_proto::route_result
+            []( http_proto::route_params&) ->
+                http_proto::route_result
             {
                 return http_proto::route::next;
             });

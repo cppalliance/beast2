@@ -31,18 +31,17 @@ struct route_handler_asio_test
     };
 
     using test_router = http_proto::basic_router<
-        http_proto::Request, ResponseAsio<stream>>;
+        asio_route_params<stream>>;
 
     void check(
         test_router& r,
         core::string_view url,
         http_proto::route_result rv0 = http_proto::route::send)
     {
-        http_proto::Request req;
-        ResponseAsio<stream> res;
+        asio_route_params<stream> req;
         auto rv = r.dispatch(
             http_proto::method::get,
-            urls::url_view(url), req, res);
+            urls::url_view(url), req);
         if(BOOST_TEST_EQ(rv.message(), rv0.message()))
             BOOST_TEST(rv == rv0);
     }
@@ -52,8 +51,7 @@ struct route_handler_asio_test
         template<class Stream>
         http_proto::route_result
         operator()(
-            http_proto::Request&,
-            ResponseAsio<Stream>&) const
+            asio_route_params<Stream>&) const
         {
             BOOST_TEST(true);
             return http_proto::route::send;

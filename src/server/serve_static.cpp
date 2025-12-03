@@ -170,28 +170,27 @@ serve_static(
 auto
 serve_static::
 operator()(
-    http_proto::Request& req,
-    http_proto::Response& res) const ->
+    http_proto::route_params& p) const ->
         http_proto::route_result
 {
     // Allow: GET, HEAD
-    if( req.message.method() != http_proto::method::get &&
-        req.message.method() != http_proto::method::head)
+    if( p.req.method() != http_proto::method::get &&
+        p.req.method() != http_proto::method::head)
     {
         if(impl_->opt.fallthrough)
             return http_proto::route::next;
 
-        res.message.set_status(
+        p.res.set_status(
             http_proto::status::method_not_allowed);
-        res.message.set(http_proto::field::allow, "GET, HEAD");
-        res.set_body("");
+        p.res.set(http_proto::field::allow, "GET, HEAD");
+        p.set_body("");
         return http_proto::route::send;
     }
 
     // Build the path to the requested file
     std::string path;
-    path_cat(path, impl_->path, req.path);
-    if(req.parser.get().target().back() == '/')
+    path_cat(path, impl_->path, p.path);
+    if(p.parser.get().target().back() == '/')
     {
         path.push_back('/');
         path.append("index.html");
@@ -206,18 +205,18 @@ operator()(
         size = f.size(ec);
     if(! ec.failed())
     {
-        res.message.set_start_line(
+        p.res.set_start_line(
             http_proto::status::ok,
-            req.message.version());
-        res.message.set_payload_size(size);
+            p.req.version());
+        p.res.set_payload_size(size);
 
         auto mt = mime_type(get_extension(path));
-        res.message.append(
+        p.res.append(
             http_proto::field::content_type, mt);
 
         // send file
-        res.serializer.start<http_proto::file_source>(
-            res.message, std::move(f), size);
+        p.serializer.start<http_proto::file_source>(
+            p.res, std::move(f), size);
         return http_proto::route::send;
     }
 

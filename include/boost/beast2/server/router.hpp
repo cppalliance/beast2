@@ -19,7 +19,7 @@ namespace beast2 {
 
 /** The sans-IO router type
 */
-using router = http_proto::basic_router<http_proto::Request, http_proto::Response>;
+using router = http_proto::basic_router<http_proto::route_params>;
 
 } // beast2
 } // boost

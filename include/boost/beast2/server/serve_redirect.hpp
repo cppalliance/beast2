@@ -21,8 +21,7 @@ struct serve_redirect
     BOOST_BEAST2_DECL
     http_proto::route_result
     operator()(
-        http_proto::Request&,
-        http_proto::Response&) const;
+        http_proto::route_params&) const;
 };
 
 } // beast2

@@ -20,8 +20,7 @@ struct post_work
 {
     system::error_code
     operator()(
-        http_proto::Request&,
-        http_proto::Response& res) const;
+        http_proto::route_params&) const;
 };
 
 } // beast2
