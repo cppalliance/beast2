@@ -36,6 +36,7 @@ else()
     context
     date_time
     buffers
+    compat
     core
     capy
     static_assert
