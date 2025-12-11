@@ -23,6 +23,8 @@
 namespace boost {
 namespace beast2 {
 
+namespace {
+
 template<class Buffers>
 std::string
 test_to_string(Buffers const& bs)
@@ -358,6 +360,8 @@ struct single_tester : public ctx_base
         test::run(ioc_);
     }
 };
+
+} // anonymous namespace
 
 struct body_read_stream_test
 {
