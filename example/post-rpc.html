@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON POST Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background: #2d2d2d;
+            border: 1px solid #3e3e3e;
+            color: #d4d4d4;
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 10px;
+            background: #2d2d2d;
+            border: 1px solid #3e3e3e;
+            color: #d4d4d4;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #0e639c;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #1177bb;
+        }
+        
+        button:active {
+            background: #0d5689;
+        }
+        
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2d2d2d;
+            border: 1px solid #3e3e3e;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .error {
+            border-color: #f48771;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 30px;">JSON POST Client</h1>
+        
+        <label for="url">URL</label>
+        <input type="text" id="url" value="http://localhost/rpc">
+        
+        <label for="json">JSON Data</label>
+        <textarea id="json" placeholder="Enter JSON here"></textarea>
+        
+        <button onclick="sendRequest()">POST</button>
+        
+        <div id="response" class="response"></div>
+    </div>
+    
+    <script>
+        async function sendRequest() {
+            const url = document.getElementById('url').value;
+            const json = document.getElementById('json').value;
+            const responseDiv = document.getElementById('response');
+            
+            responseDiv.style.display = 'block';
+            responseDiv.classList.remove('error');
+            responseDiv.textContent = 'Sending request...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: json
+                });
+                
+                const responseText = await response.text();
+                responseDiv.textContent = `Status: ${response.status} ${response.statusText}\n\n${responseText}`;
+                
+                if (!response.ok) {
+                    responseDiv.classList.add('error');
+                }
+            } catch (error) {
+                responseDiv.classList.add('error');
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

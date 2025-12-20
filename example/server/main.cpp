@@ -24,9 +24,13 @@
 #include <boost/capy/brotli/encode.hpp>
 #include <boost/capy/zlib/deflate.hpp>
 #include <boost/capy/zlib/inflate.hpp>
+#include <boost/json/parser.hpp>
 #include <iostream>
 
 namespace boost {
+
+namespace http = http_proto;
+
 namespace beast2 {
 
 void install_services(capy::application& app)
@@ -42,11 +46,100 @@ void install_services(capy::application& app)
 #endif
 
     // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
-    http_proto::install_parser_service(app,
-        http_proto::request_parser::config());
-    http_proto::install_serializer_service(app,
-        http_proto::serializer::config());
+    http::install_parser_service(app,
+        http::request_parser::config());
+    http::install_serializer_service(app,
+        http::serializer::config());
 }
+
+/*
+
+struct json_rpc;
+
+// Handle POST by parsing JSON-RPC,
+// storing `json_rpc` in `rp.request_data`
+// This validates the JSON and can respond with an error
+//
+app.use("/rpc", json_rpc_post())
+
+// Process the JSON-RPC command
+app.post(
+    "/rpc",
+    json_post(),
+    do_json_rpc()
+    );
+
+*/
+
+class json_sink : public http::sink
+{
+public:
+    explicit
+    json_sink(
+        json::value& jv) : jv_(jv)
+    {
+    }
+
+private:
+    results
+    on_write(
+        buffers::const_buffer b,
+        bool more) override
+    {
+        results rv;
+        if(more)
+        {
+            rv.bytes = pr_.write_some(
+                static_cast<char const*>(
+                    b.data()), b.size(), rv.ec);
+        }
+        else
+        {
+            rv.bytes = pr_.write(
+                static_cast<char const*>(b.data()),
+                b.size(), rv.ec);
+        }
+        if(! rv.ec.failed())
+        {
+            jv_ = pr_.release();
+            return rv;
+        }
+        return rv;
+    }
+
+    json::value& jv_;
+    json::parser pr_;
+};
+
+struct post_json_rpc
+{
+    auto operator()(
+        http::route_params& rp) const ->
+            http::route_result
+    {
+        if(! rp.is_method(http::method::post))
+            return http::route::next;
+        BOOST_ASSERT(rp.parser.is_complete());
+        auto& jv = rp.route_data.emplace<json::value>();
+        rp.parser.set_body<json_sink>(jv);
+        system::error_code ec;
+        rp.parser.parse(ec);
+        if(ec.failed())
+            return ec;
+        return http::route::next;
+    }
+};
+
+struct do_json_rpc
+{
+    auto operator()(
+        http::route_params&) const ->
+            http::route_result
+    {
+        return http::route::next;
+    }
+};
+
 
 int server_main( int argc, char* argv[] )
 {
@@ -73,12 +166,20 @@ int server_main( int argc, char* argv[] )
         //srv.wwwroot.use("/alt", serve_static( argv[3] ));
         //srv.wwwroot.use("/detach", serve_detached());
         //srv.wwwroot.use(post_work());
-        srv.wwwroot.use(
-            http_proto::cors(),
-            []( http_proto::route_params&) ->
-                http_proto::route_result
+        http::cors_options opts;
+        opts.allowedHeaders = "Content-Type";
+        srv.wwwroot.use("/rpc",
+            http::cors(opts),
+            post_json_rpc(),
+            []( http::route_params& rp) ->
+                http::route_result
             {
-                return http_proto::route::next;
+                if(rp.parser.is_complete())
+                {
+                    auto s = rp.parser.body();
+                    return http::route::next;
+                }
+                return http::route::next;
             });
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
