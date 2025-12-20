@@ -20,7 +20,7 @@ namespace beast2 {
 /** The Asio-aware router type
 */
 template<class Stream>
-using router_asio = http_proto::basic_router<
+using router_asio = http::basic_router<
     asio_route_params<Stream>>;
 
 } // beast2

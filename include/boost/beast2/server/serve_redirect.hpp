@@ -19,9 +19,9 @@ namespace beast2 {
 struct serve_redirect
 {
     BOOST_BEAST2_DECL
-    http_proto::route_result
+    http::route_result
     operator()(
-        http_proto::route_params&) const;
+        http::route_params&) const;
 };
 
 } // beast2

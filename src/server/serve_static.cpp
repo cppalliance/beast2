@@ -170,21 +170,21 @@ serve_static(
 auto
 serve_static::
 operator()(
-    http_proto::route_params& p) const ->
-        http_proto::route_result
+    http::route_params& p) const ->
+        http::route_result
 {
     // Allow: GET, HEAD
-    if( p.req.method() != http_proto::method::get &&
-        p.req.method() != http_proto::method::head)
+    if( p.req.method() != http::method::get &&
+        p.req.method() != http::method::head)
     {
         if(impl_->opt.fallthrough)
-            return http_proto::route::next;
+            return http::route::next;
 
         p.res.set_status(
-            http_proto::status::method_not_allowed);
-        p.res.set(http_proto::field::allow, "GET, HEAD");
+            http::status::method_not_allowed);
+        p.res.set(http::field::allow, "GET, HEAD");
         p.set_body("");
-        return http_proto::route::send;
+        return http::route::send;
     }
 
     // Build the path to the requested file
@@ -198,31 +198,31 @@ operator()(
 
     // Attempt to open the file
     system::error_code ec;
-    http_proto::file f;
+    http::file f;
     std::uint64_t size = 0;
-    f.open(path.c_str(), http_proto::file_mode::scan, ec);
+    f.open(path.c_str(), http::file_mode::scan, ec);
     if(! ec.failed())
         size = f.size(ec);
     if(! ec.failed())
     {
         p.res.set_start_line(
-            http_proto::status::ok,
+            http::status::ok,
             p.req.version());
         p.res.set_payload_size(size);
 
         auto mt = mime_type(get_extension(path));
         p.res.append(
-            http_proto::field::content_type, mt);
+            http::field::content_type, mt);
 
         // send file
-        p.serializer.start<http_proto::file_source>(
+        p.serializer.start<http::file_source>(
             p.res, std::move(f), size);
-        return http_proto::route::send;
+        return http::route::send;
     }
 
     if( ec == system::errc::no_such_file_or_directory &&
         ! impl_->opt.fallthrough)
-        return http_proto::route::next;
+        return http::route::next;
 
     BOOST_ASSERT(ec.failed());
     return ec;

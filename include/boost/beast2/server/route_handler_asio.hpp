@@ -11,6 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTE_HANDLER_ASIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/beast2/spawn.hpp>
 #include <boost/http_proto/server/route_handler.hpp>
 #include <boost/asio/post.hpp>
 #include <type_traits>
@@ -22,7 +23,7 @@ namespace beast2 {
 */
 template<class AsyncStream>
 class asio_route_params
-    : public http_proto::route_params
+    : public http::route_params
 {
 public:
     using stream_type = typename std::decay<AsyncStream>::type;
@@ -38,6 +39,31 @@ public:
     }
 
 private:
+    auto
+    spawn(
+        capy::task<http::route_result> t) ->
+            http::route_result override
+    {
+        return this->suspend(
+            [&](http::resumer resume)
+            {
+                beast2::spawn(
+                    stream.get_executor(),
+                    std::move(t),
+                    [resume](std::variant<
+                        std::exception_ptr,
+                        http::route_result> v)
+                    {
+                        if(v.index() == 0)
+                        {
+                            std::rethrow_exception(
+                                std::get<0>(v));
+                        }
+                        resume(std::get<1>(v));
+                    });
+            });
+    }
+
     void do_post() override;
 };
 

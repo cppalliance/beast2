@@ -10,6 +10,7 @@
 #ifndef BOOST_BEAST2_BODY_READ_STREAM_HPP
 #define BOOST_BEAST2_BODY_READ_STREAM_HPP
 
+#include <boost/beast2/detail/config.hpp>
 #include <boost/asio/async_result.hpp>
 #include <boost/http_proto/parser.hpp>
 #include <boost/system/error_code.hpp>
@@ -33,7 +34,7 @@ namespace beast2 {
     referenced in the construction of this object.
 
     @see
-        @ref http_proto::parser.
+        @ref http::parser.
 */
 template<class AsyncReadStream>
 class body_read_stream
@@ -71,13 +72,13 @@ public:
                   This object's executor is initialized to that of the
                   underlying stream.
 
-        @param pr A http_proto::parser object which will perform the parsing of
+        @param pr A http::parser object which will perform the parsing of
                   the HTTP message and extraction of the body.  This must be
                   initialized by the caller and ownership of the parser is
                   retained by the caller, which must guarantee that it remains
                   valid until the handler is called.
     */
-    explicit body_read_stream(AsyncReadStream& s, http_proto::parser& pr);
+    explicit body_read_stream(AsyncReadStream& s, http::parser& pr);
 
     /** Read some data asynchronously.
 
@@ -150,7 +151,7 @@ public:
 
 private:
     AsyncReadStream& stream_;
-    http_proto::parser& pr_;
+    http::parser& pr_;
 };
 
 } // beast2

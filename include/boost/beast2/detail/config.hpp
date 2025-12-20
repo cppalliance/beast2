@@ -36,6 +36,16 @@ namespace beast2 {
 #  include <boost/config/auto_link.hpp>
 # endif
 
+//------------------------------------------------
+
+#if defined(__cpp_lib_coroutine) && __cpp_lib_coroutine >= 201902L
+# define BOOST_BEAST_HAS_CORO 1
+#elif defined(__cpp_impl_coroutine) && __cpp_impl_coroutines >= 201902L
+# define BOOST_BEAST_HAS_CORO 1
+#endif
+
+//------------------------------------------------
+
 // Add source location to error codes
 #ifdef BOOST_BEAST2_NO_SOURCE_LOCATION
 # define BOOST_BEAST2_ERR(ev) (::boost::system::error_code(ev))
@@ -53,6 +63,12 @@ namespace beast2 {
 #endif
 
 } // beast2
+
+namespace http_proto {}
+namespace beast2 {
+namespace http = http_proto;
+}
+
 } // boost
 
 #endif

@@ -38,7 +38,7 @@ public:
         unsigned short port)
     {
         w_.emplace(
-            http_proto::acceptor_config{ false, false },
+            http::acceptor_config{ false, false },
             asio::ip::tcp::endpoint(
                 asio::ip::make_address(addr),
                 port),

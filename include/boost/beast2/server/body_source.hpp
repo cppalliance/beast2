@@ -187,7 +187,7 @@ public:
         if(impl_)
             return impl_->read(dest, n, ec);
         // empty
-        ec = http_proto::error::end_of_stream;
+        ec = http::error::end_of_stream;
         return 0;
     }
 
@@ -402,7 +402,7 @@ body_source(
                 buffers::sans_prefix(bs_, nread_));
             nread_ += n;
             if(nread_ >= size_)
-                ec = http_proto::error::end_of_stream;
+                ec = http::error::end_of_stream;
             else
                 ec = {};
             return n;

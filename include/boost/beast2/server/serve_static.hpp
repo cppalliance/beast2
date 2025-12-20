@@ -165,7 +165,7 @@ struct serve_static
     */
     BOOST_BEAST2_DECL
     system::error_code operator()(
-        http_proto::route_params&) const;
+        http::route_params&) const;
 
 private:
     struct impl;

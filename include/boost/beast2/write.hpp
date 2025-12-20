@@ -30,7 +30,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_write_some(
     AsyncWriteStream& dest,
-    http_proto::serializer& sr,
+    http::serializer& sr,
     CompletionToken&& token
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(
             typename AsyncWriteStream::executor_type));
@@ -47,7 +47,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_write(
     AsyncWriteStream& dest,
-    http_proto::serializer& sr,
+    http::serializer& sr,
     CompletionToken&& token
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(
             typename AsyncWriteStream::executor_type));
@@ -69,7 +69,7 @@ async_relay_some(
     AsyncWriteStream& dest,
     AsyncReadStream& src,
     CompletionCondition const& cond,
-    http_proto::serializer& sr,
+    http::serializer& sr,
     CompletionToken&& token
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(
             typename AsyncWriteStream::executor_type));
