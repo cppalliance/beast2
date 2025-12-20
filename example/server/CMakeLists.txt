@@ -26,6 +26,7 @@ target_include_directories(beast2_server_example PRIVATE .)
 target_link_libraries(
     beast2_server_example
     Boost::beast2
+    Boost::json
     Boost::url
     OpenSSL::SSL
     OpenSSL::Crypto
