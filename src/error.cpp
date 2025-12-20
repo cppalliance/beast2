@@ -39,9 +39,9 @@ message(
 {
     switch(static_cast<error>(code))
     {
-    case error::success: return "http_proto::error::success";
+    case error::success: return "http::error::success";
     default:
-        return "http_proto::error::?";
+        return "http::error::?";
     }
 }
 

@@ -31,13 +31,13 @@ class body_read_stream_op : public asio::coroutine
 
     AsyncReadStream& stream_;
     MutableBufferSequence mb_;
-    http_proto::parser& pr_;
+    http::parser& pr_;
 
 public:
     body_read_stream_op(
         AsyncReadStream& s,
         MutableBufferSequence&& mb,
-        http_proto::parser& pr) noexcept
+        http::parser& pr) noexcept
         : stream_(s)
         , mb_(std::move(mb))
         , pr_(pr)
@@ -133,7 +133,7 @@ public:
 template<class AsyncReadStream>
 body_read_stream<AsyncReadStream>::body_read_stream(
     AsyncReadStream& s,
-    http_proto::parser& pr)
+    http::parser& pr)
     : stream_(s)
     , pr_(pr)
 {
