@@ -28,9 +28,6 @@
 #include <iostream>
 
 namespace boost {
-
-namespace http = http_proto;
-
 namespace beast2 {
 
 void install_services(capy::application& app)
@@ -79,7 +76,6 @@ public:
         json::value& jv) : jv_(jv)
     {
     }
-
 private:
     results
     on_write(
@@ -140,6 +136,13 @@ struct do_json_rpc
     }
 };
 
+auto
+do_request(
+    http::route_params& rp) ->
+        capy::task<http::route_result>
+{
+    co_return http::route::next;
+}
 
 int server_main( int argc, char* argv[] )
 {
@@ -162,12 +165,11 @@ int server_main( int argc, char* argv[] )
             (unsigned short)std::atoi(argv[2]),
             std::atoi(argv[4]));
 
-        //srv.wwwroot.use("/log", serve_log_admin(app));
-        //srv.wwwroot.use("/alt", serve_static( argv[3] ));
-        //srv.wwwroot.use("/detach", serve_detached());
-        //srv.wwwroot.use(post_work());
         http::cors_options opts;
         opts.allowedHeaders = "Content-Type";
+
+        srv.wwwroot.use( http::co_route( do_request ) );
+
         srv.wwwroot.use("/rpc",
             http::cors(opts),
             post_json_rpc(),

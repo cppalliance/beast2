@@ -52,17 +52,16 @@ if (TARGET Boost::capy_brotli)
 endif()
 
 # CPP20 Example
-if (CMAKE_CXX_STANDARD EQUAL 20)
-    add_executable(beast2_example_client_jsonrpc_cpp20 cpp20.cpp eth_methods.hpp Jamfile)
-    set_property(TARGET beast2_example_client_jsonrpc_cpp20
-        PROPERTY FOLDER "examples")
-    target_link_libraries(beast2_example_client_jsonrpc_cpp20
-        PRIVATE
-        beast2_example_client_jsonrpc_lib)
-    if (TARGET Boost::capy_zlib)
-        target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::capy_zlib)
-    endif()
-    if (TARGET Boost::capy_brotli)
-        target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::capy_brotli)
-    endif()
-endif ()
+add_executable(beast2_example_client_jsonrpc_cpp20 cpp20.cpp eth_methods.hpp Jamfile)
+set_property(TARGET beast2_example_client_jsonrpc_cpp20
+    PROPERTY FOLDER "examples")
+target_compile_features(beast2_example_client_jsonrpc_cpp20 PUBLIC cxx_std_20)
+target_link_libraries(beast2_example_client_jsonrpc_cpp20
+    PRIVATE
+    beast2_example_client_jsonrpc_lib)
+if (TARGET Boost::capy_zlib)
+    target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::capy_zlib)
+endif()
+if (TARGET Boost::capy_brotli)
+    target_link_libraries(beast2_example_client_jsonrpc_cpp20 PRIVATE Boost::capy_brotli)
+endif()
