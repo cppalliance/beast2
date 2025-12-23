@@ -20,6 +20,7 @@
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/http_proto/server/cors.hpp>
+#include <boost/http_proto/server/helmet.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/brotli/encode.hpp>
 #include <boost/capy/zlib/deflate.hpp>
@@ -80,7 +81,16 @@ int server_main( int argc, char* argv[] )
             {
                 return http_proto::route::next;
             });
-        srv.wwwroot.use("/", serve_static( argv[3] ));
+        
+        srv.wwwroot.use(
+            http_proto::helmet(), 
+            [] ( http_proto::route_params& ) -> 
+                http_proto::route_result 
+            { 
+                return http_proto::route::next; 
+            });
+
+	    srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();
         srv.attach();
