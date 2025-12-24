@@ -30,15 +30,15 @@ class read_until_op
     : public asio::coroutine
 {
     AsyncStream& stream_;
-    http_proto::parser& pr_;
+    http::parser& pr_;
     std::size_t total_bytes_ = 0;
-    bool (&condition_)(http_proto::parser&);
+    bool (&condition_)(http::parser&);
 
 public:
     read_until_op(
         AsyncStream& s,
-        http_proto::parser& pr,
-        bool (&condition)(http_proto::parser&)) noexcept
+        http::parser& pr,
+        bool (&condition)(http::parser&)) noexcept
         : stream_(s)
         , pr_(pr)
         , condition_(condition)
@@ -62,7 +62,7 @@ public:
                 for(;;)
                 {
                     pr_.parse(ec);
-                    if(ec == http_proto::condition::need_more_input)
+                    if(ec == http::condition::need_more_input)
                     {
                         if(!!self.cancelled())
                         {
@@ -127,14 +127,14 @@ public:
 
 inline
 bool
-got_header_condition(http_proto::parser& pr)
+got_header_condition(http::parser& pr)
 {
     return pr.got_header();
 }
 
 inline
 bool
-is_complete_condition(http_proto::parser& pr)
+is_complete_condition(http::parser& pr)
 {
     return pr.is_complete();
 }
@@ -151,7 +151,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_read_some(
     AsyncReadStream& s,
-    http_proto::parser& pr,
+    http::parser& pr,
     CompletionToken&& token)
 {
     return asio::async_compose<
@@ -171,7 +171,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_read_header(
     AsyncReadStream& s,
-    http_proto::parser& pr,
+    http::parser& pr,
     CompletionToken&& token)
 {
     // TODO: async_read_header should not perform a read
@@ -187,7 +187,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_read(
     AsyncReadStream& s,
-    http_proto::parser& pr,
+    http::parser& pr,
     CompletionToken&& token)
 {
     return asio::async_compose<

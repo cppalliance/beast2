@@ -70,22 +70,22 @@ make_http_date()
 static
 void
 prepare_error(
-    http_proto::response& res,
+    http::response& res,
     std::string& body,
-    http_proto::status code,
-    http_proto::request_base const& req)
+    http::status code,
+    http::request_base const& req)
 {
     res.set_start_line(code, req.version());
-    res.append(http_proto::field::server, "boost");
-    res.append(http_proto::field::date, make_http_date());
-    res.append(http_proto::field::cache_control, "no-store");
-    res.append(http_proto::field::content_type, "text/html");
-    res.append(http_proto::field::content_language, "en");
+    res.append(http::field::server, "boost");
+    res.append(http::field::date, make_http_date());
+    res.append(http::field::cache_control, "no-store");
+    res.append(http::field::content_type, "text/html");
+    res.append(http::field::content_language, "en");
 
     // format the numeric code followed by the reason string
     auto title = std::to_string(
         static_cast<std::underlying_type<
-            http_proto::status>::type>(code));
+            http::status>::type>(code));
     title.push_back(' ');
     title.append( res.reason() );
 
@@ -106,19 +106,19 @@ prepare_error(
 auto
 serve_redirect::
 operator()(
-    http_proto::route_params& p) const ->
-        http_proto::route_result
+    http::route_params& p) const ->
+        http::route_result
 {
     std::string body;
     prepare_error(p.res, body,
-        http_proto::status::moved_permanently, p.req);
+        http::status::moved_permanently, p.req);
     urls::url u1(p.req.target());
     u1.set_scheme_id(urls::scheme::https);
     u1.set_host_address("localhost"); // VFALCO WTF IS THIS!
-    p.res.append(http_proto::field::location, u1.buffer());
+    p.res.append(http::field::location, u1.buffer());
     p.serializer.start(p.res,
-        http_proto::string_body( std::move(body)));
-    return http_proto::route::send;
+        http::string_body( std::move(body)));
+    return http::route::send;
 }
 
 } // beast2

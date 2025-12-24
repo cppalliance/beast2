@@ -29,15 +29,15 @@ class write_some_op
     : public asio::coroutine
 {
     using buffers_type =
-        http_proto::serializer::const_buffers_type;
+        http::serializer::const_buffers_type;
 
     WriteStream& dest_;
-    http_proto::serializer& sr_;
+    http::serializer& sr_;
 
 public:
     write_some_op(
         WriteStream& dest,
-        http_proto::serializer& sr) noexcept
+        http::serializer& sr) noexcept
         : dest_(dest)
         , sr_(sr)
     {
@@ -99,13 +99,13 @@ class write_op
     : public asio::coroutine
 {
     WriteStream& dest_;
-    http_proto::serializer& sr_;
+    http::serializer& sr_;
     std::size_t n_ = 0;
 
 public:
     write_op(
         WriteStream& dest,
-        http_proto::serializer& sr) noexcept
+        http::serializer& sr) noexcept
         : dest_(dest)
         , sr_(sr)
     {
@@ -165,7 +165,7 @@ class relay_some_op
     WriteStream& dest_;
     ReadStream& src_;
     CompletionCondition cond_;
-    http_proto::serializer& sr_;
+    http::serializer& sr_;
     std::size_t bytes_read_ = 0;
 
 public:
@@ -173,7 +173,7 @@ public:
         WriteStream& dest,
         ReadStream& src,
         CompletionCondition const& cond,
-        http_proto::serializer& sr) noexcept
+        http::serializer& sr) noexcept
         : dest_(dest)
         , src_(src)
         , cond_(cond)
@@ -189,7 +189,7 @@ public:
         std::size_t bytes_transferred = 0)
     {
         urls::result<
-            http_proto::serializer::buffers> rv;
+            http::serializer::buffers> rv;
 
         BOOST_ASIO_CORO_REENTER(*this)
         {
@@ -241,7 +241,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_write_some(
     AsyncWriteStream& dest,
-    http_proto::serializer& sr,
+    http::serializer& sr,
     CompletionToken&& token)
 {
     return asio::async_compose<
@@ -260,7 +260,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_write(
     AsyncWriteStream& dest,
-    http_proto::serializer& sr,
+    http::serializer& sr,
     CompletionToken&& token)
 {
     return asio::async_compose<
@@ -285,7 +285,7 @@ async_relay_some(
     AsyncWriteStream& dest,
     AsyncReadStream& src,
     CompletionCondition const& cond,
-    http_proto::serializer& sr,
+    http::serializer& sr,
     CompletionToken&& token)
 {
     return asio::async_compose<

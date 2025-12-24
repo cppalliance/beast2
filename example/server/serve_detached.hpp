@@ -39,9 +39,9 @@ public:
 
     system::error_code
     operator()(
-        http_proto::route_params& p) const
+        http_proto::route_params& rp) const
     {
-        return p.detach(
+        return rp.suspend(
             [&](http_proto::resumer resume)
             {
                 asio::post(*tp_,
@@ -49,8 +49,8 @@ public:
                     {
                         // Simulate some asynchronous work
                         std::this_thread::sleep_for(std::chrono::seconds(1));
-                        p.status(http_proto::status::ok);
-                        p.set_body("Hello from serve_detached!\n");
+                        rp.status(http_proto::status::ok);
+                        rp.set_body("Hello from serve_detached!\n");
                         resume(http_proto::route::send);
                         // resume( res.send("Hello from serve_detached!\n") );
                     });

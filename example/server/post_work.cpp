@@ -12,35 +12,6 @@
 namespace boost {
 namespace beast2 {
 
-/*
-struct etag
-{
-    Request& req;
-    Response& res;
-    sha1_state digest;
-
-    void operator()( resumer resume )
-    {
-        char buf[8192];
-        system::error_code ec;
-        auto nread = res.body.read(
-            buffers::make_buffer(buf), ec);
-        digest.update( buf, nread );
-        if(ec == error::eof)
-        {
-            res.body.rewind();
-            res.set_header(
-                http::field::etag,
-                to_hex(digest.finalize()) );
-            return resume( route::next );
-        }
-        if( ec.failed() )
-            return resume( ec );
-        // we will get called again
-    }
-};
-*/
-
 namespace {
 
 struct task
