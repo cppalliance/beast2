@@ -87,10 +87,10 @@ int server_main( int argc, char* argv[] )
         options.set(http_proto::x_download_options(http_proto::helmet_download_type::noopen));
         options.set(http_proto::x_frame_origin(http_proto::helmet_origin_type::deny));
 
-        std::vector<std::string> allow_list;
+        http_proto::sp::allow_list allow_list;
 
-        http_proto::sp::append(allow_list, "script-src", http_proto::sp::allow_type::self);
-        http_proto::sp::append(allow_list, "object-src", http_proto::sp::allow_type::none);
+        http_proto::sp::push_back(allow_list, "script-src", http_proto::sp::allow_type::self);
+        http_proto::sp::push_back(allow_list, "object-src", http_proto::sp::allow_type::none);
 
         options.set(http_proto::content_security_policy(allow_list));
 
