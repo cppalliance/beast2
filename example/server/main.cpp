@@ -49,33 +49,22 @@ void install_services(capy::application& app)
         http::serializer::config());
 }
 
-/*
-
-struct json_rpc;
-
-// Handle POST by parsing JSON-RPC,
-// storing `json_rpc` in `rp.request_data`
-// This validates the JSON and can respond with an error
-//
-app.use("/rpc", json_rpc_post())
-
-// Process the JSON-RPC command
-app.post(
-    "/rpc",
-    json_post(),
-    do_json_rpc()
-    );
-
-*/
-
 class json_sink : public http::sink
 {
 public:
-    explicit
+    json_sink(json_sink&&) = default;
+
     json_sink(
-        json::value& jv) : jv_(jv)
+        json::storage_ptr sp = {})
+        : pr_(new json::parser(std::move(sp)))
     {
     }
+
+    auto release() -> json::value
+    {
+        return pr_->release();
+    }
+
 private:
     results
     on_write(
@@ -85,29 +74,25 @@ private:
         results rv;
         if(more)
         {
-            rv.bytes = pr_.write_some(
+            rv.bytes = pr_->write_some(
                 static_cast<char const*>(
                     b.data()), b.size(), rv.ec);
         }
         else
         {
-            rv.bytes = pr_.write(
+            rv.bytes = pr_->write(
                 static_cast<char const*>(b.data()),
                 b.size(), rv.ec);
         }
         if(! rv.ec.failed())
-        {
-            jv_ = pr_.release();
             return rv;
-        }
         return rv;
     }
 
-    json::value& jv_;
-    json::parser pr_;
+    std::unique_ptr<json::parser> pr_;
 };
 
-struct post_json_rpc
+struct do_json_rpc
 {
     auto operator()(
         http::route_params& rp) const ->
@@ -115,36 +100,26 @@ struct post_json_rpc
     {
         if(! rp.is_method(http::method::post))
             return http::route::next;
-        BOOST_ASSERT(rp.parser.is_complete());
-        auto& jv = rp.route_data.emplace<json::value>();
-        rp.parser.set_body<json_sink>(jv);
-        system::error_code ec;
-        rp.parser.parse(ec);
-        if(ec.failed())
-            return ec;
-        return http::route::next;
+        return rp.read_body(
+            json_sink(),
+            [this, &rp](
+                json::value jv) ->
+                    http::route_result
+            {
+                return dispatch(std::move(jv));
+            });
     }
-};
 
-struct do_json_rpc
-{
-    auto operator()(
-        http::route_params&) const ->
+    // process the JSON-RPC request
+    auto dispatch(
+        json::value jv) const ->
             http::route_result
     {
+        (void)jv;
         return http::route::next;
     }
-};
 
-#ifdef BOOST_CAPY_HAS_CORO
-auto
-do_request(
-    http::route_params& rp) ->
-        capy::task<http::route_result>
-{
-    co_return http::route::next;
-}
-#endif
+};
 
 int server_main( int argc, char* argv[] )
 {
@@ -170,23 +145,11 @@ int server_main( int argc, char* argv[] )
         http::cors_options opts;
         opts.allowedHeaders = "Content-Type";
 
-#ifdef BOOST_CAPY_HAS_CORO
-        srv.wwwroot.use( http::co_route( do_request ) );
-#endif
-
-        srv.wwwroot.use("/rpc",
+        srv.wwwroot.use(
+            "/rpc",
             http::cors(opts),
-            post_json_rpc(),
-            []( http::route_params& rp) ->
-                http::route_result
-            {
-                if(rp.parser.is_complete())
-                {
-                    // auto s = rp.parser.body();
-                    return http::route::next;
-                }
-                return http::route::next;
-            });
+            do_json_rpc()
+        );
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();
