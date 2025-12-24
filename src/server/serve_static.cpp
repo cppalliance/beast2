@@ -198,9 +198,9 @@ operator()(
 
     // Attempt to open the file
     system::error_code ec;
-    http::file f;
+    capy::file f;
     std::uint64_t size = 0;
-    f.open(path.c_str(), http::file_mode::scan, ec);
+    f.open(path.c_str(), capy::file_mode::scan, ec);
     if(! ec.failed())
         size = f.size(ec);
     if(! ec.failed())
