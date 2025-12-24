@@ -39,6 +39,20 @@ public:
     }
 
 private:
+public:
+    // VFALCO This needs to be private
+    void do_finish()
+    {
+        if(finish_)
+        {
+            auto f = std::move(finish_);
+            finish_ = {};
+            f();
+        }
+    }
+
+private:
+
 #ifdef BOOST_CAPY_HAS_CORO
     auto
     spawn(

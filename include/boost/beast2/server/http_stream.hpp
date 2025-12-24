@@ -90,6 +90,10 @@ private:
         std::size_t bytes_transferred);
     void on_headers();
     void do_dispatch(http::route_result rv = {});
+    void do_read_body();
+    void on_read_body(
+        system::error_code ec,
+        std::size_t bytes_transferred);
     void do_respond(http::route_result rv);
     void do_write();
     void on_write(
@@ -121,7 +125,7 @@ protected:
     using work_guard = asio::executor_work_guard<decltype(
         std::declval<AsyncStream&>().get_executor())>;
     std::unique_ptr<work_guard> pwg_;
-    asio_route_params<AsyncStream&> p_;
+    asio_route_params<AsyncStream&> rp_;
 };
 
 //------------------------------------------------
@@ -172,12 +176,12 @@ http_stream(
     , stream_(stream)
     , routes_(std::move(routes))
     , close_(close)
-    , p_(stream_)
+    , rp_(stream_)
 {
-    p_.parser = http::request_parser(app);
+    rp_.parser = http::request_parser(app);
 
-    p_.serializer = http::serializer(app);
-    p_.suspend = http::suspender(*this);
+    rp_.serializer = http::serializer(app);
+    rp_.suspend = http::suspender(*this);
 }
 
 // called to start a new HTTP session.
@@ -190,8 +194,8 @@ on_stream_begin(
 {
     pconfig_ = &config;
 
-    p_.parser.reset();
-    p_.session_data.clear();
+    rp_.parser.reset();
+    rp_.session_data.clear();
     do_read();
 }
 
@@ -201,9 +205,11 @@ void
 http_stream<AsyncStream>::
 do_read()
 {
-    p_.parser.start();
+    rp_.parser.start();
 
-    beast2::async_read(stream_, p_.parser,
+    beast2::async_read_some(
+        stream_,
+        rp_.parser,
         call_mf(&http_stream::on_read, this));
 }
 
@@ -224,8 +230,6 @@ on_read(
         "{} http_stream::on_read bytes={}",
         this->id(), bytes_transferred);
 
-    BOOST_ASSERT(p_.parser.is_complete());
-
     on_headers();
 }
 
@@ -237,25 +241,25 @@ on_headers()
 {
     // set up Request and Response objects
     // VFALCO HACK for now we make a copy of the message
-    p_.req = p_.parser.get();
-    p_.route_data.clear();
-    p_.res.set_start_line( // VFALCO WTF
-        http::status::ok, p_.req.version());
-    p_.res.set_keep_alive(p_.req.keep_alive());
-    p_.serializer.reset();
+    rp_.req = rp_.parser.get();
+    rp_.route_data.clear();
+    rp_.res.set_start_line( // VFALCO WTF
+        http::status::ok, rp_.req.version());
+    rp_.res.set_keep_alive(rp_.req.keep_alive());
+    rp_.serializer.reset();
 
     // parse the URL
     {
-        auto rv = urls::parse_uri_reference(p_.req.target());
+        auto rv = urls::parse_uri_reference(rp_.req.target());
         if(rv.has_error())
         {
             // error parsing URL
-            p_.status(http::status::bad_request);
-            p_.set_body("Bad Request: " + rv.error().message());
+            rp_.status(http::status::bad_request);
+            rp_.set_body("Bad Request: " + rv.error().message());
             return do_respond(rv.error());
         }
 
-        p_.url = rv.value();
+        rp_.url = rv.value();
     }
 
     // invoke handlers for the route
@@ -273,14 +277,46 @@ do_dispatch(
     {
         BOOST_ASSERT(! pwg_); // can't be suspended
         rv = routes_.dispatch(
-            p_.req.method(), p_.url, p_);
+            rp_.req.method(), rp_.url, rp_);
     }
     else
     {
-        rv = routes_.resume(p_, rv);
+        rv = routes_.resume(rp_, rv);
     }
 
     do_respond(rv);
+}
+
+// finish reading the body
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+do_read_body()
+{
+    beast2::async_read(
+        stream_,
+        rp_.parser,
+        call_mf(&http_stream::on_read_body, this));
+}
+
+// called repeatedly when reading the body
+template<class AsyncStream>
+void 
+http_stream<AsyncStream>::
+on_read_body(
+    system::error_code ec,
+    std::size_t bytes_transferred)
+{
+    if(ec.failed())
+        return do_fail("http_stream::on_read_body", ec);
+
+    LOG_TRC(this->sect_)(
+        "{} http_stream::on_read_body bytes={}",
+        this->id(), bytes_transferred);
+
+    BOOST_ASSERT(rp_.parser.is_complete());
+
+    rp_.do_finish();
 }
 
 // called after obtaining a route result
@@ -300,8 +336,8 @@ do_respond(
     if(rv == http::route::complete)
     {
         // VFALCO what if the connection was closed or keep-alive=false?
-        // handler sendt the response?
-        BOOST_ASSERT(p_.serializer.is_done());
+        // handler sent the response?
+        BOOST_ASSERT(rp_.serializer.is_done());
         return on_write(system::error_code(), 0);
     }
 
@@ -310,6 +346,8 @@ do_respond(
         // didn't call suspend()?
         if(! pwg_)
             detail::throw_logic_error();
+        if(rp_.parser.is_body_set())
+            return do_read_body();
         return;
     }
 
@@ -317,19 +355,19 @@ do_respond(
     {
         // unhandled request
         auto const status = http::status::not_found;
-        p_.status(status);
-        p_.set_body(http::to_string(status));
+        rp_.status(status);
+        rp_.set_body(http::to_string(status));
     }
     else if(rv != http::route::send)
     {
         // error message of last resort
         BOOST_ASSERT(rv.failed());
         BOOST_ASSERT(! http::is_route_result(rv));
-        p_.status(http::status::internal_server_error);
+        rp_.status(http::status::internal_server_error);
         std::string s;
         format_to(s, "An internal server error occurred: {}", rv.message());
-        p_.res.set_keep_alive(false); // VFALCO?
-        p_.set_body(s);
+        rp_.res.set_keep_alive(false); // VFALCO?
+        rp_.set_body(s);
     }
 
     do_write();
@@ -341,8 +379,8 @@ void
 http_stream<AsyncStream>::
 do_write()
 {
-    BOOST_ASSERT(! p_.serializer.is_done());
-    beast2::async_write(stream_, p_.serializer,
+    BOOST_ASSERT(! rp_.serializer.is_done());
+    beast2::async_write(stream_, rp_.serializer,
         call_mf(&http_stream::on_write, this));
 }
 
@@ -359,13 +397,13 @@ on_write(
     if(ec.failed())
         return do_fail("http_stream::on_write", ec);
 
-    BOOST_ASSERT(p_.serializer.is_done());
+    BOOST_ASSERT(rp_.serializer.is_done());
 
     LOG_TRC(this->sect_)(
         "{} http_stream::on_write bytes={}",
         this->id(), bytes_transferred);
 
-    if(p_.res.keep_alive())
+    if(rp_.res.keep_alive())
         return do_read();
 
     do_close();
@@ -416,8 +454,8 @@ do_fail(
     LOG_TRC(this->sect_)("{}: {}", s, ec.message());
 
     // tidy up lingering objects
-    p_.parser.reset();
-    p_.serializer.reset();
+    rp_.parser.reset();
+    rp_.serializer.reset();
 
     close_(ec);
 }
@@ -438,9 +476,9 @@ void
 http_stream<AsyncStream>::
 clear() noexcept
 {
-    p_.parser.reset();
-    p_.serializer.reset();
-    p_.res.clear();
+    rp_.parser.reset();
+    rp_.serializer.reset();
+    rp_.res.clear();
 }
 
 } // beast2

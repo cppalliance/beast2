@@ -143,6 +143,23 @@ is_complete_condition(http::parser& pr)
 
 //------------------------------------------------
 
+/** Asynchronously reads some data into the parser.
+
+    This function is used to asynchronously read data from a
+    stream into the parser's input sequence. This function will always
+    keep reading until a complete header is obtained.
+    The function call will invoke the completion token
+    with the following signature:
+    @code
+    void(system::error_code ec
+    std::size_t bytes_transferred);
+    @endcode
+    @note The parser's input sequence may contain additional data
+    beyond what was required to complete the header.
+    @param s The stream to read from.
+    @param pr The parser to read data into.
+    @param token The completion token.
+*/
 template<
     class AsyncReadStream,
     BOOST_ASIO_COMPLETION_TOKEN_FOR(
@@ -163,6 +180,22 @@ async_read_some(
             s);
 }
 
+/** Asynchronously reads data into the parser until the header is complete.
+    This function is used to asynchronously read data from a
+    stream into the parser's input sequence until the parser's
+    header is complete.
+    The function call will invoke the completion token
+    with the following signature:
+    @code
+    void(system::error_code ec
+    std::size_t bytes_transferred);
+    @endcode
+    @note The parser's input sequence may contain additional data
+    beyond what was required to complete the header.
+    @param s The stream to read from.
+    @param pr The parser to read data into.
+    @param token The completion token.
+*/
 template<
     class AsyncReadStream,
     BOOST_ASIO_COMPLETION_TOKEN_FOR(
@@ -179,6 +212,22 @@ async_read_header(
     return async_read_some(s, pr, std::move(token));
 }
 
+/** Asynchronously reads data into the parser until the message is complete.
+    This function is used to asynchronously read data from a
+    stream into the parser's input sequence until the parser's
+    message is complete.
+    The function call will invoke the completion token
+    with the following signature:
+    @code
+    void(system::error_code ec
+    std::size_t bytes_transferred);
+    @endcode
+    @note The parser's input sequence may contain additional data
+    beyond what was required to complete the message.
+    @param s The stream to read from.
+    @param pr The parser to read data into.
+    @param token The completion token.
+*/
 template<
     class AsyncReadStream,
     BOOST_ASIO_COMPLETION_TOKEN_FOR(
