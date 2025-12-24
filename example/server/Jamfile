@@ -20,6 +20,7 @@ project
     : requirements
       <library>/boost/beast2//boost_beast2
       <library>/boost/url//boost_url
+      <library>/boost/json//boost_json
       [ ac.check-library /boost/capy//boost_capy_zlib : <library>/boost/capy//boost_capy_zlib : ]
       [ ac.check-library /boost/capy//boost_capy_brotli : <library>/boost/capy//boost_capy_brotli : ]
       [ ac.check-library /openssl//ssl : <library>/openssl//ssl/<link>shared : <build>no ]
