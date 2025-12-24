@@ -89,8 +89,8 @@ int server_main( int argc, char* argv[] )
 
         http_proto::sp::allow_list allow_list;
 
-        http_proto::sp::push_back(allow_list, "script-src", http_proto::sp::allow_type::self);
-        http_proto::sp::push_back(allow_list, "object-src", http_proto::sp::allow_type::none);
+        http_proto::sp::push_back(allow_list, "script-src", http_proto::sp::csp_type::self);
+        http_proto::sp::push_back(allow_list, "object-src", http_proto::sp::csp_type::none);
 
         options.set(http_proto::content_security_policy(allow_list));
 
