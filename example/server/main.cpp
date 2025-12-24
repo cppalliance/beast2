@@ -82,8 +82,13 @@ int server_main( int argc, char* argv[] )
                 return http_proto::route::next;
             });
         
+        http_proto::helmet_options options;
+
+        options.set(http_proto::x_download_options(http_proto::helmet_download_type::noopen));
+        options.set(http_proto::x_frame_origin(http_proto::helmet_origin_type::deny));
+
         srv.wwwroot.use(
-            http_proto::helmet(), 
+            http_proto::helmet(options), 
             [] ( http_proto::route_params& ) -> 
                 http_proto::route_result 
             { 
