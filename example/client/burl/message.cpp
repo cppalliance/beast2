@@ -10,6 +10,7 @@
 #include "message.hpp"
 #include "mime_type.hpp"
 
+#include <boost/capy/file.hpp>
 #include <boost/http_proto/field.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -77,9 +78,9 @@ file_body::content_length() const
 http_proto::file_source
 file_body::body() const
 {
-    http_proto::file file;
+    boost::capy::file file;
     error_code ec;
-    file.open(path_.c_str(), http_proto::file_mode::read, ec);
+    file.open(path_.c_str(), boost::capy::file_mode::read, ec);
     if(ec)
         throw system_error{ ec };
 
