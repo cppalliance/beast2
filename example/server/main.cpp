@@ -87,12 +87,12 @@ int server_main( int argc, char* argv[] )
         options.set(http_proto::x_download_options(http_proto::helmet_download_type::noopen));
         options.set(http_proto::x_frame_origin(http_proto::helmet_origin_type::deny));
 
-        http_proto::sp::allow_list allow_list;
+        http_proto::security_policy sp;
 
-        http_proto::sp::push_back(allow_list, "script-src", http_proto::sp::csp_type::self);
-        http_proto::sp::push_back(allow_list, "object-src", http_proto::sp::csp_type::none);
+        sp.append("script-src", http_proto::csp_type::self)
+                .append("object-src", http_proto::csp_type::none);
 
-        options.set(http_proto::content_security_policy(allow_list));
+        options.set(http_proto::content_security_policy(sp));
 
         srv.wwwroot.use(
             http_proto::helmet(options), 
