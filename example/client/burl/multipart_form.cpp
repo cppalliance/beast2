@@ -11,12 +11,13 @@
 
 #include <boost/buffers/copy.hpp>
 #include <boost/buffers/slice.hpp>
-#include <boost/http_proto/file.hpp>
+#include <boost/capy/file.hpp>
 #include <boost/system/system_error.hpp>
 
 #include <filesystem>
 #include <random>
 
+namespace capy     = boost::capy;
 namespace core     = boost::core;
 namespace fs       = std::filesystem;
 using system_error = boost::system::system_error;
@@ -171,9 +172,9 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
 
     auto read = [&](const std::string& path, uint64_t size)
     {
-        http_proto::file file;
+        capy::file file;
 
-        file.open(path.c_str(), http_proto::file_mode::read, rs.ec);
+        file.open(path.c_str(), capy::file_mode::read, rs.ec);
         if(rs.ec)
             return false;
 

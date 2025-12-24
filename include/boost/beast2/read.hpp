@@ -85,7 +85,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_read_header(
     AsyncReadStream& s,
-    http_proto::parser& pr,
+    http::parser& pr,
     CompletionToken&& token
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(
             typename AsyncReadStream::executor_type));
@@ -156,7 +156,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_read_some(
     AsyncReadStream& s,
-    http_proto::parser& pr,
+    http::parser& pr,
     CompletionToken&& token
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(
             typename AsyncReadStream::executor_type));
@@ -225,7 +225,7 @@ BOOST_ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken,
     void (system::error_code, std::size_t))
 async_read(
     AsyncReadStream& s,
-    http_proto::parser& pr,
+    http::parser& pr,
     CompletionToken&& token
         BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(
             typename AsyncReadStream::executor_type));

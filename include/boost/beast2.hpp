@@ -29,6 +29,7 @@
 #include <boost/beast2/test/stream.hpp>
 #include <boost/beast2/test/tcp.hpp>
 #include <boost/beast2/asio_io_context.hpp>
+#include <boost/beast2/body_read_stream.hpp>
 #include <boost/beast2/buffer.hpp>
 #include <boost/beast2/client.hpp>
 #include <boost/beast2/endpoint.hpp>
@@ -38,6 +39,7 @@
 #include <boost/beast2/logger.hpp>
 #include <boost/beast2/body_read_stream.hpp>
 #include <boost/beast2/read.hpp>
+#include <boost/beast2/spawn.hpp>
 //#include <boost/beast2/ssl_stream.hpp>
 #include <boost/beast2/write.hpp>
 
