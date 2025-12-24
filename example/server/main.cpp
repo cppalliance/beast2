@@ -136,6 +136,7 @@ struct do_json_rpc
     }
 };
 
+#ifdef BOOST_CAPY_HAS_CORO
 auto
 do_request(
     http::route_params& rp) ->
@@ -143,6 +144,7 @@ do_request(
 {
     co_return http::route::next;
 }
+#endif
 
 int server_main( int argc, char* argv[] )
 {
@@ -168,7 +170,9 @@ int server_main( int argc, char* argv[] )
         http::cors_options opts;
         opts.allowedHeaders = "Content-Type";
 
+#ifdef BOOST_CAPY_HAS_CORO
         srv.wwwroot.use( http::co_route( do_request ) );
+#endif
 
         srv.wwwroot.use("/rpc",
             http::cors(opts),
@@ -178,7 +182,7 @@ int server_main( int argc, char* argv[] )
             {
                 if(rp.parser.is_complete())
                 {
-                    auto s = rp.parser.body();
+                    // auto s = rp.parser.body();
                     return http::route::next;
                 }
                 return http::route::next;
