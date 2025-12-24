@@ -189,24 +189,27 @@ int server_main( int argc, char* argv[] )
                 return http::route::next;
             });
         
-        http_proto::helmet_options options;
+        http::helmet_options options;
 
-        options.set(http_proto::x_download_options(http_proto::helmet_download_type::noopen));
-        options.set(http_proto::x_frame_origin(http_proto::helmet_origin_type::deny));
+        options.set(http::x_download_options(http::helmet_download_type::noopen));
+        options.set(http::x_frame_origin(http::helmet_origin_type::deny));
 
-        http_proto::security_policy sp;
+        http::helmet::csp_policy sp;
 
-        sp.append("script-src", http_proto::csp_type::self)
-                .append("object-src", http_proto::csp_type::none);
+        sp.append("script-src", http::csp_type::self)
+                .append("object-src", http::csp_type::none)
+                .append("style-src", "https://example.com/index.css");
 
-        options.set(http_proto::content_security_policy(sp));
+        sp.remove("style-src");
+
+        options.set(http::content_security_policy(sp));
 
         srv.wwwroot.use(
-            http_proto::helmet(options), 
-            [] ( http_proto::route_params& ) -> 
-                http_proto::route_result 
+            http::helmet(options), 
+            [] ( http::route_params& ) -> 
+                http::route_result 
             { 
-                return http_proto::route::next; 
+                return http::route::next; 
             });
 
 	    srv.wwwroot.use("/", serve_static( argv[3] ));
