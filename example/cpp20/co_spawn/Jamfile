@@ -7,6 +7,8 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
+import config : requires ;
+
 using openssl ;
 import ac ;
 
@@ -32,4 +34,8 @@ project
 
 exe get :
     [ glob *.cpp ]
+    : requirements
+      [ requires
+        cxx20_hdr_coroutine
+      ]
     ;

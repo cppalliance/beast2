@@ -7,6 +7,10 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
+if(NOT cxx_std_20 IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+    return()
+endif()
+
 file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp
     CMakeLists.txt
     Jamfile)

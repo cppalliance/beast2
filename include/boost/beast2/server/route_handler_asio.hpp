@@ -39,6 +39,7 @@ public:
     }
 
 private:
+#ifdef BOOST_CAPY_HAS_CORO
     auto
     spawn(
         capy::task<http::route_result> t) ->
@@ -63,6 +64,7 @@ private:
                     });
             });
     }
+#endif
 
     void do_post() override;
 };

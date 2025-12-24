@@ -10,8 +10,11 @@
 #ifndef BOOST_BEAST2_SPAWN_HPP
 #define BOOST_BEAST2_SPAWN_HPP
 
-#include <boost/beast2/detail/config.hpp>
 #include <boost/capy/task.hpp>
+
+#ifdef BOOST_CAPY_HAS_CORO
+
+#include <boost/beast2/detail/config.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/any_io_executor.hpp>
@@ -76,5 +79,7 @@ auto spawn(
 
 } // beast2
 } // boost
+
+#endif
 
 #endif
