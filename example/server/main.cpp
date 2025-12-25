@@ -196,11 +196,11 @@ int server_main( int argc, char* argv[] )
 
         http::helmet::csp_policy sp;
 
-        sp.set("script-src", http::csp_type::self)
-                .set("object-src", http::csp_type::none)
-                .set("style-src", "https://example.com/index.css")
-                .set("style-src", "https://example.com/foo.css")
-                .set("style-src", http::csp_type::self);
+        sp.allow("script-src", http::csp_type::self)
+                .allow("object-src", http::csp_type::none)
+                .allow("style-src", "https://example.com/index.css")
+                .allow("style-src", "https://example.com/foo.css")
+                .allow("style-src", http::csp_type::self);
 
         options.set(http::content_security_policy(sp));
 
