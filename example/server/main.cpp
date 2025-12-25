@@ -198,9 +198,9 @@ int server_main( int argc, char* argv[] )
 
         sp.append("script-src", http::csp_type::self)
                 .append("object-src", http::csp_type::none)
-                .append("style-src", "https://example.com/index.css");
-
-        sp.remove("style-src");
+                .append("style-src", "https://example.com/index.css")
+                .append("style-src", "https://example.com/foo.css")
+                .append("style-src", http::csp_type::self);
 
         options.set(http::content_security_policy(sp));
 
