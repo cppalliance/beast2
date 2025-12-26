@@ -14,6 +14,7 @@
 #include <boost/beast2/asio_io_context.hpp>
 #include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/router.hpp>
+#include <boost/beast2/server/serve_not_found.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
@@ -212,6 +213,7 @@ int server_main( int argc, char* argv[] )
                 return http::route::next; 
             });
 
+	    srv.wwwroot.use("/", serve_not_found( argv[3] ));
 	    srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();
