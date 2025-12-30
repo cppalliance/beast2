@@ -23,6 +23,7 @@
 #include <boost/asio/prepend.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/utility/base_from_member.hpp>
 
 namespace boost {
 
@@ -38,10 +39,15 @@ template<
     class Executor,
     class Protocol = asio::ip::tcp
 >
-class worker_ssl : public http_stream<
-    ssl_stream<asio::basic_stream_socket<Protocol, Executor>>
->
+class worker_ssl
+    : private boost::base_from_member<
+        ssl_stream<asio::basic_stream_socket<Protocol, Executor>>>
+    , public http_stream<
+        ssl_stream<asio::basic_stream_socket<Protocol, Executor>>>
 {
+    using base_member = boost::base_from_member<
+        ssl_stream<asio::basic_stream_socket<Protocol, Executor>>>;
+
 public:
     using executor_type = Executor;
     using protocol_type = Protocol;
@@ -68,7 +74,7 @@ public:
 
     socket_type& socket() noexcept
     {
-        return stream_.next_layer();
+        return this->member.next_layer();
     }
 
     typename Protocol::endpoint&
@@ -102,7 +108,6 @@ private:
 
     workers_base& wb_;
     asio::ssl::context& ssl_ctx_;
-    stream_type stream_;
     typename Protocol::endpoint ep_;
 };
 
@@ -116,9 +121,10 @@ worker_ssl(
     Executor0 const& ex,
     asio::ssl::context& ssl_ctx,
     router_asio<stream_type> rr)
-    : http_stream<stream_type>(
+    : base_member(Executor(ex), ssl_ctx)
+    , http_stream<stream_type>(
         wb.app(),
-        stream_,
+        this->member,
         std::move(rr),
         [this](system::error_code const& ec)
         {
@@ -126,7 +132,6 @@ worker_ssl(
         })
     , wb_(wb)
     , ssl_ctx_(ssl_ctx)
-    , stream_(Executor(ex), ssl_ctx)
 {
 }
 
@@ -136,7 +141,7 @@ worker_ssl<Executor, Protocol>::
 cancel()
 {
     system::error_code ec;
-    stream_.next_layer().cancel(ec);
+    this->member.next_layer().cancel(ec);
 }
 
 //--------------------------------------------
@@ -147,12 +152,12 @@ void
 worker_ssl<Executor, Protocol>::
 on_accept(acceptor_config const* pconfig)
 {
-    BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
+    BOOST_ASSERT(this->member.get_executor().running_in_this_thread());
     // VFALCO TODO timeout
-    stream_.set_ssl(pconfig->is_ssl);
+    this->member.set_ssl(pconfig->is_ssl);
     if(! pconfig->is_ssl)
         return this->on_accept(*pconfig);
-    return stream_.stream().async_handshake(
+    return this->member.stream().async_handshake(
         asio::ssl::stream_base::server,
         asio::prepend(call_mf(
             &worker_ssl::on_handshake, this), pconfig));
@@ -187,7 +192,7 @@ on_shutdown(system::error_code ec)
         "{} worker_ssl::on_shutdown",
         this->id());
 
-    stream_.next_layer().shutdown(
+    this->member.next_layer().shutdown(
         asio::socket_base::shutdown_both, ec);
     // error ignored
 
@@ -225,14 +230,14 @@ reset()
 {
     // Clean up any previous connection.
     system::error_code ec;
-    stream_.next_layer().close(ec);
+    this->member.next_layer().close(ec);
 
     // asio::ssl::stream has an internal state which cannot be reset.
     // In order to perform the handshake again, we destroy the old
     // object and assign a new one, in a way that preserves the
     // original socket to avoid churning file handles.
     //
-    stream_ = stream_type(std::move(stream_.next_layer()), ssl_ctx_);
+    this->member = stream_type(std::move(this->member.next_layer()), ssl_ctx_);
 }
 
 /** Close the connection to end the session
@@ -250,7 +255,7 @@ do_close(system::error_code const& ec)
             wb_.do_idle(this);
             return;
         }
-        stream_.stream().async_shutdown(call_mf(
+        this->member.stream().async_shutdown(call_mf(
             &worker_ssl::on_shutdown, this));
         return;
     }

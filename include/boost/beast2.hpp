@@ -34,6 +34,7 @@
 #include <boost/beast2/client.hpp>
 #include <boost/beast2/endpoint.hpp>
 #include <boost/beast2/error.hpp>
+#include <boost/beast2/wrap_executor.hpp>
 #include <boost/beast2/format.hpp>
 #include <boost/beast2/log_service.hpp>
 #include <boost/beast2/logger.hpp>

@@ -20,16 +20,21 @@
 #include <boost/asio/basic_socket_acceptor.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/prepend.hpp>
+#include <boost/utility/base_from_member.hpp>
 
 namespace boost {
 namespace beast2 {
 
 template<class Executor, class Protocol>
 class plain_worker
-    : public http_stream<
-        asio::basic_stream_socket<Protocol, Executor>
-    >
+    : private boost::base_from_member<
+        asio::basic_stream_socket<Protocol, Executor>>
+    , public http_stream<
+        asio::basic_stream_socket<Protocol, Executor>>
 {
+    using base_member = boost::base_from_member<
+        asio::basic_stream_socket<Protocol, Executor>>;
+
 public:
     using executor_type = Executor;
     using protocol_type = Protocol;
@@ -51,7 +56,7 @@ public:
 
     socket_type& socket() noexcept
     {
-        return stream_;
+        return this->member;
     }
 
     typename Protocol::endpoint&
@@ -78,7 +83,6 @@ private:
     void do_close(system::error_code const& ec);
 
     workers_base& wb_;
-    stream_type stream_;
     typename Protocol::endpoint ep_;
 };
 
@@ -91,16 +95,16 @@ plain_worker(
     workers_base& wb,
     Executor0 const& ex,
     router_asio<stream_type&> rr)
-    : http_stream<stream_type>(
+    : base_member(Executor(ex))
+    , http_stream<stream_type>(
         wb.app(),
-        stream_,
+        this->member,
         std::move(rr),
         [this](system::error_code const& ec)
         {
             this->do_close(ec);
         })
     , wb_(wb)
-    , stream_(Executor(ex))
 {
 }
 
@@ -110,7 +114,7 @@ plain_worker<Executor, Protocol>::
 cancel()
 {
     system::error_code ec;
-    stream_.cancel(ec);
+    this->member.cancel(ec);
 }
 
 //--------------------------------------------
@@ -121,7 +125,7 @@ void
 plain_worker<Executor, Protocol>::
 on_accept(acceptor_config const* pconfig)
 {
-    BOOST_ASSERT(stream_.get_executor().running_in_this_thread());
+    BOOST_ASSERT(this->member.get_executor().running_in_this_thread());
     // VFALCO TODO timeout
     this->on_stream_begin(*pconfig);
 }
@@ -156,7 +160,7 @@ reset()
 {
     // Clean up any previous connection.
     system::error_code ec;
-    stream_.close(ec);
+    this->member.close(ec);
 }
 
 /** Close the connection to end the session
