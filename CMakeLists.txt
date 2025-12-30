@@ -62,6 +62,7 @@ set(BOOST_BEAST2_DEPENDENCIES
     Boost::config
     Boost::core
     Boost::describe
+    Boost::endian
     Boost::http_proto
     Boost::json
     Boost::mp11
