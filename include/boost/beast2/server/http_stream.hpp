@@ -12,13 +12,14 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/log_service.hpp>
+#include <boost/beast2/error.hpp>
 #include <boost/beast2/format.hpp>
 #include <boost/beast2/read.hpp>
-#include <boost/beast2/write.hpp>
 #include <boost/beast2/server/any_lambda.hpp>
 #include <boost/beast2/server/route_handler_asio.hpp>
 #include <boost/beast2/server/router_asio.hpp>
-#include <boost/beast2/error.hpp>
+#include <boost/beast2/wrap_executor.hpp>
+#include <boost/beast2/write.hpp>
 #include <boost/beast2/detail/except.hpp>
 #include <boost/capy/application.hpp>
 #include <boost/http_proto/request_parser.hpp>
@@ -101,7 +102,8 @@ private:
         std::size_t bytes_transferred);
     void on_complete();
     http::resumer do_suspend() override;
-    void do_resume(http::route_result const& ec) override;
+    void do_resume(http::route_result const& rv) override;
+    void do_resume(std::exception_ptr ep) override;
     void do_close();
     void do_fail(core::string_view s,
         system::error_code const& ec);
@@ -182,6 +184,7 @@ http_stream(
 
     rp_.serializer = http::serializer(app);
     rp_.suspend = http::suspender(*this);
+    rp_.ex = wrap_executor(stream_.get_executor());
 }
 
 // called to start a new HTTP session.
@@ -441,6 +444,40 @@ do_resume(
             pwg_.reset();
 
             do_dispatch(rv);
+        });
+}
+
+// called by resume(ep)
+template<class AsyncStream>
+void
+http_stream<AsyncStream>::
+do_resume(
+    std::exception_ptr ep)
+{
+    asio::dispatch(
+        stream_.get_executor(),
+        [this, ep]
+        {
+            BOOST_ASSERT(pwg_.get() != nullptr);
+            pwg_.reset();
+
+            rp_.status(http::status::internal_server_error);
+            try
+            {
+                std::rethrow_exception(ep);
+            }
+            catch(std::exception const& e)
+            {
+                std::string s;
+                format_to(s, "An internal server error occurred: {}", e.what());
+                rp_.set_body(s);
+            }
+            catch(...)
+            {
+                rp_.set_body("An internal server error occurred");
+            }
+            rp_.res.set_keep_alive(false);
+            do_write();
         });
 }
 

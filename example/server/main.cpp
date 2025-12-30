@@ -8,7 +8,6 @@
 //
 
 #include "certificate.hpp"
-#include "post_work.hpp"
 #include "serve_detached.hpp"
 #include "serve_log_admin.hpp"
 #include <boost/beast2/asio_io_context.hpp>
@@ -17,9 +16,12 @@
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
+#include <boost/capy/async_result.hpp>
+#include <boost/capy/thread_pool.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
 #include <boost/http_proto/server/cors.hpp>
+#include <boost/capy/bcrypt.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/brotli/encode.hpp>
 #include <boost/capy/zlib/deflate.hpp>
@@ -29,6 +31,8 @@
 
 namespace boost {
 namespace beast2 {
+
+capy::thread_pool g_tp;
 
 void install_services(capy::application& app)
 {
@@ -102,7 +106,7 @@ struct do_json_rpc
             return http::route::next;
         return rp.read_body(
             json_sink(),
-            [this, &rp](
+            [this](
                 json::value jv) ->
                     http::route_result
             {
@@ -120,6 +124,46 @@ struct do_json_rpc
     }
 
 };
+
+#ifdef BOOST_BEAST2_HAS_CORO
+auto
+my_coro(
+    http::route_params& rp) ->
+        capy::task<http::route_result>
+{
+    (void)rp;
+    asio::thread_pool tp(1);
+    co_await capy::make_async_result<void>(
+        [&tp](auto&& handler)
+        {
+            asio::post(tp.get_executor(),
+                [handler = std::move(handler)]() mutable
+                {
+                    // Simulate some asynchronous work
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                    handler();
+                });
+        });
+    co_return http::route::next;
+}
+
+auto
+do_bcrypt(
+    http::route_params& rp) ->
+        capy::task<http::route_result>
+{
+    std::string password = "boost";
+    //auto rv = co_await capy::bcrypt::async_hash(password);
+    co_await g_tp.get_executor().submit(
+        []()
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        });
+    co_return http::route::next;
+}
+
+
+#endif
 
 int server_main( int argc, char* argv[] )
 {
@@ -150,6 +194,14 @@ int server_main( int argc, char* argv[] )
             http::cors(opts),
             do_json_rpc()
         );
+#ifdef BOOST_BEAST2_HAS_CORO
+        srv.wwwroot.use(
+            "/spawn",
+            http::co_route(my_coro));
+        srv.wwwroot.use(
+            "/bcrypt",
+            http::co_route(do_bcrypt));
+#endif
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();

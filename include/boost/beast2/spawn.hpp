@@ -10,13 +10,15 @@
 #ifndef BOOST_BEAST2_SPAWN_HPP
 #define BOOST_BEAST2_SPAWN_HPP
 
-#include <boost/capy/task.hpp>
-
-#ifdef BOOST_CAPY_HAS_CORO
-
 #include <boost/beast2/detail/config.hpp>
+
+#ifdef BOOST_BEAST2_HAS_CORO
+
+#include <boost/beast2/wrap_executor.hpp>
+#include <boost/capy/task.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/dispatch.hpp>
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/use_awaitable.hpp>
@@ -59,9 +61,12 @@ auto spawn(
             auto h = t.release();
             auto* p = &h.promise();
 
-            p->on_done_ = [handler = std::move(handler), h, p]() mutable
+            // Set executor to ensure executor affinity
+            p->ex = wrap_executor(ex_);
+
+            p->on_done = [handler = std::move(handler), h, p]() mutable
             {
-                auto& r = p->result_;
+                auto& r = p->result;
                 if (r.index() == 2)
                     std::move(handler)(std::variant<std::exception_ptr, T>(
                         std::in_place_index<0>, std::get<2>(r)));

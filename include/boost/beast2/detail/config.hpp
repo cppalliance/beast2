@@ -39,9 +39,9 @@ namespace beast2 {
 //------------------------------------------------
 
 #if defined(__cpp_lib_coroutine) && __cpp_lib_coroutine >= 201902L
-# define BOOST_BEAST_HAS_CORO 1
+# define BOOST_BEAST2_HAS_CORO 1
 #elif defined(__cpp_impl_coroutine) && __cpp_impl_coroutines >= 201902L
-# define BOOST_BEAST_HAS_CORO 1
+# define BOOST_BEAST2_HAS_CORO 1
 #endif
 
 //------------------------------------------------
