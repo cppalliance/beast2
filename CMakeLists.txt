@@ -57,10 +57,19 @@ set(BOOST_SRC_DIR ${DEFAULT_BOOST_SRC_DIR} CACHE STRING "Boost source dir to use
 set(BOOST_BEAST2_DEPENDENCIES
     Boost::asio
     Boost::assert
+    Boost::buffers
+    Boost::capy
     Boost::config
+    Boost::core
+    Boost::describe
     Boost::http_proto
+    Boost::json
+    Boost::mp11
+    Boost::static_assert
     Boost::system
     Boost::throw_exception
+    Boost::url
+    Boost::variant2
     )
 
 foreach (BOOST_BEAST2_DEPENDENCY ${BOOST_BEAST2_DEPENDENCIES})
@@ -70,10 +79,10 @@ foreach (BOOST_BEAST2_DEPENDENCY ${BOOST_BEAST2_DEPENDENCIES})
 endforeach ()
 # Conditional dependencies
 if (BOOST_BEAST2_BUILD_TESTS)
-    set(BOOST_BEAST2_UNIT_TEST_LIBRARIES beast url)
+    set(BOOST_BEAST2_UNIT_TEST_LIBRARIES beast)
 endif ()
 if (BOOST_BEAST2_BUILD_EXAMPLES)
-    set(BOOST_BEAST2_EXAMPLE_LIBRARIES json program_options scope url multiprecision)
+    set(BOOST_BEAST2_EXAMPLE_LIBRARIES program_options scope multiprecision)
 endif ()
 # Complete dependency list
 set(BOOST_INCLUDE_LIBRARIES ${BOOST_BEAST2_INCLUDE_LIBRARIES} ${BOOST_BEAST2_UNIT_TEST_LIBRARIES} ${BOOST_BEAST2_EXAMPLE_LIBRARIES})
@@ -115,7 +124,7 @@ if (BOOST_BEAST2_IS_ROOT)
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BOOST_SRC_DIR}/tools/cmake/include")
     else ()
         # From Boost Package
-        find_package(Boost REQUIRED COMPONENTS buffers http_proto program_options scope url)
+        find_package(Boost REQUIRED COMPONENTS buffers capy http_proto json program_options scope system url)
         foreach (BOOST_INCLUDE_LIBRARY ${BOOST_INCLUDE_LIBRARIES})
             if (NOT TARGET Boost::${BOOST_INCLUDE_LIBRARY})
                 add_library(Boost::${BOOST_INCLUDE_LIBRARY} ALIAS Boost::headers)
