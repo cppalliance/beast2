@@ -908,7 +908,6 @@ jobs:
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
           boost-dir: boost-source
-          modules: endian
           modules-exclude-paths: ''
           scan-modules-dir: |
             http-io-root
@@ -1237,7 +1236,6 @@ jobs:
         with:
           branch: ${{ (github.ref_name == 'master' && github.ref_name) || 'develop' }}
           boost-dir: boost-source
-          modules: endian
           modules-exclude-paths: ''
           scan-modules-dir: |
             http-io-root
