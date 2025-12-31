@@ -11,7 +11,6 @@
 //#include <boost/beast2/stream.hpp>
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/spawn.hpp>
 #include <boost/beast2/test/stream.hpp>
 #include <boost/buffers/any_stream.hpp>
 #include <boost/asio/use_awaitable.hpp>
