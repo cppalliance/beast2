@@ -10,4 +10,3 @@
 
 build-project client ;
 build-project server ;
-build-project cpp20 ;
