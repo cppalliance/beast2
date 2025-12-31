@@ -16,7 +16,6 @@
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
-#include <boost/capy/async_result.hpp>
 #include <boost/capy/thread_pool.hpp>
 #include <boost/http_proto/request_parser.hpp>
 #include <boost/http_proto/serializer.hpp>
@@ -133,7 +132,7 @@ my_coro(
 {
     (void)rp;
     asio::thread_pool tp(1);
-    co_await capy::make_async_result<void>(
+    co_await capy::make_async_op<void>(
         [&tp](auto&& handler)
         {
             asio::post(tp.get_executor(),

@@ -40,7 +40,6 @@
 #include <boost/beast2/logger.hpp>
 #include <boost/beast2/body_read_stream.hpp>
 #include <boost/beast2/read.hpp>
-#include <boost/beast2/spawn.hpp>
 //#include <boost/beast2/ssl_stream.hpp>
 #include <boost/beast2/write.hpp>
 
