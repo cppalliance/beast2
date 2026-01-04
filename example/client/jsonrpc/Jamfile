@@ -33,16 +33,7 @@ project
       <include>.
     ;
 
-exe cpp11 :
-    cpp11.cpp
+exe jsonrpc_example :
+    main.cpp
     [ glob jsonrpc/*.cpp ]
-    ;
-
-exe cpp20 :
-    cpp20.cpp
-    [ glob jsonrpc/*.cpp ]
-    : requirements
-      [ requires
-        cxx20_hdr_coroutine
-      ]
     ;

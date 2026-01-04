@@ -151,7 +151,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "src" FILES ${BOOST_BEA
 
 
 function(boost_beast2_setup_properties target)
-    target_compile_features(${target} PUBLIC cxx_constexpr)
+    target_compile_features(${target} PUBLIC cxx_std_20)
     target_include_directories(${target}
         PUBLIC "${PROJECT_SOURCE_DIR}/include"
         PRIVATE "${PROJECT_SOURCE_DIR}")

@@ -20,7 +20,6 @@ lib user32 ;
 project
     : requirements
       [ requires
-        cxx20_hdr_concepts
         cxx20_hdr_format
       ]
       <library>/boost/beast2//boost_beast2
