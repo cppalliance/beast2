@@ -7,10 +7,6 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
-if(NOT cxx_std_20 IN_LIST CMAKE_CXX_COMPILE_FEATURES)
-    return()
-endif()
-
 file(GLOB_RECURSE PFILES CONFIGURE_DEPENDS *.cpp *.hpp
     CMakeLists.txt
     Jamfile)
@@ -26,8 +22,6 @@ set_property(TARGET beast2_example_client_burl
     PROPERTY FOLDER "examples")
 
 find_package(OpenSSL REQUIRED)
-
-target_compile_features(beast2_example_client_burl PUBLIC cxx_std_20)
 
 target_link_libraries(beast2_example_client_burl
     Boost::beast2

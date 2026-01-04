@@ -12,7 +12,7 @@ find_package(OpenSSL)
 add_subdirectory(visit)
 
 if (OPENSSL_FOUND)
-    add_subdirectory(burl)
+    # add_subdirectory(burl)
     add_subdirectory(get)
     add_subdirectory(jsonrpc)
 endif ()

@@ -14,13 +14,12 @@ This is a portable C++ library which implements the HTTP/1 protocol using
 Boost.HTTP.Proto and Boost.Asio. The library is distinguished by these
 provided features:
 
-* Require only C++11
 * Works without exceptions
 * Fast compilation, few templates
 
 == Requirements
 
-* Requires Boost and a compiler supporting at least C++11
+* Requires Boost and a compiler supporting at least C++20
 * Link to a static or dynamically linked version of this library
 * Supports `-fno-exceptions`, detected automatically
 
@@ -28,8 +27,8 @@ provided features:
 
 Boost.Buffers has been tested with the following compilers:
 
-* gcc: 5 to 14 (except 8.0.1)
-* clang: 3.9, 4 to 18
+* gcc: 10 to 15
+* clang: 11 to 20
 * msvc: 14.1 to 14.42
 
 == Quality Assurance
