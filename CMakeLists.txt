@@ -149,7 +149,6 @@ source_group("" FILES "include/boost/beast2.hpp" "build/Jamfile")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/boost/beast2 PREFIX "include" FILES ${BOOST_BEAST2_HEADERS})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX "src" FILES ${BOOST_BEAST2_SOURCES})
 
-
 function(boost_beast2_setup_properties target)
     target_compile_features(${target} PUBLIC cxx_std_20)
     target_include_directories(${target}
@@ -174,9 +173,10 @@ if (BOOST_BEAST2_MRDOCS_BUILD)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mrdocs.cpp" "#include <boost/beast2.hpp>\n")
     add_library(boost_beast2_mrdocs "${CMAKE_CURRENT_BINARY_DIR}/mrdocs.cpp")
     boost_beast2_setup_properties(boost_beast2_mrdocs)
-    boost_beast2_setup_properties(boost_beast2_mrdocs PUBLIC BOOST_BEAST2_MRDOCS)
+    target_compile_definitions(boost_beast2_mrdocs PUBLIC BOOST_BEAST2_MRDOCS)
+    set_target_properties(boost_beast2_mrdocs PROPERTIES EXPORT_COMPILE_COMMANDS ON)
     return()
-endif()
+endif ()
 
 add_library(boost_beast2 include/boost/beast2.hpp build/Jamfile ${BOOST_BEAST2_HEADERS} ${BOOST_BEAST2_SOURCES})
 add_library(Boost::beast2 ALIAS boost_beast2)
