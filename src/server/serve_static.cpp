@@ -9,7 +9,7 @@
 
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
-#include <boost/http_proto/file_source.hpp>
+#include <boost/http/file_source.hpp>
 #include <boost/url/grammar/ci_string.hpp>
 #include <string>
 

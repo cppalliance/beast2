@@ -47,9 +47,9 @@ common_install () {
     popd
   fi
 
-  if [ ! -d "$BOOST_ROOT/libs/http_proto" ]; then
+  if [ ! -d "$BOOST_ROOT/libs/http" ]; then
     pushd $BOOST_ROOT/libs
-    git clone https://github.com/cppalliance/http_proto -b $BOOST_BRANCH --depth 1
+    git clone https://github.com/cppalliance/http -b $BOOST_BRANCH --depth 1
     popd
   fi
 }
@@ -139,9 +139,9 @@ if [ ! -d "$BOOST_ROOT/libs/capy" ]; then
   popd
 fi
 
-if [ ! -d "$BOOST_ROOT/libs/http_proto" ]; then
+if [ ! -d "$BOOST_ROOT/libs/http" ]; then
   pushd $BOOST_ROOT/libs
-  git clone https://github.com/cppalliance/http_proto -b $BOOST_BRANCH --depth 1
+  git clone https://github.com/cppalliance/http -b $BOOST_BRANCH --depth 1
   popd
 fi
 

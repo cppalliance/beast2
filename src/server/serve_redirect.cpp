@@ -8,9 +8,9 @@
 //
 
 #include <boost/beast2/server/serve_redirect.hpp>
-#include <boost/http_proto/file_source.hpp>
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/string_body.hpp>
+#include <boost/http/file_source.hpp>
+#include <boost/http/response.hpp>
+#include <boost/http/string_body.hpp>
 #include <boost/url/url.hpp>
 #include <boost/url/authority_view.hpp>
 #include <boost/url/grammar/ci_string.hpp>
@@ -26,7 +26,7 @@ namespace beast2 {
 
 //------------------------------------------------
 
-/// Returns the current system time formatted as an HTTP-date per RFC 9110 §5.6.7.
+/// Returns the current system time formatted as an HTTP-date per RFC 9110 ï¿½5.6.7.
 /// Example: "Sat, 11 Oct 2025 02:12:34 GMT"
 static
 std::string

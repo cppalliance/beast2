@@ -64,7 +64,7 @@ namespace beast2 {
 #include <boost/buffers/make_buffer.hpp>
 #include <boost/buffers/string_buffer.hpp>
 #include <boost/capy/polystore.hpp>
-#include <boost/http_proto/response.hpp>
+#include <boost/http/response.hpp>
 
 #include "test_helpers.hpp"
 
@@ -93,7 +93,7 @@ public:
     {
         boost::asio::io_context ioc;
         boost::capy::polystore capy_ctx;
-        http_proto::install_serializer_service(capy_ctx, {});
+        http::install_serializer_service(capy_ctx, {});
 
         // async_write_some completes when the serializer writes the message.
         {
@@ -101,10 +101,10 @@ public:
             ts.connect(tr);
             ts.write_size(1);
 
-            http_proto::serializer sr(capy_ctx);
+            http::serializer sr(capy_ctx);
             sr.reset();
 
-            http_proto::response res(headers);
+            http::response res(headers);
             sr.start(res, buffers::const_buffer(body.data(), body.size()));
 
             for(std::size_t total = 0; total < msg.size(); total++)
@@ -132,10 +132,10 @@ public:
             ts.connect(tr);
             ts.write_size(1);
 
-            http_proto::serializer sr(capy_ctx);
+            http::serializer sr(capy_ctx);
             sr.reset();
 
-            http_proto::response res(headers);
+            http::response res(headers);
             sr.start(res, buffers::const_buffer(body.data(), body.size()));
 
             for(int count = 0; count < 3; count++)
@@ -178,10 +178,10 @@ public:
 
                 asio::cancellation_signal c_signal;
 
-                http_proto::serializer sr(capy_ctx);
+                http::serializer sr(capy_ctx);
                 sr.reset();
 
-                http_proto::response res(headers);
+                http::response res(headers);
                 sr.start(res, buffers::const_buffer(body.data(), body.size()));
 
                 // async_read_some cancels after reading 0 bytes
@@ -209,7 +209,7 @@ public:
     {
         boost::asio::io_context ioc;
         capy::polystore capy_ctx;
-        http_proto::install_serializer_service(capy_ctx, {});
+        http::install_serializer_service(capy_ctx, {});
 
         // async_write completes when the serializer writes
         // the entire message.
@@ -218,10 +218,10 @@ public:
             ts.connect(tr);
             ts.write_size(1);
 
-            http_proto::serializer sr(capy_ctx);
+            http::serializer sr(capy_ctx);
             sr.reset();
 
-            http_proto::response res(headers);
+            http::response res(headers);
             sr.start(res, buffers::const_buffer(body.data(), body.size()));
 
             async_write(
@@ -247,10 +247,10 @@ public:
             ts.connect(tr);
             ts.write_size(1);
 
-            http_proto::serializer sr(capy_ctx);
+            http::serializer sr(capy_ctx);
             sr.reset();
 
-            http_proto::response res(headers);
+            http::response res(headers);
             sr.start(res, buffers::const_buffer(body.data(), body.size()));
 
             async_write(
@@ -283,10 +283,10 @@ public:
 
                 asio::cancellation_signal c_signal;
 
-                http_proto::serializer sr(capy_ctx);
+                http::serializer sr(capy_ctx);
                 sr.reset();
 
-                http_proto::response res(headers);
+                http::response res(headers);
                 sr.start(res, buffers::const_buffer(body.data(), body.size()));
 
                 // cancel after writing

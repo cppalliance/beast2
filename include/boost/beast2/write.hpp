@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_WRITE_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/serializer.hpp>
 #include <boost/asio/async_result.hpp>
 #include <boost/system/error_code.hpp>
 

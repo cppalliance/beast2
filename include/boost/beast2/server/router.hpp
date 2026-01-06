@@ -11,8 +11,8 @@
 #define BOOST_BEAST2_SERVER_ROUTER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http_proto/server/basic_router.hpp>
-#include <boost/http_proto/server/route_handler.hpp>
+#include <boost/http/server/basic_router.hpp>
+#include <boost/http/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {

@@ -63,15 +63,14 @@ set(BOOST_BEAST2_DEPENDENCIES
     Boost::core
     Boost::describe
     Boost::endian
-    Boost::http_proto
+    Boost::http
     Boost::json
     Boost::mp11
     Boost::static_assert
     Boost::system
     Boost::throw_exception
     Boost::url
-    Boost::variant2
-    )
+    Boost::variant2)
 
 foreach (BOOST_BEAST2_DEPENDENCY ${BOOST_BEAST2_DEPENDENCIES})
     if (BOOST_BEAST2_DEPENDENCY MATCHES "^[ ]*Boost::([A-Za-z0-9_]+)[ ]*$")
@@ -125,7 +124,7 @@ if (BOOST_BEAST2_IS_ROOT)
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BOOST_SRC_DIR}/tools/cmake/include")
     else ()
         # From Boost Package
-        find_package(Boost REQUIRED COMPONENTS buffers capy http_proto json program_options scope system url)
+        find_package(Boost REQUIRED COMPONENTS buffers capy http json program_options scope system url)
         foreach (BOOST_INCLUDE_LIBRARY ${BOOST_INCLUDE_LIBRARIES})
             if (NOT TARGET Boost::${BOOST_INCLUDE_LIBRARY})
                 add_library(Boost::${BOOST_INCLUDE_LIBRARY} ALIAS Boost::headers)
