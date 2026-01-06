@@ -12,9 +12,9 @@
 
 #include "multipart_form.hpp"
 
-#include <boost/http_proto/file_source.hpp>
-#include <boost/http_proto/request.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/file_source.hpp>
+#include <boost/http/request.hpp>
+#include <boost/http/serializer.hpp>
 
 #include <variant>
 
@@ -28,7 +28,7 @@ class string_body
 public:
     string_body(std::string body, std::string content_type);
 
-    http_proto::method
+    http::method
     method() const noexcept;
 
     core::string_view
@@ -48,7 +48,7 @@ class file_body
 public:
     file_body(std::string path);
 
-    http_proto::method
+    http::method
     method() const noexcept;
 
     core::string_view
@@ -57,21 +57,21 @@ public:
     std::uint64_t
     content_length() const;
 
-    http_proto::file_source
+    http::file_source
     body() const;
 };
 
 class stdin_body
 {
 public:
-    class source : public http_proto::source
+    class source : public http::source
     {
     public:
         results
         on_read(buffers::mutable_buffer mb) override;
     };
 
-    http_proto::method
+    http::method
     method() const noexcept;
 
     core::string_view
@@ -106,12 +106,12 @@ public:
     }
 
     void
-    set_headers(http_proto::request& request) const;
+    set_headers(http::request& request) const;
 
     void
     start_serializer(
-        http_proto::serializer& serializer,
-        http_proto::request& request) const;
+        http::serializer& serializer,
+        http::request& request) const;
 };
 
 #endif

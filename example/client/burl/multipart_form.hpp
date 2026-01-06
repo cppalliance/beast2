@@ -12,8 +12,8 @@
 
 #include <boost/buffers/buffer.hpp>
 #include <boost/core/detail/string_view.hpp>
-#include <boost/http_proto/method.hpp>
-#include <boost/http_proto/source.hpp>
+#include <boost/http/method.hpp>
+#include <boost/http/source.hpp>
 #include <boost/optional.hpp>
 #include <boost/system/error_code.hpp>
 
@@ -21,7 +21,7 @@
 #include <vector>
 
 namespace buffers    = boost::buffers;
-namespace http_proto = boost::http_proto;
+namespace http = boost::http;
 using error_code     = boost::system::error_code;
 
 class multipart_form
@@ -55,7 +55,7 @@ public:
         boost::optional<std::string> content_type = {},
         std::vector<std::string> headers = {});
 
-    http_proto::method
+    http::method
     method() const noexcept;
 
     std::string
@@ -68,7 +68,7 @@ public:
     body() const;
 };
 
-class multipart_form::source : public http_proto::source
+class multipart_form::source : public http::source
 {
     const multipart_form* form_;
     std::vector<part>::const_iterator it_{ form_->pacapy_.begin() };

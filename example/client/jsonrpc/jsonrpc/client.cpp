@@ -18,7 +18,7 @@
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/beast2.hpp>
-#include <boost/http_proto/string_body.hpp>
+#include <boost/http/string_body.hpp>
 #include <boost/json/parse.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/polystore.hpp>
@@ -223,7 +223,7 @@ private:
     };
 };
 
-class json_sink : public http_proto::sink
+class json_sink : public http::sink
 {
     json::stream_parser& jpr_;
 
@@ -250,7 +250,7 @@ private:
     }
 };
 
-class json_source : public http_proto::source
+class json_source : public http::source
 {
     json::serializer& jsr_;
     json::value v_;
@@ -404,9 +404,9 @@ client(
     , endpoint_(std::move(endpoint))
     , sr_(capy_ctx)
     , pr_(capy_ctx)
-    , req_(http_proto::method::post, "/")
+    , req_(http::method::post, "/")
 {
-    using field = http_proto::field;
+    using field = http::field;
 
     if(!endpoint_.encoded_target().empty())
         req_.set_target(endpoint_.encoded_target());

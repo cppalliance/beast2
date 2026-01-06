@@ -47,11 +47,11 @@ explicit beast2_sources ;
 lib boost_beast2
    : beast2_sources
    : requirements
-     <library>/boost//http_proto
+     <library>/boost//http
      <include>../
      <define>BOOST_BEAST2_SOURCE
    : usage-requirements
-     <library>/boost//http_proto
+     <library>/boost//http
    ;
 
 boost-install boost_beast2 ;

@@ -13,7 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/detail/except.hpp>
 #include <boost/beast2/detail/type_traits.hpp>
-#include <boost/http_proto/error.hpp>
+#include <boost/http/error.hpp>
 #include <boost/buffers/buffer.hpp>
 #include <boost/buffers/copy.hpp>
 #include <boost/buffers/slice.hpp>

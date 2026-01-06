@@ -17,7 +17,7 @@
 #include <boost/asio/immediate.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/result.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/serializer.hpp>
 
 namespace boost {
 namespace beast2 {

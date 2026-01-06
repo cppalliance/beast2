@@ -12,8 +12,8 @@
 #define BOOST_BEAST2_IMPL_READ_HPP
 
 #include <boost/beast2/detail/except.hpp>
-#include <boost/http_proto/error.hpp>
-#include <boost/http_proto/parser.hpp>
+#include <boost/http/error.hpp>
+#include <boost/http/parser.hpp>
 #include <boost/asio/append.hpp>
 #include <boost/asio/compose.hpp>
 #include <boost/asio/coroutine.hpp>

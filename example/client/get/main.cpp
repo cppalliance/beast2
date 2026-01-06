@@ -14,9 +14,9 @@
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/core/ignore_unused.hpp>
 #include <boost/beast2.hpp>
-#include <boost/http_proto/request.hpp>
-#include <boost/http_proto/response_parser.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/request.hpp>
+#include <boost/http/response_parser.hpp>
+#include <boost/http/serializer.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/polystore.hpp>
 #include <boost/capy/zlib/inflate.hpp>
@@ -37,9 +37,9 @@ class session
     asio::ssl::context& ssl_ctx_;
     asio::ssl::stream<asio::ip::tcp::socket> stream_;
     asio::ip::tcp::resolver resolver_;
-    http_proto::serializer sr_;
-    http_proto::response_parser pr_;
-    http_proto::request req_;
+    http::serializer sr_;
+    http::response_parser pr_;
+    http::request req_;
     urls::url url_;
     std::string host_;
     std::string port_;
@@ -62,7 +62,7 @@ public:
     void
     run(urls::url_view url)
     {
-        using field = http_proto::field;
+        using field = http::field;
 
         // Set up an HTTP GET request
         if(!url.encoded_target().empty())
@@ -251,9 +251,9 @@ private:
 
     void
     on_redirect_response(
-        http_proto::response_base const& response)
+        http::response_base const& response)
     {
-        using field = http_proto::field;
+        using field = http::field;
 
         if(max_redirects_ == 0)
             return fail("Maximum redirects followed");
@@ -367,9 +367,9 @@ private:
 
     static
     bool
-    is_redirect(http_proto::status s) noexcept
+    is_redirect(http::status s) noexcept
     {
-        using status = http_proto::status;
+        using status = http::status;
         switch(s)
         {
         case status::moved_permanently:
@@ -390,14 +390,14 @@ private:
     static
     bool
     can_reuse_connection(
-        http_proto::response_base const& response,
+        http::response_base const& response,
         urls::url_view a,
         urls::url_view b) noexcept
     {
         if(a.encoded_origin() != b.encoded_origin())
             return false;
 
-        if(response.version() != http_proto::version::http_1_1)
+        if(response.version() != http::version::http_1_1)
             return false;
 
         if(response.metadata().connection.close)
@@ -407,7 +407,7 @@ private:
     }
 
     // Writes body to standard out
-    struct stdout_sink : http_proto::sink
+    struct stdout_sink : http::sink
     {
         results
         on_write(buffers::const_buffer cb, bool) override
@@ -446,7 +446,7 @@ main(int argc, char* argv[])
 
     // Install parser service
     {
-        http_proto::response_parser::config cfg;
+        http::response_parser::config cfg;
         cfg.body_limit = std::uint64_t(-1);
         cfg.min_buffer = 64 * 1024;
     #ifdef BOOST_CAPY_HAS_BROTLI
@@ -458,11 +458,11 @@ main(int argc, char* argv[])
         cfg.apply_gzip_decoder    = true;
         capy::zlib::install_inflate_service(capy_ctx);
     #endif
-        http_proto::install_parser_service(capy_ctx, cfg);
+        http::install_parser_service(capy_ctx, cfg);
     }
 
     // Install serializer service with default configuration
-    http_proto::install_serializer_service(capy_ctx, {});
+    http::install_serializer_service(capy_ctx, {});
 
     // Root certificates used for verification
     ssl_ctx.set_default_verify_paths();

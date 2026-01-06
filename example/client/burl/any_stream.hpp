@@ -18,19 +18,19 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/buffers/slice.hpp>
 #include <boost/core/span.hpp>
-#include <boost/http_proto/parser.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/parser.hpp>
+#include <boost/http/serializer.hpp>
 
 namespace asio       = boost::asio;
 namespace buffers    = boost::buffers;
-namespace http_proto = boost::http_proto;
+namespace http = boost::http;
 using error_code     = boost::system::error_code;
 
 class any_stream
 {
 public:
-    using const_buffers_type   = http_proto::serializer::const_buffers_type;
-    using mutable_buffers_type = http_proto::parser::mutable_buffers_type;
+    using const_buffers_type   = http::serializer::const_buffers_type;
+    using mutable_buffers_type = http::parser::mutable_buffers_type;
     using executor_type        = asio::any_io_executor;
 
     template<typename Stream>

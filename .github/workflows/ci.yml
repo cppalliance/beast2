@@ -694,7 +694,7 @@ jobs:
       - name: Clone Boost.Http.Proto
         uses: actions/checkout@v3
         with:
-          repository: cppalliance/http_proto
+          repository: cppalliance/http
           path: http-proto-root
           ref: develop
 
@@ -745,7 +745,7 @@ jobs:
             capy-root
           scan-modules-ignore: |
             beast2
-            http_proto
+            http
             buffers
             capy
 
@@ -822,7 +822,7 @@ jobs:
 
           # Patch boost-root with workspace module
           cp -r "$workspace_root"/http-io-root "libs/$module"
-          cp -r "$workspace_root"/http-proto-root libs/http_proto
+          cp -r "$workspace_root"/http-proto-root libs/http
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/capy-root libs/capy
 
@@ -846,7 +846,7 @@ jobs:
           cxxflags: ${{ (matrix.asan && '-fsanitize=pointer-subtract') || '' }}
           user-config: ${{ ((startsWith(matrix.runs-on, 'windows') || startsWith(matrix.runs-on, 'macOS')) && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
           stop-on-error: true
-          extra-args: "libs/beast2/example" # https://github.com/ashtum/cpp-actions/issues/23
+          extra-args: "libs/beast2/example"
 
       - name: Boost CMake Workflow
         uses: alandefreitas/cpp-actions/cmake-workflow@v1.9.0
@@ -1041,7 +1041,7 @@ jobs:
       - name: Clone Boost.Http.Proto
         uses: actions/checkout@v3
         with:
-          repository: cppalliance/http_proto
+          repository: cppalliance/http
           path: http-proto-root
           ref: develop
 
@@ -1073,7 +1073,7 @@ jobs:
             capy-root
           scan-modules-ignore: |
             beast2
-            http_proto
+            http
             buffers
             capy
 
@@ -1108,7 +1108,7 @@ jobs:
 
           # Patch boost-root with workspace module
           cp -r "$workspace_root"/http-io-root "libs/$module"
-          cp -r "$workspace_root"/http-proto-root libs/http_proto
+          cp -r "$workspace_root"/http-proto-root libs/http
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/capy-root libs/capy
 

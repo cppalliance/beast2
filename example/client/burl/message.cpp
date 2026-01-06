@@ -11,7 +11,7 @@
 #include "mime_type.hpp"
 
 #include <boost/capy/file.hpp>
-#include <boost/http_proto/field.hpp>
+#include <boost/http/field.hpp>
 #include <boost/system/system_error.hpp>
 
 #include <filesystem>
@@ -26,10 +26,10 @@ string_body::string_body(std::string body, std::string content_type)
 {
 }
 
-http_proto::method
+http::method
 string_body::method() const noexcept
 {
-    return http_proto::method::post;
+    return http::method::post;
 }
 
 core::string_view
@@ -57,10 +57,10 @@ file_body::file_body(std::string path)
 {
 }
 
-http_proto::method
+http::method
 file_body::method() const noexcept
 {
-    return http_proto::method::put;
+    return http::method::put;
 }
 
 core::string_view
@@ -75,7 +75,7 @@ file_body::content_length() const
     return fs::file_size(path_);
 }
 
-http_proto::file_source
+http::file_source
 file_body::body() const
 {
     boost::capy::file file;
@@ -84,12 +84,12 @@ file_body::body() const
     if(ec)
         throw system_error{ ec };
 
-    return http_proto::file_source{ std::move(file), content_length() };
+    return http::file_source{ std::move(file), content_length() };
 }
 
 // -----------------------------------------------------------------------------
 
-boost::http_proto::source::results
+boost::http::source::results
 stdin_body::source::on_read(buffers::mutable_buffer mb)
 {
     std::cin.read(static_cast<char*>(mb.data()), mb.size());
@@ -99,10 +99,10 @@ stdin_body::source::on_read(buffers::mutable_buffer mb)
              .finished = std::cin.eof() };
 }
 
-http_proto::method
+http::method
 stdin_body::method() const noexcept
 {
-    return http_proto::method::put;
+    return http::method::put;
 }
 
 core::string_view
@@ -126,12 +126,12 @@ stdin_body::body() const
 // -----------------------------------------------------------------------------
 
 void
-message::set_headers(http_proto::request& request) const
+message::set_headers(http::request& request) const
 {
     std::visit(
         [&](auto& f)
         {
-            using field = http_proto::field;
+            using field = http::field;
             if constexpr(!std::is_same_v<decltype(f), const std::monostate&>)
             {
                 request.set_method(f.method());
@@ -143,7 +143,7 @@ message::set_headers(http_proto::request& request) const
                 {
                     request.set_content_length(content_length.value());
                     if(content_length.value() >= 1024 * 1024 &&
-                       request.version() == http_proto::version::http_1_1)
+                       request.version() == http::version::http_1_1)
                         request.set(field::expect, "100-continue");
                 }
                 else
@@ -158,8 +158,8 @@ message::set_headers(http_proto::request& request) const
 
 void
 message::start_serializer(
-    http_proto::serializer& serializer,
-    http_proto::request& request) const
+    http::serializer& serializer,
+    http::request& request) const
 {
     std::visit(
         [&](auto& f)

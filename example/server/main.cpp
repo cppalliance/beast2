@@ -17,9 +17,9 @@
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
 #include <boost/capy/thread_pool.hpp>
-#include <boost/http_proto/request_parser.hpp>
-#include <boost/http_proto/serializer.hpp>
-#include <boost/http_proto/server/cors.hpp>
+#include <boost/http/request_parser.hpp>
+#include <boost/http/serializer.hpp>
+#include <boost/http/server/cors.hpp>
 #include <boost/capy/bcrypt.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/brotli/encode.hpp>
@@ -45,7 +45,7 @@ void install_services(capy::application& app)
     capy::zlib::install_inflate_service(app);
 #endif
 
-    // VFALCO These ugly incantations are needed for http_proto and will hopefully go away soon.
+    // VFALCO These ugly incantations are needed for http and will hopefully go away soon.
     http::install_parser_service(app,
         http::request_parser::config());
     http::install_serializer_service(app,

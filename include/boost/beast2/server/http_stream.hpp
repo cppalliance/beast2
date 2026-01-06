@@ -22,11 +22,11 @@
 #include <boost/beast2/write.hpp>
 #include <boost/beast2/detail/except.hpp>
 #include <boost/capy/application.hpp>
-#include <boost/http_proto/request_parser.hpp>
-#include <boost/http_proto/response.hpp>
-#include <boost/http_proto/serializer.hpp>
-#include <boost/http_proto/string_body.hpp>
-#include <boost/http_proto/server/basic_router.hpp>
+#include <boost/http/request_parser.hpp>
+#include <boost/http/response.hpp>
+#include <boost/http/serializer.hpp>
+#include <boost/http/string_body.hpp>
+#include <boost/http/server/basic_router.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/asio/prepend.hpp>
 

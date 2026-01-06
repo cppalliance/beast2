@@ -30,7 +30,7 @@ public:
 
     system::error_code
     operator()(
-        http_proto::route_params& p) const
+        http::route_params& p) const
     {
         auto const v = ls_.get_sections();
         std::string s;
@@ -71,10 +71,10 @@ public:
         format_to(s, "</body>\n");
         format_to(s, "</html>\n");
 
-        p.status(http_proto::status::ok);
-        p.res.set(http_proto::field::content_type, "text/html; charset=UTF-8");
+        p.status(http::status::ok);
+        p.res.set(http::field::content_type, "text/html; charset=UTF-8");
         p.set_body(std::move(s));
-        return http_proto::route::send;
+        return http::route::send;
     }
 
 private:
@@ -96,12 +96,12 @@ public:
 
     system::error_code
     operator()(
-        http_proto::route_params& p) const
+        http::route_params& p) const
     {
-        p.status(http_proto::status::ok);
-        p.res.set(http_proto::field::content_type, "plain/text; charset=UTF-8");
+        p.status(http::status::ok);
+        p.res.set(http::field::content_type, "plain/text; charset=UTF-8");
         p.set_body("submit");
-        return http_proto::route::send;
+        return http::route::send;
     }
 
 private:
@@ -117,8 +117,8 @@ serve_log_admin(
     capy::polystore& ps)
 {
     router r;
-    r.add(http_proto::method::get, "/", serve_log_page(ps));
-    r.add(http_proto::method::get, "/submit", handle_submit(ps));
+    r.add(http::method::get, "/", serve_log_page(ps));
+    r.add(http::method::get, "/submit", handle_submit(ps));
     return r;
 }
 

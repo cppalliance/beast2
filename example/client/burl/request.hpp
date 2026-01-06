@@ -16,8 +16,8 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/beast2/read.hpp>
 #include <boost/beast2/write.hpp>
-#include <boost/http_proto/response_parser.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/response_parser.hpp>
+#include <boost/http/serializer.hpp>
 
 #include <chrono>
 #include <memory>
@@ -25,15 +25,15 @@
 namespace asio       = boost::asio;
 namespace ch         = std::chrono;
 namespace beast2     = boost::beast2;
-namespace http_proto = boost::http_proto;
+namespace http = boost::http;
 using error_code     = boost::system::error_code;
 
 template<class AsyncReadStream>
 class async_request_op
 {
     AsyncReadStream& stream_;
-    http_proto::serializer& serializer_;
-    http_proto::response_parser& parser_;
+    http::serializer& serializer_;
+    http::response_parser& parser_;
     ch::steady_clock::duration exp100_timeout_;
     asio::coroutine c;
 
@@ -52,8 +52,8 @@ class async_request_op
 public:
     async_request_op(
         AsyncReadStream& stream,
-        http_proto::serializer& serializer,
-        http_proto::response_parser& parser,
+        http::serializer& serializer,
+        http::response_parser& parser,
         ch::steady_clock::duration exp100_timeout)
         : stream_{ stream }
         , serializer_{ serializer }
@@ -83,7 +83,7 @@ public:
                 return self.complete(ec);
             }
 
-            if(ec != http_proto::error::expect_100_continue)
+            if(ec != http::error::expect_100_continue)
                 return self.complete(ec);
 
             // TODO: use associated allocator
@@ -115,7 +115,7 @@ public:
                             exp100->timer.cancel();
                             if(ec ||
                                parser.get().status() !=
-                                   http_proto::status::continue_)
+                                   http::status::continue_)
                             {
                                 exp100->state = exp100::cancelled;
                             }
@@ -156,8 +156,8 @@ template<
 auto
 async_request(
     AsyncReadStream& stream,
-    http_proto::serializer& serializer,
-    http_proto::response_parser& parser,
+    http::serializer& serializer,
+    http::response_parser& parser,
     ch::steady_clock::duration expect100_timeout,
     CompletionToken&& token = CompletionToken{})
 {
