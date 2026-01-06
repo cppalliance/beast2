@@ -47,7 +47,7 @@ pushd !BOOST_ROOT!\libs
 git clone https://github.com/cppalliance/capy -b !BOOST_BRANCH! --depth 1
 popd
 pushd !BOOST_ROOT!\libs
-git clone https://github.com/cppalliance/http_proto -b !BOOST_BRANCH! --depth 1
+git clone https://github.com/cppalliance/http -b !BOOST_BRANCH! --depth 1
 popd
 
 echo '==================================> COMPILE'

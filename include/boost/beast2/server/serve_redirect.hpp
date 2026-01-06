@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_SERVE_REDIRECT_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http_proto/server/route_handler.hpp>
+#include <boost/http/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {

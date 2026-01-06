@@ -13,7 +13,7 @@
 #include "message.hpp"
 
 #include <boost/asio/ssl/context.hpp>
-#include <boost/http_proto/fields.hpp>
+#include <boost/http/fields.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/url/url.hpp>
 
@@ -26,7 +26,7 @@
 namespace asio       = boost::asio;
 namespace ch         = std::chrono;
 namespace fs         = std::filesystem;
-namespace http_proto = boost::http_proto;
+namespace http = boost::http;
 namespace urls       = boost::urls;
 
 struct operation_config
@@ -80,7 +80,7 @@ struct operation_config
     bool rm_partial   = false;
     bool use_httpget  = false;
     boost::optional<std::string> request_target;
-    http_proto::fields headers;
+    http::fields headers;
     std::vector<std::string> omitheaders;
     bool show_headers        = false;
     bool cookiesession       = false;

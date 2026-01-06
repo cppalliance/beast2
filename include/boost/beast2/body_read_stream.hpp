@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/asio/async_result.hpp>
-#include <boost/http_proto/parser.hpp>
+#include <boost/http/parser.hpp>
 #include <boost/system/error_code.hpp>
 
 namespace boost {

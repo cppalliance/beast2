@@ -79,7 +79,7 @@ struct read_source
             if(ec_.failed())
                 ec = ec_;
             else
-                ec = http_proto::error::end_of_stream;
+                ec = http::error::end_of_stream;
         }
         else
         {
@@ -133,7 +133,7 @@ struct body_source_test
             {
                 auto nread = b.read(buf, n, ec);
                 s.append(buf, nread);
-                if(ec == http_proto::error::end_of_stream)
+                if(ec == http::error::end_of_stream)
                 {
                     BOOST_TEST(! fec.failed());
                     BOOST_TEST_EQ(s, s0);
@@ -238,7 +238,7 @@ struct body_source_test
     {
         core::string_view s1("Hello, world!");
         system::error_code fec =
-            http_proto::error::bad_connection;
+            http::error::bad_connection;
 
         body_source b1((read_source(s1, fec)));
         BOOST_TEST_EQ(b1.has_size(), false);

@@ -64,9 +64,9 @@ namespace beast2 {
 
 } // beast2
 
-namespace http_proto {}
+namespace http {}
 namespace beast2 {
-namespace http = http_proto;
+namespace http = http;
 }
 
 } // boost

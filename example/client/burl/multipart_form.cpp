@@ -84,10 +84,10 @@ multipart_form::append(
           serialize_headers(headers) });
 }
 
-http_proto::method
+http::method
 multipart_form::method() const noexcept
 {
-    return http_proto::method::post;
+    return http::method::post;
 }
 
 std::string

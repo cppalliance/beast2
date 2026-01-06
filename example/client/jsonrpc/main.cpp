@@ -151,7 +151,7 @@ main(int, char*[])
 
         // Install parser service
         {
-            http_proto::response_parser::config cfg;
+            http::response_parser::config cfg;
             cfg.min_buffer = 64 * 1024;
         #ifdef BOOST_CAPY_HAS_BROTLI
             cfg.apply_brotli_decoder  = true;
@@ -162,11 +162,11 @@ main(int, char*[])
             cfg.apply_gzip_decoder    = true;
             capy::zlib::install_inflate_service(capy_ctx);
         #endif
-            http_proto::install_parser_service(capy_ctx, cfg);
+            http::install_parser_service(capy_ctx, cfg);
         }
 
         // Install serializer service with default configuration
-        http_proto::install_serializer_service(capy_ctx, {});
+        http::install_serializer_service(capy_ctx, {});
 
         // Root certificates used for verification
         ssl_ctx.set_default_verify_paths();

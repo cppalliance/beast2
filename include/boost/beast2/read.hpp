@@ -12,8 +12,8 @@
 #define BOOST_BEAST2_READ_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http_proto/request_parser.hpp>
-#include <boost/http_proto/response_parser.hpp>
+#include <boost/http/request_parser.hpp>
+#include <boost/http/response_parser.hpp>
 #include <boost/asio/async_result.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/result.hpp>

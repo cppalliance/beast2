@@ -109,7 +109,7 @@ struct ctx_base
 
     ctx_base()
     {
-        http_proto::install_parser_service(capy_ctx_, {});
+        http::install_parser_service(capy_ctx_, {});
     }
 };
 
@@ -131,7 +131,7 @@ struct single_tester : public ctx_base
     boost::asio::io_context ioc_;
 
     test::stream ts_;
-    http_proto::response_parser pr_;
+    http::response_parser pr_;
 
     // Create a destination buffer
     std::string s_;
@@ -353,7 +353,7 @@ struct single_tester : public ctx_base
         // Ensure we get an error by making the body limit too small
         pr_.set_body_limit(2);
 
-        async_read_some(1024, http_proto::error::body_too_large, 0);
+        async_read_some(1024, http::error::body_too_large, 0);
 
         test::run(ioc_);
     }

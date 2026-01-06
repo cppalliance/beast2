@@ -19,9 +19,9 @@
 #include <boost/asio/compose.hpp>
 #include <boost/asio/deferred.hpp>
 #include <boost/asio/ssl/context.hpp>
-#include <boost/http_proto/request.hpp>
-#include <boost/http_proto/response_parser.hpp>
-#include <boost/http_proto/serializer.hpp>
+#include <boost/http/request.hpp>
+#include <boost/http/response_parser.hpp>
+#include <boost/http/serializer.hpp>
 #include <boost/json/serializer.hpp>
 #include <boost/json/stream_parser.hpp>
 #include <boost/json/value_to.hpp>
@@ -35,9 +35,9 @@ class client
 {
     std::unique_ptr<any_stream> stream_;
     boost::urls::url endpoint_;
-    boost::http_proto::serializer sr_;
-    boost::http_proto::response_parser pr_;
-    boost::http_proto::request req_;
+    boost::http::serializer sr_;
+    boost::http::response_parser pr_;
+    boost::http::request req_;
     boost::json::stream_parser jpr_;
     boost::json::serializer jsr_;
     std::uint64_t id_ = 0;
@@ -104,7 +104,7 @@ public:
         This function can be used to customize HTTP headers, for
         example, to add the required credentials.
     */
-    boost::http_proto::fields_base&
+    boost::http::fields_base&
     http_fields()
     {
         return req_;

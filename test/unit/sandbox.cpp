@@ -14,14 +14,14 @@
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/http_proto.hpp>
+#include <boost/http.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <chrono>
 #include <memory>
 #include <sstream>
 
 namespace boost {
-namespace http_proto {
+namespace http {
 
 static std::size_t constexpr buffer_bytes = 8 * 1024 * 1024;
 static std::size_t constexpr payload_size = buffer_bytes * 10;
@@ -223,7 +223,7 @@ TEST_SUITE(
     sandbox_test,
     "boost.beast2.sandbox");
 
-} // http_proto
+} // http
 } // boost
 
 #endif

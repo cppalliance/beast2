@@ -14,8 +14,8 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/core/detail/string_view.hpp>
-#include <boost/http_proto/request.hpp>
-#include <boost/http_proto/response_parser.hpp>
+#include <boost/http/request.hpp>
+#include <boost/http/response_parser.hpp>
 #include <boost/capy/polystore.hpp>
 #include <boost/url/url_view.hpp>
 
@@ -196,7 +196,7 @@ struct worker
         boost::asio::ip::tcp, executor_type>;
 
     socket_type sock;
-    boost::http_proto::response_parser pr;
+    boost::http::response_parser pr;
     boost::urls::url_view url;
 
     explicit
@@ -246,12 +246,12 @@ struct worker
     void
     do_request()
     {
-        boost::http_proto::request req;
+        boost::http::request req;
         auto path = url.encoded_path();
         req.set_start_line(
-            boost::http_proto::method::get,
+            boost::http::method::get,
             path.empty() ? "/" : path,
-            boost::http_proto::version::http_1_1);
+            boost::http::version::http_1_1);
 
         do_shutdown();
     }
@@ -277,8 +277,8 @@ main(int argc, char* argv[])
     (void)argv;
 
     boost::capy::polystore ctx;
-    boost::http_proto::parser::config_base cfg;
-    boost::http_proto::install_parser_service(ctx, cfg);
+    boost::http::parser::config_base cfg;
+    boost::http::install_parser_service(ctx, cfg);
 
     boost::asio::io_context ioc;
 

@@ -17,7 +17,7 @@
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/beast2.hpp>
-#include <boost/http_proto.hpp>
+#include <boost/http.hpp>
 #include <boost/url.hpp>
 
 namespace core     = boost::core;
@@ -166,8 +166,8 @@ connect_http_proxy(
     // Connect to the proxy server
     co_await asio::async_connect(stream, rresults);
 
-    using field    = http_proto::field;
-    auto request   = http_proto::request{};
+    using field    = http::field;
+    auto request   = http::request{};
     auto host_port = [&]()
     {
         auto rs = url.encoded_host().decode();
@@ -176,7 +176,7 @@ connect_http_proxy(
         return rs;
     }();
 
-    request.set_method(http_proto::method::connect);
+    request.set_method(http::method::connect);
     request.set_target(host_port);
     request.set(field::host, host_port);
     request.set(field::proxy_connection, "keep-alive");
@@ -190,8 +190,8 @@ connect_http_proxy(
         request.set(field::proxy_authorization, basic_auth);
     }
 
-    auto serializer = http_proto::serializer{ capy_ctx };
-    auto parser     = http_proto::response_parser{ capy_ctx };
+    auto serializer = http::serializer{ capy_ctx };
+    auto parser     = http::response_parser{ capy_ctx };
 
     serializer.start(request);
     co_await beast2::async_write(stream, serializer);
@@ -200,7 +200,7 @@ connect_http_proxy(
     parser.start();
     co_await beast2::async_read_header(stream, parser);
 
-    if(parser.get().status() != http_proto::status::ok)
+    if(parser.get().status() != http::status::ok)
         throw std::runtime_error{ "Proxy server rejected the connection" };
 }
 

@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/error.hpp>
-#include <boost/http_proto/server/route_handler.hpp>
+#include <boost/http/server/route_handler.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <memory>
@@ -39,19 +39,19 @@ public:
 
     system::error_code
     operator()(
-        http_proto::route_params& rp) const
+        http::route_params& rp) const
     {
         return rp.suspend(
-            [&](http_proto::resumer resume)
+            [&](http::resumer resume)
             {
                 asio::post(*tp_,
                     [&, resume]()
                     {
                         // Simulate some asynchronous work
                         std::this_thread::sleep_for(std::chrono::seconds(1));
-                        rp.status(http_proto::status::ok);
+                        rp.status(http::status::ok);
                         rp.set_body("Hello from serve_detached!\n");
-                        resume(http_proto::route::send);
+                        resume(http::route::send);
                         // resume( res.send("Hello from serve_detached!\n") );
                     });
             });

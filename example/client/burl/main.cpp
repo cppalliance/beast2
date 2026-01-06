@@ -30,7 +30,7 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/buffers.hpp>
 #include <boost/beast2.hpp>
-#include <boost/http_proto.hpp>
+#include <boost/http.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/zlib/inflate.hpp>
 #include <boost/scope/scope_exit.hpp>
@@ -59,7 +59,7 @@ constexpr bool capy_has_brotli = false;
 void
 set_target(
     const operation_config& oc,
-    http_proto::request& request,
+    http::request& request,
     const urls::url_view& url)
 {
     if(oc.request_target)
@@ -78,21 +78,21 @@ struct is_redirect_result
 };
 
 is_redirect_result
-is_redirect(const operation_config& oc, http_proto::status status) noexcept
+is_redirect(const operation_config& oc, http::status status) noexcept
 {
     // The specifications do not intend for 301 and 302
     // redirects to change the HTTP method, but most
     // user agents do change the method in practice.
     switch(status)
     {
-    case http_proto::status::moved_permanently:
+    case http::status::moved_permanently:
         return { true, !oc.post301 };
-    case http_proto::status::found:
+    case http::status::found:
         return { true, !oc.post302 };
-    case http_proto::status::see_other:
+    case http::status::see_other:
         return { true, !oc.post303 };
-    case http_proto::status::temporary_redirect:
-    case http_proto::status::permanent_redirect:
+    case http::status::temporary_redirect:
+    case http::status::permanent_redirect:
         return { true, false };
     default:
         return { false, false };
@@ -100,16 +100,16 @@ is_redirect(const operation_config& oc, http_proto::status status) noexcept
 }
 
 bool
-is_transient_error(http_proto::status status) noexcept
+is_transient_error(http::status status) noexcept
 {
     switch(status)
     {
-    case http_proto::status::request_timeout:
-    case http_proto::status::too_many_requests:
-    case http_proto::status::internal_server_error:
-    case http_proto::status::bad_gateway:
-    case http_proto::status::service_unavailable:
-    case http_proto::status::gateway_timeout:
+    case http::status::request_timeout:
+    case http::status::too_many_requests:
+    case http::status::internal_server_error:
+    case http::status::bad_gateway:
+    case http::status::service_unavailable:
+    case http::status::gateway_timeout:
         return true;
     default:
         return false;
@@ -118,14 +118,14 @@ is_transient_error(http_proto::status status) noexcept
 
 bool
 can_reuse_connection(
-    http_proto::response_base const& response,
+    http::response_base const& response,
     const urls::url_view& a,
     const urls::url_view& b) noexcept
 {
     if(a.encoded_origin() != b.encoded_origin())
         return false;
 
-    if(response.version() != http_proto::version::http_1_1)
+    if(response.version() != http::version::http_1_1)
         return false;
 
     if(response.metadata().connection.close)
@@ -137,28 +137,28 @@ can_reuse_connection(
 bool
 should_ignore_body(
     const operation_config& oc,
-    http_proto::response_base const& response) noexcept
+    http::response_base const& response) noexcept
 {
-    if(oc.resume_from && !response.count(http_proto::field::content_range))
+    if(oc.resume_from && !response.count(http::field::content_range))
         return true;
 
     return false;
 }
 
 boost::optional<std::uint64_t>
-body_size(http_proto::response_base const& response)
+body_size(http::response_base const& response)
 {
-    if(response.payload() == http_proto::payload::size)
+    if(response.payload() == http::payload::size)
         return response.payload_size();
     return boost::none;
 }
 
 urls::url
 redirect_url(
-    http_proto::response_base const& response,
+    http::response_base const& response,
     const urls::url_view& referer)
 {
-    auto it = response.find(http_proto::field::location);
+    auto it = response.find(http::field::location);
     if(it != response.end())
     {
         auto rs = urls::parse_uri_reference(it->value);
@@ -225,21 +225,21 @@ report_progress(progress_meter& pm)
     }
 }
 
-http_proto::request
+http::request
 create_request(
     const operation_config& oc,
     const message& msg,
     const urls::url_view& url)
 {
-    using field   = http_proto::field;
-    using method  = http_proto::method;
-    using version = http_proto::version;
+    using field   = http::field;
+    using method  = http::method;
+    using version = http::version;
 
     if(oc.disallow_username_in_url && url.has_userinfo())
         throw std::runtime_error(
             "Credentials was passed in the URL when prohibited");
 
-    auto request = http_proto::request{};
+    auto request = http::request{};
 
     request.set_method(oc.no_body ? method::head : method::get);
 
@@ -308,7 +308,7 @@ create_request(
     return request;
 }
 
-class sink : public http_proto::sink
+class sink : public http::sink
 {
     progress_meter* pm_;
     any_ostream* os_;
@@ -337,7 +337,7 @@ public:
     }
 };
 
-asio::awaitable<http_proto::status>
+asio::awaitable<http::status>
 perform_request(
     operation_config oc,
     boost::optional<any_ostream>& header_output,
@@ -348,11 +348,11 @@ perform_request(
     message msg,
     request_opt request_opt)
 {
-    using field     = http_proto::field;
+    using field     = http::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto parser     = http_proto::response_parser{ capy_ctx };
-    auto serializer = http_proto::serializer{ capy_ctx };
+    auto parser     = http::response_parser{ capy_ctx };
+    auto serializer = http::serializer{ capy_ctx };
 
     urls::url url = [&]()
     {
@@ -440,7 +440,7 @@ perform_request(
     }();
 
     if(oc.skip_existing && fs::exists(output_path))
-        co_return http_proto::status::ok;
+        co_return http::status::ok;
 
     auto output     = any_ostream{ output_path, !!oc.resume_from };
     auto request    = create_request(oc, msg, url);
@@ -474,7 +474,7 @@ perform_request(
             stream.write_limit(oc.sendpersecond.value());
     };
 
-    auto stream_headers = [&](http_proto::response_base const& response)
+    auto stream_headers = [&](http::response_base const& response)
     {
         if(oc.show_headers)
             output << response.buffer();
@@ -518,7 +518,7 @@ perform_request(
         set_cookies(url, trusted);
         msg.start_serializer(serializer, request);
 
-        if(request.method() == http_proto::method::head)
+        if(request.method() == http::method::head)
             parser.start_head_response();
         else
             parser.start();
@@ -562,9 +562,9 @@ perform_request(
         }
 
         // Change the method according to RFC 9110, Section 15.4.4.
-        if(need_method_change && request.method() != http_proto::method::head)
+        if(need_method_change && request.method() != http::method::head)
         {
-            request.set_method(http_proto::method::get);
+            request.set_method(http::method::get);
             request.erase(field::content_length);
             request.erase(field::content_encoding);
             request.erase(field::content_type);
@@ -618,7 +618,7 @@ perform_request(
     }
 
     if(oc.resume_from &&
-       parser.get().status() != http_proto::status::range_not_satisfiable &&
+       parser.get().status() != http::status::range_not_satisfiable &&
        parser.get().count(field::content_range) == 0)
     {
         throw std::runtime_error(
@@ -663,7 +663,7 @@ perform_request(
 asio::awaitable<void>
 retry(
     const operation_config& oc,
-    std::function<asio::awaitable<http_proto::status>()> request_task)
+    std::function<asio::awaitable<http::status>()> request_task)
 {
     auto executor = co_await asio::this_coro::executor;
     auto timer    = asio::steady_timer{ executor };
@@ -771,7 +771,7 @@ co_main(int argc, char* argv[])
 
     // parser service
     {
-        http_proto::response_parser::config cfg;
+        http::response_parser::config cfg;
         cfg.body_limit = oc.max_filesize;
         cfg.min_buffer = 1024 * 1024;
         if constexpr(capy_has_brotli)
@@ -785,14 +785,14 @@ co_main(int argc, char* argv[])
             cfg.apply_gzip_decoder    = true;
             capy::zlib::install_inflate_service(capy_ctx);
         }
-        http_proto::install_parser_service(capy_ctx, cfg);
+        http::install_parser_service(capy_ctx, cfg);
     }
 
     // serializer service
     {
-        http_proto::serializer::config cfg;
+        http::serializer::config cfg;
         cfg.payload_buffer = 1024 * 1024;
-        http_proto::install_serializer_service(capy_ctx, cfg);
+        http::install_serializer_service(capy_ctx, cfg);
     }
 
     if(!oc.headerfile.empty())
