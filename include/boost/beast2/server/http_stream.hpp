@@ -424,8 +424,6 @@ do_suspend() ->
     BOOST_ASSERT(! pwg_);
     pwg_.reset(new work_guard(stream_.get_executor()));
 
-    // VFALCO cancel timer
-
     return http::resumer(*this);
 }
 

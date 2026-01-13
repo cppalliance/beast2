@@ -7,7 +7,6 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include "certificate.hpp"
 #include "serve_detached.hpp"
 #include "serve_log_admin.hpp"
 #include <boost/beast2/asio_io_context.hpp>

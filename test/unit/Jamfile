@@ -8,14 +8,6 @@
 #
 
 import testing ;
-import ac ;
-
-using openssl ;
-
-lib advapi32 ;
-lib crypt32 ;
-lib gdi32 ;
-lib user32 ;
 
 project
     : requirements
@@ -33,20 +25,7 @@ project
       <toolset>clang-win:<cxxflags>"-Wno-unused-private-field"
     ;
 
-for local f in [ glob-tree-ex . : *.cpp : ssl_*.cpp ]
+for local f in [ glob-tree-ex . : *.cpp ]
 {
     run $(f) ;
-}
-
-for local f in [ glob-tree-ex . : ssl_*.cpp ]
-{
-    run $(f)
-        : requirements
-          [ ac.check-library /openssl//ssl : <library>/openssl//ssl/<link>shared : <build>no ]
-          [ ac.check-library /openssl//crypto : <library>/openssl//crypto/<link>shared : <build>no ]
-          <target-os>windows:<library>advapi32
-          <target-os>windows:<library>crypt32
-          <target-os>windows:<library>gdi32
-          <target-os>windows:<library>user32
-        ;
 }

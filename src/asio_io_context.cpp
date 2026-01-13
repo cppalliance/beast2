@@ -11,7 +11,6 @@
 #include <boost/beast2/server/call_mf.hpp>
 #include <boost/capy/application.hpp>
 #include <boost/asio/executor_work_guard.hpp>
-#include <boost/asio/signal_set.hpp>
 #include <thread>
 #include <vector>
 
@@ -38,7 +37,6 @@ public:
         : app_(app)
         , num_threads_(num_threads)
         , ioc_(num_threads)
-        , sigs_(ioc_.get_executor(), SIGINT, SIGTERM)
         , work_(ioc_.get_executor())
     {
         if(num_threads > 1)
@@ -69,11 +67,6 @@ public:
 
     void start() override
     {
-        // Capture SIGINT and SIGTERM to
-        // perform a clean shutdown
-        sigs_.async_wait(call_mf(
-            &asio_io_context_impl::on_signal, this));
-
         for(auto& t : vt_)
         {
             t = std::thread(
@@ -87,25 +80,13 @@ public:
 
     void stop() override
     {
-        system::error_code ec;
-        sigs_.cancel(ec); // VFALCO should we use the 0-arg overload?
         work_.reset();
     }
 
 private:
-    void
-    on_signal(
-        system::error_code const& ec, int)
-    {
-        if(ec == asio::error::operation_aborted)
-            return;
-        app_.stop();
-    }
-
     capy::application& app_;
     int num_threads_;
     asio::io_context ioc_;
-    asio::signal_set sigs_;
     asio::executor_work_guard<
         asio::io_context::executor_type> work_;
     std::vector<std::thread> vt_;
