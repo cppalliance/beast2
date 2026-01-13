@@ -8,5 +8,5 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
-add_subdirectory(client)
+# add_subdirectory(client) # disabled for now
 add_subdirectory(server)

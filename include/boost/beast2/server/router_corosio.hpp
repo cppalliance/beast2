@@ -7,13 +7,21 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/server/workers.hpp>
+#ifndef BOOST_BEAST2_SERVER_ROUTER_COROSIO_HPP
+#define BOOST_BEAST2_SERVER_ROUTER_COROSIO_HPP
+
+#include <boost/beast2/detail/config.hpp>
+#include <boost/http/server/basic_router.hpp>
+#include <boost/beast2/server/route_handler_corosio.hpp>
 
 namespace boost {
 namespace beast2 {
 
-workers_base::
-~workers_base() = default;
+/** The Corosio-aware router type
+*/
+using router_corosio = http::basic_router<corosio_route_params>;
 
 } // beast2
 } // boost
+
+#endif

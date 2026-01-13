@@ -15,9 +15,6 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
 
 add_executable(beast2_server_example ${PFILES})
 
-target_compile_definitions(beast2_server_example
-    PRIVATE BOOST_ASIO_NO_DEPRECATED)
-
 set_property(TARGET beast2_server_example
     PROPERTY FOLDER "examples")
 

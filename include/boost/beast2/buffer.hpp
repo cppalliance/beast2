@@ -11,12 +11,17 @@
 #define BOOST_BEAST2_BUFFER_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/asio/buffer.hpp>
+#include <boost/capy/buffers.hpp>
 #include <cstdlib>
 #include <iterator>
 
 namespace boost {
 namespace beast2 {
+
+// Re-export buffer types from capy
+using capy::mutable_buffer;
+using capy::const_buffer;
+using capy::buffer_size;
 
 } // beast2
 } // boost

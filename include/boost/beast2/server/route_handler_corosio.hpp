@@ -7,38 +7,33 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_ROUTE_HANDLER_ASIO_HPP
-#define BOOST_BEAST2_SERVER_ROUTE_HANDLER_ASIO_HPP
+#ifndef BOOST_BEAST2_SERVER_ROUTE_HANDLER_COROSIO_HPP
+#define BOOST_BEAST2_SERVER_ROUTE_HANDLER_COROSIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/http/server/route_handler.hpp>
-#include <type_traits>
+#include <boost/corosio/socket.hpp>
 
 namespace boost {
 namespace beast2 {
 
-/** Route parameters object for Asio HTTP route handlers
+/** Route parameters object for Corosio HTTP route handlers
 */
-template<class AsyncStream>
-class asio_route_params
+class corosio_route_params
     : public http::route_params
 {
 public:
-    using stream_type = typename std::decay<AsyncStream>::type;
+    using stream_type = corosio::socket;
 
-    AsyncStream stream;
+    corosio::socket& stream;
 
-    template<class... Args>
     explicit
-    asio_route_params(
-        Args&&... args)
-        : stream(std::forward<Args>(args)...)
+    corosio_route_params(
+        corosio::socket& s)
+        : stream(s)
     {
     }
 
-private:
-public:
-    // VFALCO This needs to be private
     void do_finish()
     {
         if(finish_)
@@ -48,7 +43,6 @@ public:
             f();
         }
     }
-
 };
 
 } // beast2
