@@ -16,13 +16,13 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/immediate.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/buffers/slice.hpp>
+#include <boost/capy/buffers/slice.hpp>
 #include <boost/core/span.hpp>
 #include <boost/http/parser.hpp>
 #include <boost/http/serializer.hpp>
 
 namespace asio       = boost::asio;
-namespace buffers    = boost::buffers;
+namespace capy       = boost::capy;
 namespace http = boost::http;
 using error_code     = boost::system::error_code;
 
@@ -56,7 +56,7 @@ public:
 
             virtual void
             async_write_some(
-                const buffers::slice_of<boost::span<buffers::const_buffer const>>& buffers,
+                const capy::slice_of<boost::span<capy::const_buffer const>>& buffers,
                 asio::any_completion_handler<void(error_code, std::size_t)>
                     handler) override
             {
@@ -65,7 +65,7 @@ public:
 
             virtual void
             async_read_some(
-                const buffers::slice_of<boost::span<buffers::mutable_buffer const>>& buffers,
+                const capy::slice_of<boost::span<capy::mutable_buffer const>>& buffers,
                 asio::any_completion_handler<void(error_code, std::size_t)>
                     handler) override
             {
@@ -153,7 +153,7 @@ public:
                         }
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_write_some(
-                            buffers::prefix(buffers, wr_remain_),
+                            capy::prefix(buffers, wr_remain_),
                             std::move(self));
                         wr_remain_ -= n;
                         self.complete(ec, n);
@@ -191,7 +191,7 @@ public:
                         }
                         BOOST_ASIO_CORO_YIELD
                         stream_->async_read_some(
-                            buffers::prefix(buffers, rd_remain_),
+                            capy::prefix(buffers, rd_remain_),
                             std::move(self));
                         rd_remain_ -= n;
                         self.complete(ec, n);
@@ -226,12 +226,12 @@ private:
 
         virtual void
         async_write_some(
-            const buffers::slice_of<boost::span<buffers::const_buffer const>>&,
+            const capy::slice_of<boost::span<capy::const_buffer const>>&,
             asio::any_completion_handler<void(error_code, std::size_t)>) = 0;
 
         virtual void
         async_read_some(
-            const buffers::slice_of<boost::span<buffers::mutable_buffer const>>&,
+            const capy::slice_of<boost::span<capy::mutable_buffer const>>&,
             asio::any_completion_handler<void(error_code, std::size_t)>) = 0;
 
         virtual void async_shutdown(

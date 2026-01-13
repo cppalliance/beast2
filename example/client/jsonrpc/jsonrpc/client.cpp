@@ -84,7 +84,7 @@ public:
 
     void
     async_write_some(
-        const boost::span<boost::buffers::const_buffer const>& buffers,
+        const boost::span<boost::capy::const_buffer const>& buffers,
         asio::any_completion_handler<void(system::error_code, std::size_t)>
             handler) override
     {
@@ -96,7 +96,7 @@ public:
 
     void
     async_read_some(
-        const boost::span<boost::buffers::mutable_buffer const>& buffers,
+        const boost::span<boost::capy::mutable_buffer const>& buffers,
         asio::any_completion_handler<void(system::error_code, std::size_t)>
             handler) override
     {
@@ -236,7 +236,7 @@ public:
 private:
     results
     on_write(
-        buffers::const_buffer b,
+        capy::const_buffer b,
         bool more) override
     {
         results ret;
@@ -266,7 +266,7 @@ public:
 private:
     results
     on_read(
-        buffers::mutable_buffer b) override
+        capy::mutable_buffer b) override
     {
         results ret;
         ret.bytes = jsr_.read(

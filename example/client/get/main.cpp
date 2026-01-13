@@ -410,7 +410,7 @@ private:
     struct stdout_sink : http::sink
     {
         results
-        on_write(buffers::const_buffer cb, bool) override
+        on_write(capy::const_buffer cb, bool) override
         {
             std::cout.write(
                 static_cast<const char*>(cb.data()), cb.size());

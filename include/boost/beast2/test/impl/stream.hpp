@@ -21,7 +21,7 @@
 #include <boost/asio/executor.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/post.hpp>
-#include <boost/buffers/copy.hpp>
+#include <boost/capy/buffers/copy.hpp>
 
 #include <mutex>
 
@@ -159,7 +159,7 @@ class basic_stream<Executor>::read_op : public detail::stream_op_base
                 BOOST_ASSERT(!sp->rop);
                 if(sp->b.size() > 0)
                 {
-                    bytes_transferred = buffers::copy(
+                    bytes_transferred = capy::copy(
                         base::b_,
                         sp->b.data(),
                         sp->read_max);
@@ -167,7 +167,7 @@ class basic_stream<Executor>::read_op : public detail::stream_op_base
                     sp->nread_bytes += bytes_transferred;
                 }
                 else if(
-                    buffers::size(
+                    capy::buffer_size(
                         base::b_) > 0)
                 {
                     ec = asio::error::eof;
@@ -245,10 +245,10 @@ class basic_stream<Executor>::write_op : public detail::stream_op_base
             {
                 // copy buffers
                 std::size_t n = std::min<std::size_t>(
-                    buffers::size(base::b_), isp->write_max);
+                    capy::buffer_size(base::b_), isp->write_max);
                 {
                     std::lock_guard<std::mutex> lock(osp->m);
-                    n = buffers::copy(osp->b.prepare(n), base::b_);
+                    n = capy::copy(osp->b.prepare(n), base::b_);
                     osp->b.commit(n);
                     osp->nwrite_bytes += n;
                     osp->notify_read();
@@ -331,7 +331,7 @@ struct basic_stream<Executor>::run_read_op
             std::unique_ptr<detail::stream_op_base>{ new read_op<
                 typename std::decay<ReadHandler>::type,
                 MutableBufferSequence>(std::move(h), in_, out, buffers) },
-            buffers::size(buffers));
+            capy::buffer_size(buffers));
     }
 };
 
@@ -367,7 +367,7 @@ struct basic_stream<Executor>::run_write_op
             std::unique_ptr<detail::stream_op_base>{ new write_op<
                 typename std::decay<WriteHandler>::type,
                 ConstBufferSequence>(std::move(h), in_, out, buffers) },
-            buffers::size(buffers));
+            capy::buffer_size(buffers));
     }
 };
 
@@ -464,7 +464,7 @@ basic_stream<Executor>::initiate_read(
     }
 
     // A request to read 0 bytes from a stream is a no-op.
-    if(buf_size == 0 || buffers::size(in->b.data()) > 0)
+    if(buf_size == 0 || capy::buffer_size(in->b.data()) > 0)
     {
         lock.unlock();
         (*rop)(ec);
@@ -589,9 +589,9 @@ basic_stream(
     core::string_view s)
     : in_(detail::stream_service::make_impl(ioc.get_executor(), nullptr))
 {
-    in_->b.commit(buffers::copy(
+    in_->b.commit(capy::copy(
         in_->b.prepare(s.size()),
-        buffers::const_buffer(s.data(), s.size())));
+        capy::const_buffer(s.data(), s.size())));
 }
 
 template<class Executor>
@@ -602,9 +602,9 @@ basic_stream(
     core::string_view s)
     : in_(detail::stream_service::make_impl(ioc.get_executor(), &fc))
 {
-    in_->b.commit(buffers::copy(
+    in_->b.commit(capy::copy(
         in_->b.prepare(s.size()),
-        buffers::const_buffer(s.data(), s.size())));
+        capy::const_buffer(s.data(), s.size())));
 }
 
 template<class Executor>
@@ -629,9 +629,9 @@ basic_stream<Executor>::
 str() const
 {
     auto const bs = in_->b.data();
-    if(buffers::size(bs) == 0)
+    if(capy::buffer_size(bs) == 0)
         return {};
-    buffers::const_buffer const b = *asio::buffer_sequence_begin(bs);
+    capy::const_buffer const b = *asio::buffer_sequence_begin(bs);
     return {static_cast<char const*>(b.data()), b.size()};
 }
 
@@ -641,9 +641,9 @@ basic_stream<Executor>::
 append(core::string_view s)
 {
     std::lock_guard<std::mutex> lock{in_->m};
-    in_->b.commit(buffers::copy(
+    in_->b.commit(capy::copy(
         in_->b.prepare(s.size()),
-        buffers::const_buffer(s.data(), s.size())));
+        capy::const_buffer(s.data(), s.size())));
 }
 
 template<class Executor>

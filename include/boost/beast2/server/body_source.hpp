@@ -14,11 +14,11 @@
 #include <boost/beast2/detail/except.hpp>
 #include <boost/beast2/detail/type_traits.hpp>
 #include <boost/http/error.hpp>
-#include <boost/buffers/buffer.hpp>
-#include <boost/buffers/copy.hpp>
-#include <boost/buffers/slice.hpp>
-#include <boost/buffers/data_source.hpp>
-#include <boost/buffers/read_source.hpp>
+#include <boost/capy/buffers.hpp>
+#include <boost/capy/buffers/copy.hpp>
+#include <boost/capy/buffers/slice.hpp>
+#include <boost/capy/buffers/data_source.hpp>
+#include <boost/capy/buffers/read_source.hpp>
 #include <boost/core/span.hpp>
 #include <boost/system/error_code.hpp>
 
@@ -90,7 +90,7 @@ public:
     template<class ReadSource
         , typename std::enable_if<
             ! std::is_same<typename std::decay<ReadSource>::type, body_source>::value &&
-            buffers::is_read_source<typename std::decay<ReadSource>::type>::value
+            capy::is_read_source<typename std::decay<ReadSource>::type>::value
         , int>::type = 0>
     body_source(ReadSource&& body);
 
@@ -99,7 +99,7 @@ public:
     template<class ReadSource
         , typename std::enable_if<
             ! std::is_same<typename std::decay<ReadSource>::type, body_source>::value &&
-            buffers::is_read_source<typename std::decay<ReadSource>::type>::value
+            capy::is_read_source<typename std::decay<ReadSource>::type>::value
         , int>::type = 0>
     body_source(
         std::size_t known_size,
@@ -110,7 +110,7 @@ public:
     template<class DataSource
         , typename std::enable_if<
             ! std::is_same<typename std::decay<DataSource>::type, body_source>::value &&
-            buffers::is_data_source<typename std::decay<DataSource>::type>::value
+            capy::is_data_source<typename std::decay<DataSource>::type>::value
         , int>::type = 0>
     body_source(DataSource&& body);
 
@@ -153,7 +153,7 @@ public:
         @return A span of buffers representing the body.
     */
     auto data() const ->
-        span<buffers::const_buffer const>
+        span<capy::const_buffer const>
     {
         if(impl_)
             return impl_->data();
@@ -202,7 +202,7 @@ private:
             detail::throw_invalid_argument();
         }
         virtual auto data() const ->
-            span<buffers::const_buffer const>
+            span<capy::const_buffer const>
         {
             detail::throw_invalid_argument();
         }
@@ -220,7 +220,7 @@ private:
 template<class ReadSource
     , typename std::enable_if<
         ! std::is_same<typename std::decay<ReadSource>::type, body_source>::value &&
-        buffers::is_read_source<typename std::decay<ReadSource>::type>::value
+        capy::is_read_source<typename std::decay<ReadSource>::type>::value
     , int>::type>
 body_source::
 body_source(
@@ -253,7 +253,7 @@ body_source(
                 return 0;
             }
             auto nread = body_.read(
-                buffers::mutable_buffer(dest, size), ec);
+                capy::mutable_buffer(dest, size), ec);
             ec_ = ec;
             return nread;
         }
@@ -269,7 +269,7 @@ body_source(
 template<class ReadSource
     , typename std::enable_if<
         ! std::is_same<typename std::decay<ReadSource>::type, body_source>::value &&
-        buffers::is_read_source<typename std::decay<ReadSource>::type>::value
+        capy::is_read_source<typename std::decay<ReadSource>::type>::value
     , int>::type>
 body_source::
 body_source(
@@ -317,7 +317,7 @@ body_source(
                 return 0;
             }
             auto nread = body_.read(
-                buffers::mutable_buffer(dest, size), ec);
+                capy::mutable_buffer(dest, size), ec);
             ec_ = ec;
             return nread;
         }
@@ -333,7 +333,7 @@ body_source(
 template<class DataSource
     , typename std::enable_if<
         ! std::is_same<typename std::decay<DataSource>::type, body_source>::value &&
-        buffers::is_data_source<typename std::decay<DataSource>::type>::value
+        capy::is_data_source<typename std::decay<DataSource>::type>::value
     , int>::type>
 body_source::
 body_source(
@@ -343,7 +343,7 @@ body_source(
     {
         typename std::decay<DataSource>::type body_;
         std::size_t size_ = 0;
-        span<boost::buffers::const_buffer> bs_;
+        span<boost::capy::const_buffer> bs_;
         std::size_t nread_ = 0;
 
         explicit model(
@@ -351,19 +351,19 @@ body_source(
             : body_(std::forward<DataSource>(body))
         {
             auto const& data = body_.data();
-            auto const& end = buffers::end(data);
+            auto const& end = capy::end(data);
             auto p = reinterpret_cast<
-                buffers::const_buffer*>(this+1);
+                capy::const_buffer*>(this+1);
             std::size_t length = 0;
-            for(auto it = buffers::begin(data); it != end; ++it)
+            for(auto it = capy::begin(data); it != end; ++it)
             {
-                boost::buffers::const_buffer cb(*it);
+                boost::capy::const_buffer cb(*it);
                 size_ += cb.size();
                 *p++ = cb;
                 ++length;
             }
             bs_ = { reinterpret_cast<
-                buffers::const_buffer*>(this + 1), length };
+                capy::const_buffer*>(this + 1), length };
         }
 
         bool has_size() const noexcept override
@@ -381,7 +381,7 @@ body_source(
             return size_;
         }
 
-        span<buffers::const_buffer const>
+        span<capy::const_buffer const>
         data() const override
         {
             return bs_;
@@ -397,9 +397,9 @@ body_source(
             std::size_t n0,
             system::error_code& ec) override
         {
-            std::size_t n = buffers::copy(
-                buffers::mutable_buffer(dest, n0),
-                buffers::sans_prefix(bs_, nread_));
+            std::size_t n = capy::copy(
+                capy::mutable_buffer(dest, n0),
+                capy::sans_prefix(bs_, nread_));
             nread_ += n;
             if(nread_ >= size_)
                 ec = http::error::end_of_stream;
@@ -411,8 +411,8 @@ body_source(
 
     std::size_t length = 0;
     auto const& data = body.data();
-    auto const& end = buffers::end(data);
-    for(auto it = buffers::begin(data);
+    auto const& end = capy::end(data);
+    for(auto it = capy::begin(data);
         it != end; ++it)
     {
         ++length;
@@ -421,7 +421,7 @@ body_source(
     // VFALCO this requires DataSource to be nothrow
     // move constructible for strong exception safety.
     auto p = ::operator new(sizeof(model) +
-        length * sizeof(buffers::const_buffer));
+        length * sizeof(capy::const_buffer));
     impl_ = ::new(p) model(
         std::forward<DataSource>(body));
 }

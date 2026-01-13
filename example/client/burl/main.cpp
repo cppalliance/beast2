@@ -28,7 +28,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/signal_set.hpp>
-#include <boost/buffers.hpp>
+#include <boost/capy/buffers.hpp>
 #include <boost/beast2.hpp>
 #include <boost/http.hpp>
 #include <boost/capy/brotli/decode.hpp>
@@ -41,6 +41,7 @@
 #include <cstdlib>
 
 namespace beast2   = boost::beast2;
+namespace capy     = boost::capy;
 namespace scope    = boost::scope;
 using system_error = boost::system::system_error;
 
@@ -323,7 +324,7 @@ public:
     }
 
     results
-    on_write(buffers::const_buffer cb, bool) override
+    on_write(capy::const_buffer cb, bool) override
     {
         auto chunk =
             core::string_view(static_cast<const char*>(cb.data()), cb.size());

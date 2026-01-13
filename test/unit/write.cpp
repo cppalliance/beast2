@@ -60,9 +60,9 @@ namespace beast2 {
 #include <boost/asio/bind_immediate_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/beast2/test/stream.hpp>
-#include <boost/buffers/copy.hpp>
-#include <boost/buffers/make_buffer.hpp>
-#include <boost/buffers/string_buffer.hpp>
+#include <boost/capy/buffers/copy.hpp>
+#include <boost/capy/buffers/make_buffer.hpp>
+#include <boost/capy/buffers/string_buffer.hpp>
 #include <boost/capy/polystore.hpp>
 #include <boost/http/response.hpp>
 
@@ -105,7 +105,7 @@ public:
             sr.reset();
 
             http::response res(headers);
-            sr.start(res, buffers::const_buffer(body.data(), body.size()));
+            sr.start(res, capy::const_buffer(body.data(), body.size()));
 
             for(std::size_t total = 0; total < msg.size(); total++)
             {
@@ -136,7 +136,7 @@ public:
             sr.reset();
 
             http::response res(headers);
-            sr.start(res, buffers::const_buffer(body.data(), body.size()));
+            sr.start(res, capy::const_buffer(body.data(), body.size()));
 
             for(int count = 0; count < 3; count++)
             {
@@ -182,7 +182,7 @@ public:
                 sr.reset();
 
                 http::response res(headers);
-                sr.start(res, buffers::const_buffer(body.data(), body.size()));
+                sr.start(res, capy::const_buffer(body.data(), body.size()));
 
                 // async_read_some cancels after reading 0 bytes
                 async_write_some(
@@ -222,7 +222,7 @@ public:
             sr.reset();
 
             http::response res(headers);
-            sr.start(res, buffers::const_buffer(body.data(), body.size()));
+            sr.start(res, capy::const_buffer(body.data(), body.size()));
 
             async_write(
                 ts,
@@ -251,7 +251,7 @@ public:
             sr.reset();
 
             http::response res(headers);
-            sr.start(res, buffers::const_buffer(body.data(), body.size()));
+            sr.start(res, capy::const_buffer(body.data(), body.size()));
 
             async_write(
                 ts,
@@ -287,7 +287,7 @@ public:
                 sr.reset();
 
                 http::response res(headers);
-                sr.start(res, buffers::const_buffer(body.data(), body.size()));
+                sr.start(res, capy::const_buffer(body.data(), body.size()));
 
                 // cancel after writing
                 async_write(

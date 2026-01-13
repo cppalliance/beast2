@@ -20,7 +20,7 @@
 #include <boost/asio/error.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/assert.hpp>
-#include <boost/buffers/flat_buffer.hpp>
+#include <boost/capy/buffers/flat_buffer.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
@@ -175,7 +175,7 @@ private:
 #endif
 
 public:
-    using buffer_type = buffers::string_buffer;
+    using buffer_type = capy::string_buffer;
 
     /** Destructor
 

@@ -14,6 +14,7 @@
 #include <boost/beast2/read.hpp>
 
 #include <boost/asio/buffer.hpp>
+#include <boost/capy/buffers.hpp>
 #include <boost/asio/buffers_iterator.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/core/ignore_unused.hpp>
@@ -57,7 +58,7 @@ public:
         {
             self.reset_cancellation_state(asio::enable_total_cancellation());
 
-            if(buffers::size(mb_) == 0)
+            if(capy::buffer_size(mb_) == 0)
             {
                 BOOST_ASIO_CORO_YIELD
                 {

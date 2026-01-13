@@ -11,7 +11,7 @@
 
 #include <boost/asio/bind_cancellation_slot.hpp>
 #include <boost/asio/read.hpp>
-#include <boost/buffers/make_buffer.hpp>
+#include <boost/capy/buffers/make_buffer.hpp>
 #include <boost/capy/polystore.hpp>
 
 #include "test_helpers.hpp"
@@ -29,8 +29,8 @@ template<class Buffers>
 std::string
 test_to_string(Buffers const& bs)
 {
-    std::string s(buffers::size(bs), 0);
-    s.resize(buffers::copy(buffers::make_buffer(&s[0], s.size()), bs));
+    std::string s(capy::buffer_size(bs), 0);
+    s.resize(capy::copy(capy::make_buffer(&s[0], s.size()), bs));
     return s;
 }
 
@@ -137,7 +137,7 @@ struct single_tester : public ctx_base
 
     // Create a destination buffer
     std::string s_;
-    boost::buffers::string_buffer buf_;
+    boost::capy::string_buffer buf_;
 
     // The object under test
     body_read_stream<test::stream> brs_;
@@ -197,13 +197,13 @@ struct single_tester : public ctx_base
         std::size_t n_;
         system::error_code ec_;
         std::size_t* total_;
-        boost::buffers::string_buffer* buf_;
+        boost::capy::string_buffer* buf_;
 
         chunking_handler(
             std::size_t n,
             system::error_code ec,
             std::size_t* total,
-            boost::buffers::string_buffer* buf)
+            boost::capy::string_buffer* buf)
             : n_(n)
             , ec_(ec)
             , total_(total)

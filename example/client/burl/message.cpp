@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <iostream>
 
+namespace capy     = boost::capy;
 namespace fs       = std::filesystem;
 using system_error = boost::system::system_error;
 
@@ -44,7 +45,7 @@ string_body::content_length() const noexcept
     return body_.size();
 }
 
-buffers::const_buffer
+capy::const_buffer
 string_body::body() const noexcept
 {
     return { body_.data(), body_.size() };
@@ -90,7 +91,7 @@ file_body::body() const
 // -----------------------------------------------------------------------------
 
 boost::http::source::results
-stdin_body::source::on_read(buffers::mutable_buffer mb)
+stdin_body::source::on_read(capy::mutable_buffer mb)
 {
     std::cin.read(static_cast<char*>(mb.data()), mb.size());
 

@@ -13,7 +13,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/error.hpp>
-#include <boost/buffers/string_buffer.hpp>
+#include <boost/capy/buffers/string_buffer.hpp>
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/test/detail/service_base.hpp>
 #include <boost/beast2/test/error.hpp>
@@ -88,7 +88,7 @@ struct stream_state
     boost::weak_ptr<stream_service_impl> wp;
     std::mutex m;
     std::string storage;
-    buffers::string_buffer b;
+    capy::string_buffer b;
     //std::condition_variable cv;
     std::unique_ptr<stream_op_base> rop;
     std::unique_ptr<stream_op_base> wop;
