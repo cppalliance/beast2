@@ -8,88 +8,77 @@
 //
 
 #include <boost/beast2/server/http_server.hpp>
-#include <boost/beast2/server/http_stream.hpp>
-#include <boost/beast2/server/plain_worker.hpp>
-#include <boost/beast2/asio_io_context.hpp>
+#include <boost/beast2/server/workers.hpp>
 #include <boost/capy/application.hpp>
+#include <boost/corosio/io_context.hpp>
+#include <boost/corosio/endpoint.hpp>
+#include <boost/url/ipv4_address.hpp>
 
 namespace boost {
 namespace beast2 {
 
 namespace {
 
-template<class Stream>
 class http_server_impl
-    : public http_server<Stream>
+    : public http_server
 {
 public:
     http_server_impl(
         capy::application& app,
-        std::size_t num_workers)
-        : ioc_(install_single_threaded_asio_io_context(app))
-        , w_(app,
-            ioc_.get_executor(), 1, num_workers,
-            ioc_.get_executor(), this->wwwroot)
-    {
-    }
-
-    void add_port(
         char const* addr,
-        unsigned short port)
+        unsigned short port,
+        std::size_t num_workers)
+        : ioc_()
+        , workers_(app, ioc_, num_workers, this->wwwroot)
     {
-        w_.emplace(
-            http::acceptor_config{ false, false },
-            asio::ip::tcp::endpoint(
-                asio::ip::make_address(addr),
-                port),
-            true);
+        // Parse address and create endpoint
+        auto addr_result = urls::parse_ipv4_address(addr);
+        if (addr_result.has_error())
+        {
+            // Fallback to any address if parsing fails
+            workers_.listen(
+                http::acceptor_config{false, false},
+                corosio::endpoint(port));
+        }
+        else
+        {
+            workers_.listen(
+                http::acceptor_config{false, false},
+                corosio::endpoint(addr_result.value(), port));
+        }
     }
 
-    void start()
+    void run() override
     {
-        w_.start();
+        workers_.start();
+        ioc_.run();
     }
 
-    void stop()
+    void stop() override
     {
-        w_.stop();
-    }
-
-    void attach() override
-    {
-        ioc_.attach();
+        workers_.stop();
+        ioc_.stop();
     }
 
 private:
-    using workers_type = workers< plain_worker<
-        asio::io_context::executor_type, asio::ip::tcp> >;
-
-    asio_io_context& ioc_;
-    workers_type w_;
+    corosio::io_context ioc_;
+    workers workers_;
 };
 
 } // (anon)
 
 //------------------------------------------------
 
-auto
+http_server&
 install_plain_http_server(
     capy::application& app,
     char const* addr,
     unsigned short port,
-    std::size_t num_workers) ->
-        http_server<asio::basic_stream_socket<
-            asio::ip::tcp,
-            asio::io_context::executor_type>>&
+    std::size_t num_workers)
 {
-    using stream_type = asio::basic_stream_socket<
-        asio::ip::tcp, asio::io_context::executor_type>;
-    auto& srv = app.emplace<http_server_impl<stream_type>>(
-        app, num_workers);
-    srv.add_port(addr, port);
-    return srv;
+    return app.emplace<http_server_impl>(
+        app, addr, port, num_workers);
 }
 
 } // beast2
 } // boost
-

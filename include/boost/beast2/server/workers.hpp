@@ -13,301 +13,222 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/log_service.hpp>
 #include <boost/beast2/server/fixed_array.hpp>
+#include <boost/beast2/server/router_corosio.hpp>
+#include <boost/beast2/server/http_stream.hpp>
 #include <boost/capy/application.hpp>
-#include <boost/asio/basic_stream_socket.hpp>
-#include <boost/asio/basic_socket_acceptor.hpp>
-#include <boost/asio/dispatch.hpp>
-#include <boost/asio/prepend.hpp>
+#include <boost/capy/task.hpp>
+#include <boost/capy/async_run.hpp>
+#include <boost/corosio/acceptor.hpp>
+#include <boost/corosio/socket.hpp>
+#include <boost/corosio/io_context.hpp>
+#include <boost/corosio/endpoint.hpp>
+#include <boost/http/server/route_handler.hpp>
+
+#include <vector>
 
 namespace boost {
 namespace beast2 {
 
-class BOOST_SYMBOL_VISIBLE
-    workers_base
+/** A preallocated worker that handles one HTTP connection at a time.
+*/
+struct http_worker
 {
-public:
-    BOOST_BEAST2_DECL
-    virtual ~workers_base();
+    corosio::socket sock;
+    bool in_use = false;
 
-    virtual capy::application& app() noexcept = 0;
-    virtual void do_idle(void* worker) = 0;
+    explicit http_worker(corosio::io_context& ioc)
+        : sock(ioc)
+    {
+    }
+
+    http_worker(http_worker&&) = default;
+    http_worker& operator=(http_worker&&) = default;
 };
+
+//------------------------------------------------
 
 /** A set of accepting sockets and their workers.
 
-    This implements a set of listening ports as a server service. An array of
-    workers created upon construction is used to accept incoming connections
-    and handle their sessions.
-
-    @par Worker exemplar
-    @code
-    template< class Executor >
-    struct Worker
-    {
-        using executor_type = Executor;
-        using protocol_type = asio::ip::tcp;
-        using socket_type = asio::basic_stream_socket<protocol_type, Executor>;
-        using acceptor_config = beast2::acceptor_config;
-
-        asio::basic_stream_socket<protocol_type, Executor>& socket() noexcept;
-        typename protocol_type::endpoint& endpoint() noexcept;
-
-        void on_accept();
-    };
-    @endcode
-
-    @tparam Executor The type of executor used by acceptor sockets.
-    @tparam Worker The type of worker to use.
+    This implements a server that accepts incoming connections
+    and handles HTTP requests using preallocated workers.
 */
-template<class Worker>
 class workers
-    : public workers_base
 {
 public:
-    using executor_type = typename Worker::executor_type;
-    using protocol_type = typename Worker::protocol_type;
-    using acceptor_type = asio::basic_socket_acceptor<protocol_type, executor_type>;
-    using acceptor_config = typename Worker::acceptor_config;
-    using socket_type = asio::basic_stream_socket<protocol_type, executor_type>;
-
-    ~workers()
-    {
-    }
+    ~workers() = default;
 
     /** Constructor
 
-        @param app The @ref application which holds this part
-        @param ex The executor to use for acceptor sockets
-        @param concurrency The number of threads calling io_context::run
-        @param num_workers The number of workers to construct
-        @param args Arguments forwarded to each worker's constructor
+        @param app The application which holds this server
+        @param ioc The I/O context for async operations
+        @param num_workers The number of workers to preallocate
+        @param routes The router for dispatching requests
     */
-    template<class Executor1, class... Args>
     workers(
         capy::application& app,
-        Executor1 const& ex,
-        unsigned concurrency,
+        corosio::io_context& ioc,
         std::size_t num_workers,
-        Args&&... args);
+        router_corosio routes);
 
-    /** Add an acceptor
+    /** Add a listening endpoint
+
+        @param config Acceptor configuration
+        @param ep The endpoint to listen on
     */
-    template<class... Args>
     void
-    emplace(
-        acceptor_config&& config,
-        Args&&... args)
-    {
-        va_.emplace_back(
-            concurrency_,
-            std::move(config),
-            acceptor_type(ex_,
-                std::forward<Args>(args)...));
-    }
+    listen(
+        http::acceptor_config config,
+        corosio::endpoint ep);
 
+    /** Start the accept loop
+
+        Must be called after listen() to begin accepting connections.
+    */
     void start();
+
+    /** Stop accepting and cancel all connections
+    */
     void stop();
 
 private:
-    struct acceptor;
-    struct worker;
+    capy::task<void>
+    accept_loop(corosio::acceptor& acc, http::acceptor_config config);
 
-    capy::application& app() noexcept override;
-    void do_idle(void*) override;
-    void do_accepts();
-    void on_accept(acceptor*, worker*,
-        system::error_code const&);
-    void do_stop();
+    capy::task<void>
+    run_session(http_worker& w, http::acceptor_config const& config);
 
     capy::application& app_;
+    corosio::io_context& ioc_;
     section sect_;
-    executor_type ex_;
-    fixed_array<worker> vw_;
-    std::vector<acceptor> va_;
-    worker* idle_ = nullptr;
-    std::size_t n_idle_ = 0;
-    unsigned concurrency_;
-    bool stop_ = false;
+    router_corosio routes_;
+    std::vector<http_worker> workers_;
+    std::vector<corosio::acceptor> acceptors_;
+    std::vector<http::acceptor_config> configs_;
+    bool stopped_ = false;
 };
 
 //------------------------------------------------
 
-template<class Worker>
-struct workers<Worker>::
-    acceptor
-{
-    template<class... Args>
-    explicit
-    acceptor(
-        std::size_t concurrency,
-        acceptor_config&& config_,
-        acceptor_type&& sock_)
-        : config(std::move(config_))
-        , sock(std::move(sock_))
-        , need(concurrency)
-    {
-    }
-
-    acceptor_config config;
-    asio::basic_socket_acceptor<
-        protocol_type, executor_type> sock;
-    std::size_t need;   // number of accepts we need
-};
-
-template<class Worker>
-struct workers<Worker>::
-    worker
-{
-    worker* next;
-    Worker w;
-
-    template<class... Args>
-    explicit worker(
-        worker* next_, Args&&... args)
-        : next(next_)
-        , w(std::forward<Args>(args)...)
-    {
-    }
-};
-
-//------------------------------------------------
-
-template<class Worker>
-template<class Executor1, class... Args>
-workers<Worker>::
+inline
+workers::
 workers(
     capy::application& app,
-    Executor1 const& ex,
-    unsigned concurrency,
+    corosio::io_context& ioc,
     std::size_t num_workers,
-    Args&&... args)
+    router_corosio routes)
     : app_(app)
+    , ioc_(ioc)
     , sect_(use_log_service(app).get_section("workers"))
-    , ex_(executor_type(ex))
-    , vw_(num_workers)
-    , concurrency_(concurrency)
+    , routes_(std::move(routes))
 {
-    while(! vw_.is_full())
-        idle_ = &vw_.emplace_back(idle_, *this,
-            std::forward<Args>(args)...);
-    n_idle_ = vw_.size();
+    workers_.reserve(num_workers);
+    for (std::size_t i = 0; i < num_workers; ++i)
+        workers_.emplace_back(ioc_);
 }
 
-template<class Worker>
-capy::application&
-workers<Worker>::
-app() noexcept
+inline
+void
+workers::
+listen(
+    http::acceptor_config config,
+    corosio::endpoint ep)
 {
-    return app_;
+    acceptors_.emplace_back(ioc_);
+    acceptors_.back().listen(ep);
+    configs_.push_back(config);
 }
 
-template<class Worker>
+inline
 void
-workers<Worker>::
-do_idle(void* pw)
-{
-    asio::dispatch(ex_,
-        [this, pw]()
-        {
-            // recover the `worker` pointer without using offsetof
-            worker* w = vw_.data() + (
-                reinterpret_cast<std::uintptr_t>(pw) -
-                reinterpret_cast<std::uintptr_t>(vw_.data())) /
-                sizeof(worker);
-            // push
-            w->next = idle_;
-            idle_ = w;
-            ++n_idle_;
-            do_accepts();
-        });
-}
-template<class Worker>
-void
-workers<Worker>::
+workers::
 start()
 {
-    asio::dispatch(ex_, call_mf(&workers::do_accepts, this));
+    stopped_ = false;
+    for (std::size_t i = 0; i < acceptors_.size(); ++i)
+    {
+        capy::async_run(ioc_.get_executor())(
+            accept_loop(acceptors_[i], configs_[i]));
+    }
 }
 
-template<class Worker>
+inline
 void
-workers<Worker>::
+workers::
 stop()
 {
-    asio::dispatch(ex_, call_mf(&workers::do_stop, this));
+    stopped_ = true;
+    for (auto& acc : acceptors_)
+        acc.cancel();
+    for (auto& w : workers_)
+    {
+        if (w.in_use)
+            w.sock.cancel();
+    }
 }
 
-template<class Worker>
-void
-workers<Worker>::
-do_accepts()
+inline
+capy::task<void>
+workers::
+accept_loop(corosio::acceptor& acc, http::acceptor_config config)
 {
-    BOOST_ASSERT(ex_.running_in_this_thread());
-    if(stop_)
-        return;
-    if(idle_)
+    while (!stopped_)
     {
-        for(auto& a : va_)
+        // Find a free worker
+        http_worker* free_worker = nullptr;
+        for (auto& w : workers_)
         {
-            while(a.need > 0)
+            if (!w.in_use)
             {
-                --a.need;
-                // pop
-                auto pw = idle_;
-                idle_ = idle_->next;
-                --n_idle_;
-                a.sock.async_accept(pw->w.socket(), pw->w.endpoint(),
-                    asio::prepend(call_mf(&workers::on_accept, this), &a, pw));
-                if(! idle_)
-                    goto busy;
+                free_worker = &w;
+                break;
             }
         }
-        return;
+
+        if (!free_worker)
+        {
+            // All workers busy - accept and immediately close
+            // A production server might queue or have backpressure
+            LOG_DBG(sect_)("All workers busy, rejecting connection");
+            corosio::socket temp(ioc_);
+            auto [ec] = co_await acc.accept(temp);
+            if (ec)
+            {
+                if (stopped_)
+                    break;
+                LOG_DBG(sect_)("accept error: {}", ec.message());
+            }
+            temp.close();
+            continue;
+        }
+
+        // Accept into the free worker's socket
+        auto [ec] = co_await acc.accept(free_worker->sock);
+        if (ec)
+        {
+            if (stopped_)
+                break;
+            LOG_DBG(sect_)("accept error: {}", ec.message());
+            continue;
+        }
+
+        // Spawn session coroutine
+        capy::async_run(ioc_.get_executor())(
+            run_session(*free_worker, config));
     }
-busy:
-    // all workers are busy
-    // VFALCO log to warn the server admin?
-    return;
 }
 
-template<class Worker>
-void
-workers<Worker>::
-on_accept(
-    acceptor* pa,
-    worker* pw,
-    system::error_code const& ec)
+inline
+capy::task<void>
+workers::
+run_session(http_worker& w, http::acceptor_config const& config)
 {
-    BOOST_ASSERT(ex_.running_in_this_thread());
-    ++pa->need;
-    if(ec.failed())
-    {
-        // push
-        pw->next = idle_;
-        idle_ = pw;
-        ++n_idle_;
-        LOG_DBG(sect_)("async_accept: {}", ec.message());
-        return do_accepts();
-    }
-    do_accepts();
-    asio::dispatch(pw->w.socket().get_executor(), asio::prepend(
-        call_mf(&Worker::on_accept, &pw->w), &pa->config));
-}
+    w.in_use = true;
 
-template<class Worker>
-void
-workers<Worker>::
-do_stop()
-{
-    stop_ = true;
+    http_stream stream(app_, w.sock, routes_);
+    co_await stream.run(config);
 
-    for(auto& a : va_)
-    {
-        system::error_code ec;
-        a.sock.cancel(ec); // error ignored
-    }
-    for(auto& w : vw_)
-        w.w.cancel();
+    w.sock.close();
+    w.in_use = false;
 }
 
 } // beast2
