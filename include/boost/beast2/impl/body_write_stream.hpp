@@ -13,6 +13,7 @@
 #include <boost/beast2/write.hpp>
 
 #include <boost/assert.hpp>
+#include <boost/capy/buffers.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/buffers_iterator.hpp>
 #include <boost/asio/coroutine.hpp>
@@ -112,7 +113,7 @@ public:
             // complete immediately with no error. Also check for a saved
             // error from a previous call.
             if(bws_.ec_.failed() ||
-               buffers::size(cb_) == 0)
+               capy::buffer_size(cb_) == 0)
             {
                 ec = bws_.ec_;
                 bws_.ec_ = {};

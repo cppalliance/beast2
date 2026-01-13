@@ -16,8 +16,9 @@
 #include <boost/asio/deferred.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
-#include <boost/buffers/make_buffer.hpp>
+#include <boost/capy/buffers/make_buffer.hpp>
 #include <boost/capy/async_op.hpp>
+#include <boost/capy/async_run.hpp>
 #include <boost/capy/polystore.hpp>
 #include <boost/capy/task.hpp>
 #include <boost/http/response.hpp>
@@ -39,8 +40,8 @@ template<class Buffers>
 std::string
 test_to_string(Buffers const& bs)
 {
-    std::string s(buffers::size(bs), 0);
-    s.resize(buffers::copy(buffers::make_buffer(&s[0], s.size()), bs));
+    std::string s(capy::buffer_size(bs), 0);
+    s.resize(capy::copy(capy::make_buffer(&s[0], s.size()), bs));
     return s;
 }
 
@@ -148,7 +149,7 @@ struct single_tester : public ctx_base
 
     // Create a destination buffer
     std::string s_;
-    boost::buffers::string_buffer buf_;
+    boost::capy::string_buffer buf_;
 
     // The object under test
     body_read_stream<test::stream> brs_;
@@ -206,12 +207,12 @@ struct single_tester : public ctx_base
         bws().async_close(test_handler(ec, 0));
     }
 
-    buffers::const_buffer
+    capy::const_buffer
     make_test_buffer(std::size_t size)
     {
         std::string val = body_.substr(0, size);
         val.resize(size, '.');
-        boost::buffers::string_buffer sb(&val);
+        boost::capy::string_buffer sb(&val);
         return sb.data();
     }
 
@@ -273,7 +274,7 @@ struct single_tester : public ctx_base
     {
         // Ensure a read into a zero sized buffer returns with no error.
         std::string val;
-        boost::buffers::string_buffer sb(&val);
+        boost::capy::string_buffer sb(&val);
         auto cb = sb.data();
         bws().async_write_some(cb, test_handler(system::error_code{}, 0));
         test::run(ioc_);
@@ -296,7 +297,7 @@ struct single_tester : public ctx_base
             // Construct a buffer of size bs
             std::string val = body_.substr(0, bs);
             val.resize(bs, '.');
-            boost::buffers::string_buffer sb(&val);
+            boost::capy::string_buffer sb(&val);
             auto cb = sb.data();
 
             finals += val;
@@ -370,7 +371,7 @@ struct single_tester : public ctx_base
     test_with_ignored_cancel_signal(std::size_t len)
     {
         std::string val = body_.substr(0, len);
-        boost::buffers::string_buffer sb(&val);
+        boost::capy::string_buffer sb(&val);
         auto cb = sb.data();
 
         // Add a signal to test cancellation
@@ -398,7 +399,7 @@ struct single_tester : public ctx_base
         // Second call: write the remainder successfully.
         // Cancellation after successful write is not saved, so this succeeds.
         std::string remainder = body_.substr(len);
-        boost::buffers::string_buffer sb2(&remainder);
+        boost::capy::string_buffer sb2(&remainder);
         auto cb2 = sb2.data();
 
         std::size_t remainder_len = body_length_ - len;
@@ -436,7 +437,7 @@ struct single_tester : public ctx_base
         {
             asio::async_write(
                 bws(),
-                buffers::const_buffer(body_.data(), body_.size()),
+                capy::const_buffer(body_.data(), body_.size()),
                 test_handler(system::error_code{}, body_length_));
         }
 
@@ -474,7 +475,7 @@ struct single_tester : public ctx_base
         // stream write fails. Due to deferred error handling, this
         // returns success with the committed bytes, and saves the error.
         std::string val = body_;
-        boost::buffers::string_buffer sb(&val);
+        boost::capy::string_buffer sb(&val);
         auto cb = sb.data();
 
         bws.async_write_some(
@@ -514,7 +515,7 @@ struct single_tester : public ctx_base
         // stream write fails. Due to deferred error handling, this
         // returns success with the committed bytes, and saves the error.
         std::string val = body_;
-        boost::buffers::string_buffer sb(&val);
+        boost::capy::string_buffer sb(&val);
         auto cb = sb.data();
 
         bws.async_write_some(
@@ -555,7 +556,7 @@ struct single_tester : public ctx_base
 
         // Write body data - this should succeed.
         std::string val = body_;
-        boost::buffers::string_buffer sb(&val);
+        boost::capy::string_buffer sb(&val);
         auto cb = sb.data();
 
         bws.async_write_some(
@@ -583,7 +584,7 @@ struct single_tester : public ctx_base
         // data equal to its capacity
         std::size_t cap = srs_capacity_;
         std::string fill_data(cap, 'F');
-        buffers::const_buffer fill_cb(fill_data.data(), fill_data.size());
+        capy::const_buffer fill_cb(fill_data.data(), fill_data.size());
 
         bool fill_complete = false;
         bws().async_write_some(
@@ -599,7 +600,7 @@ struct single_tester : public ctx_base
         // Now the buffer should be full. The next write should enter
         // the buffer-clearing loop with bytes_ == 0 on the first iteration.
         std::string more_data(64, 'X');
-        buffers::const_buffer cb(more_data.data(), more_data.size());
+        capy::const_buffer cb(more_data.data(), more_data.size());
 
         asio::cancellation_signal c_signal;
 
@@ -671,7 +672,7 @@ do_coro_write(
     body_write_stream<test::stream> bws(wts, sr, std::move(srs));
 
     // Write body data using co_await
-    buffers::const_buffer cb(body.data(), body.size());
+    capy::const_buffer cb(body.data(), body.size());
     std::size_t total_written = 0;
 
     while(cb.size() > 0)
@@ -723,14 +724,9 @@ test_coroutine()
     http::response res(header);
     auto srs = sr.start_stream(res);
 
-    capy::spawn(
-        wrap_executor(ioc.get_executor()),
-        do_coro_write(wts, rts, sr, std::move(srs), body, expected_msg),
-        [](system::result<void, std::exception_ptr> result)
-        {
-            if(result.has_error())
-                std::rethrow_exception(result.error());
-        });
+    // Launch coroutine using async_run (default handler rethrows exceptions)
+    capy::async_run(wrap_executor(ioc.get_executor()))(
+        do_coro_write(wts, rts, sr, std::move(srs), body, expected_msg));
 
     ioc.run();
 }

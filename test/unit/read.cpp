@@ -15,8 +15,8 @@
 #include <boost/asio/bind_cancellation_slot.hpp>
 #include <boost/asio/bind_immediate_executor.hpp>
 #include <boost/asio/io_context.hpp>
-#include <boost/buffers/copy.hpp>
-#include <boost/buffers/make_buffer.hpp>
+#include <boost/capy/buffers/copy.hpp>
+#include <boost/capy/buffers/make_buffer.hpp>
 #include <boost/capy/polystore.hpp>
 
 #include "test_helpers.hpp"
@@ -228,9 +228,9 @@ public:
                     pr.start();
 
                     pr.commit(
-                        buffers::copy(
+                        capy::copy(
                             pr.prepare(),
-                            buffers::const_buffer(
+                            capy::const_buffer(
                                 msg.data(),
                                 msg.size())));
 

@@ -9,8 +9,8 @@
 
 #include "multipart_form.hpp"
 
-#include <boost/buffers/copy.hpp>
-#include <boost/buffers/slice.hpp>
+#include <boost/capy/buffers/copy.hpp>
+#include <boost/capy/buffers/slice.hpp>
 #include <boost/capy/file.hpp>
 #include <boost/system/system_error.hpp>
 
@@ -148,18 +148,18 @@ multipart_form::source::source(const multipart_form* form) noexcept
 }
 
 multipart_form::source::results
-multipart_form::source::on_read(buffers::mutable_buffer mb)
+multipart_form::source::on_read(capy::mutable_buffer mb)
 {
     auto rs = results{};
 
     auto copy = [&](core::string_view sv)
     {
-        buffers::const_buffer source(sv.data(), sv.size());
-        buffers::remove_prefix(mb, static_cast<std::size_t>(skip_));
+        capy::const_buffer source(sv.data(), sv.size());
+        capy::remove_prefix(mb, static_cast<std::size_t>(skip_));
 
-        auto copied = buffers::copy(mb, source);
+        auto copied = capy::copy(mb, source);
 
-        buffers::remove_prefix(mb, copied);
+        capy::remove_prefix(mb, copied);
         rs.bytes += copied;
         skip_    += copied;
 
@@ -189,7 +189,7 @@ multipart_form::source::on_read(buffers::mutable_buffer mb)
         if(rs.ec)
             return false;
 
-        buffers::remove_prefix(mb, read);
+        capy::remove_prefix(mb, read);
         rs.bytes += read;
         skip_    += read;
 

@@ -71,7 +71,7 @@ public:
 private:
     results
     on_write(
-        buffers::const_buffer b,
+        capy::const_buffer b,
         bool more) override
     {
         results rv;

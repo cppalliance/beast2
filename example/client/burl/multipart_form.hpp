@@ -10,7 +10,7 @@
 #ifndef BURL_MULTIPART_FORM_HPP
 #define BURL_MULTIPART_FORM_HPP
 
-#include <boost/buffers/buffer.hpp>
+#include <boost/capy/buffers.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <boost/http/method.hpp>
 #include <boost/http/source.hpp>
@@ -20,7 +20,7 @@
 #include <array>
 #include <vector>
 
-namespace buffers    = boost::buffers;
+namespace capy       = boost::capy;
 namespace http = boost::http;
 using error_code     = boost::system::error_code;
 
@@ -79,7 +79,7 @@ public:
     explicit source(const multipart_form* form) noexcept;
 
     results
-    on_read(buffers::mutable_buffer mb) override;
+    on_read(capy::mutable_buffer mb) override;
 };
 
 #endif

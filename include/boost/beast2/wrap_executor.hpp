@@ -11,12 +11,9 @@
 #define BOOST_BEAST2_WRAP_EXECUTOR_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/capy/executor.hpp>
-#include <boost/asio/associated_allocator.hpp>
+#include <boost/capy/any_dispatcher.hpp>
 #include <boost/asio/post.hpp>
-#include <cstddef>
-#include <memory>
-#include <new>
+#include <coroutine>
 #include <type_traits>
 #include <utility>
 
@@ -25,157 +22,69 @@ namespace beast2 {
 
 namespace detail {
 
-// Metadata stored before each work allocation
-struct work_metadata
-{
-    void* raw;
-    std::size_t total_size;
-};
+/** A dispatcher that posts coroutine handles to an Asio executor.
 
+    This class wraps an Asio executor and satisfies the capy::dispatcher
+    concept. When invoked with a coroutine handle, it posts the handle's
+    resumption to the wrapped executor for later execution.
+*/
 template<class AsioExecutor>
-struct asio_executor_impl
+class asio_dispatcher
 {
-    friend struct capy::executor::access;
-
-    using allocator_type = typename
-        asio::associated_allocator<AsioExecutor>::type;
-
     AsioExecutor exec_;
-    allocator_type alloc_;
 
+public:
     explicit
-    asio_executor_impl(AsioExecutor ex)
+    asio_dispatcher(AsioExecutor ex)
         : exec_(std::move(ex))
-        , alloc_(asio::get_associated_allocator(exec_))
     {
     }
 
-    // Move constructor
-    asio_executor_impl(asio_executor_impl&& other) noexcept
-        : exec_(std::move(other.exec_))
-        , alloc_(std::move(other.alloc_))
+    asio_dispatcher(asio_dispatcher const&) = default;
+    asio_dispatcher(asio_dispatcher&&) = default;
+    asio_dispatcher& operator=(asio_dispatcher const&) = default;
+    asio_dispatcher& operator=(asio_dispatcher&&) = default;
+
+    /** Dispatch a coroutine handle for execution.
+
+        Posts the coroutine's resumption to the Asio executor.
+        Returns noop_coroutine since the work is scheduled for later.
+
+        @param h The coroutine handle to dispatch.
+        @return std::noop_coroutine() indicating no symmetric transfer.
+    */
+    capy::coro
+    operator()(capy::coro h) const
     {
-    }
-
-    // Move assignment
-    asio_executor_impl& operator=(asio_executor_impl&& other) noexcept
-    {
-        if(this != &other)
-        {
-            exec_ = std::move(other.exec_);
-            alloc_ = std::move(other.alloc_);
-        }
-        return *this;
-    }
-
-    // Delete copy operations
-    asio_executor_impl(asio_executor_impl const&) = delete;
-    asio_executor_impl& operator=(asio_executor_impl const&) = delete;
-
-private:
-    void*
-    allocate(std::size_t size, std::size_t align)
-    {
-        // Rebind allocator to char for byte-level allocation
-        using char_alloc = typename std::allocator_traits<
-            allocator_type>::template rebind_alloc<char>;
-        char_alloc a(alloc_);
-
-        // We need space for:
-        // - metadata struct (aligned to work_metadata alignment)
-        // - padding for work alignment
-        // - work object
-        std::size_t const meta_size = sizeof(work_metadata);
-        std::size_t const total_size = meta_size + align + size;
-
-        // Allocate raw storage
-        char* raw = std::allocator_traits<char_alloc>::allocate(a, total_size);
-
-        // Compute aligned pointer for work after metadata
-        char* after_meta = raw + meta_size;
-        void* aligned = after_meta;
-        std::size_t space = total_size - meta_size;
-        aligned = std::align(align, size, aligned, space);
-
-        // Store metadata immediately before the aligned work region
-        work_metadata* meta = reinterpret_cast<work_metadata*>(
-            static_cast<char*>(aligned) - sizeof(work_metadata));
-        meta->raw = raw;
-        meta->total_size = total_size;
-
-        return aligned;
-    }
-
-    void
-    deallocate(void* p, std::size_t /*size*/, std::size_t /*align*/)
-    {
-        using char_alloc = typename std::allocator_traits<
-            allocator_type>::template rebind_alloc<char>;
-        char_alloc a(alloc_);
-
-        // Retrieve metadata stored before p
-        work_metadata* meta = reinterpret_cast<work_metadata*>(
-            static_cast<char*>(p) - sizeof(work_metadata));
-
-        std::allocator_traits<char_alloc>::deallocate(
-            a, static_cast<char*>(meta->raw), meta->total_size);
-    }
-
-    void
-    submit(capy::executor::work* w)
-    {
-        // Capture a copy of allocator for the lambda
-        allocator_type alloc_copy = alloc_;
-        asio::post(exec_,
-            [w, alloc_copy]() mutable
-            {
-                using char_alloc = typename std::allocator_traits<
-                    allocator_type>::template rebind_alloc<char>;
-                char_alloc a(alloc_copy);
-
-                // Retrieve metadata stored before w
-                work_metadata* meta = reinterpret_cast<work_metadata*>(
-                    reinterpret_cast<char*>(w) - sizeof(work_metadata));
-                void* raw = meta->raw;
-                std::size_t total_size = meta->total_size;
-
-                w->invoke();
-                w->~work();
-
-                std::allocator_traits<char_alloc>::deallocate(
-                    a, static_cast<char*>(raw), total_size);
-            });
+        asio::post(exec_, [h]() mutable {
+            h.resume();
+        });
+        return std::noop_coroutine();
     }
 };
 
 } // detail
 
-/** Return a capy::executor from an Asio executor.
+/** Return a capy::any_dispatcher from an Asio executor.
 
-    This function wraps an Asio executor in a capy::executor,
-    mapping the capy::executor implementation API to the
-    corresponding Asio executor operations.
-
-    The returned executor uses get_associated_allocator on
-    the Asio executor to obtain the allocator for work items.
+    This function wraps an Asio executor in a dispatcher that can be
+    stored in capy::any_dispatcher. When the dispatcher is invoked with
+    a coroutine handle, it posts the handle's resumption to the Asio
+    executor for later execution.
 
     @param ex The Asio executor to wrap.
 
-    @return A capy::executor that submits work via the
-    provided Asio executor.
+    @return A dispatcher that posts work to the provided Asio executor.
 */
 template<class AsioExecutor>
-capy::executor
-wrap_executor(AsioExecutor ex)
+detail::asio_dispatcher<typename std::decay<AsioExecutor>::type>
+wrap_executor(AsioExecutor&& ex)
 {
-    return capy::executor::wrap(
-        detail::asio_executor_impl<
-            typename std::decay<AsioExecutor>::type>(
-                std::move(ex)));
+    return detail::asio_dispatcher<typename std::decay<AsioExecutor>::type>(
+        std::forward<AsioExecutor>(ex));
 }
 
 } // beast2
 } // boost
 
 #endif
-

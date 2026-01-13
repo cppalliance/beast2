@@ -37,7 +37,7 @@ public:
     std::size_t
     content_length() const noexcept;
 
-    buffers::const_buffer
+    capy::const_buffer
     body() const noexcept;
 };
 
@@ -68,7 +68,7 @@ public:
     {
     public:
         results
-        on_read(buffers::mutable_buffer mb) override;
+        on_read(capy::mutable_buffer mb) override;
     };
 
     http::method

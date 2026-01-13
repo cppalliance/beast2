@@ -12,7 +12,7 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/test/stream.hpp>
-#include <boost/buffers/any_stream.hpp>
+#include <boost/capy/buffers/any_stream.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/capy/task.hpp>
 
@@ -26,9 +26,9 @@ namespace beast2 {
 template<class AsyncStream>
 auto make_stream(
     AsyncStream&& asioStream) ->
-        buffers::any_stream
+        capy::any_stream
 {
-    struct impl : buffers::any_stream::impl
+    struct impl : capy::any_stream::impl
     {
         typename std::decay<AsyncStream>::type stream_;
 
@@ -37,24 +37,24 @@ auto make_stream(
         {
         }
 
-        buffers::async_io_result
+        capy::async_io_result
         read_some(
-            buffers::mutable_buffer b) override
+            capy::mutable_buffer b) override
         {
-            return capy::make_async_result<buffers::io_result>(
+            return capy::make_async_result<capy::io_result>(
                 stream_.async_read_some(b, asio::deferred));
         }
 
-        buffers::async_io_result
+        capy::async_io_result
         write_some(
-            buffers::const_buffer b) override
+            capy::const_buffer b) override
         {
-            return capy::make_async_result<buffers::io_result>(
+            return capy::make_async_result<capy::io_result>(
                 stream_.async_write_some(b, asio::deferred));
         }
     };
 
-    return buffers::any_stream(std::make_shared<impl>(
+    return capy::any_stream(std::make_shared<impl>(
         std::forward<AsyncStream>(asioStream)));
 }
 
@@ -67,10 +67,10 @@ struct stream_test
     }
 
     capy::task<int>
-    do_read(buffers::any_stream stream)
+    do_read(capy::any_stream stream)
     {
         char buf[256];
-        buffers::mutable_buffer b(buf, sizeof(buf));
+        capy::mutable_buffer b(buf, sizeof(buf));
         auto rv = co_await stream.read_some(b);
         core::string_view sv(buf, rv.bytes_transferred);
         BOOST_TEST(! rv.ec.failed());

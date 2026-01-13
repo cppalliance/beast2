@@ -30,7 +30,7 @@ struct data_source
     {
     }
 
-    buffers::const_buffer
+    capy::const_buffer
     data() const
     {
         return { s_.data(), s_.size() };
@@ -68,9 +68,9 @@ struct read_source
             ec = ec_;
             return 0;
         }
-        auto n = buffers::copy(
+        auto n = capy::copy(
             dest,
-            buffers::const_buffer(
+            capy::const_buffer(
                 s_.data() + nread_,
                 s_.size() - nread_));
         nread_ += n;
@@ -155,7 +155,7 @@ struct body_source_test
         BOOST_TEST_EQ(b.has_size(), true);
         BOOST_TEST_EQ(b.size(), 0);
         BOOST_TEST_EQ(b.has_buffers(), true);
-        BOOST_TEST_EQ(buffers::size(b.data()), 0);
+        BOOST_TEST_EQ(capy::buffer_size(b.data()), 0);
         BOOST_TEST_NO_THROW(b.rewind());
         grind(b, "");
     }
@@ -169,7 +169,7 @@ struct body_source_test
         BOOST_TEST_EQ(b1.has_size(), true);
         BOOST_TEST_EQ(b1.size(), s1.size());
         BOOST_TEST_EQ(b1.has_buffers(), true);
-        BOOST_TEST_EQ(buffers::size(b1.data()), s1.size());
+        BOOST_TEST_EQ(capy::buffer_size(b1.data()), s1.size());
         BOOST_TEST_NO_THROW(b1.rewind());
         grind(b1, s1);
 
@@ -177,7 +177,7 @@ struct body_source_test
         BOOST_TEST_EQ(b2.has_size(), true);
         BOOST_TEST_EQ(b2.size(), s1.size());
         BOOST_TEST_EQ(b2.has_buffers(), true);
-        BOOST_TEST_EQ(buffers::size(b2.data()), s1.size());
+        BOOST_TEST_EQ(capy::buffer_size(b2.data()), s1.size());
         BOOST_TEST_NO_THROW(b2.rewind());
         grind(b2, s1);
 
@@ -185,7 +185,7 @@ struct body_source_test
         BOOST_TEST_EQ(b1.has_size(), true);
         BOOST_TEST_EQ(b1.size(), s2.size());
         BOOST_TEST_EQ(b1.has_buffers(), true);
-        BOOST_TEST_EQ(buffers::size(b1.data()), s2.size());
+        BOOST_TEST_EQ(capy::buffer_size(b1.data()), s2.size());
         BOOST_TEST_NO_THROW(b1.rewind());
         grind(b1, s2);
     }
@@ -212,7 +212,7 @@ struct body_source_test
         BOOST_TEST_EQ(b1.has_size(), true);
         BOOST_TEST_EQ(b1.size(), 0);
         BOOST_TEST_EQ(b1.has_buffers(), true);
-        BOOST_TEST_EQ(buffers::size(b1.data()), 0);
+        BOOST_TEST_EQ(capy::buffer_size(b1.data()), 0);
         BOOST_TEST_NO_THROW(b1.rewind());
         grind(b2, s1);
 
