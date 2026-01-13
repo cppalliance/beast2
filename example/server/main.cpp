@@ -124,7 +124,7 @@ struct do_json_rpc
 
 };
 
-#ifdef BOOST_BEAST2_HAS_CORO
+#if 0
 auto
 my_coro(
     http::route_params& rp) ->
@@ -193,7 +193,7 @@ int server_main( int argc, char* argv[] )
             http::cors(opts),
             do_json_rpc()
         );
-#ifdef BOOST_BEAST2_HAS_CORO
+#if 0
         srv.wwwroot.use(
             "/spawn",
             http::co_route(my_coro));
