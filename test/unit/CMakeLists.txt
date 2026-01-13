@@ -20,10 +20,8 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "" FILES ${PFILES})
 
 add_executable(boost_beast2_tests ${PFILES})
 target_include_directories(boost_beast2_tests PRIVATE . ../../)
-find_package(OpenSSL REQUIRED)
 target_link_libraries(boost_beast2_tests PRIVATE
     boost_url_test_suite_with_main
-    OpenSSL::SSL
     Boost::beast2)
 
 # Register individual tests with CTest

@@ -21,20 +21,13 @@ target_compile_definitions(beast2_server_example
 set_property(TARGET beast2_server_example
     PROPERTY FOLDER "examples")
 
-find_package(OpenSSL REQUIRED)
 target_include_directories(beast2_server_example PRIVATE .)
 target_link_libraries(
     beast2_server_example
     Boost::beast2
     Boost::json
     Boost::url
-    OpenSSL::SSL
-    OpenSSL::Crypto
     )
-
-if (WIN32)
-    target_link_libraries(beast2_server_example crypt32)
-endif()
 
 if (TARGET Boost::capy_zlib)
     target_link_libraries(beast2_server_example Boost::capy_zlib)
@@ -43,4 +36,3 @@ endif()
 if (TARGET Boost::capy_brotli)
     target_link_libraries(beast2_server_example Boost::capy_brotli)
 endif()
-

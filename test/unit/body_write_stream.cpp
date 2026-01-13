@@ -631,8 +631,6 @@ struct single_tester : public ctx_base
     }
 };
 
-#ifdef BOOST_BEAST2_HAS_CORO
-
 // Result type for async write operations
 struct write_result
 {
@@ -731,8 +729,6 @@ test_coroutine()
     ioc.run();
 }
 
-#endif // BOOST_BEAST2_HAS_CORO
-
 } // anonymous namespace.
 
 struct body_write_stream_test
@@ -808,12 +804,10 @@ struct body_write_stream_test
             single_tester().test_cancel_during_buffer_clear();
         }
 
-#ifdef BOOST_BEAST2_HAS_CORO
         // Test C++20 coroutine compatibility
         {
             test_coroutine();
         }
-#endif
     }
 };
 
