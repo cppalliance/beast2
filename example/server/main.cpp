@@ -13,7 +13,7 @@
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
-#include <boost/capy/thread_pool.hpp>
+#include <boost/capy/ex/thread_pool.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/server/cors.hpp>
