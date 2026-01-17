@@ -17,7 +17,7 @@
 #include <boost/beast2/server/http_stream.hpp>
 #include <boost/capy/application.hpp>
 #include <boost/capy/task.hpp>
-#include <boost/capy/ex/async_run.hpp>
+#include <boost/capy/ex/run_async.hpp>
 #include <boost/corosio/acceptor.hpp>
 #include <boost/corosio/socket.hpp>
 #include <boost/corosio/io_context.hpp>
@@ -146,7 +146,7 @@ start()
     stopped_ = false;
     for (std::size_t i = 0; i < acceptors_.size(); ++i)
     {
-        capy::async_run(ioc_.get_executor())(
+        capy::run_async(ioc_.get_executor())(
             accept_loop(acceptors_[i], configs_[i]));
     }
 }
@@ -212,7 +212,7 @@ accept_loop(corosio::acceptor& acc, http::acceptor_config config)
         }
 
         // Spawn session coroutine
-        capy::async_run(ioc_.get_executor())(
+        capy::run_async(ioc_.get_executor())(
             run_session(*free_worker, config));
     }
 }
