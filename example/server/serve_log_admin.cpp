@@ -112,6 +112,7 @@ private:
 
 //------------------------------------------------
 
+#if 0
 router
 serve_log_admin(
     capy::polystore& ps)
@@ -121,6 +122,7 @@ serve_log_admin(
     r.add(http::method::get, "/submit", handle_submit(ps));
     return r;
 }
+#endif
 
 } // beast2
 } // boost
