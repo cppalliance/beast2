@@ -1,0 +1,233 @@
+//
+// Copyright (c) 2026 Vinnie Falco (vinnie dot falco at gmail dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+// Official repository: https://github.com/cppalliance/beast2
+//
+
+#include <boost/beast2/http_server.hpp>
+#include <boost/http/server/flat_router.hpp>
+#include <boost/capy/task.hpp>
+#include <boost/capy/ex/strand.hpp>
+#include <boost/beast2/server/route_handler_corosio.hpp>
+#include <boost/http/request_parser.hpp>
+#include <boost/http/response.hpp>
+#include <boost/http/serializer.hpp>
+#include <boost/http/string_body.hpp>
+#include <boost/http/server/flat_router.hpp>
+#include <boost/http/server/router.hpp>
+#include <boost/http/error.hpp>
+#include <boost/url/parse.hpp>
+
+#include <boost/capy/application.hpp>
+
+namespace boost {
+namespace beast2 {
+
+struct http_server::impl
+{
+    http::flat_router router;
+    capy::application app;
+
+    impl(http::flat_router r)
+        : router(std::move(r))
+    {
+        // VFALCO These ugly incantations are needed
+        // for http and will hopefully go away soon.
+        http::install_parser_service(app,
+            http::request_parser::config());
+        http::install_serializer_service(app,
+            http::serializer::config());
+    }
+};
+
+struct http_server::
+    worker : http_server::worker_base
+{
+    using launcher = launcher;
+
+    http_server* srv;
+    corosio::io_context& ctx;
+    capy::strand<corosio::io_context::executor_type> strand;
+    corosio::socket sock;
+    corosio_route_params rp;
+
+    worker(
+        corosio::io_context& ctx_,
+        http_server* srv_)
+        : srv(srv_)
+        , ctx(ctx_)
+        , strand(ctx_.get_executor())
+        , sock(ctx_)
+        , rp(sock)
+    {
+        sock.open();
+        rp.parser = http::request_parser(srv->impl_->app);
+        rp.serializer = http::serializer(srv->impl_->app);
+    }
+
+    corosio::socket& socket() override
+    {
+        return sock;
+    }
+
+    void run(launcher launch) override
+    {
+        launch(ctx.get_executor(), srv->do_session(*this));
+    }
+
+    capy::task<corosio::io_result<std::size_t>>
+    read_header()
+    {
+        std::size_t total_bytes = 0;
+        system::error_code ec;
+
+        for (;;)
+        {
+            // Try to parse what we have
+            rp.parser.parse(ec);
+        
+            if (ec == http::condition::need_more_input)
+            {
+                // Need to read more data
+                auto buf = rp.parser.prepare();
+                auto [read_ec, n] = co_await sock.read_some(buf);
+            
+                if (read_ec)
+                    co_return {read_ec, total_bytes};
+            
+                if (n == 0)
+                {
+                    // EOF
+                    rp.parser.commit_eof();
+                    ec = {};
+                }
+                else
+                {
+                    rp.parser.commit(n);
+                    total_bytes += n;
+                }
+                continue;
+            }
+
+            if (ec.failed())
+                co_return {ec, total_bytes};
+
+            if (rp.parser.got_header())
+                co_return {{}, total_bytes};
+        }
+    }
+
+    void on_headers()
+    {
+        // Set up Request and Response objects
+        rp.req = rp.parser.get();
+        rp.route_data.clear();
+        rp.res.set_start_line(
+            http::status::ok, rp.req.version());
+        rp.res.set_keep_alive(rp.req.keep_alive());
+        rp.serializer.reset();
+
+        // Parse the URL
+        auto rv = urls::parse_uri_reference(rp.req.target());
+        if (rv.has_error())
+        {
+            rp.status(http::status::bad_request);
+            rp.set_body("Bad Request: " + rv.error().message());
+            return;
+        }
+
+        rp.url = rv.value();
+    }
+};
+
+http_server::
+~http_server()
+{
+    delete impl_;
+}
+
+http_server::
+http_server(
+    corosio::io_context& ctx,
+    std::size_t num_workers,
+    http::flat_router router)
+    : tcp_server(ctx, ctx.get_executor())
+    , impl_(new impl(std::move(router)))
+{
+    wv_.reserve(num_workers);
+    for(std::size_t i = 0; i < num_workers; ++i)
+        wv_.emplace<worker>(ctx, this);
+}
+
+capy::task<void>
+http_server::
+do_session(
+    worker& w)
+{
+    struct guard
+    {
+        corosio_route_params& rp;
+
+        guard(corosio_route_params& rp_)
+            : rp(rp_)
+        {
+        }
+
+        ~guard()
+        {
+            rp.parser.reset();
+            rp.session_data.clear();
+            rp.parser.start();
+        }
+    };
+
+    guard g(w.rp); // clear things when session ends
+
+    for(;;)
+    {
+        w.rp.parser.reset();
+        w.rp.session_data.clear();
+        w.rp.parser.start();
+
+        // Read HTTP request header
+        auto [ec, n] = co_await w.read_header();
+        if (ec)
+        {
+            //LOG_TRC(sect_)("{} read_header: {}", id(), ec.message());
+            break;
+        }
+
+        //LOG_TRC(sect_)("{} read_header bytes={}", id(), n);
+
+        // Process headers and dispatch
+        w.on_headers();
+
+        auto rv = co_await impl_->router.dispatch(
+            w.rp.req.method(), w.rp.url, w.rp);
+#if 0
+        do_respond(rv); 
+
+        // Write response
+        if (!rp.serializer.is_done())
+        {
+            auto [wec, wn] = co_await write_response();
+            if (wec)
+            {
+                LOG_TRC(sect_)("{} write_response: {}", id(), wec.message());
+                break;
+            }
+            LOG_TRC(sect_)("{} write_response bytes={}", id(), wn);
+        }
+
+        // Check keep-alive
+        if (!rp.res.keep_alive())
+            break;
+#endif
+    }
+}
+
+} // beast2
+} // boost

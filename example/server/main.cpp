@@ -8,8 +8,9 @@
 //
 
 #include "serve_log_admin.hpp"
-#include <boost/beast2/server/http_server.hpp>
+//#include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/router.hpp>
+#include <boost/http/server/flat_router.hpp>
 #include <boost/beast2/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
@@ -17,13 +18,17 @@
 #include <boost/http/request_parser.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/server/cors.hpp>
-#include <boost/capy/bcrypt.hpp>
+#include <boost/beast2/http_server.hpp>
+#include <boost/http/bcrypt.hpp>
 #include <boost/capy/brotli/decode.hpp>
 #include <boost/capy/brotli/encode.hpp>
 #include <boost/capy/zlib/deflate.hpp>
 #include <boost/capy/zlib/inflate.hpp>
 #include <boost/json/parser.hpp>
+#include <boost/url/ipv4_address.hpp>
 #include <iostream>
+
+#include <boost/beast2/server/route_handler_corosio.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -173,9 +178,39 @@ int server_main( int argc, char* argv[] )
         }
 
         capy::application app;
+        corosio::io_context ioc;
 
         install_services(app);
 
+        auto addr = urls::parse_ipv4_address(argv[1]);
+        if(addr.has_error())
+        {
+            std::cerr << "Invalid address: " << argv[1] << "\n";
+            return EXIT_FAILURE;
+        }
+        auto port = static_cast<std::uint16_t>(std::atoi(argv[2]));
+        corosio::endpoint ep(addr.value(), port);
+
+        http::router<corosio_route_params> rr;
+
+        rr.use(
+            [](http::route_params& rp) -> capy::task<http::route_result>
+            {
+                (void)rp;
+                co_return http::route::next;
+            });
+        http_server hsrv(ioc, std::atoi(argv[4]), std::move(rr));
+        auto ec = hsrv.bind(ep);
+        if(ec)
+        {
+            std::cerr << "Bind failed: " << ec.message() << "\n";
+            return EXIT_FAILURE;
+        }
+
+        hsrv.start();
+        ioc.run();
+
+#if 0
         auto& srv = install_plain_http_server(
             app,
             argv[1],
@@ -186,22 +221,29 @@ int server_main( int argc, char* argv[] )
         opts.allowedHeaders = "Content-Type";
 
         srv.wwwroot.use(
+            []( http::route_params& rp ) ->
+                capy::task<http::route_result>
+            {
+                co_return {};
+            });
+        srv.wwwroot.use(
             "/rpc",
             http::cors(opts),
             do_json_rpc()
         );
-#if 0
+
         srv.wwwroot.use(
             "/spawn",
             http::co_route(my_coro));
         srv.wwwroot.use(
             "/bcrypt",
             http::co_route(do_bcrypt));
-#endif
+
         srv.wwwroot.use("/", serve_static( argv[3] ));
 
         app.start();
         srv.run();
+#endif
     }
     catch( std::exception const& e )
     {

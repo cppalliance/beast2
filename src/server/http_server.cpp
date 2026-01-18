@@ -29,7 +29,7 @@ public:
         unsigned short port,
         std::size_t num_workers)
         : ioc_()
-        , workers_(app, ioc_, num_workers, this->wwwroot)
+        , workers_(app, ioc_, num_workers, std::move(this->wwwroot))
     {
         // Parse address and create endpoint
         auto addr_result = urls::parse_ipv4_address(addr);

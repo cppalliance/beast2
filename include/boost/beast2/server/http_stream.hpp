@@ -26,7 +26,8 @@
 #include <boost/http/response.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/string_body.hpp>
-#include <boost/http/server/basic_router.hpp>
+#include <boost/http/server/flat_router.hpp>
+#include <boost/http/server/router.hpp>
 #include <boost/http/error.hpp>
 #include <boost/url/parse.hpp>
 
@@ -60,7 +61,7 @@ public:
     http_stream(
         capy::application& app,
         corosio::socket& sock,
-        router_corosio routes);
+        http::flat_router& routes);
 
     /** Run the HTTP session as a coroutine.
 
@@ -99,7 +100,7 @@ private:
     section sect_;
     std::size_t id_ = 0;
     corosio::socket& sock_;
-    router_corosio routes_;
+    //http::flat_router& routes_;
     http::acceptor_config const* pconfig_ = nullptr;
     corosio_route_params rp_;
 };
@@ -111,7 +112,7 @@ http_stream::
 http_stream(
     capy::application& app,
     corosio::socket& sock,
-    router_corosio routes)
+    http::flat_router& /*routes*/)
     : sect_(use_log_service(app).get_section("http_stream"))
     , id_(
         []() noexcept
@@ -120,7 +121,7 @@ http_stream(
             return ++n;
         }())
     , sock_(sock)
-    , routes_(std::move(routes))
+    //, routes_(routes)
     , rp_(sock_)
 {
     rp_.parser = http::request_parser(app);
@@ -348,8 +349,9 @@ http::route_result
 http_stream::
 do_dispatch()
 {
-    return routes_.dispatch(
-        rp_.req.method(), rp_.url, rp_);
+    return {};
+    //return routes_.dispatch(
+        //rp_.req.method(), rp_.url, rp_);
 }
 
 inline

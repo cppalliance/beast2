@@ -100,7 +100,7 @@ private:
     capy::application& app_;
     corosio::io_context& ioc_;
     section sect_;
-    router_corosio routes_;
+    http::flat_router routes_;
     std::vector<http_worker> workers_;
     std::vector<corosio::acceptor> acceptors_;
     std::vector<http::acceptor_config> configs_;
@@ -220,7 +220,9 @@ accept_loop(corosio::acceptor& acc, http::acceptor_config config)
 inline
 capy::task<void>
 workers::
-run_session(http_worker& w, http::acceptor_config const& config)
+run_session(
+    http_worker& w,
+    http::acceptor_config const& config)
 {
     w.in_use = true;
 
