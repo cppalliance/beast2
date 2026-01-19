@@ -178,8 +178,7 @@ int server_main( int argc, char* argv[] )
         rr.use(
             [](http::route_params& rp) -> capy::task<http::route_result>
             {
-                (void)rp;
-                co_return http::route::next;
+                co_return co_await rp.send( "Hello, coworld!" );
             });
         http_server hsrv(ioc, std::atoi(argv[4]), std::move(rr));
         auto ec = hsrv.bind(ep);

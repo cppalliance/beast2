@@ -12,7 +12,10 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/http/server/route_handler.hpp>
+#include <boost/http/field.hpp>
+#include <boost/http/string_body.hpp>
 #include <boost/corosio/socket.hpp>
+#include <boost/capy/buffers.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -30,8 +33,59 @@ public:
     explicit
     corosio_route_params(
         corosio::socket& s)
-        : stream(s)
+        : stream( s )
     {
+    }
+
+    http::route_task
+    send( std::string_view body ) override
+    {
+        // Auto-detect Content-Type if not already set
+        if( ! res.exists( http::field::content_type ) )
+        {
+            if( ! body.empty() && body[0] == '<' )
+                res.set( http::field::content_type,
+                    "text/html; charset=utf-8" );
+            else
+                res.set( http::field::content_type,
+                    "text/plain; charset=utf-8" );
+        }
+
+        // Set Content-Length if not already set
+        if( ! res.exists( http::field::content_length ) )
+            res.set_payload_size( body.size() );
+
+        // Start the serializer with the response and body
+        serializer.start( res,
+            http::string_body( std::string( body ) ) );
+
+        // Write the response to the socket
+        while( ! serializer.is_done() )
+        {
+            auto rv = serializer.prepare();
+            if( ! rv )
+                co_return rv.error();
+
+            auto bufs = *rv;
+
+            // Write all buffers
+            for( auto const& buf : bufs )
+            {
+                auto [ec, n] = co_await stream.write_some(
+                    capy::const_buffer( buf.data(), buf.size() ) );
+                if( ec )
+                    co_return ec;
+            }
+
+            // Calculate total size written
+            std::size_t written = 0;
+            for( auto const& buf : bufs )
+                written += buf.size();
+
+            serializer.consume( written );
+        }
+
+        co_return {};
     }
 };
 
