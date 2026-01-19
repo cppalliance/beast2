@@ -175,11 +175,14 @@ int server_main( int argc, char* argv[] )
 
         http::router<corosio_route_params> rr;
 
+        rr.use( "/", serve_static( argv[3] ) );
+#if 0
         rr.use(
             [](http::route_params& rp) -> capy::task<http::route_result>
             {
                 co_return co_await rp.send( "Hello, coworld!" );
             });
+#endif
         http_server hsrv(ioc, std::atoi(argv[4]), std::move(rr));
         auto ec = hsrv.bind(ep);
         if(ec)

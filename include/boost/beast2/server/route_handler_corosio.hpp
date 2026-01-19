@@ -87,6 +87,50 @@ public:
 
         co_return {};
     }
+
+    http::route_task
+    end() override
+    {
+        // For chunked encoding, send the terminating chunk
+        // Currently assumes headers have already been sent
+        // and any final data has been written via write()
+
+        // If using chunked encoding, send "0\r\n\r\n"
+        if( res.value_or(
+                http::field::transfer_encoding, "" ) == "chunked" )
+        {
+            static constexpr char terminator[] = "0\r\n\r\n";
+            auto [ec, n] = co_await stream.write_some(
+                capy::const_buffer( terminator, 5 ) );
+            if( ec )
+                co_return ec;
+        }
+
+        co_return {};
+    }
+
+protected:
+    http::route_task
+    write_impl( http::detail::any_bufref buffers ) override
+    {
+        // Extract buffers from type-erased wrapper
+        constexpr std::size_t max_bufs = 16;
+        capy::mutable_buffer bufs[max_bufs];
+        auto const n = buffers.copy_to( bufs, max_bufs );
+
+        // Write all buffers
+        for( std::size_t i = 0; i < n; ++i )
+        {
+            auto [ec, written] = co_await stream.write_some(
+                capy::const_buffer(
+                    bufs[i].data(),
+                    bufs[i].size() ) );
+            if( ec )
+                co_return ec;
+        }
+
+        co_return {};
+    }
 };
 
 } // beast2
