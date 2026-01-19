@@ -44,10 +44,8 @@ struct http_server::impl
 };
 
 struct http_server::
-    worker : http_server::worker_base
+    worker : tcp_server::worker_base
 {
-    using launcher = launcher;
-
     http_server* srv;
     corosio::io_context& ctx;
     capy::strand<corosio::io_context::executor_type> strand;

@@ -10,6 +10,8 @@
 #ifndef BOOST_BEAST2_SERVER_HTTP_STREAM_HPP
 #define BOOST_BEAST2_SERVER_HTTP_STREAM_HPP
 
+#if 0
+
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/log_service.hpp>
 #include <boost/beast2/error.hpp>
@@ -414,5 +416,7 @@ clear() noexcept
 
 } // beast2
 } // boost
+
+#endif
 
 #endif
