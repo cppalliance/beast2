@@ -78,7 +78,7 @@ foreach (BOOST_BEAST2_DEPENDENCY ${BOOST_BEAST2_DEPENDENCIES})
 endforeach ()
 # Conditional dependencies
 if (BOOST_BEAST2_BUILD_TESTS)
-    set(BOOST_BEAST2_UNIT_TEST_LIBRARIES beast)
+    set(BOOST_BEAST2_UNIT_TEST_LIBRARIES asio filesystem beast)
 endif ()
 if (BOOST_BEAST2_BUILD_EXAMPLES)
     set(BOOST_BEAST2_EXAMPLE_LIBRARIES program_options scope multiprecision)

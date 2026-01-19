@@ -712,6 +712,13 @@ jobs:
           repository: cppalliance/capy
           ref: develop
 
+      - name: Clone Boost.Corosio
+        uses: actions/checkout@v3
+        with:
+          path: corosio-root
+          repository: cppalliance/corosio
+          ref: develop
+
       - name: Setup C++
         uses: alandefreitas/cpp-actions/setup-cpp@v1.9.0
         id: setup-cpp
@@ -743,11 +750,13 @@ jobs:
             http-proto-root
             buffers-root
             capy-root
+            corosio-root
           scan-modules-ignore: |
             beast2
             http
             buffers
             capy
+            corosio
 
       - name: Install Packages (Windows)
         uses: alandefreitas/cpp-actions/package-install@v1.9.0
@@ -825,6 +834,7 @@ jobs:
           cp -r "$workspace_root"/http-proto-root libs/http
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/capy-root libs/capy
+          cp -r "$workspace_root"/corosio-root libs/corosio
 
       - name: Boost B2 Workflow
         uses: alandefreitas/cpp-actions/b2-workflow@v1.9.0
@@ -1059,6 +1069,13 @@ jobs:
           repository: cppalliance/capy
           ref: develop
 
+      - name: Clone Boost.Corosio
+        uses: actions/checkout@v3
+        with:
+          path: corosio-root
+          repository: cppalliance/corosio
+          ref: develop
+
       - name: Clone Boost
         uses: alandefreitas/cpp-actions/boost-clone@v1.9.0
         id: boost-clone
@@ -1071,11 +1088,13 @@ jobs:
             http-proto-root
             buffers-root
             capy-root
+            corosio-root
           scan-modules-ignore: |
             beast2
             http
             buffers
             capy
+            corosio
 
       - name: Patch Boost
         id: patch
@@ -1111,6 +1130,7 @@ jobs:
           cp -r "$workspace_root"/http-proto-root libs/http
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/capy-root libs/capy
+          cp -r "$workspace_root"/corosio-root libs/corosio
 
       - uses: actions/setup-node@v4
         with:
