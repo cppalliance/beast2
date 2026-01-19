@@ -11,7 +11,7 @@
 //#include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/http/server/flat_router.hpp>
-#include <boost/beast2/server/serve_static.hpp>
+#include <boost/http/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/capy/application.hpp>
 #include <boost/capy/ex/thread_pool.hpp>
@@ -175,7 +175,7 @@ int server_main( int argc, char* argv[] )
 
         http::router<corosio_route_params> rr;
 
-        rr.use( "/", serve_static( argv[3] ) );
+        rr.use( "/", http::serve_static( argv[3] ) );
 #if 0
         rr.use(
             [](http::route_params& rp) -> capy::task<http::route_result>

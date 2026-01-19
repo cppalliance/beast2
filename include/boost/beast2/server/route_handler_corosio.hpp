@@ -15,6 +15,7 @@
 #include <boost/http/field.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/corosio/socket.hpp>
+#include <boost/capy/any_bufref.hpp>
 #include <boost/capy/buffers.hpp>
 
 namespace boost {
@@ -33,56 +34,56 @@ public:
     explicit
     corosio_route_params(
         corosio::socket& s)
-        : stream( s )
+        : stream(s)
     {
     }
 
     http::route_task
-    send( std::string_view body ) override
+    send(std::string_view body) override
     {
         // Auto-detect Content-Type if not already set
-        if( ! res.exists( http::field::content_type ) )
+        if(! res.exists(http::field::content_type))
         {
-            if( ! body.empty() && body[0] == '<' )
-                res.set( http::field::content_type,
-                    "text/html; charset=utf-8" );
+            if(! body.empty() && body[0] == '<')
+                res.set(http::field::content_type,
+                    "text/html; charset=utf-8");
             else
-                res.set( http::field::content_type,
-                    "text/plain; charset=utf-8" );
+                res.set(http::field::content_type,
+                    "text/plain; charset=utf-8");
         }
 
         // Set Content-Length if not already set
-        if( ! res.exists( http::field::content_length ) )
-            res.set_payload_size( body.size() );
+        if(! res.exists(http::field::content_length))
+            res.set_payload_size(body.size());
 
         // Start the serializer with the response and body
-        serializer.start( res,
-            http::string_body( std::string( body ) ) );
+        serializer.start(res,
+            http::string_body(std::string(body)));
 
         // Write the response to the socket
-        while( ! serializer.is_done() )
+        while(! serializer.is_done())
         {
             auto rv = serializer.prepare();
-            if( ! rv )
+            if(! rv)
                 co_return rv.error();
 
             auto bufs = *rv;
 
             // Write all buffers
-            for( auto const& buf : bufs )
+            for(auto const& buf : bufs)
             {
                 auto [ec, n] = co_await stream.write_some(
-                    capy::const_buffer( buf.data(), buf.size() ) );
-                if( ec )
+                    capy::const_buffer(buf.data(), buf.size()));
+                if(ec)
                     co_return ec;
             }
 
             // Calculate total size written
             std::size_t written = 0;
-            for( auto const& buf : bufs )
+            for(auto const& buf : bufs)
                 written += buf.size();
 
-            serializer.consume( written );
+            serializer.consume(written);
         }
 
         co_return {};
@@ -96,13 +97,13 @@ public:
         // and any final data has been written via write()
 
         // If using chunked encoding, send "0\r\n\r\n"
-        if( res.value_or(
-                http::field::transfer_encoding, "" ) == "chunked" )
+        if(res.value_or(
+                http::field::transfer_encoding, "") == "chunked")
         {
             static constexpr char terminator[] = "0\r\n\r\n";
             auto [ec, n] = co_await stream.write_some(
-                capy::const_buffer( terminator, 5 ) );
-            if( ec )
+                capy::const_buffer(terminator, 5));
+            if(ec)
                 co_return ec;
         }
 
@@ -111,21 +112,21 @@ public:
 
 protected:
     http::route_task
-    write_impl( http::detail::any_bufref buffers ) override
+    write_impl(capy::any_bufref buffers) override
     {
         // Extract buffers from type-erased wrapper
         constexpr std::size_t max_bufs = 16;
         capy::mutable_buffer bufs[max_bufs];
-        auto const n = buffers.copy_to( bufs, max_bufs );
+        auto const n = buffers.copy_to(bufs, max_bufs);
 
         // Write all buffers
-        for( std::size_t i = 0; i < n; ++i )
+        for(std::size_t i = 0; i < n; ++i)
         {
             auto [ec, written] = co_await stream.write_some(
                 capy::const_buffer(
                     bufs[i].data(),
-                    bufs[i].size() ) );
-            if( ec )
+                    bufs[i].size()));
+            if(ec)
                 co_return ec;
         }
 
