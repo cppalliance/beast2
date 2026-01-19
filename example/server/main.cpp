@@ -54,6 +54,7 @@ void install_services(capy::application& app)
         http::serializer::config());
 }
 
+#if 0
 class json_sink : public http::sink
 {
 public:
@@ -125,28 +126,9 @@ struct do_json_rpc
     }
 
 };
+#endif
 
 #if 0
-auto
-my_coro(
-    http::route_params& rp) ->
-        capy::task<http::route_result>
-{
-    (void)rp;
-    asio::thread_pool tp(1);
-    co_await capy::make_async_op<void>(
-        [&tp](auto&& handler)
-        {
-            asio::post(tp.get_executor(),
-                [handler = std::move(handler)]() mutable
-                {
-                    // Simulate some asynchronous work
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                    handler();
-                });
-        });
-    co_return http::route::next;
-}
 
 auto
 do_bcrypt(
@@ -232,12 +214,7 @@ int server_main( int argc, char* argv[] )
             do_json_rpc()
         );
 
-        srv.wwwroot.use(
-            "/spawn",
-            http::co_route(my_coro));
-        srv.wwwroot.use(
-            "/bcrypt",
-            http::co_route(do_bcrypt));
+        srv.wwwroot.use( "/bcrypt", do_bcrypt );
 
         srv.wwwroot.use("/", serve_static( argv[3] ));
 

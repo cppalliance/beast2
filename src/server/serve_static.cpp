@@ -170,9 +170,11 @@ serve_static(
 auto
 serve_static::
 operator()(
-    http::route_params& p) const ->
+    http::route_params&) const ->
         http::route_result
 {
+    return {};
+#if 0
     // Allow: GET, HEAD
     if( p.req.method() != http::method::get &&
         p.req.method() != http::method::head)
@@ -226,6 +228,7 @@ operator()(
 
     BOOST_ASSERT(ec.failed());
     return ec;
+#endif
 }
 
 } // beast2

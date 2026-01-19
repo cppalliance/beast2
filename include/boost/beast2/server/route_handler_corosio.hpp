@@ -33,16 +33,6 @@ public:
         : stream(s)
     {
     }
-
-    void do_finish()
-    {
-        if(finish_)
-        {
-            auto f = std::move(finish_);
-            finish_ = {};
-            f();
-        }
-    }
 };
 
 } // beast2

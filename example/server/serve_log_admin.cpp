@@ -30,8 +30,10 @@ public:
 
     system::error_code
     operator()(
-        http::route_params& p) const
+        http::route_params&) const
     {
+        return {};
+#if 0
         auto const v = ls_.get_sections();
         std::string s;
         format_to(s, "<html>\n");
@@ -75,6 +77,7 @@ public:
         p.res.set(http::field::content_type, "text/html; charset=UTF-8");
         p.set_body(std::move(s));
         return http::route::send;
+#endif
     }
 
 private:
@@ -96,12 +99,15 @@ public:
 
     system::error_code
     operator()(
-        http::route_params& p) const
+        http::route_params&) const
     {
+        return {};
+#if 0
         p.status(http::status::ok);
         p.res.set(http::field::content_type, "plain/text; charset=UTF-8");
         p.set_body("submit");
         return http::route::send;
+#endif
     }
 
 private:
