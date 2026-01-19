@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/asio",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/asio"
+	}
+}

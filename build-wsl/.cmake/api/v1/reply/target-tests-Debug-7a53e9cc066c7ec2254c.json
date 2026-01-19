@@ -1,0 +1,71 @@
+{
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"add_dependencies"
+		],
+		"files" : 
+		[
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/test/CMakeLists.txt",
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/test/unit/CMakeLists.txt",
+			"test/unit/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 11,
+				"parent" : 0
+			},
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 43,
+				"parent" : 2
+			},
+			{
+				"file" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 2,
+				"line" : 31,
+				"parent" : 4
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 3,
+			"id" : "boost_capy_tests::@ed6d7ff0052f0effdc57"
+		},
+		{
+			"backtrace" : 5,
+			"id" : "boost_beast2_tests::@eef10db73b2f22524f92"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "Dependencies"
+	},
+	"id" : "tests::@d235649a82f4ad67d5b2",
+	"name" : "tests",
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/capy/test",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/test"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}

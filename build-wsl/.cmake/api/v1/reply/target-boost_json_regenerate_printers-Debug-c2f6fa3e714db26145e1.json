@@ -1,0 +1,84 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"boost_pretty_printers_gdb_python_header"
+		],
+		"files" : 
+		[
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/json/pretty_printers/FindBoostPrettyPrinters.cmake",
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/json/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 60,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 64,
+				"parent" : 1
+			}
+		]
+	},
+	"folder" : 
+	{
+		"name" : "Dependencies"
+	},
+	"id" : "boost_json_regenerate_printers::@990a8c66a1d0105be817",
+	"name" : "boost_json_regenerate_printers",
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/json",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/json"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0,
+				2
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"isGenerated" : true,
+			"path" : "build-wsl/Dependencies/boost/libs/json/CMakeFiles/boost_json_regenerate_printers",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build-wsl/Dependencies/boost/libs/json/CMakeFiles/boost_json_regenerate_printers.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/json/src/boost_json_gdb_printers.py",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "UTILITY"
+}

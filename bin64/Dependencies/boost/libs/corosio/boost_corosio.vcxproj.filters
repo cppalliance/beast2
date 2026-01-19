@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\acceptor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\except.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\posix_scheduler.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_iocp_resolver_service.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_iocp_scheduler.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_iocp_sockets.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_wsa_init.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\io_context.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\resolver.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\socket.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\acceptor.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\any_bufref.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\consuming_buffers.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\detail\config.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\detail\except.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\detail\scheduler.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\detail\unique_ptr.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\endpoint.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\io_context.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\io_object.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\io_result.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\io_stream.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\read.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\resolver.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\resolver_results.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\socket.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\wolfssl_stream.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\include\boost\corosio\write.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\endpoint_convert.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\posix_op.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\posix_resolver_service.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\posix_scheduler.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\posix_sockets.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\scheduler_op.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_iocp_resolver_service.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_iocp_scheduler.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_iocp_sockets.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_mutex.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_overlapped_op.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\win_wsa_init.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\src\corosio\src\detail\windows.hpp">
+      <Filter>src\detail</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\corosio\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{98C90C26-BD55-38BD-8A06-4FA32BCAE692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\detail">
+      <UniqueIdentifier>{CDCBA84D-D1B7-377C-8A22-985960A81C8F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{C9E4D543-1D8A-3074-9BF6-E22E0CCADB1B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\detail">
+      <UniqueIdentifier>{F03E2187-64F2-3F1E-AA50-D6D1AEA5E2E6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

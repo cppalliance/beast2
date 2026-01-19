@@ -1,0 +1,3047 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"_add_library",
+			"add_library",
+			"target_sources"
+		],
+		"files" : 
+		[
+			"/home/mungo/repos/MungoG/vcpkg/scripts/buildsystems/vcpkg.cmake",
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/math/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 10,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 649,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 17,
+				"parent" : 0
+			}
+		]
+	},
+	"folder" : 
+	{
+		"name" : "Dependencies"
+	},
+	"id" : "boost_math::@6f0babdbb2ecc0b368e0",
+	"name" : "boost_math",
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/math",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43,
+				44,
+				45,
+				46,
+				47,
+				48,
+				49,
+				50,
+				51,
+				52,
+				53,
+				54,
+				55,
+				56,
+				57,
+				58,
+				59,
+				60,
+				61,
+				62,
+				63,
+				64,
+				65,
+				66,
+				67,
+				68,
+				69,
+				70,
+				71,
+				72,
+				73,
+				74,
+				75,
+				76,
+				77,
+				78,
+				79,
+				80,
+				81,
+				82,
+				83,
+				84,
+				85,
+				86,
+				87,
+				88,
+				89,
+				90,
+				91,
+				92,
+				93,
+				94,
+				95,
+				96,
+				97,
+				98,
+				99,
+				100,
+				101,
+				102,
+				103,
+				104,
+				105,
+				106,
+				107,
+				108,
+				109,
+				110,
+				111,
+				112,
+				113,
+				114,
+				115,
+				116,
+				117,
+				118,
+				119,
+				120,
+				121,
+				122,
+				123,
+				124,
+				125,
+				126,
+				127,
+				128,
+				129,
+				130,
+				131,
+				132,
+				133,
+				134,
+				135,
+				136,
+				137,
+				138,
+				139,
+				140,
+				141,
+				142,
+				143,
+				144,
+				145,
+				146,
+				147,
+				148,
+				149,
+				150,
+				151,
+				152,
+				153,
+				154,
+				155,
+				156,
+				157,
+				158,
+				159,
+				160,
+				161,
+				162,
+				163,
+				164,
+				165,
+				166,
+				167,
+				168,
+				169,
+				170,
+				171,
+				172,
+				173,
+				174,
+				175,
+				176,
+				177,
+				178,
+				179,
+				180,
+				181,
+				182,
+				183,
+				184,
+				185,
+				186,
+				187,
+				188,
+				189,
+				190,
+				191,
+				192,
+				193,
+				194,
+				195,
+				196,
+				197,
+				198,
+				199,
+				200,
+				201,
+				202,
+				203,
+				204,
+				205,
+				206,
+				207,
+				208,
+				209,
+				210,
+				211,
+				212,
+				213,
+				214,
+				215,
+				216,
+				217,
+				218,
+				219,
+				220,
+				221,
+				222,
+				223,
+				224,
+				225,
+				226,
+				227,
+				228,
+				229,
+				230,
+				231,
+				232,
+				233,
+				234,
+				235,
+				236,
+				237,
+				238,
+				239,
+				240,
+				241,
+				242,
+				243,
+				244,
+				245,
+				246,
+				247,
+				248,
+				249,
+				250,
+				251,
+				252,
+				253,
+				254,
+				255,
+				256,
+				257,
+				258,
+				259,
+				260,
+				261,
+				262,
+				263,
+				264,
+				265,
+				266,
+				267,
+				268,
+				269,
+				270,
+				271,
+				272,
+				273,
+				274,
+				275,
+				276,
+				277,
+				278,
+				279,
+				280,
+				281,
+				282,
+				283,
+				284,
+				285,
+				286,
+				287,
+				288,
+				289,
+				290,
+				291,
+				292,
+				293,
+				294,
+				295,
+				296,
+				297,
+				298,
+				299,
+				300,
+				301,
+				302,
+				303,
+				304,
+				305,
+				306,
+				307,
+				308,
+				309,
+				310,
+				311,
+				312,
+				313,
+				314,
+				315,
+				316,
+				317,
+				318,
+				319,
+				320,
+				321,
+				322,
+				323,
+				324,
+				325,
+				326,
+				327,
+				328,
+				329,
+				330,
+				331,
+				332,
+				333,
+				334,
+				335,
+				336,
+				337,
+				338,
+				339,
+				340,
+				341,
+				342,
+				343,
+				344,
+				345,
+				346,
+				347,
+				348,
+				349,
+				350,
+				351,
+				352,
+				353,
+				354,
+				355,
+				356,
+				357,
+				358,
+				359,
+				360,
+				361,
+				362,
+				363,
+				364,
+				365,
+				366,
+				367,
+				368,
+				369,
+				370,
+				371,
+				372,
+				373,
+				374,
+				375,
+				376,
+				377,
+				378,
+				379,
+				380,
+				381,
+				382,
+				383,
+				384,
+				385,
+				386,
+				387,
+				388,
+				389,
+				390,
+				391,
+				392,
+				393,
+				394,
+				395,
+				396,
+				397,
+				398,
+				399,
+				400,
+				401,
+				402,
+				403,
+				404,
+				405,
+				406,
+				407,
+				408,
+				409,
+				410,
+				411,
+				412,
+				413,
+				414,
+				415,
+				416,
+				417,
+				418,
+				419,
+				420,
+				421,
+				422,
+				423,
+				424,
+				425,
+				426,
+				427,
+				428,
+				429,
+				430,
+				431,
+				432,
+				433,
+				434,
+				435,
+				436,
+				437,
+				438,
+				439,
+				440,
+				441,
+				442,
+				443,
+				444,
+				445,
+				446,
+				447,
+				448,
+				449,
+				450,
+				451,
+				452,
+				453,
+				454,
+				455,
+				456,
+				457,
+				458,
+				459,
+				460,
+				461,
+				462,
+				463,
+				464,
+				465,
+				466,
+				467,
+				468,
+				469,
+				470,
+				471,
+				472,
+				473,
+				474,
+				475,
+				476,
+				477,
+				478,
+				479,
+				480,
+				481,
+				482,
+				483,
+				484,
+				485,
+				486,
+				487,
+				488,
+				489,
+				490,
+				491,
+				492,
+				493,
+				494,
+				495,
+				496
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/cstdfloat.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/bindings/detail/big_digamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/bindings/detail/big_lanczos.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/bindings/mpfr.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/bindings/mpreal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/bindings/rr.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/abs.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/ccmath.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/ceil.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/copysign.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/detail/config.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/detail/swap.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/div.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fabs.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fdim.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/floor.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fmax.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fmin.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fmod.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/fpclassify.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/frexp.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/hypot.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/ilogb.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isfinite.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isgreater.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isgreaterequal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isinf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isless.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/islessequal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isnan.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isnormal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/isunordered.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/ldexp.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/logb.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/modf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/next.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/remainder.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/round.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/scalbln.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/scalbn.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/signbit.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/sqrt.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/ccmath/trunc.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/common_factor.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/common_factor_ct.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/common_factor_rt.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/acos.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/acosh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/asin.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/asinh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/atan.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/atanh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/details.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/complex/fabs.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/concepts/distributions.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/concepts/real_concept.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/concepts/real_type_concept.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/concepts/std_real_concept.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/constants/calculate_constants.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/constants/constants.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/constants/info.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/cstdfloat/cstdfloat_cmath.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/cstdfloat/cstdfloat_complex.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/cstdfloat/cstdfloat_complex_std.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/cstdfloat/cstdfloat_iostream.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/cstdfloat/cstdfloat_limits.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/cstdfloat/cstdfloat_types.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/differentiation/autodiff.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/differentiation/autodiff_cpp11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/differentiation/finite_difference.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/differentiation/lanczos_smoothing.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/arcsine.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/bernoulli.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/beta.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/binomial.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/cauchy.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/chi_squared.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/complement.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/common_error_handling.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/derived_accessors.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/generic_mode.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/generic_quantile.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/hypergeometric_cdf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/hypergeometric_pdf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/hypergeometric_quantile.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/detail/inv_discrete_quantile.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/empirical_cumulative_distribution_function.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/exponential.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/extreme_value.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/find_location.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/find_scale.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/fisher_f.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/fwd.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/gamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/geometric.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/holtsmark.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/hyperexponential.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/hypergeometric.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/inverse_chi_squared.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/inverse_gamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/inverse_gaussian.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/kolmogorov_smirnov.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/landau.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/laplace.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/logistic.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/lognormal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/mapairy.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/negative_binomial.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/non_central_beta.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/non_central_chi_squared.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/non_central_f.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/non_central_t.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/normal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/pareto.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/poisson.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/rayleigh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/saspoint5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/skew_normal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/students_t.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/triangular.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/uniform.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/distributions/weibull.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/filters/daubechies.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/barycentric_rational.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/bezier_polynomial.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/bilinear_uniform.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/cardinal_cubic_b_spline.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/cardinal_quadratic_b_spline.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/cardinal_quintic_b_spline.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/cardinal_trigonometric.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/catmull_rom.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/cubic_b_spline.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/cubic_hermite.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/barycentric_rational_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/bezier_polynomial_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/bilinear_uniform_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/cardinal_cubic_b_spline_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/cardinal_quadratic_b_spline_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/cardinal_quintic_b_spline_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/cardinal_trigonometric_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/cubic_b_spline_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/cubic_hermite_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/quintic_hermite_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/septic_hermite_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/vector_barycentric_rational_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/detail/whittaker_shannon_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/makima.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/pchip.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/quintic_hermite.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/septic_hermite.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/vector_barycentric_rational.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/interpolators/whittaker_shannon.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/octonion.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/optimization/cma_es.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/optimization/detail/common.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/optimization/differential_evolution.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/optimization/jso.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/optimization/random_search.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/policies/error_handling.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/policies/policy.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/detail/exp_sinh_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/detail/ooura_fourier_integrals_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/detail/sinh_sinh_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/detail/tanh_sinh_detail.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/exp_sinh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/gauss.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/gauss_kronrod.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/naive_monte_carlo.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/ooura_fourier_integrals.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/sinh_sinh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/tanh_sinh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/trapezoidal.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quadrature/wavelet_transforms.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/quaternion.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/acosh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/airy.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/asinh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/atanh.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/bernoulli.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/bessel.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/bessel_iterators.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/bessel_prime.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/beta.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/binomial.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/cardinal_b_spline.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/cbrt.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/chebyshev.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/chebyshev_transform.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/cos_pi.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/daubechies_scaling.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/daubechies_wavelet.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/airy_ai_bi_zero.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bernoulli_details.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_derivatives_linear.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_i0.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_i1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_ik.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_j0.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_j1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jn.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jy.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jy_asym.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jy_derivatives_asym.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jy_derivatives_series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jy_series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_jy_zero.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_k0.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_k1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_kn.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_y0.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_y1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/bessel_yn.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/daubechies_scaling_integer_grid.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/erf_inv.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/fp_traits.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/gamma_inva.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_0F1_bessel.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_addition_theorems_on_z.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_bessel.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_by_ratios.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_cf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_large_a.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_large_abz.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_negative_b_regions.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_recurrence.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_scaled_series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_1F1_small_a_negative_b_by_ratio.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_asym.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_cf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_pFq_checked_series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_pade.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_rational.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_separated_series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/hypergeometric_series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/ibeta_inv_ab.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/ibeta_inverse.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/iconv.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/igamma_inverse.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/igamma_large.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/lanczos_sse2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/lgamma_small.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/polygamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/round_fwd.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/t_distribution_inv.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/unchecked_bernoulli.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/detail/unchecked_factorial.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/digamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_d.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_rc.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_rd.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_rf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_rg.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ellint_rj.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/erf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/expint.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/expm1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/factorials.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/fibonacci.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/fourier_transform_daubechies.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/fpclassify.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/gamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/gegenbauer.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hankel.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hermite.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/heuman_lambda.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hypergeometric_0F1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hypergeometric_1F0.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hypergeometric_1F1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hypergeometric_2F0.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hypergeometric_pFq.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/hypot.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/jacobi.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/jacobi_elliptic.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/jacobi_theta.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/jacobi_zeta.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/laguerre.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/lambert_w.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/lanczos.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/legendre.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/legendre_stieltjes.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/log1p.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/logaddexp.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/logsumexp.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/math_fwd.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/modf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/next.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/nonfinite_num_facets.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/owens_t.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/polygamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/pow.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/powm1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/prime.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/relative_difference.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/round.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/rsqrt.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/sign.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/sin_pi.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/sinc.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/sinhc.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/spherical_harmonic.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/sqrt1pm1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/trigamma.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/trunc.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/ulp.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/special_functions/zeta.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/anderson_darling.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/bivariate_statistics.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/chatterjee_correlation.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/detail/rank.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/detail/single_pass.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/linear_regression.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/ljung_box.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/runs_test.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/signal_statistics.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/t_test.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/univariate_statistics.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/statistics/z_test.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/agm.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/array.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/assert.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/atomic.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/big_constant.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/bivariate_statistics.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/centered_continued_fraction.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/cohen_acceleration.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/color_maps.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/complex.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/concepts.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/condition_numbers.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/config.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/convert_from_string.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/cstdint.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/cubic_roots.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/cxx03_warn.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/is_const_iterable.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_10.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_12.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_13.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_14.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_15.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_16.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_17.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_18.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_19.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_20.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_4.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_6.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_7.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_8.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner1_9.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_10.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_12.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_13.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_14.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_15.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_16.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_17.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_18.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_19.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_20.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_4.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_6.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_7.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_8.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner2_9.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_10.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_12.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_13.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_14.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_15.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_16.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_17.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_18.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_19.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_20.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_4.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_6.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_7.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_8.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/polynomial_horner3_9.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_10.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_12.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_13.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_14.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_15.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_16.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_17.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_18.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_19.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_20.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_4.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_6.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_7.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_8.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner1_9.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_10.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_12.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_13.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_14.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_15.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_16.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_17.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_18.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_19.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_20.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_4.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_6.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_7.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_8.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner2_9.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_10.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_11.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_12.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_13.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_14.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_15.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_16.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_17.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_18.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_19.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_2.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_20.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_3.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_4.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_5.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_6.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_7.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_8.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/detail/rational_horner3_9.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/engel_expansion.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/estrin.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/fraction.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/header_deprecated.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/is_constant_evaluated.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/is_detected.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/is_standalone.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/luroth_expansion.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/minima.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/mp.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/norms.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/nothrow.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/numeric_limits.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/numerical_differentiation.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/polynomial.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/polynomial_gcd.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/precision.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/promotion.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/quartic_roots.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/random_vector.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/rational.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/real_cast.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/recurrence.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/roots.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/series.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/signal_statistics.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/simple_continued_fraction.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/stats.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/test_value.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/throw_exception.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/toms748_solve.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/traits.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/tuple.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/type_traits.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/ulps_plot.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/univariate_statistics.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/user.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/utility.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tools/workaround.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math/tr1.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 3,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/include/boost/math_fwd.hpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "INTERFACE_LIBRARY"
+}

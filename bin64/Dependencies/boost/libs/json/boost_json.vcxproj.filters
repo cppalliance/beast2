@@ -1,0 +1,423 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\json\src\src.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\array.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\basic_parser.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\basic_parser_impl.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\conversion.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\debug_printers.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\array.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\buffer.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\chars_format.hpp">
+      <Filter>json\detail\charconv</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\compute_float64.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\config.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\emulated128.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\ascii_number.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\bigint.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\constexpr_feature_detect.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\decimal_to_binary.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\digit_comparison.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\fast_float.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\fast_table.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\float_common.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\fast_float\parse_number.hpp">
+      <Filter>json\detail\charconv\detail\fast_float</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\from_chars_float_impl.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\from_chars_integer_impl.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\from_chars_result.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\integer_search_trees.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\parser.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\detail\significand_tables.hpp">
+      <Filter>json\detail\charconv\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\from_chars.hpp">
+      <Filter>json\detail\charconv</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\limits.hpp">
+      <Filter>json\detail\charconv</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\config.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\default_resource.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\digest.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\except.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\format.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\gdb_printers.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\handler.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\array.hpp">
+      <Filter>json\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\stack.hpp">
+      <Filter>json\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\literals.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\object.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\parse_into.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\detail\common.hpp">
+      <Filter>json\detail\ryu\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\detail\d2s.hpp">
+      <Filter>json\detail\ryu\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\detail\d2s_full_table.hpp">
+      <Filter>json\detail\ryu\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\detail\d2s_intrinsics.hpp">
+      <Filter>json\detail\ryu\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\detail\digit_table.hpp">
+      <Filter>json\detail\ryu\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\ryu.hpp">
+      <Filter>json\detail\ryu</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\sbo_buffer.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\shared_resource.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\sse2.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\stack.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\stream.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\string_impl.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\utf8.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\value.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\value_from.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\value_to.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\writer.hpp">
+      <Filter>json\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\error.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\fwd.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\array.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\conversion.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\error.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\object.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\parse_into.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\serialize.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\serializer.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\string.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\value.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\value_ref.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\visit.hpp">
+      <Filter>json\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\is_deallocate_trivial.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\kind.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\monotonic_resource.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\null_resource.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\object.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\parse.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\parse_into.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\parse_options.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\parser.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\pilfer.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\result_for.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\serialize.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\serialize_options.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\serializer.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\set_pointer_options.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\src.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\static_resource.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\storage_ptr.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\stream_parser.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\string.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\string_view.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\value.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\value_from.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\value_ref.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\value_stack.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\value_to.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\visit.hpp">
+      <Filter>json</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\json\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\json.natvis">
+      <Filter>json</Filter>
+    </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\charconv\impl\from_chars.ipp">
+      <Filter>json\detail\charconv\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\default_resource.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\except.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\format.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\handler.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\shared_resource.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\stack.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\impl\string_impl.ipp">
+      <Filter>json\detail\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\detail\ryu\impl\d2s.ipp">
+      <Filter>json\detail\ryu\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\array.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\error.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\kind.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\monotonic_resource.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\null_resource.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\object.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\parse.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\parser.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\pointer.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\serialize.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\serializer.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\static_resource.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\stream_parser.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\string.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\value.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\value_ref.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\json\include\boost\json\impl\value_stack.ipp">
+      <Filter>json\impl</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="json">
+      <UniqueIdentifier>{530DB040-FCCA-398A-8501-A1F0193A37E8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail">
+      <UniqueIdentifier>{00CC1FCF-A019-3C97-8ECF-10571FB36313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\charconv">
+      <UniqueIdentifier>{6236472B-AF87-35B8-BA0A-79BBBB84F86F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\charconv\detail">
+      <UniqueIdentifier>{CA1D35EC-5F7D-3872-9E34-B42DF133A46E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\charconv\detail\fast_float">
+      <UniqueIdentifier>{5A702414-0B20-3507-98FE-DE3516B9EA8A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\charconv\impl">
+      <UniqueIdentifier>{21259223-4A74-3C79-AC2C-5F4A17379932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\impl">
+      <UniqueIdentifier>{7810E24A-339D-358B-85A8-D7047B465C1B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\ryu">
+      <UniqueIdentifier>{00C5791E-7702-3574-8359-F5AC476277C2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\ryu\detail">
+      <UniqueIdentifier>{FAE828EF-F3A1-3C29-A201-23C119238515}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\detail\ryu\impl">
+      <UniqueIdentifier>{6049F1A4-25EC-3B49-B1DB-1BB2E7C6F6AD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json\impl">
+      <UniqueIdentifier>{1C7EE7C1-8F3B-37A9-9880-DFAC42793323}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

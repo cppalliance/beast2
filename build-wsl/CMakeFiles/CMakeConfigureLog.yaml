@@ -1,0 +1,1191 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:233 (message)"
+      - "CMakeLists.txt:23 (project)"
+    message: |
+      The system is: Linux - 6.6.87.2-microsoft-standard-WSL2 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:23 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /usr/bin/c++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is GNU, found in:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/3.28.3/CompilerIdCXX/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:23 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-fYZJ5u"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-fYZJ5u"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-fYZJ5u'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_5073b
+        [1/2] /usr/bin/c++   -std=gnu++20   -v -o CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/c++
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+        COLLECT_GCC_OPTIONS='-std=gnu++20' '-v' '-o' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_5073b.dir/'
+         /usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_5073b.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -std=gnu++20 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/cc9Tezi6.s
+        GNU C++20 (Ubuntu 13.3.0-6ubuntu2~24.04) version 13.3.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 13.3.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/13"
+        ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/include/c++/13
+         /usr/include/x86_64-linux-gnu/c++/13
+         /usr/include/c++/13/backward
+         /usr/lib/gcc/x86_64-linux-gnu/13/include
+         /usr/local/include
+         /usr/include/x86_64-linux-gnu
+         /usr/include
+        End of search list.
+        Compiler executable checksum: c81c05345ce537099dafd5580045814a
+        COLLECT_GCC_OPTIONS='-std=gnu++20' '-v' '-o' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_5073b.dir/'
+         as -v --64 -o CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc9Tezi6.s
+        GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-std=gnu++20' '-v' '-o' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.'
+        [2/2] : && /usr/bin/c++  -v CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_5073b   && :
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/c++
+        COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_5073b' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_5073b.'
+         /usr/libexec/gcc/x86_64-linux-gnu/13/collect2 -plugin /usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper -plugin-opt=-fresolution=/tmp/ccryjzQt.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_5073b /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/13/../../.. CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_5073b' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_5073b.'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:23 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/include/c++/13]
+          add: [/usr/include/x86_64-linux-gnu/c++/13]
+          add: [/usr/include/c++/13/backward]
+          add: [/usr/lib/gcc/x86_64-linux-gnu/13/include]
+          add: [/usr/local/include]
+          add: [/usr/include/x86_64-linux-gnu]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/usr/include/c++/13] ==> [/usr/include/c++/13]
+        collapse include dir [/usr/include/x86_64-linux-gnu/c++/13] ==> [/usr/include/x86_64-linux-gnu/c++/13]
+        collapse include dir [/usr/include/c++/13/backward] ==> [/usr/include/c++/13/backward]
+        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/13/include] ==> [/usr/lib/gcc/x86_64-linux-gnu/13/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/include/x86_64-linux-gnu] ==> [/usr/include/x86_64-linux-gnu]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/usr/include/c++/13;/usr/include/x86_64-linux-gnu/c++/13;/usr/include/c++/13/backward;/usr/lib/gcc/x86_64-linux-gnu/13/include;/usr/local/include;/usr/include/x86_64-linux-gnu;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:23 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-fYZJ5u']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/bin/ninja -v cmTC_5073b]
+        ignore line: [[1/2] /usr/bin/c++   -std=gnu++20   -v -o CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/c++]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-std=gnu++20' '-v' '-o' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_5073b.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_5073b.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -std=gnu++20 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/cc9Tezi6.s]
+        ignore line: [GNU C++20 (Ubuntu 13.3.0-6ubuntu2~24.04) version 13.3.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 13.3.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/13"]
+        ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/include/c++/13]
+        ignore line: [ /usr/include/x86_64-linux-gnu/c++/13]
+        ignore line: [ /usr/include/c++/13/backward]
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/13/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/include/x86_64-linux-gnu]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Compiler executable checksum: c81c05345ce537099dafd5580045814a]
+        ignore line: [COLLECT_GCC_OPTIONS='-std=gnu++20' '-v' '-o' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_5073b.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc9Tezi6.s]
+        ignore line: [GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-std=gnu++20' '-v' '-o' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [[2/2] : && /usr/bin/c++  -v CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_5073b   && :]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/c++]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) ]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_5073b' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_5073b.']
+        link line: [ /usr/libexec/gcc/x86_64-linux-gnu/13/collect2 -plugin /usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper -plugin-opt=-fresolution=/tmp/ccryjzQt.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_5073b /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/13/../../.. CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o]
+          arg [/usr/libexec/gcc/x86_64-linux-gnu/13/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccryjzQt.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-pie] ==> ignore
+          arg [-znow] ==> ignore
+          arg [-zrelro] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_5073b] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib]
+          arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+          arg [-L/lib/../lib] ==> dir [/lib/../lib]
+          arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+          arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../..]
+          arg [CMakeFiles/cmTC_5073b.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lc] ==> lib [c]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o] ==> [/usr/lib/x86_64-linux-gnu/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13] ==> [/usr/lib/gcc/x86_64-linux-gnu/13]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib] ==> [/usr/lib]
+        collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+        collapse library dir [/lib/../lib] ==> [/lib]
+        collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../..] ==> [/usr/lib]
+        implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+        implicit objs: [/usr/lib/x86_64-linux-gnu/Scrt1.o;/usr/lib/x86_64-linux-gnu/crti.o;/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o;/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o;/usr/lib/x86_64-linux-gnu/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/13;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/container/CMakeLists.txt:7 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/cc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is GNU, found in:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/3.28.3/CompilerIdC/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/container/CMakeLists.txt:7 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-nchZ97"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-nchZ97"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-nchZ97'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_d0131
+        [1/2] /usr/bin/cc   -v -o CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/cc
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d0131.dir/'
+         /usr/libexec/gcc/x86_64-linux-gnu/13/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_d0131.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccp0EoNf.s
+        GNU C17 (Ubuntu 13.3.0-6ubuntu2~24.04) version 13.3.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 13.3.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/lib/gcc/x86_64-linux-gnu/13/include
+         /usr/local/include
+         /usr/include/x86_64-linux-gnu
+         /usr/include
+        End of search list.
+        Compiler executable checksum: 38987c28e967c64056a6454abdef726e
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d0131.dir/'
+         as -v --64 -o CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o /tmp/ccp0EoNf.s
+        GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.'
+        [2/2] : && /usr/bin/cc  -v CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o -o cmTC_d0131   && :
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/cc
+        COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_d0131' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_d0131.'
+         /usr/libexec/gcc/x86_64-linux-gnu/13/collect2 -plugin /usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper -plugin-opt=-fresolution=/tmp/ccYXspxI.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_d0131 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/13/../../.. CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_d0131' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_d0131.'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/container/CMakeLists.txt:7 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/lib/gcc/x86_64-linux-gnu/13/include]
+          add: [/usr/local/include]
+          add: [/usr/include/x86_64-linux-gnu]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/13/include] ==> [/usr/lib/gcc/x86_64-linux-gnu/13/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/include/x86_64-linux-gnu] ==> [/usr/include/x86_64-linux-gnu]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/usr/lib/gcc/x86_64-linux-gnu/13/include;/usr/local/include;/usr/include/x86_64-linux-gnu;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/container/CMakeLists.txt:7 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-nchZ97']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/bin/ninja -v cmTC_d0131]
+        ignore line: [[1/2] /usr/bin/cc   -v -o CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/cc]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d0131.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-linux-gnu/13/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_d0131.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccp0EoNf.s]
+        ignore line: [GNU C17 (Ubuntu 13.3.0-6ubuntu2~24.04) version 13.3.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 13.3.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/13/../../../../x86_64-linux-gnu/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/13/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/include/x86_64-linux-gnu]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Compiler executable checksum: 38987c28e967c64056a6454abdef726e]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d0131.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o /tmp/ccp0EoNf.s]
+        ignore line: [GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.']
+        ignore line: [[2/2] : && /usr/bin/cc  -v CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o -o cmTC_d0131   && :]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/cc]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c ada c++ go d fortran objc obj-c++ m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) ]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/13/:/usr/libexec/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/13/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/13/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_d0131' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_d0131.']
+        link line: [ /usr/libexec/gcc/x86_64-linux-gnu/13/collect2 -plugin /usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper -plugin-opt=-fresolution=/tmp/ccYXspxI.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_d0131 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/13 -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/13/../../.. CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o]
+          arg [/usr/libexec/gcc/x86_64-linux-gnu/13/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/libexec/gcc/x86_64-linux-gnu/13/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccYXspxI.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-pie] ==> ignore
+          arg [-znow] ==> ignore
+          arg [-zrelro] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_d0131] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib]
+          arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+          arg [-L/lib/../lib] ==> dir [/lib/../lib]
+          arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+          arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/13/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../..]
+          arg [CMakeFiles/cmTC_d0131.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [-lc] ==> lib [c]
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o] ==> [/usr/lib/x86_64-linux-gnu/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13] ==> [/usr/lib/gcc/x86_64-linux-gnu/13]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../../../lib] ==> [/usr/lib]
+        collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+        collapse library dir [/lib/../lib] ==> [/lib]
+        collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/13/../../..] ==> [/usr/lib]
+        implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+        implicit objs: [/usr/lib/x86_64-linux-gnu/Scrt1.o;/usr/lib/x86_64-linux-gnu/crti.o;/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o;/usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o;/usr/lib/x86_64-linux-gnu/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/13;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:99 (CHECK_CXX_SOURCE_COMPILES)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "/home/mungo/repos/MungoG/vcpkg/scripts/buildsystems/vcpkg.cmake:904 (_find_package)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/CMakeLists.txt:126 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-OBnd6v"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-OBnd6v"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-OBnd6v'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_b2648
+        [1/2] /usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD  -std=gnu++20 -o CMakeFiles/cmTC_b2648.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-OBnd6v/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_b2648.dir/src.cxx.o -o cmTC_b2648   && :
+        
+      exitCode: 0
+...
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:1131 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineASMCompiler.cmake:131 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/CMakeLists.txt:197 (enable_language)"
+    message: |
+      Checking whether the ASM compiler is GNU using "--version" matched "(GNU assembler)|(GCC)|(Free Software Foundation)":
+      cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+      Copyright (C) 2023 Free Software Foundation, Inc.
+      This is free software; see the source for copying conditions.  There is NO
+      warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+      
+...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/CMakeLists.txt:27 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_ATOMIC_TARGET_X86"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-8l9klV"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-8l9klV"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_ATOMIC_TARGET_X86"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-8l9klV'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_fbb38
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_ATOMIC_TARGET_X86 -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_fbb38.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-8l9klV/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_fbb38.dir/src.cxx.o -o cmTC_fbb38   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/CMakeLists.txt:51 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_ATOMIC_COMPILER_HAS_SSE2"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-IZJODy"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-IZJODy"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_ATOMIC_COMPILER_HAS_SSE2"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-IZJODy'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_ce519
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_ATOMIC_COMPILER_HAS_SSE2 -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -msse -msse2 -std=c++20 -Wall -o CMakeFiles/cmTC_ce519.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-IZJODy/src.cxx
+        [2/2] : && /usr/bin/c++ -msse -msse2  CMakeFiles/cmTC_ce519.dir/src.cxx.o -o cmTC_ce519   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/CMakeLists.txt:57 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_ATOMIC_COMPILER_HAS_SSE41"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-1iC2EG"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-1iC2EG"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_ATOMIC_COMPILER_HAS_SSE41"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-1iC2EG'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_7d412
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_ATOMIC_COMPILER_HAS_SSE41 -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -msse -msse2 -msse3 -mssse3 -msse4.1 -std=c++20 -Wall -o CMakeFiles/cmTC_7d412.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-1iC2EG/src.cxx
+        [2/2] : && /usr/bin/c++ -msse -msse2 -msse3 -mssse3 -msse4.1  CMakeFiles/cmTC_7d412.dir/src.cxx.o -o cmTC_7d412   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/CMakeLists.txt:75 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_ATOMIC_HAS_PTHREAD_COND_CLOCKWAIT"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-3DGiVi"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-3DGiVi"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_ATOMIC_HAS_PTHREAD_COND_CLOCKWAIT"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-3DGiVi'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_a6627
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_ATOMIC_HAS_PTHREAD_COND_CLOCKWAIT -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_a6627.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-3DGiVi/src.cxx
+        FAILED: CMakeFiles/cmTC_a6627.dir/src.cxx.o 
+        /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_ATOMIC_HAS_PTHREAD_COND_CLOCKWAIT -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_a6627.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-3DGiVi/src.cxx
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-3DGiVi/src.cxx:1:10: fatal error: /home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/config/pthread_cond_clockwait.cpp: No such file or directory
+            1 | #include </home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/config/pthread_cond_clockwait.cpp>
+              |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        compilation terminated.
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:34 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_INIT_PRIORITY"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-aLfmpt"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-aLfmpt"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_INIT_PRIORITY"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-aLfmpt'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_a13bb
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_INIT_PRIORITY -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_a13bb.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-aLfmpt/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_a13bb.dir/src.cxx.o -o cmTC_a13bb   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:35 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_CXX20_ATOMIC_REF"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DB0aQ8"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DB0aQ8"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_CXX20_ATOMIC_REF"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DB0aQ8'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_108ad
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_CXX20_ATOMIC_REF -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_108ad.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DB0aQ8/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_108ad.dir/src.cxx.o -o cmTC_108ad   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:36 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STAT_ST_BLKSIZE"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Mp8PXS"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Mp8PXS"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STAT_ST_BLKSIZE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Mp8PXS'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_10321
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_BLKSIZE -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_10321.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Mp8PXS/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Mp8PXS/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_blksize.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_blksize.cpp:16:17: warning: variable ‘st’ set but not used [-Wunused-but-set-variable]
+           16 |     struct stat st;
+              |                 ^~
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_10321.dir/src.cxx.o -o cmTC_10321   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:37 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STAT_ST_MTIM"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-lINXaR"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-lINXaR"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STAT_ST_MTIM"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-lINXaR'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_9fefe
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_MTIM -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_9fefe.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-lINXaR/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-lINXaR/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_mtim.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_mtim.cpp:16:17: warning: variable ‘st’ set but not used [-Wunused-but-set-variable]
+           16 |     struct stat st;
+              |                 ^~
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_9fefe.dir/src.cxx.o -o cmTC_9fefe   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:38 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STAT_ST_MTIMENSEC"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-TWlJzd"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-TWlJzd"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STAT_ST_MTIMENSEC"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-TWlJzd'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_eb4b4
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_MTIMENSEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_eb4b4.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-TWlJzd/src.cxx
+        FAILED: CMakeFiles/cmTC_eb4b4.dir/src.cxx.o 
+        /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_MTIMENSEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_eb4b4.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-TWlJzd/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-TWlJzd/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_mtimensec.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_mtimensec.cpp:17:8: error: ‘struct stat’ has no member named ‘st_mtimensec’
+           17 |     st.st_mtimensec = 10;
+              |        ^~~~~~~~~~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:39 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STAT_ST_MTIMESPEC"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-BnYsLJ"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-BnYsLJ"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STAT_ST_MTIMESPEC"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-BnYsLJ'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_e4844
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_MTIMESPEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_e4844.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-BnYsLJ/src.cxx
+        FAILED: CMakeFiles/cmTC_e4844.dir/src.cxx.o 
+        /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_MTIMESPEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_e4844.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-BnYsLJ/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-BnYsLJ/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_mtimespec.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_mtimespec.cpp:17:8: error: ‘struct stat’ has no member named ‘st_mtimespec’
+           17 |     st.st_mtimespec.tv_nsec = 10;
+              |        ^~~~~~~~~~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:40 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMENSEC"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-hGLhlr"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-hGLhlr"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMENSEC"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-hGLhlr'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_78a3e
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMENSEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_78a3e.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-hGLhlr/src.cxx
+        FAILED: CMakeFiles/cmTC_78a3e.dir/src.cxx.o 
+        /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMENSEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_78a3e.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-hGLhlr/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-hGLhlr/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_birthtimensec.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_birthtimensec.cpp:17:8: error: ‘struct stat’ has no member named ‘st_birthtime’
+           17 |     st.st_birthtime = 1;
+              |        ^~~~~~~~~~~~
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_birthtimensec.cpp:18:8: error: ‘struct stat’ has no member named ‘st_birthtimensec’
+           18 |     st.st_birthtimensec = 10;
+              |        ^~~~~~~~~~~~~~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:41 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMESPEC"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DI6mhx"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DI6mhx"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMESPEC"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DI6mhx'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_5d1a4
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMESPEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_5d1a4.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DI6mhx/src.cxx
+        FAILED: CMakeFiles/cmTC_5d1a4.dir/src.cxx.o 
+        /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STAT_ST_BIRTHTIMESPEC -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_5d1a4.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DI6mhx/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-DI6mhx/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_birthtimespec.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_birthtimespec.cpp:17:8: error: ‘struct stat’ has no member named ‘st_birthtimespec’
+           17 |     st.st_birthtimespec.tv_sec = 1;
+              |        ^~~~~~~~~~~~~~~~
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_stat_st_birthtimespec.cpp:18:8: error: ‘struct stat’ has no member named ‘st_birthtimespec’
+           18 |     st.st_birthtimespec.tv_nsec = 10;
+              |        ^~~~~~~~~~~~~~~~
+        ninja: build stopped: subcommand failed.
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:43 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_STATX"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Kv76D9"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Kv76D9"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_STATX"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Kv76D9'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_375e2
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_STATX -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_375e2.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Kv76D9/src.cxx
+        In file included from /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Kv76D9/src.cxx:1:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_statx.cpp: In function ‘int main()’:
+        /home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/config/has_statx.cpp:18:9: warning: unused variable ‘res’ [-Wunused-variable]
+           18 |     int res = statx(AT_FDCWD, ".", AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT, STATX_BTIME, &st);
+              |         ^~~
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_375e2.dir/src.cxx.o -o cmTC_375e2   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:48 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_FDOPENDIR_NOFOLLOW"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Gi5cFB"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Gi5cFB"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_FDOPENDIR_NOFOLLOW"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Gi5cFB'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_9a538
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_FDOPENDIR_NOFOLLOW -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_9a538.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-Gi5cFB/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_9a538.dir/src.cxx.o -o cmTC_9a538   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:49 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_DIRENT_D_TYPE"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-SS41wO"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-SS41wO"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_DIRENT_D_TYPE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-SS41wO'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_59668
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_DIRENT_D_TYPE -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_59668.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-SS41wO/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_59668.dir/src.cxx.o -o cmTC_59668   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:50 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_POSIX_AT_APIS"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-bsxsE0"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-bsxsE0"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_POSIX_AT_APIS"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-bsxsE0'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_ea9a7
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_POSIX_AT_APIS -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_ea9a7.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-bsxsE0/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_ea9a7.dir/src.cxx.o -o cmTC_ea9a7   && :
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt:51 (check_cxx_source_compiles)"
+    checks:
+      - "Performing Test BOOST_FILESYSTEM_HAS_FALLOCATE"
+    directories:
+      source: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-rbvRDm"
+      binary: "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-rbvRDm"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include"
+      CMAKE_MSVC_RUNTIME_LIBRARY: "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      VCPKG_CHAINLOAD_TOOLCHAIN_FILE: "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+      VCPKG_INSTALLED_DIR: "/home/mungo/repos/MungoG/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-linux"
+      Z_VCPKG_ROOT_DIR: "/home/mungo/repos/MungoG/vcpkg"
+    buildResult:
+      variable: "BOOST_FILESYSTEM_HAS_FALLOCATE"
+      cached: true
+      stdout: |
+        Change Dir: '/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-rbvRDm'
+        
+        Run Build Command(s): /usr/bin/ninja -v cmTC_522f7
+        [1/2] /usr/bin/c++ -DBOOST_ALL_STATIC_LINK=1 -DBOOST_FILESYSTEM_HAS_FALLOCATE -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/src -I/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/array/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/buffers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/io/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/range/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include -I/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include -std=c++20 -Wall -o CMakeFiles/cmTC_522f7.dir/src.cxx.o -c /home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl/CMakeFiles/CMakeScratch/TryCompile-rbvRDm/src.cxx
+        [2/2] : && /usr/bin/c++   CMakeFiles/cmTC_522f7.dir/src.cxx.o -o cmTC_522f7   && :
+        
+      exitCode: 0
+...

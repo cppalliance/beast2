@@ -1,0 +1,404 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "Dependencies/boost/libs/context/libboost_context.a"
+		}
+	],
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"_add_library",
+			"add_library",
+			"add_definitions",
+			"include",
+			"project",
+			"target_compile_definitions",
+			"target_link_libraries",
+			"add_compile_options",
+			"set_property"
+		],
+		"files" : 
+		[
+			"/home/mungo/repos/MungoG/vcpkg/scripts/buildsystems/vcpkg.cmake",
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/context/CMakeLists.txt",
+			"/mnt/c/dev/repos/MungoG/boost_toolchain/common.cmake",
+			"/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake",
+			"build-wsl/CMakeFiles/3.28.3/CMakeSystem.cmake",
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 216,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 649,
+				"parent" : 1
+			},
+			{
+				"file" : 5
+			},
+			{
+				"command" : 4,
+				"file" : 5,
+				"line" : 23,
+				"parent" : 3
+			},
+			{
+				"file" : 4,
+				"parent" : 4
+			},
+			{
+				"command" : 3,
+				"file" : 4,
+				"line" : 6,
+				"parent" : 5
+			},
+			{
+				"file" : 0,
+				"parent" : 6
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 209,
+				"parent" : 7
+			},
+			{
+				"file" : 3,
+				"parent" : 8
+			},
+			{
+				"command" : 3,
+				"file" : 3,
+				"line" : 2,
+				"parent" : 9
+			},
+			{
+				"file" : 2,
+				"parent" : 10
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 6,
+				"parent" : 11
+			},
+			{
+				"command" : 5,
+				"file" : 1,
+				"line" : 247,
+				"parent" : 0
+			},
+			{
+				"command" : 5,
+				"file" : 1,
+				"line" : 239,
+				"parent" : 0
+			},
+			{
+				"command" : 6,
+				"file" : 1,
+				"line" : 225,
+				"parent" : 0
+			},
+			{
+				"command" : 7,
+				"file" : 3,
+				"line" : 5,
+				"parent" : 9
+			},
+			{
+				"command" : 8,
+				"file" : 1,
+				"line" : 191,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g"
+				},
+				{
+					"backtrace" : 17,
+					"fragment" : "-x assembler-with-cpp"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 12,
+					"define" : "BOOST_ALL_STATIC_LINK=1"
+				},
+				{
+					"backtrace" : 13,
+					"define" : "BOOST_CONTEXT_EXPORT="
+				},
+				{
+					"backtrace" : 14,
+					"define" : "BOOST_CONTEXT_NO_LIB="
+				},
+				{
+					"backtrace" : 14,
+					"define" : "BOOST_CONTEXT_SOURCE="
+				},
+				{
+					"backtrace" : 13,
+					"define" : "BOOST_CONTEXT_STATIC_LINK="
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 0,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include"
+				}
+			],
+			"language" : "ASM",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2
+			]
+		},
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g -std=c++20"
+				},
+				{
+					"backtrace" : 16,
+					"fragment" : "-Wall"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 12,
+					"define" : "BOOST_ALL_STATIC_LINK=1"
+				},
+				{
+					"backtrace" : 13,
+					"define" : "BOOST_CONTEXT_EXPORT="
+				},
+				{
+					"backtrace" : 14,
+					"define" : "BOOST_CONTEXT_NO_LIB="
+				},
+				{
+					"backtrace" : 14,
+					"define" : "BOOST_CONTEXT_SOURCE="
+				},
+				{
+					"backtrace" : 13,
+					"define" : "BOOST_CONTEXT_STATIC_LINK="
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 0,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include"
+				},
+				{
+					"backtrace" : 15,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					15,
+					15,
+					15,
+					15
+				],
+				"standard" : "20"
+			},
+			"sourceIndexes" : 
+			[
+				3,
+				4
+			]
+		}
+	],
+	"folder" : 
+	{
+		"name" : "Dependencies"
+	},
+	"id" : "boost_context::@e57082daf55fded6bea8",
+	"name" : "boost_context",
+	"nameOnDisk" : "libboost_context.a",
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/context",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2
+			]
+		},
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				3,
+				4
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/src/asm/make_x86_64_sysv_elf_gas.S",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/src/asm/jump_x86_64_sysv_elf_gas.S",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/src/asm/ontop_x86_64_sysv_elf_gas.S",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 1,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/src/fcontext.cpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 1,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/src/posix/stack_traits.cpp",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

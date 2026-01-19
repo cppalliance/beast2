@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveNugetPackages>false</ResolveNugetPackages>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CEAD2DD0-AB8D-3957-8972-0E6027642D2C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostInstall.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostMessage.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostRoot.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostInstall.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostMessage.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostRoot.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostInstall.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostMessage.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostRoot.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostInstall.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostMessage.cmake;C:\dev\repos\MungoG\cursor_boost\tools\cmake\include\BoostRoot.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\ZERO_CHECK.vcxproj">
+      <Project>{6573AAFC-1199-3859-8E0C-6835601B737A}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\assert\boost_assert.vcxproj">
+      <Project>{10722DF8-DFD2-3B6E-9A1A-21C12B2C95D5}</Project>
+      <Name>boost_assert</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\capy\boost_capy.vcxproj">
+      <Project>{05BE9715-1FB8-32AD-8B12-4B4C7664F966}</Project>
+      <Name>boost_capy</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\capy\bench\boost_capy_bench.vcxproj">
+      <Project>{B49BA6D2-F014-3767-B518-6FB441416BBA}</Project>
+      <Name>boost_capy_bench</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\capy\test\unit\boost_capy_tests.vcxproj">
+      <Project>{870D9BFD-47EF-3A25-87E4-C52CE2C5C763}</Project>
+      <Name>boost_capy_tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\container\boost_container.vcxproj">
+      <Project>{6838085D-A3EC-3504-830C-46E0F4A2CCD0}</Project>
+      <Name>boost_container</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\core\boost_core.vcxproj">
+      <Project>{BB7E7244-4CBD-38DA-85D6-C365E61E562C}</Project>
+      <Name>boost_core</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\corosio\boost_corosio.vcxproj">
+      <Project>{D29D021C-7071-3428-883C-7131176CDF8D}</Project>
+      <Name>boost_corosio</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\http\boost_http.vcxproj">
+      <Project>{AFFD4F05-CD11-30C0-A962-9B795E243F8D}</Project>
+      <Name>boost_http</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\json\boost_json.vcxproj">
+      <Project>{4D6CB970-FC91-3D08-A0AF-518AA119A368}</Project>
+      <Name>boost_json</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\optional\boost_optional.vcxproj">
+      <Project>{626D4066-781B-3545-B24E-CAA8CE1A7983}</Project>
+      <Name>boost_optional</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\system\boost_system.vcxproj">
+      <Project>{37E9F106-DF62-3653-A5F4-F7BC9994D607}</Project>
+      <Name>boost_system</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\boost_url.vcxproj">
+      <Project>{2DFB4CD6-8136-3D11-BCF1-49C13E69594F}</Project>
+      <Name>boost_url</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\capy\test\unit\test_suite\boost_url_test_suite.vcxproj">
+      <Project>{663101A5-DFFA-3E38-82C2-27410067F581}</Project>
+      <Name>boost_url_test_suite</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\capy\test\unit\test_suite\boost_url_test_suite_with_main.vcxproj">
+      <Project>{D958AB28-7FB1-30A4-A660-5E1363BE86C3}</Project>
+      <Name>boost_url_test_suite_with_main</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\variant2\boost_variant2.vcxproj">
+      <Project>{347E55DB-2931-3360-87B2-78CF7921E90C}</Project>
+      <Name>boost_variant2</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

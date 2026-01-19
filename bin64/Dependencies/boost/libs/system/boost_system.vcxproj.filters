@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\system\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="C:\dev\repos\MungoG\cursor_boost\libs\system\extra\boost_system.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\cerrno.hpp">
+      <Filter>Header Files\boost</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system.hpp">
+      <Filter>Header Files\boost</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\api_config.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\config.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\append_int.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\cerrno.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\config.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\enable_if.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\errc.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\error_category.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\error_category_impl.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\error_code.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\error_condition.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\generic_category.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\generic_category_message.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\interop_category.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\is_same.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\mutex.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\snprintf.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\std_category.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\std_category_impl.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\system_category.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\system_category_condition_win32.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\system_category_impl.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\system_category_message.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\system_category_message_win32.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\detail\throws.hpp">
+      <Filter>Header Files\boost\system\detail</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\errc.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\error_category.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\error_code.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\error_condition.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\generic_category.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\is_error_code_enum.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\is_error_condition_enum.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\linux_error.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\result.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\system_category.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\system_error.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\system\include\boost\system\windows_error.hpp">
+      <Filter>Header Files\boost\system</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{701D4CF3-70BB-33C2-A6FE-35E5BC438A1A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost">
+      <UniqueIdentifier>{E46B1806-48BC-3E30-A3D7-4C1D90E9EF1D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost\system">
+      <UniqueIdentifier>{F8CF0D99-044B-35AA-97B5-E2C1C32810DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost\system\detail">
+      <UniqueIdentifier>{EF4366D7-C2EE-3A89-8A39-F66A3674ECDF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

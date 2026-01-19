@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\detail\except.cpp">
+      <Filter>src\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\error.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\log_service.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\logger.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\body_source.cpp">
+      <Filter>src\server</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\endpoint.cpp">
+      <Filter>src\server</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\http_server.cpp">
+      <Filter>src\server</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\route_rule.cpp">
+      <Filter>src\server</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\serve_redirect.cpp">
+      <Filter>src\server</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\serve_static.cpp">
+      <Filter>src\server</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\buffer.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\client.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\detail\call_traits.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\detail\config.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\detail\except.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\detail\type_traits.hpp">
+      <Filter>include\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\endpoint.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\error.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\format.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\log_service.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\logger.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\any_lambda.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\body_source.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\fixed_array.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\http_server.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\http_stream.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\route_handler_corosio.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\router.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\router_corosio.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\serve_redirect.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\serve_static.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\server\workers.hpp">
+      <Filter>include\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\test\error.hpp">
+      <Filter>include\test</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\test\fail_count.hpp">
+      <Filter>include\test</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\include\boost\beast2\test\impl\error.hpp">
+      <Filter>include\test\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\route_rule.hpp">
+      <Filter>src\server</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\src\server\segs.hpp">
+      <Filter>src\server</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\build\Jamfile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{98C90C26-BD55-38BD-8A06-4FA32BCAE692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\detail">
+      <UniqueIdentifier>{CDCBA84D-D1B7-377C-8A22-985960A81C8F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\server">
+      <UniqueIdentifier>{30D88D1B-9FFF-34CA-9CB7-C6DCFA942C8C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\test">
+      <UniqueIdentifier>{5BD66A95-3FA9-3FC8-943C-6AAFF0EA537F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\test\impl">
+      <UniqueIdentifier>{F4816909-11A1-395B-9953-378EE0CDB1A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{C9E4D543-1D8A-3074-9BF6-E22E0CCADB1B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\detail">
+      <UniqueIdentifier>{F03E2187-64F2-3F1E-AA50-D6D1AEA5E2E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\server">
+      <UniqueIdentifier>{F8908B2A-5B9B-3B41-807E-F44EAECB08D7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

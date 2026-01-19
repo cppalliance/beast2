@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\variant2\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="C:\dev\repos\MungoG\cursor_boost\libs\variant2\extra\boost_variant2.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\variant2\include\boost\variant2.hpp">
+      <Filter>Header Files\boost</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\variant2\include\boost\variant2\variant.hpp">
+      <Filter>Header Files\boost\variant2</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{701D4CF3-70BB-33C2-A6FE-35E5BC438A1A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost">
+      <UniqueIdentifier>{E46B1806-48BC-3E30-A3D7-4C1D90E9EF1D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost\variant2">
+      <UniqueIdentifier>{D60C32CF-0569-3337-B395-3E4BF879CB47}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

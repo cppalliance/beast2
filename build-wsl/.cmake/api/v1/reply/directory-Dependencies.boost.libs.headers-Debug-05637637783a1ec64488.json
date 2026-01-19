@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/headers",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/headers"
+	}
+}

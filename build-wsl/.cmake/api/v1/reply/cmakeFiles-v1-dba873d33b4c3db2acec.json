@@ -1,0 +1,799 @@
+{
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build-wsl/CMakeFiles/3.28.3/CMakeSystem.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/repos/MungoG/vcpkg/scripts/buildsystems/vcpkg.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeDependentOption.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/mnt/c/dev/repos/MungoG/boost_toolchain/common.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakePrintHelpers.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-Initialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build-wsl/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/UnixPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CTest.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CTestUseLaunchers.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CTestTargets.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/DartConfiguration.tcl.in"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include/BoostRoot.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include/BoostMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include/BoostInstall.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/tools/cmake/include/BoostMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/GNUInstallDirs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakePackageConfigHelpers.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/WriteBasicConfigVersionFile.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/algorithm/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/align/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/any/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/array/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/asio/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/atomic/cmake/BoostLibraryIncludes.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/bind/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindZLIB.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/cmake/FindBrotli.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/bench/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/test/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/test/unit/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/url/extra/test_suite/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/url/extra/test_suite/DiscoverTests.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/concept_check/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/config/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/container/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build-wsl/CMakeFiles/3.28.3/CMakeCCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/context/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "build-wsl/CMakeFiles/3.28.3/CMakeASMCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeASMInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/conversion/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/core/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/corosio/cmake/FindWolfSSL.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/date_time/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/detail/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/dynamic_bitset/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/exception/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/filesystem/cmake/BoostLibraryIncludes.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/function/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/function_types/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/functional/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/fusion/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/headers/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/integer/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/io/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/iterator/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/json/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/GNUInstallDirs.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/json/pretty_printers/FindBoostPrettyPrinters.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPython3.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPython/Support.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/lexical_cast/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/math/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeDependentOption.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/move/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/mpl/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/multiprecision/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeDependentOption.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/numeric/conversion/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/pool/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/preprocessor/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/program_options/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/random/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/range/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/regex/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindICU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindICU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/SelectLibraryConfigurations.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/scope/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/smart_ptr/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/system/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/tokenizer/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/tuple/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/type_index/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/typeof/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/unordered/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/url/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/utility/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/CMakeLists.txt"
+		},
+		{
+			"path" : "test/CMakeLists.txt"
+		},
+		{
+			"path" : "test/unit/CMakeLists.txt"
+		},
+		{
+			"path" : "example/CMakeLists.txt"
+		},
+		{
+			"path" : "example/server/CMakeLists.txt"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2/build-wsl",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/beast2"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}

@@ -1,0 +1,571 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2DFB4CD6-8136-3D11-BCF1-49C13E69594F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <VcpkgEnabled>false</VcpkgEnabled>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>boost_url</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="do_not_import_user.props" Condition="exists('do_not_import_user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">boost_url.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">libboost_url-vc143-mt-sgd-x64-1_90</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">boost_url.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">libboost_url-vc143-mt-s-x64-1_90</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">boost_url.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">libboost_url-vc143-mt-s-x64-1_90</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">boost_url.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">libboost_url-vc143-mt-s-x64-1_90</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ConformanceMode>true</ConformanceMode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\boost_url.dir\Debug\libboost_url-vc143-mt-sgd-x64-1_90.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_DEBUG;WIN32;_WINDOWS;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ConformanceMode>true</ConformanceMode>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ProgramDataBaseFileName>C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\boost_url.dir\Release\libboost_url-vc143-mt-s-x64-1_90.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ConformanceMode>true</ConformanceMode>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ProgramDataBaseFileName>C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\boost_url.dir\MinSizeRel\libboost_url-vc143-mt-s-x64-1_90.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ConformanceMode>true</ConformanceMode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\boost_url.dir\RelWithDebInfo\libboost_url-vc143-mt-s-x64-1_90.pdb</ProgramDataBaseFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;BOOST_URL_NO_LIB=1;BOOST_URL_STATIC_LINK=1;BOOST_URL_SOURCE;BOOST_ALL_STATIC_LINK=1;_WIN32_WINNT=0x0A00;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\repos\MungoG\cursor_boost\libs\url\include;C:\dev\repos\MungoG\cursor_boost\libs\align\include;C:\dev\repos\MungoG\cursor_boost\libs\assert\include;C:\dev\repos\MungoG\cursor_boost\libs\config\include;C:\dev\repos\MungoG\cursor_boost\libs\core\include;C:\dev\repos\MungoG\cursor_boost\libs\throw_exception\include;C:\dev\repos\MungoG\cursor_boost\libs\static_assert\include;C:\dev\repos\MungoG\cursor_boost\libs\mp11\include;C:\dev\repos\MungoG\cursor_boost\libs\optional\include;C:\dev\repos\MungoG\cursor_boost\libs\type_traits\include;C:\dev\repos\MungoG\cursor_boost\libs\system\include;C:\dev\repos\MungoG\cursor_boost\libs\variant2\include;C:\dev\repos\MungoG\cursor_boost\libs\winapi\include;C:\dev\repos\MungoG\cursor_boost\libs\predef\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\url\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/libs/url/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/libs/url/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/libs/url/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/libs/url/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/libs/url/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/libs/url/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/dev/repos/MungoG/cursor_boost/libs/url/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/repos/MungoG/cursor_boost/libs/beast2 -BC:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64 --check-stamp-file C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/Dependencies/boost/libs/url/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\CMakeFiles\cmake.verify_globs;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\url\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\authority_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\decode_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\any_params_iter.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\any_segments_iter.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\config.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\encode.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\except.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\format_args.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\impl\format_args.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\optional_string.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\params_iter_impl.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\parts_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\replacement_field_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\segments_iter_impl.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\segments_range.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\string_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\url_impl.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\detail\vformat.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\encode.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\encoding_opts.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\error.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\error_types.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\format.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\all_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\alnum_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\alpha_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\charset.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\ci_string.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\dec_octet_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\delim_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\detail\charset.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\detail\ci_string.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\detail\recycled.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\detail\tuple.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\digit_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\error.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\hexdig_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\error.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\not_empty_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\optional_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\parse.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\range_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\recycled.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\token_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\tuple_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\unsigned_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\impl\variant_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\literal_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\lut_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\not_empty_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\optional_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\parse.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\range_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\recycled.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\string_token.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\string_view_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\token_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\tuple_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\type_traits.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\unsigned_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\variant_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\grammar\vchars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\host_type.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\ignore_case.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\decode_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\encode.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\error.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\params_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\params_encoded_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\params_encoded_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\params_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\segments_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\segments_encoded_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\segments_encoded_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\impl\segments_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\ipv4_address.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\ipv6_address.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\optional.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\param.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\params_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\params_encoded_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\params_encoded_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\params_encoded_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\params_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\params_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\parse.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\parse_path.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\parse_query.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\pct_string_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\absolute_uri_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\authority_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\detail\path_rules.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\gen_delim_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\impl\pct_encoded_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\ipv4_address_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\ipv6_address_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\origin_form_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\pchars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\pct_encoded_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\query_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\relative_ref_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\reserved_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\sub_delim_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\unreserved_chars.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\uri_reference_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\rfc\uri_rule.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\scheme.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\segments_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\segments_encoded_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\segments_encoded_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\segments_encoded_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\segments_ref.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\segments_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\src.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\static_url.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\string_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\url.hpp" />
+    <Natvis Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\url.natvis">
+    </Natvis>
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\url_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\url_view.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\url_view_base.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\urls.hpp" />
+    <ClInclude Include="C:\dev\repos\MungoG\cursor_boost\libs\url\include\boost\url\variant.hpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\authority_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\decode_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\any_params_iter.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\any_segments_iter.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\decode.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\except.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\format_args.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\normalize.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\params_iter_impl.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\pattern.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\pct_format.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\replacement_field_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\segments_iter_impl.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\url_impl.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\detail\vformat.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\error.cpp">
+      <ObjectFileName>$(IntDir)/src/error.cpp.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\ci_string.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\dec_octet_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\delim_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\detail\recycled.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\error.cpp">
+      <ObjectFileName>$(IntDir)/src/grammar/error.cpp.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\literal_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\grammar\string_view_base.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\ipv4_address.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\ipv6_address.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\params_base.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\params_encoded_base.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\params_encoded_ref.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\params_encoded_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\params_ref.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\params_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\parse.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\parse_path.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\parse_query.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\pct_string_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\absolute_uri_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\authority_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\h16_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\hier_part_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\host_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\ip_literal_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\ipv6_addrz_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\ipvfuture_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\port_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\relative_part_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\scheme_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\detail\userinfo_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\ipv4_address_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\ipv6_address_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\origin_form_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\query_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\relative_ref_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\uri_reference_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\rfc\uri_rule.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\scheme.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\segments_base.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\segments_encoded_base.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\segments_encoded_ref.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\segments_encoded_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\segments_ref.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\segments_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\static_url.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\url.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\url_base.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\url_view.cpp" />
+    <ClCompile Include="C:\dev\repos\MungoG\cursor_boost\libs\url\src\url_view_base.cpp" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\ZERO_CHECK.vcxproj">
+      <Project>{6573AAFC-1199-3859-8E0C-6835601B737A}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\assert\boost_assert.vcxproj">
+      <Project>{10722DF8-DFD2-3B6E-9A1A-21C12B2C95D5}</Project>
+      <Name>boost_assert</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\core\boost_core.vcxproj">
+      <Project>{BB7E7244-4CBD-38DA-85D6-C365E61E562C}</Project>
+      <Name>boost_core</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\optional\boost_optional.vcxproj">
+      <Project>{626D4066-781B-3545-B24E-CAA8CE1A7983}</Project>
+      <Name>boost_optional</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\system\boost_system.vcxproj">
+      <Project>{37E9F106-DF62-3653-A5F4-F7BC9994D607}</Project>
+      <Name>boost_system</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\repos\MungoG\cursor_boost\libs\beast2\bin64\Dependencies\boost\libs\variant2\boost_variant2.vcxproj">
+      <Project>{347E55DB-2931-3360-87B2-78CF7921E90C}</Project>
+      <Name>boost_variant2</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

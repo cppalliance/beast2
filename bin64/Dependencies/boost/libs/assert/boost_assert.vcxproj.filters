@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\repos\MungoG\cursor_boost\libs\assert\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="C:\dev\repos\MungoG\cursor_boost\libs\assert\extra\boost_assert.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\assert\include\boost\assert.hpp">
+      <Filter>Header Files\boost</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\assert\include\boost\assert\source_location.hpp">
+      <Filter>Header Files\boost\assert</Filter>
+    </None>
+    <None Include="C:\dev\repos\MungoG\cursor_boost\libs\assert\include\boost\current_function.hpp">
+      <Filter>Header Files\boost</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{701D4CF3-70BB-33C2-A6FE-35E5BC438A1A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost">
+      <UniqueIdentifier>{E46B1806-48BC-3E30-A3D7-4C1D90E9EF1D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\boost\assert">
+      <UniqueIdentifier>{6803CBA3-7D63-36B8-BC3B-315C2680B341}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

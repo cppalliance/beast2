@@ -1,0 +1,1145 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "Dependencies/boost/libs/http/libboost_http.a"
+		}
+	],
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"_add_library",
+			"add_library",
+			"target_link_libraries",
+			"boost_http_setup_properties",
+			"add_compile_options",
+			"include",
+			"project",
+			"add_definitions",
+			"target_compile_definitions",
+			"target_include_directories",
+			"target_compile_features"
+		],
+		"files" : 
+		[
+			"/home/mungo/repos/MungoG/vcpkg/scripts/buildsystems/vcpkg.cmake",
+			"/home/mungo/winrepos/MungoG/cursor_boost/libs/http/CMakeLists.txt",
+			"/mnt/c/dev/repos/MungoG/boost_toolchain/linux.cmake",
+			"build-wsl/CMakeFiles/3.28.3/CMakeSystem.cmake",
+			"CMakeLists.txt",
+			"/mnt/c/dev/repos/MungoG/boost_toolchain/common.cmake"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 171,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 649,
+				"parent" : 1
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 173,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 152,
+				"parent" : 3
+			},
+			{
+				"file" : 4
+			},
+			{
+				"command" : 6,
+				"file" : 4,
+				"line" : 23,
+				"parent" : 5
+			},
+			{
+				"file" : 3,
+				"parent" : 6
+			},
+			{
+				"command" : 5,
+				"file" : 3,
+				"line" : 6,
+				"parent" : 7
+			},
+			{
+				"file" : 0,
+				"parent" : 8
+			},
+			{
+				"command" : 5,
+				"file" : 0,
+				"line" : 209,
+				"parent" : 9
+			},
+			{
+				"file" : 2,
+				"parent" : 10
+			},
+			{
+				"command" : 4,
+				"file" : 2,
+				"line" : 5,
+				"parent" : 11
+			},
+			{
+				"command" : 5,
+				"file" : 2,
+				"line" : 2,
+				"parent" : 11
+			},
+			{
+				"file" : 5,
+				"parent" : 13
+			},
+			{
+				"command" : 7,
+				"file" : 5,
+				"line" : 6,
+				"parent" : 14
+			},
+			{
+				"command" : 8,
+				"file" : 1,
+				"line" : 153,
+				"parent" : 3
+			},
+			{
+				"command" : 8,
+				"file" : 1,
+				"line" : 154,
+				"parent" : 3
+			},
+			{
+				"command" : 8,
+				"file" : 1,
+				"line" : 158,
+				"parent" : 3
+			},
+			{
+				"command" : 9,
+				"file" : 1,
+				"line" : 150,
+				"parent" : 3
+			},
+			{
+				"command" : 9,
+				"file" : 1,
+				"line" : 151,
+				"parent" : 3
+			},
+			{
+				"command" : 10,
+				"file" : 1,
+				"line" : 149,
+				"parent" : 3
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g -std=c++20"
+				},
+				{
+					"backtrace" : 12,
+					"fragment" : "-Wall"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 15,
+					"define" : "BOOST_ALL_STATIC_LINK=1"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_CAPY_NO_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_CAPY_STATIC_LINK"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_CONTAINER_NO_LIB"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_CONTAINER_STATIC_LINK"
+				},
+				{
+					"backtrace" : 16,
+					"define" : "BOOST_HTTP_NO_LIB"
+				},
+				{
+					"backtrace" : 17,
+					"define" : "BOOST_HTTP_SOURCE"
+				},
+				{
+					"backtrace" : 18,
+					"define" : "BOOST_HTTP_STATIC_LINK"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_JSON_NO_LIB=1"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_JSON_STATIC_LINK=1"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_URL_NO_LIB=1"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "BOOST_URL_STATIC_LINK=1"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 19,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include"
+				},
+				{
+					"backtrace" : 20,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/assert/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/config/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/capy/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/core/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/throw_exception/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/system/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/variant2/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/mp11/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/winapi/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/predef/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/json/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/align/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/static_assert/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/container/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/intrusive/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/move/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/container_hash/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/describe/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/endian/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/type_traits/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/url/include"
+				},
+				{
+					"backtrace" : 4,
+					"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/optional/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					21,
+					4,
+					4,
+					4,
+					4,
+					4
+				],
+				"standard" : "20"
+			},
+			"sourceIndexes" : 
+			[
+				57,
+				61,
+				62,
+				64,
+				68,
+				70,
+				71,
+				72,
+				73,
+				74,
+				75,
+				76,
+				77,
+				78,
+				79,
+				80,
+				81,
+				82,
+				83,
+				84,
+				86,
+				88,
+				89,
+				90,
+				91,
+				92,
+				93,
+				94,
+				95,
+				97,
+				98,
+				99,
+				100,
+				101
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 4,
+			"id" : "boost_capy::@4733a802d9cf35778d51"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "boost_container::@3b8e17c5748b4a9ca53b"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "boost_json::@990a8c66a1d0105be817"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "boost_optional::@7bf00034b40976f17e1b"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "boost_url::@8a67b57b1dd838c19044"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "Dependencies"
+	},
+	"id" : "boost_http::@591cd2b0286767b8a52e",
+	"name" : "boost_http",
+	"nameOnDisk" : "libboost_http.a",
+	"paths" : 
+	{
+		"build" : "Dependencies/boost/libs/http",
+		"source" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		},
+		{
+			"name" : "include\\detail",
+			"sourceIndexes" : 
+			[
+				2,
+				3,
+				4,
+				6,
+				7,
+				8
+			]
+		},
+		{
+			"name" : "include\\detail\\impl",
+			"sourceIndexes" : 
+			[
+				5
+			]
+		},
+		{
+			"name" : "include",
+			"sourceIndexes" : 
+			[
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				44,
+				50,
+				51,
+				52,
+				53,
+				54,
+				55,
+				56
+			]
+		},
+		{
+			"name" : "include\\impl",
+			"sourceIndexes" : 
+			[
+				17,
+				18,
+				19,
+				20,
+				21,
+				22
+			]
+		},
+		{
+			"name" : "include\\rfc",
+			"sourceIndexes" : 
+			[
+				34,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43
+			]
+		},
+		{
+			"name" : "include\\rfc\\detail",
+			"sourceIndexes" : 
+			[
+				35
+			]
+		},
+		{
+			"name" : "include\\rfc\\impl",
+			"sourceIndexes" : 
+			[
+				36
+			]
+		},
+		{
+			"name" : "include\\server",
+			"sourceIndexes" : 
+			[
+				45,
+				46,
+				47,
+				48,
+				49
+			]
+		},
+		{
+			"name" : "src\\detail",
+			"sourceIndexes" : 
+			[
+				57,
+				58,
+				59,
+				60,
+				61,
+				62,
+				63,
+				64,
+				65,
+				66,
+				67,
+				68,
+				69
+			]
+		},
+		{
+			"name" : "src",
+			"sourceIndexes" : 
+			[
+				70,
+				71,
+				72,
+				73,
+				74,
+				75,
+				76,
+				77,
+				78,
+				79,
+				80,
+				81,
+				82,
+				91,
+				98,
+				99,
+				100,
+				101
+			]
+		},
+		{
+			"name" : "src\\rfc",
+			"sourceIndexes" : 
+			[
+				83,
+				88,
+				89,
+				90
+			]
+		},
+		{
+			"name" : "src\\rfc\\detail",
+			"sourceIndexes" : 
+			[
+				84,
+				85,
+				86,
+				87
+			]
+		},
+		{
+			"name" : "src\\server",
+			"sourceIndexes" : 
+			[
+				92,
+				93,
+				94,
+				95,
+				96,
+				97
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/build/Jamfile",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/config.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/except.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/header.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/impl/workspace.hpp",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/sv.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/type_traits.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/detail/workspace.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/error.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/field.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/fields.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/fields_base.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/file_sink.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/file_source.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/header_limits.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/http_proto.natvis",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/impl/error.hpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/impl/fields_base.hpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/impl/parser.hpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/impl/serializer.hpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/impl/sink.hpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/impl/source.hpp",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/json.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/message_base.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/metadata.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/method.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/parser.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/request.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/request_base.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/request_parser.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/response.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/response_base.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/response_parser.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/combine_field_values.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/detail/ws.hpp",
+			"sourceGroupIndex" : 6
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/impl/list_rule.hpp",
+			"sourceGroupIndex" : 7
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/list_rule.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/media_type.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/parameter.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/quoted_token_rule.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/quoted_token_view.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/token_rule.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/rfc/upgrade_rule.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/serializer.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/server/basic_router.hpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/server/cors.hpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/server/route_handler.hpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/server/router.hpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/server/router_types.hpp",
+			"sourceGroupIndex" : 8
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/sink.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/source.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/static_request.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/static_response.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/status.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/string_body.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/include/boost/http/version.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/array_of_const_buffers.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/array_of_const_buffers.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/brotli_filter_base.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/buffer_utils.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/except.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/filter.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/filter.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/header.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/move_chars.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/number_string.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/win32_unicode_path.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/workspace.cpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/detail/zlib_filter_base.hpp",
+			"sourceGroupIndex" : 9
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/error.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/field.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/fields_base.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/file_sink.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/file_source.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/header_limits.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/message_base.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/method.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/parser.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/request_base.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/request_parser.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/response_base.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/response_parser.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/combine_field_values.cpp",
+			"sourceGroupIndex" : 11
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/detail/rules.cpp",
+			"sourceGroupIndex" : 12
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/detail/rules.hpp",
+			"sourceGroupIndex" : 12
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/detail/transfer_coding_rule.cpp",
+			"sourceGroupIndex" : 12
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/detail/transfer_coding_rule.hpp",
+			"sourceGroupIndex" : 12
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/parameter.cpp",
+			"sourceGroupIndex" : 11
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/quoted_token_rule.cpp",
+			"sourceGroupIndex" : 11
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/rfc/upgrade_rule.cpp",
+			"sourceGroupIndex" : 11
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/serializer.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/server/basic_router.cpp",
+			"sourceGroupIndex" : 13
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/server/cors.cpp",
+			"sourceGroupIndex" : 13
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/server/route_handler.cpp",
+			"sourceGroupIndex" : 13
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/server/route_rule.cpp",
+			"sourceGroupIndex" : 13
+		},
+		{
+			"backtrace" : 2,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/server/route_rule.hpp",
+			"sourceGroupIndex" : 13
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/server/router_types.cpp",
+			"sourceGroupIndex" : 13
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/sink.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/source.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/status.cpp",
+			"sourceGroupIndex" : 10
+		},
+		{
+			"backtrace" : 2,
+			"compileGroupIndex" : 0,
+			"path" : "/home/mungo/winrepos/MungoG/cursor_boost/libs/http/src/version.cpp",
+			"sourceGroupIndex" : 10
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

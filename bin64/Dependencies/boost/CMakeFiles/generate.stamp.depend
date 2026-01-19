@@ -1,0 +1,9 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.2/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-4.2/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-4.2/Modules/WriteBasicConfigVersionFile.cmake
+C:/dev/repos/MungoG/cursor_boost/CMakeLists.txt
+C:/dev/repos/MungoG/cursor_boost/libs/beast2/bin64/CMakeFiles/cmake.verify_globs
+C:/dev/repos/MungoG/cursor_boost/tools/cmake/include/BoostInstall.cmake
+C:/dev/repos/MungoG/cursor_boost/tools/cmake/include/BoostMessage.cmake
+C:/dev/repos/MungoG/cursor_boost/tools/cmake/include/BoostRoot.cmake
