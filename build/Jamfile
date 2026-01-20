@@ -46,6 +46,7 @@ lib boost_beast2
    : usage-requirements
      <library>/boost//corosio
      <library>/boost//http
+     <target-os>windows:<define>_WIN32_WINNT=0x0602
    ;
 
 boost-install boost_beast2 ;
