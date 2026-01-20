@@ -39,18 +39,22 @@ env:
   TZ: "Europe/London"
 
 jobs:
-  runner-selection:
-    name: Runner Selection
-    runs-on: ${{ github.repository_owner == 'boostorg' && fromJSON('[ "self-hosted", "linux", "x64", "ubuntu-latest-aws" ]') || 'ubuntu-latest' }}
-    outputs:
-      labelmatrix: ${{ steps.aws_hosted_runners.outputs.labelmatrix }}
-    steps:
-      - name: AWS Hosted Runners
-        id: aws_hosted_runners
-        uses: cppalliance/aws-hosted-runners@v1.0.0
+  # Self-hosted runner selection is disabled to allow re-running individual
+  # failed jobs from the GitHub Actions UI. When using dynamic runner selection,
+  # the runs-on value depends on this job's output, which isn't available when
+  # re-running a subset of jobs.
+  #
+  # runner-selection:
+  #   name: Runner Selection
+  #   runs-on: ${{ github.repository_owner == 'boostorg' && fromJSON('[ "self-hosted", "linux", "x64", "ubuntu-latest-aws" ]') || 'ubuntu-latest' }}
+  #   outputs:
+  #     labelmatrix: ${{ steps.aws_hosted_runners.outputs.labelmatrix }}
+  #   steps:
+  #     - name: AWS Hosted Runners
+  #       id: aws_hosted_runners
+  #       uses: cppalliance/aws-hosted-runners@v1.0.0
 
   build:
-    needs: [ runner-selection ]
     defaults:
       run:
         shell: bash
@@ -279,16 +283,16 @@ jobs:
     timeout-minutes: 120
 
     steps:
-      - name: Clone Boost.Http.Io
+      - name: Clone Boost.Beast2
         uses: actions/checkout@v4
         with:
-          path: http-io-root
+          path: beast2-root
 
-      - name: Clone Boost.Http.Proto
+      - name: Clone Boost.Http
         uses: actions/checkout@v4
         with:
           repository: cppalliance/http
-          path: http-proto-root
+          path: http-root
           ref: develop
 
       - name: Clone Boost.Buffers
@@ -340,7 +344,7 @@ jobs:
           modules-exclude-paths: ''
           scan-modules-dir: |
             http-io-root
-            http-proto-root
+            http-root
             buffers-root
             capy-root
             corosio-root
@@ -423,8 +427,8 @@ jobs:
           echo -E "boost_root=$boost_root" >> $GITHUB_OUTPUT
 
           # Patch boost-root with workspace module
-          cp -r "$workspace_root"/http-io-root "libs/$module"
-          cp -r "$workspace_root"/http-proto-root libs/http
+          cp -r "$workspace_root"/beast2-root "libs/$module"
+          cp -r "$workspace_root"/http-root libs/http
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/capy-root libs/capy
           cp -r "$workspace_root"/corosio-root libs/corosio
@@ -433,7 +437,7 @@ jobs:
         uses: alandefreitas/cpp-actions/b2-workflow@v1.9.0
         if: ${{ !matrix.coverage && !matrix.time-trace }}
         env:
-          ASAN_OPTIONS: ${{ (startsWith(matrix.compiler, 'apple-clang') && 'detect_invalid_pointer_pairs=0') || 'detect_invalid_pointer_pairs=2' }}
+          ASAN_OPTIONS: ${{ ((matrix.compiler == 'apple-clang' || matrix.compiler == 'clang') && 'detect_invalid_pointer_pairs=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1') || 'detect_invalid_pointer_pairs=2:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1' }}
         with:
           source-dir: boost-root
           modules: beast2
@@ -446,7 +450,7 @@ jobs:
           ubsan: ${{ matrix.ubsan }}
           shared: ${{ matrix.shared }}
           rtti: ${{ (matrix.is-latest && 'on,off') || 'on' }}
-          cxxflags: ${{ (matrix.asan && '-fsanitize=pointer-subtract') || '' }}
+          cxxflags: ${{ (matrix.asan && '-fsanitize-address-use-after-scope -fsanitize=pointer-subtract') || '' }}
           user-config: ${{ ((startsWith(matrix.runs-on, 'windows') || startsWith(matrix.runs-on, 'macOS')) && format('{0}/user-config.jam', steps.patch.outputs.workspace_root)) || '' }}
           stop-on-error: true
           extra-args: "libs/beast2/example"
@@ -593,17 +597,17 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
   changelog:
-    needs: [ runner-selection ]
+    # needs: [ runner-selection ]
     defaults:
       run:
         shell: bash
 
     name: Changelog Summary
-    runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)['ubuntu-22.04'] }}
+    runs-on: 'ubuntu-22.04'
     timeout-minutes: 120
 
     steps:
-      - name: Clone Boost.Http.Io
+      - name: Clone Boost.Beast2
         uses: actions/checkout@v4
         with:
           # Avoid the common API rate limit exceeded error in boostorg by including 100 latest commits in any case
@@ -618,15 +622,9 @@ jobs:
           tag-pattern: 'boost-.*\..*\..*'
 
   antora:
-    needs: [ runner-selection ]
-    strategy:
-      matrix:
-        include:
-          - { name: Windows, os: windows-latest }
-          - { name: Ubuntu, os: ubuntu-latest }
-          - { name: MacOS, os: macos-15 }
-    name: Antora Docs (${{ matrix.name }})
-    runs-on: ${{ fromJSON(needs.runner-selection.outputs.labelmatrix)[matrix.os] }}
+    # needs: [ runner-selection ]
+    name: Antora Docs
+    runs-on: 'ubuntu-latest'
     defaults:
       run:
         shell: bash
@@ -636,16 +634,16 @@ jobs:
         with:
           apt-get: git cmake
 
-      - name: Clone Boost.Http.Io
+      - name: Clone Boost.Beast2
         uses: actions/checkout@v4
         with:
-          path: http-io-root
+          path: beast2-root
 
-      - name: Clone Boost.Http.Proto
+      - name: Clone Boost.Http
         uses: actions/checkout@v4
         with:
           repository: cppalliance/http
-          path: http-proto-root
+          path: http-root
           ref: develop
 
       - name: Clone Boost.Buffers
@@ -678,7 +676,7 @@ jobs:
           modules-exclude-paths: ''
           scan-modules-dir: |
             http-io-root
-            http-proto-root
+            http-root
             buffers-root
             capy-root
             corosio-root
@@ -719,8 +717,8 @@ jobs:
           echo -E "boost_root=$boost_root" >> $GITHUB_OUTPUT
 
           # Patch boost-root with workspace module
-          cp -r "$workspace_root"/http-io-root "libs/$module"
-          cp -r "$workspace_root"/http-proto-root libs/http
+          cp -r "$workspace_root"/beast2-root "libs/$module"
+          cp -r "$workspace_root"/http-root libs/http
           cp -r "$workspace_root"/buffers-root libs/buffers
           cp -r "$workspace_root"/capy-root libs/capy
           cp -r "$workspace_root"/corosio-root libs/corosio
@@ -728,10 +726,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Setup Ninja
-        if: runner.os == 'Windows'
-        uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Build Antora Docs
         env:
@@ -755,5 +749,5 @@ jobs:
       - name: Create Antora Docs Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: antora-docs-${{ matrix.name }}
+          name: antora-docs
           path: boost-root/libs/beast2/doc/build/site
