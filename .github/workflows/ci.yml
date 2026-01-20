@@ -280,33 +280,33 @@ jobs:
 
     steps:
       - name: Clone Boost.Http.Io
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: http-io-root
 
       - name: Clone Boost.Http.Proto
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cppalliance/http
           path: http-proto-root
           ref: develop
 
       - name: Clone Boost.Buffers
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: buffers-root
           repository: cppalliance/buffers
           ref: develop
 
       - name: Clone Boost.Capy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: capy-root
           repository: cppalliance/capy
           ref: develop
 
       - name: Clone Boost.Corosio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: corosio-root
           repository: cppalliance/corosio
@@ -604,7 +604,7 @@ jobs:
 
     steps:
       - name: Clone Boost.Http.Io
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Avoid the common API rate limit exceeded error in boostorg by including 100 latest commits in any case
           fetch-depth: 100
@@ -637,33 +637,33 @@ jobs:
           apt-get: git cmake
 
       - name: Clone Boost.Http.Io
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: http-io-root
 
       - name: Clone Boost.Http.Proto
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cppalliance/http
           path: http-proto-root
           ref: develop
 
       - name: Clone Boost.Buffers
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: buffers-root
           repository: cppalliance/buffers
           ref: develop
 
       - name: Clone Boost.Capy
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: capy-root
           repository: cppalliance/capy
           ref: develop
 
       - name: Clone Boost.Corosio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: corosio-root
           repository: cppalliance/corosio
