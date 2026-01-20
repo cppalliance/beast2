@@ -205,6 +205,7 @@ do_session(
 
         auto rv = co_await impl_->router.dispatch(
             w.rp.req.method(), w.rp.url, w.rp);
+        (void)rv;
 #if 0
         do_respond(rv); 
 

@@ -8,7 +8,6 @@
 //
 
 #include "serve_log_admin.hpp"
-//#include <boost/beast2/server/http_server.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/http/server/serve_static.hpp>
