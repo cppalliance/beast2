@@ -15,7 +15,7 @@
 #include <boost/http/field.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/corosio/socket.hpp>
-#include <boost/capy/any_bufref.hpp>
+#include <boost/capy/buffers/buffer_param.hpp>
 #include <boost/capy/buffers.hpp>
 
 namespace boost {
@@ -112,7 +112,7 @@ public:
 
 protected:
     http::route_task
-    write_impl(capy::any_bufref buffers) override
+    write_impl(capy::buffer_param buffers) override
     {
         // Extract buffers from type-erased wrapper
         constexpr std::size_t max_bufs = 16;
