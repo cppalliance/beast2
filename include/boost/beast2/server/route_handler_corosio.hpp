@@ -15,8 +15,9 @@
 #include <boost/http/field.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/corosio/socket.hpp>
-#include <boost/corosio/io_buffer_param.hpp>
 #include <boost/capy/buffers.hpp>
+#include <boost/capy/buffers/copy.hpp>
+#include <boost/capy/write.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -26,6 +27,8 @@ namespace beast2 {
 class corosio_route_params
     : public http::route_params
 {
+    http::serializer::stream srs_;
+
 public:
     using stream_type = corosio::socket;
 
@@ -92,19 +95,31 @@ public:
     http::route_task
     end() override
     {
-        // For chunked encoding, send the terminating chunk
-        // Currently assumes headers have already been sent
-        // and any final data has been written via write()
+        // Close the serializer stream if active
+        if(srs_.is_open())
+            srs_.close();
 
-        // If using chunked encoding, send "0\r\n\r\n"
-        if(res.value_or(
-                http::field::transfer_encoding, "") == "chunked")
+        // Drain all remaining serializer output
+        while(!serializer.is_done())
         {
-            static constexpr char terminator[] = "0\r\n\r\n";
-            auto [ec, n] = co_await stream.write_some(
-                capy::const_buffer(terminator, 5));
+            auto cbs = serializer.prepare();
+            if(cbs.has_error())
+            {
+                if(cbs.error() == http::error::need_data)
+                    continue;
+                co_return cbs.error();
+            }
+
+            if(capy::buffer_size(*cbs) == 0)
+            {
+                serializer.consume(0);
+                continue;
+            }
+
+            auto [ec, n] = co_await capy::write(stream, *cbs);
             if(ec)
                 co_return ec;
+            serializer.consume(capy::buffer_size(*cbs));
         }
 
         co_return {};
@@ -112,22 +127,37 @@ public:
 
 protected:
     http::route_task
-    write_impl(corosio::io_buffer_param buffers) override
+    write_impl(capy::const_buffer_param buffers) override
     {
-        // Extract buffers from type-erased wrapper
-        constexpr std::size_t max_bufs = 16;
-        capy::mutable_buffer bufs[max_bufs];
-        auto const n = buffers.copy_to(bufs, max_bufs);
+        // Initialize streaming on first call
+        if(!srs_.is_open())
+            srs_ = serializer.start_stream(res);
 
-        // Write all buffers
-        for(std::size_t i = 0; i < n; ++i)
+        // Loop until all input buffers are consumed
+        while(true)
         {
-            auto [ec, written] = co_await stream.write_some(
-                capy::const_buffer(
-                    bufs[i].data(),
-                    bufs[i].size()));
+            auto bufs = buffers.data();
+            if(bufs.empty())
+                break;
+
+            // Copy data to serializer stream
+            std::size_t bytes = capy::copy(srs_.prepare(), bufs);
+            srs_.commit(bytes);
+            buffers.consume(bytes);
+
+            // Write serializer output to socket
+            auto cbs = serializer.prepare();
+            if(cbs.has_error())
+            {
+                if(cbs.error() != http::error::need_data)
+                    co_return cbs.error();
+                continue;
+            }
+
+            auto [ec, n] = co_await capy::write(stream, *cbs);
             if(ec)
                 co_return ec;
+            serializer.consume(capy::buffer_size(*cbs));
         }
 
         co_return {};
