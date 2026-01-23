@@ -19,7 +19,7 @@
 #include <boost/beast2/server/route_handler_corosio.hpp>
 #include <boost/beast2/server/router_corosio.hpp>
 #include <boost/beast2/detail/except.hpp>
-#include <boost/capy/application.hpp>
+#include <boost/http/application.hpp>
 #include <boost/capy/task.hpp>
 #include <boost/capy/buffers.hpp>
 #include <boost/corosio/socket.hpp>
@@ -61,7 +61,7 @@ public:
         @param routes The router used to dispatch incoming HTTP requests.
     */
     http_stream(
-        capy::application& app,
+        http::application& app,
         corosio::socket& sock,
         http::flat_router& routes);
 
@@ -112,7 +112,7 @@ private:
 inline
 http_stream::
 http_stream(
-    capy::application& app,
+    http::application& app,
     corosio::socket& sock,
     http::flat_router& /*routes*/)
     : sect_(use_log_service(app).get_section("http_stream"))

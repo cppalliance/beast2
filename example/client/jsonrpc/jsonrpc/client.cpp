@@ -20,9 +20,9 @@
 #include <boost/beast2.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/json/parse.hpp>
-#include <boost/capy/brotli/decode.hpp>
-#include <boost/capy/polystore.hpp>
-#include <boost/capy/zlib/inflate.hpp>
+#include <boost/http/brotli/decode.hpp>
+#include <boost/http/core/polystore.hpp>
+#include <boost/http/zlib/inflate.hpp>
 #include <boost/url/url_view.hpp>
 
 using namespace boost;
@@ -385,7 +385,7 @@ public:
 client::
 client(
     urls::url endpoint,
-    capy::polystore& capy_ctx,
+    http::polystore& capy_ctx,
     asio::any_io_executor exec,
     asio::ssl::context& ssl_ctx)
     : client(
@@ -398,7 +398,7 @@ client(
 client::
 client(
     urls::url endpoint,
-    capy::polystore& capy_ctx,
+    http::polystore& capy_ctx,
     std::unique_ptr<any_stream> stream)
     : stream_(std::move(stream))
     , endpoint_(std::move(endpoint))
@@ -416,10 +416,10 @@ client(
     req_.append(field::accept, "application/json");
     req_.append(field::user_agent, "Boost.Http.Io");
 
-    if(capy_ctx.find<capy::brotli::decode_service>() != nullptr)
+    if(capy_ctx.find<http::brotli::decode_service>() != nullptr)
         req_.append(field::accept_encoding, "br");
 
-    if(capy_ctx.find<capy::zlib::inflate_service>() != nullptr)
+    if(capy_ctx.find<http::zlib::inflate_service>() != nullptr)
         req_.append(field::accept_encoding, "deflate, gzip");
 
     pr_.reset();

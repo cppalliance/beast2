@@ -26,10 +26,10 @@ target_link_libraries(
     Boost::url
     )
 
-if (TARGET Boost::capy_zlib)
-    target_link_libraries(beast2_server_example Boost::capy_zlib)
+if (TARGET Boost::http_zlib)
+    target_link_libraries(beast2_server_example Boost::http_zlib)
 endif()
 
-if (TARGET Boost::capy_brotli)
-    target_link_libraries(beast2_server_example Boost::capy_brotli)
+if (TARGET Boost::http_brotli)
+    target_link_libraries(beast2_server_example Boost::http_brotli)
 endif()

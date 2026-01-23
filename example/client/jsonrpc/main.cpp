@@ -16,9 +16,9 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/capy/brotli/decode.hpp>
-#include <boost/capy/polystore.hpp>
-#include <boost/capy/zlib/inflate.hpp>
+#include <boost/http/brotli/decode.hpp>
+#include <boost/http/core/polystore.hpp>
+#include <boost/http/zlib/inflate.hpp>
 
 #include <iostream>
 
@@ -27,7 +27,7 @@ using namespace boost;
 asio::awaitable<void>
 co_main(
     asio::ssl::context& ssl_ctx,
-    capy::polystore& capy_ctx)
+    http::polystore& capy_ctx)
 {
     using dec_float = multiprecision::cpp_dec_float_50;
     const auto to_int = [](std::string_view s)
@@ -147,20 +147,20 @@ main(int, char*[])
 
         // CAPY context holds optional deflate and
         // required configuration services
-        capy::polystore capy_ctx;
+        http::polystore capy_ctx;
 
         // Install parser service
         {
             http::response_parser::config cfg;
             cfg.min_buffer = 64 * 1024;
-        #ifdef BOOST_CAPY_HAS_BROTLI
+        #ifdef BOOST_HTTP_HAS_BROTLI
             cfg.apply_brotli_decoder  = true;
-            capy::brotli::install_decode_service(capy_ctx);
+            http::brotli::install_decode_service(capy_ctx);
         #endif
-        #ifdef BOOST_CAPY_HAS_ZLIB
+        #ifdef BOOST_HTTP_HAS_ZLIB
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            capy::zlib::install_inflate_service(capy_ctx);
+            http::zlib::install_inflate_service(capy_ctx);
         #endif
             http::install_parser_service(capy_ctx, cfg);
         }

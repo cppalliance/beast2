@@ -12,17 +12,17 @@
 #include <boost/http/server/flat_router.hpp>
 #include <boost/http/server/serve_static.hpp>
 #include <boost/beast2/error.hpp>
-#include <boost/capy/application.hpp>
+#include <boost/http/application.hpp>
 #include <boost/capy/ex/thread_pool.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/server/cors.hpp>
 #include <boost/beast2/http_server.hpp>
 #include <boost/http/bcrypt.hpp>
-#include <boost/capy/brotli/decode.hpp>
-#include <boost/capy/brotli/encode.hpp>
-#include <boost/capy/zlib/deflate.hpp>
-#include <boost/capy/zlib/inflate.hpp>
+#include <boost/http/brotli/decode.hpp>
+#include <boost/http/brotli/encode.hpp>
+#include <boost/http/zlib/deflate.hpp>
+#include <boost/http/zlib/inflate.hpp>
 #include <boost/json/parser.hpp>
 #include <boost/url/ipv4_address.hpp>
 #include <iostream>
@@ -34,16 +34,16 @@ namespace beast2 {
 
 capy::thread_pool g_tp;
 
-void install_services(capy::application& app)
+void install_services(http::application& app)
 {
-#ifdef BOOST_CAPY_HAS_BROTLI
-    capy::brotli::install_decode_service(app);
-    capy::brotli::install_encode_service(app);
+#ifdef BOOST_HTTP_HAS_BROTLI
+    http::brotli::install_decode_service(app);
+    http::brotli::install_encode_service(app);
 #endif
 
-#ifdef BOOST_CAPY_HAS_ZLIB
-    capy::zlib::install_deflate_service(app);
-    capy::zlib::install_inflate_service(app);
+#ifdef BOOST_HTTP_HAS_ZLIB
+    http::zlib::install_deflate_service(app);
+    http::zlib::install_inflate_service(app);
 #endif
 
     // VFALCO These ugly incantations are needed for http and will hopefully go away soon.
@@ -158,7 +158,7 @@ int server_main( int argc, char* argv[] )
             return EXIT_FAILURE;
         }
 
-        capy::application app;
+        http::application app;
         corosio::io_context ioc;
 
         install_services(app);

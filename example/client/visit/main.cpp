@@ -16,7 +16,7 @@
 #include <boost/core/detail/string_view.hpp>
 #include <boost/http/request.hpp>
 #include <boost/http/response_parser.hpp>
-#include <boost/capy/polystore.hpp>
+#include <boost/http/core/polystore.hpp>
 #include <boost/url/url_view.hpp>
 
 //------------------------------------------------
@@ -202,7 +202,7 @@ struct worker
     explicit
     worker(
         executor_type ex,
-        boost::capy::polystore& ctx)
+        boost::http::polystore& ctx)
         : sock(ex)
         , pr(ctx)
     {
@@ -276,7 +276,7 @@ main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    boost::capy::polystore ctx;
+    boost::http::polystore ctx;
     boost::http::parser::config_base cfg;
     boost::http::install_parser_service(ctx, cfg);
 

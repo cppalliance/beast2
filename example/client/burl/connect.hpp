@@ -15,11 +15,11 @@
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/context.hpp>
-#include <boost/capy/polystore.hpp>
+#include <boost/http/core/polystore.hpp>
 #include <boost/url/url.hpp>
 
 namespace asio       = boost::asio;
-namespace capy        = boost::capy;
+namespace http        = boost::http;
 namespace ssl        = boost::asio::ssl;
 namespace urls       = boost::urls;
 
@@ -27,7 +27,7 @@ asio::awaitable<void>
 connect(
     const operation_config& oc,
     ssl::context& ssl_ctx,
-    capy::polystore& capy_ctx,
+    http::polystore& capy_ctx,
     any_stream& stream,
     urls::url url);
 

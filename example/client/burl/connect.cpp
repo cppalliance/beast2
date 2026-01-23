@@ -153,7 +153,7 @@ connect_socks5_proxy(
 asio::awaitable<void>
 connect_http_proxy(
     const operation_config& oc,
-    capy::polystore& capy_ctx,
+    http::polystore& capy_ctx,
     asio::ip::tcp::socket& stream,
     const urls::url_view& url,
     const urls::url_view& proxy)
@@ -225,7 +225,7 @@ asio::awaitable<void>
 connect(
     const operation_config& oc,
     ssl::context& ssl_ctx,
-    capy::polystore& capy_ctx,
+    http::polystore& capy_ctx,
     any_stream& stream,
     urls::url url)
 {

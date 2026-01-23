@@ -43,9 +43,9 @@ set_property(TARGET beast2_example_client_jsonrpc
 target_link_libraries(beast2_example_client_jsonrpc
     PRIVATE
     beast2_example_client_jsonrpc_lib)
-if (TARGET Boost::capy_zlib)
-    target_link_libraries(beast2_example_client_jsonrpc PRIVATE Boost::capy_zlib)
+if (TARGET Boost::http_zlib)
+    target_link_libraries(beast2_example_client_jsonrpc PRIVATE Boost::http_zlib)
 endif()
-if (TARGET Boost::capy_brotli)
-    target_link_libraries(beast2_example_client_jsonrpc PRIVATE Boost::capy_brotli)
+if (TARGET Boost::http_brotli)
+    target_link_libraries(beast2_example_client_jsonrpc PRIVATE Boost::http_brotli)
 endif()

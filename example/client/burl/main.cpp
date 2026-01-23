@@ -31,8 +31,8 @@
 #include <boost/capy/buffers.hpp>
 #include <boost/beast2.hpp>
 #include <boost/http.hpp>
-#include <boost/capy/brotli/decode.hpp>
-#include <boost/capy/zlib/inflate.hpp>
+#include <boost/http/brotli/decode.hpp>
+#include <boost/http/zlib/inflate.hpp>
 #include <boost/scope/scope_exit.hpp>
 #include <boost/scope/scope_fail.hpp>
 #include <boost/url/parse.hpp>
@@ -45,13 +45,13 @@ namespace capy     = boost::capy;
 namespace scope    = boost::scope;
 using system_error = boost::system::system_error;
 
-#ifdef BOOST_CAPY_HAS_ZLIB
+#ifdef BOOST_HTTP_HAS_ZLIB
 constexpr bool capy_has_zlib = true;
 #else
 constexpr bool capy_has_zlib = false;
 #endif
 
-#ifdef BOOST_CAPY_HAS_BROTLI
+#ifdef BOOST_HTTP_HAS_BROTLI
 constexpr bool capy_has_brotli = true;
 #else
 constexpr bool capy_has_brotli = false;
@@ -345,7 +345,7 @@ perform_request(
     boost::optional<cookie_jar>& cookie_jar,
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
-    capy::polystore& capy_ctx,
+    http::polystore& capy_ctx,
     message msg,
     request_opt request_opt)
 {
@@ -759,7 +759,7 @@ co_main(int argc, char* argv[])
 
     auto executor      = co_await asio::this_coro::executor;
     auto task_group    = ::task_group{ executor, oc.parallel_max };
-    auto capy_ctx       = capy::polystore{};
+    auto capy_ctx       = http::polystore{};
     auto cookie_jar    = boost::optional<::cookie_jar>{};
     auto header_output = boost::optional<any_ostream>{};
     auto exp_cookies   = std::string{};
@@ -778,13 +778,13 @@ co_main(int argc, char* argv[])
         if constexpr(capy_has_brotli)
         {
             cfg.apply_brotli_decoder  = true;
-            capy::brotli::install_decode_service(capy_ctx);
+            http::brotli::install_decode_service(capy_ctx);
         }
         if constexpr(capy_has_zlib)
         {
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            capy::zlib::install_inflate_service(capy_ctx);
+            http::zlib::install_inflate_service(capy_ctx);
         }
         http::install_parser_service(capy_ctx, cfg);
     }

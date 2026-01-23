@@ -23,7 +23,7 @@ class serve_log_page
 {
 public:
     serve_log_page(
-        capy::polystore& ps)
+        http::polystore& ps)
         : ls_(use_log_service(ps))
     {
     }
@@ -92,7 +92,7 @@ class handle_submit
 {
 public:
     handle_submit(
-        capy::polystore& ps)
+        http::polystore& ps)
         : ls_(use_log_service(ps))
     {
     }
@@ -121,7 +121,7 @@ private:
 #if 0
 router
 serve_log_admin(
-    capy::polystore& ps)
+    http::polystore& ps)
 {
     router r;
     r.add(http::method::get, "/", serve_log_page(ps));

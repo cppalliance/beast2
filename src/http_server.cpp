@@ -21,7 +21,7 @@
 #include <boost/http/error.hpp>
 #include <boost/url/parse.hpp>
 
-#include <boost/capy/application.hpp>
+#include <boost/http/application.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -29,7 +29,7 @@ namespace beast2 {
 struct http_server::impl
 {
     http::flat_router router;
-    capy::application app;
+    http::application app;
 
     impl(http::flat_router r)
         : router(std::move(r))
@@ -76,7 +76,7 @@ struct http_server::
         launch(ctx.get_executor(), srv->do_session(*this));
     }
 
-    capy::task<corosio::io_result<std::size_t>>
+    capy::task<capy::io_result<std::size_t>>
     read_header()
     {
         std::size_t total_bytes = 0;
