@@ -25,3 +25,16 @@
 |===
 
 == boost.beast2
+
+This is a portable C++ library which implements the HTTP/1 protocol using
+Boost.HTTP.Proto and Boost.Asio. The library is distinguished by these
+provided features:
+
+* Works without exceptions
+* Fast compilation, few templates
+
+=== License
+
+Distributed under the Boost Software License, Version 1.0.
+(See accompanying file [LICENSE_1_0.txt](LICENSE_1_0.txt) or copy at
+https://www.boost.org/LICENSE_1_0.txt)

@@ -8,5 +8,5 @@
 # Official repository: https://github.com/cppalliance/beast2
 #
 
-build-project client ;
+# build-project client ; # disabled for now
 build-project server ;

@@ -13,14 +13,12 @@
 // Server components
 #include <boost/beast2/server/any_lambda.hpp>
 #include <boost/beast2/server/fixed_array.hpp>
-#include <boost/beast2/server/http_server.hpp>
+#include <boost/beast2/http_server.hpp>
 #include <boost/beast2/server/http_stream.hpp>
 #include <boost/beast2/server/route_handler_corosio.hpp>
 #include <boost/beast2/server/router.hpp>
 #include <boost/beast2/server/router_corosio.hpp>
-#include <boost/beast2/server/serve_redirect.hpp>
 #include <boost/beast2/server/serve_static.hpp>
-#include <boost/beast2/server/workers.hpp>
 
 // Test utilities
 #include <boost/beast2/test/error.hpp>
