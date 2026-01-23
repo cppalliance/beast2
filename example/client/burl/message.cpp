@@ -8,18 +8,10 @@
 //
 
 #include "message.hpp"
-#include "mime_type.hpp"
 
-#include <boost/capy/file.hpp>
 #include <boost/http/field.hpp>
-#include <boost/system/system_error.hpp>
 
-#include <filesystem>
-#include <iostream>
-
-namespace capy     = boost::capy;
-namespace fs       = std::filesystem;
-using system_error = boost::system::system_error;
+namespace capy = boost::capy;
 
 string_body::string_body(std::string body, std::string content_type)
     : body_{ std::move(body) }
@@ -53,79 +45,6 @@ string_body::body() const noexcept
 
 // -----------------------------------------------------------------------------
 
-file_body::file_body(std::string path)
-    : path_{ std::move(path) }
-{
-}
-
-http::method
-file_body::method() const noexcept
-{
-    return http::method::put;
-}
-
-core::string_view
-file_body::content_type() const noexcept
-{
-    return mime_type(path_);
-}
-
-std::uint64_t
-file_body::content_length() const
-{
-    return fs::file_size(path_);
-}
-
-http::file_source
-file_body::body() const
-{
-    boost::capy::file file;
-    error_code ec;
-    file.open(path_.c_str(), boost::capy::file_mode::read, ec);
-    if(ec)
-        throw system_error{ ec };
-
-    return http::file_source{ std::move(file), content_length() };
-}
-
-// -----------------------------------------------------------------------------
-
-boost::http::source::results
-stdin_body::source::on_read(capy::mutable_buffer mb)
-{
-    std::cin.read(static_cast<char*>(mb.data()), mb.size());
-
-    return { .ec       = {},
-             .bytes    = static_cast<std::size_t>(std::cin.gcount()),
-             .finished = std::cin.eof() };
-}
-
-http::method
-stdin_body::method() const noexcept
-{
-    return http::method::put;
-}
-
-core::string_view
-stdin_body::content_type() const noexcept
-{
-    return "application/octet-stream";
-}
-
-boost::optional<std::size_t>
-stdin_body::content_length() const noexcept
-{
-    return boost::none;
-}
-
-stdin_body::source
-stdin_body::body() const
-{
-    return {};
-}
-
-// -----------------------------------------------------------------------------
-
 void
 message::set_headers(http::request& request) const
 {
@@ -138,20 +57,11 @@ message::set_headers(http::request& request) const
                 request.set_method(f.method());
                 request.set(field::content_type, f.content_type());
 
-                boost::optional<std::size_t> content_length =
-                    f.content_length();
-                if(content_length.has_value())
-                {
-                    request.set_content_length(content_length.value());
-                    if(content_length.value() >= 1024 * 1024 &&
-                       request.version() == http::version::http_1_1)
-                        request.set(field::expect, "100-continue");
-                }
-                else
-                {
-                    request.set_chunked(true);
+                std::size_t content_length = f.content_length();
+                request.set_content_length(content_length);
+                if(content_length >= 1024 * 1024 &&
+                   request.version() == http::version::http_1_1)
                     request.set(field::expect, "100-continue");
-                }
             }
         },
         body_);
@@ -167,8 +77,7 @@ message::start_serializer(
         {
             if constexpr(!std::is_same_v<decltype(f), const std::monostate&>)
             {
-                serializer.start<std::decay_t<decltype(f.body())>>(
-                    request, f.body());
+                serializer.start(request, f.body());
             }
             else
             {

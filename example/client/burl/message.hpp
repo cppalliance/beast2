@@ -10,9 +10,6 @@
 #ifndef BURL_MESSAGE_HPP
 #define BURL_MESSAGE_HPP
 
-#include "multipart_form.hpp"
-
-#include <boost/http/file_source.hpp>
 #include <boost/http/request.hpp>
 #include <boost/http/serializer.hpp>
 
@@ -41,57 +38,11 @@ public:
     body() const noexcept;
 };
 
-class file_body
-{
-    std::string path_;
-
-public:
-    file_body(std::string path);
-
-    http::method
-    method() const noexcept;
-
-    core::string_view
-    content_type() const noexcept;
-
-    std::uint64_t
-    content_length() const;
-
-    http::file_source
-    body() const;
-};
-
-class stdin_body
-{
-public:
-    class source : public http::source
-    {
-    public:
-        results
-        on_read(capy::mutable_buffer mb) override;
-    };
-
-    http::method
-    method() const noexcept;
-
-    core::string_view
-    content_type() const noexcept;
-
-    boost::optional<std::size_t>
-    content_length() const noexcept;
-
-    source
-    body() const;
-};
-
 class message
 {
     std::variant<
         std::monostate,
-        string_body,
-        multipart_form,
-        file_body,
-        stdin_body>
+        string_body>
         body_;
 
 public:

@@ -984,57 +984,7 @@ parse_args(int argc, char* argv[])
 
     if(vm.contains("form") || vm.contains("form-string"))
     {
-        auto form = multipart_form{};
-        if(vm.contains("form"))
-        {
-            for(core::string_view sv :
-                vm.at("form").as<std::vector<std::string>>())
-            {
-                auto [name, prefix, value, filename, type, headers] =
-                    parse_form_option(sv);
-
-                auto is_file = false;
-
-                if(prefix == '@' || prefix == '<')
-                {
-                    is_file = true;
-
-                    if(!filename && prefix != '<')
-                        filename = fs::path{ value }.filename().string();
-
-                    if(value == "-")
-                    {
-                        value.clear();
-                        any_istream{ core::string_view{ "-" } }.append_to(
-                            value);
-                        is_file = false;
-                    }
-                    else if(!type)
-                    {
-                        type = ::mime_type(value);
-                    }
-                }
-                form.append(
-                    is_file,
-                    std::move(name),
-                    std::move(value),
-                    std::move(filename),
-                    std::move(type),
-                    std::move(headers));
-            }
-        }
-        if(vm.contains("form-string"))
-        {
-            for(core::string_view sv :
-                vm.at("form-string").as<std::vector<std::string>>())
-            {
-                if(auto pos = sv.find('='); pos != sv.npos)
-                    form.append(false, sv.substr(0, pos), sv.substr(pos + 1));
-                else
-                    throw std::runtime_error("Illegally formatted input field");
-            }
-        }
-        oc.msg = std::move(form);
+        throw std::runtime_error{ "Multipart form support is not available" };
     }
 
     if(vm.contains("json"))

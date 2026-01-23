@@ -20,6 +20,7 @@
 #include <boost/beast2.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/json/parse.hpp>
+#include <boost/json/serialize.hpp>
 #include <boost/http/brotli/decode.hpp>
 #include <boost/http/core/polystore.hpp>
 #include <boost/http/zlib/inflate.hpp>
@@ -250,33 +251,6 @@ private:
     }
 };
 
-class json_source : public http::source
-{
-    json::serializer& jsr_;
-    json::value v_;
-
-public:
-    json_source(json::serializer& jsr, json::value v)
-        : jsr_(jsr)
-        , v_(std::move(v))
-    {
-        jsr_.reset(&v_);
-    }
-
-private:
-    results
-    on_read(
-        capy::mutable_buffer b) override
-    {
-        results ret;
-        ret.bytes = jsr_.read(
-            static_cast<char*>(b.data()),
-            b.size()).size();
-        ret.finished = jsr_.done();
-        return ret;
-    }
-};
-
 } //namespace
 
 // ----------------------------------------------
@@ -286,6 +260,7 @@ class client::request_op
 {
     client& client_;
     std::uint64_t id_;
+    std::string body_;
 
 public:
     request_op(client& c) noexcept
@@ -310,9 +285,10 @@ public:
                 { "id", id_ }
             },
             sp);
-        client_.req_.set_chunked(true);
-        client_.sr_.start<json_source>(
-            client_.req_, client_.jsr_, std::move(value));
+        body_ = json::serialize(value);
+        client_.req_.set_content_length(body_.size());
+        client_.sr_.start(
+            client_.req_, http::string_body(std::move(body_)));
 
         beast2::async_write(
             *client_.stream_, client_.sr_, std::move(self));

@@ -376,26 +376,7 @@ perform_request(
 
     if(!request_opt.input.empty())
     {
-        msg = [&]() -> message
-        {
-            if(request_opt.input == "-")
-                return stdin_body{};
-
-            auto path = request_opt.input;
-
-            // Append filename to URL if missing
-            auto segs = url.encoded_segments();
-            if(segs.empty())
-            {
-                segs.push_back(path.filename().string());
-            }
-            else if(auto back = --segs.end(); back->empty())
-            {
-                segs.replace(back, path.filename().string());
-            }
-
-            return file_body{ path.string() };
-        }();
+        throw std::runtime_error{ "File upload is not available" };
     }
 
     fs::path output_path = [&]()
