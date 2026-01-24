@@ -16,7 +16,6 @@
 #include <boost/core/detail/string_view.hpp>
 #include <boost/http/request.hpp>
 #include <boost/http/response_parser.hpp>
-#include <boost/http/core/polystore.hpp>
 #include <boost/url/url_view.hpp>
 
 //------------------------------------------------
@@ -201,10 +200,8 @@ struct worker
 
     explicit
     worker(
-        executor_type ex,
-        boost::http::polystore& ctx)
+        executor_type ex)
         : sock(ex)
-        , pr(ctx)
     {
         sock.open(boost::asio::ip::tcp::v4());
     }
@@ -276,13 +273,12 @@ main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    boost::http::polystore ctx;
     boost::http::parser::config_base cfg;
-    boost::http::install_parser_service(ctx, cfg);
+    boost::http::install_parser_service(cfg);
 
     boost::asio::io_context ioc;
 
-    worker w(ioc.get_executor(), ctx);
+    worker w(ioc.get_executor());
 
     w.do_next();
 

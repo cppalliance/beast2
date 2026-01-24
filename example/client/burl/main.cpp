@@ -345,15 +345,14 @@ perform_request(
     boost::optional<cookie_jar>& cookie_jar,
     core::string_view exp_cookies,
     ssl::context& ssl_ctx,
-    http::polystore& capy_ctx,
     message msg,
     request_opt request_opt)
 {
     using field     = http::field;
     auto executor   = co_await asio::this_coro::executor;
     auto stream     = any_stream{ asio::ip::tcp::socket{ executor } };
-    auto parser     = http::response_parser{ capy_ctx };
-    auto serializer = http::serializer{ capy_ctx };
+    auto parser     = http::response_parser{};
+    auto serializer = http::serializer{};
 
     urls::url url = [&]()
     {
@@ -446,7 +445,7 @@ perform_request(
 
         co_await asio::co_spawn(
             executor,
-            connect(oc, ssl_ctx, capy_ctx, stream, url),
+            connect(oc, ssl_ctx, stream, url),
             asio::cancel_after(oc.connect_timeout));
 
         if(oc.recvpersecond)
@@ -740,7 +739,6 @@ co_main(int argc, char* argv[])
 
     auto executor      = co_await asio::this_coro::executor;
     auto task_group    = ::task_group{ executor, oc.parallel_max };
-    auto capy_ctx       = http::polystore{};
     auto cookie_jar    = boost::optional<::cookie_jar>{};
     auto header_output = boost::optional<any_ostream>{};
     auto exp_cookies   = std::string{};
@@ -759,22 +757,22 @@ co_main(int argc, char* argv[])
         if constexpr(capy_has_brotli)
         {
             cfg.apply_brotli_decoder  = true;
-            http::brotli::install_decode_service(capy_ctx);
+            http::brotli::install_decode_service();
         }
         if constexpr(capy_has_zlib)
         {
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            http::zlib::install_inflate_service(capy_ctx);
+            http::zlib::install_inflate_service();
         }
-        http::install_parser_service(capy_ctx, cfg);
+        http::install_parser_service(cfg);
     }
 
     // serializer service
     {
         http::serializer::config cfg;
         cfg.payload_buffer = 1024 * 1024;
-        http::install_serializer_service(capy_ctx, cfg);
+        http::install_serializer_service(cfg);
     }
 
     if(!oc.headerfile.empty())
@@ -812,7 +810,6 @@ co_main(int argc, char* argv[])
                     cookie_jar,
                     exp_cookies,
                     ssl_ctx,
-                    capy_ctx,
                     oc.msg,
                     ropt.value());
             };

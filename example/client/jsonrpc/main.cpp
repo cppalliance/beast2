@@ -17,7 +17,6 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/http/brotli/decode.hpp>
-#include <boost/http/core/polystore.hpp>
 #include <boost/http/zlib/inflate.hpp>
 
 #include <iostream>
@@ -26,8 +25,7 @@ using namespace boost;
 
 asio::awaitable<void>
 co_main(
-    asio::ssl::context& ssl_ctx,
-    http::polystore& capy_ctx)
+    asio::ssl::context& ssl_ctx)
 {
     using dec_float = multiprecision::cpp_dec_float_50;
     const auto to_int = [](std::string_view s)
@@ -37,7 +35,6 @@ co_main(
 
     jsonrpc::client client(
         urls::url("https://ethereum.publicnode.com"),
-        capy_ctx,
         co_await asio::this_coro::executor,
         ssl_ctx);
 
@@ -145,28 +142,24 @@ main(int, char*[])
         // The SSL context is required, and holds certificates
         asio::ssl::context ssl_ctx(asio::ssl::context::tls_client);
 
-        // CAPY context holds optional deflate and
-        // required configuration services
-        http::polystore capy_ctx;
-
         // Install parser service
         {
             http::response_parser::config cfg;
             cfg.min_buffer = 64 * 1024;
         #ifdef BOOST_HTTP_HAS_BROTLI
             cfg.apply_brotli_decoder  = true;
-            http::brotli::install_decode_service(capy_ctx);
+            http::brotli::install_decode_service();
         #endif
         #ifdef BOOST_HTTP_HAS_ZLIB
             cfg.apply_deflate_decoder = true;
             cfg.apply_gzip_decoder    = true;
-            http::zlib::install_inflate_service(capy_ctx);
+            http::zlib::install_inflate_service();
         #endif
-            http::install_parser_service(capy_ctx, cfg);
+            http::install_parser_service(cfg);
         }
 
         // Install serializer service with default configuration
-        http::install_serializer_service(capy_ctx, {});
+        http::install_serializer_service({});
 
         // Root certificates used for verification
         ssl_ctx.set_default_verify_paths();
@@ -176,7 +169,7 @@ main(int, char*[])
 
         asio::co_spawn(
             ioc,
-            co_main(ssl_ctx, capy_ctx),
+            co_main(ssl_ctx),
             [](auto eptr)
             {
                 if(eptr)

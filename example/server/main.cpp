@@ -34,22 +34,21 @@ namespace beast2 {
 
 capy::thread_pool g_tp;
 
-void install_services(http::application& app)
+void install_services()
 {
 #ifdef BOOST_HTTP_HAS_BROTLI
-    http::brotli::install_decode_service(app);
-    http::brotli::install_encode_service(app);
+    http::brotli::install_decode_service();
+    http::brotli::install_encode_service();
 #endif
 
 #ifdef BOOST_HTTP_HAS_ZLIB
-    http::zlib::install_deflate_service(app);
-    http::zlib::install_inflate_service(app);
+    http::zlib::install_deflate_service();
+    http::zlib::install_inflate_service();
 #endif
 
-    // VFALCO These ugly incantations are needed for http and will hopefully go away soon.
-    http::install_parser_service(app,
+    http::install_parser_service(
         http::request_parser::config());
-    http::install_serializer_service(app,
+    http::install_serializer_service(
         http::serializer::config());
 }
 
@@ -161,7 +160,7 @@ int server_main( int argc, char* argv[] )
         http::application app;
         corosio::io_context ioc;
 
-        install_services(app);
+        install_services();
 
         auto addr = urls::parse_ipv4_address(argv[1]);
         if(addr.has_error())

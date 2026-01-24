@@ -12,14 +12,12 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/server/router.hpp>
-#include <boost/http/core/polystore.hpp>
 
 namespace boost {
 namespace beast2 {
 
 router
-serve_log_admin(
-    http::polystore& ps);
+serve_log_admin();
 
 } // beast2
 } // boost

@@ -9,6 +9,7 @@
 
 #include <boost/beast2/log_service.hpp>
 #include <boost/beast2/logger.hpp>
+#include <boost/capy/ex/system_context.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -17,9 +18,15 @@ namespace {
 
 class log_service_impl
     : public log_service
+    , public capy::execution_context::service
 {
 public:
     using key_type = log_service;
+
+    explicit
+    log_service_impl(capy::execution_context&) noexcept
+    {
+    }
 
     section
     get_section(
@@ -35,6 +42,8 @@ public:
         return ls_.get_sections();
     }
 
+    void shutdown() override {}
+
 private:
     log_sections ls_;
 };
@@ -42,10 +51,9 @@ private:
 } // (anon)
 
 log_service&
-use_log_service(
-    http::polystore& ps)
+use_log_service()
 {
-    return ps.try_emplace<log_service_impl>();
+    return capy::get_system_context().use_service<log_service_impl>();
 }
 
 } // beast2

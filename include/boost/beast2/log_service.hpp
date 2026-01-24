@@ -12,7 +12,6 @@
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/beast2/logger.hpp>
-#include <boost/http/core/polystore.hpp>
 #include <boost/core/detail/string_view.hpp>
 #include <vector>
 
@@ -38,16 +37,16 @@ public:
         std::vector<section> = 0;
 };
 
-/** Return the log service attached to the polystore
-    If the polystore does not already contain the
+/** Return the log service from the system context
+
+    If the system context does not already contain the
     service, it is created.
-    @param ps The polystore.
+
     @return The log service.
 */
 BOOST_BEAST2_DECL
 log_service&
-use_log_service(
-    http::polystore& ps);
+use_log_service();
 
 } // beast2
 } // boost

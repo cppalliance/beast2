@@ -18,11 +18,11 @@
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/beast2.hpp>
+#include <boost/capy/ex/system_context.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/json/parse.hpp>
 #include <boost/json/serialize.hpp>
 #include <boost/http/brotli/decode.hpp>
-#include <boost/http/core/polystore.hpp>
 #include <boost/http/zlib/inflate.hpp>
 #include <boost/url/url_view.hpp>
 
@@ -361,12 +361,10 @@ public:
 client::
 client(
     urls::url endpoint,
-    http::polystore& capy_ctx,
     asio::any_io_executor exec,
     asio::ssl::context& ssl_ctx)
     : client(
         std::move(endpoint),
-        capy_ctx,
         std::unique_ptr<any_stream>(new stream_impl(exec, ssl_ctx)))
 {
 }
@@ -374,12 +372,9 @@ client(
 client::
 client(
     urls::url endpoint,
-    http::polystore& capy_ctx,
     std::unique_ptr<any_stream> stream)
     : stream_(std::move(stream))
     , endpoint_(std::move(endpoint))
-    , sr_(capy_ctx)
-    , pr_(capy_ctx)
     , req_(http::method::post, "/")
 {
     using field = http::field;
@@ -392,10 +387,11 @@ client(
     req_.append(field::accept, "application/json");
     req_.append(field::user_agent, "Boost.Http.Io");
 
-    if(capy_ctx.find<http::brotli::decode_service>() != nullptr)
+    auto& ctx = capy::get_system_context();
+    if(ctx.find_service<http::brotli::decode_service>() != nullptr)
         req_.append(field::accept_encoding, "br");
 
-    if(capy_ctx.find<http::zlib::inflate_service>() != nullptr)
+    if(ctx.find_service<http::zlib::inflate_service>() != nullptr)
         req_.append(field::accept_encoding, "deflate, gzip");
 
     pr_.reset();

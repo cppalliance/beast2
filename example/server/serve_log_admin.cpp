@@ -22,9 +22,8 @@ namespace {
 class serve_log_page
 {
 public:
-    serve_log_page(
-        http::polystore& ps)
-        : ls_(use_log_service(ps))
+    serve_log_page()
+        : ls_(use_log_service())
     {
     }
 
@@ -91,9 +90,8 @@ private:
 class handle_submit
 {
 public:
-    handle_submit(
-        http::polystore& ps)
-        : ls_(use_log_service(ps))
+    handle_submit()
+        : ls_(use_log_service())
     {
     }
 
@@ -120,12 +118,11 @@ private:
 
 #if 0
 router
-serve_log_admin(
-    http::polystore& ps)
+serve_log_admin()
 {
     router r;
-    r.add(http::method::get, "/", serve_log_page(ps));
-    r.add(http::method::get, "/submit", handle_submit(ps));
+    r.add(http::method::get, "/", serve_log_page());
+    r.add(http::method::get, "/submit", handle_submit());
     return r;
 }
 #endif

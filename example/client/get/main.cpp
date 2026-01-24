@@ -18,7 +18,6 @@
 #include <boost/http/response_parser.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/brotli/decode.hpp>
-#include <boost/http/core/polystore.hpp>
 #include <boost/http/zlib/inflate.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
@@ -49,13 +48,10 @@ class session
 public:
     session(
         asio::io_context& ioc,
-        asio::ssl::context& ssl_ctx,
-        http::polystore& capy_ctx)
+        asio::ssl::context& ssl_ctx)
         : ssl_ctx_(ssl_ctx)
         , stream_(ioc, ssl_ctx)
         , resolver_(ioc)
-        , sr_(capy_ctx)
-        , pr_(capy_ctx)
     {
     }
 
@@ -440,10 +436,6 @@ main(int argc, char* argv[])
     // The SSL context is required, and holds certificates
     asio::ssl::context ssl_ctx(asio::ssl::context::tls_client);
 
-    // holds optional deflate and
-    // required configuration services
-    http::polystore capy_ctx;
-
     // Install parser service
     {
         http::response_parser::config cfg;
@@ -451,18 +443,18 @@ main(int argc, char* argv[])
         cfg.min_buffer = 64 * 1024;
     #ifdef BOOST_HTTP_HAS_BROTLI
         cfg.apply_brotli_decoder  = true;
-        http::brotli::install_decode_service(capy_ctx);
+        http::brotli::install_decode_service();
     #endif
     #ifdef BOOST_HTTP_HAS_ZLIB
         cfg.apply_deflate_decoder = true;
         cfg.apply_gzip_decoder    = true;
-        http::zlib::install_inflate_service(capy_ctx);
+        http::zlib::install_inflate_service();
     #endif
-        http::install_parser_service(capy_ctx, cfg);
+        http::install_parser_service(cfg);
     }
 
     // Install serializer service with default configuration
-    http::install_serializer_service(capy_ctx, {});
+    http::install_serializer_service({});
 
     // Root certificates used for verification
     ssl_ctx.set_default_verify_paths();
@@ -476,7 +468,7 @@ main(int argc, char* argv[])
     if(!url.has_authority())
         goto help;
 
-    session s(ioc, ssl_ctx, capy_ctx);
+    session s(ioc, ssl_ctx);
     s.run(url);
 
     ioc.run();

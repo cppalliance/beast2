@@ -25,7 +25,6 @@
 #include <boost/json/serializer.hpp>
 #include <boost/json/stream_parser.hpp>
 #include <boost/json/value_to.hpp>
-#include <boost/http/core/polystore_fwd.hpp>
 #include <boost/url/url.hpp>
 
 namespace jsonrpc {
@@ -56,7 +55,6 @@ public:
     */ 
     client(
         boost::urls::url endpoint,
-        boost::http::polystore& capy_ctx,
         boost::asio::any_io_executor exec,
         boost::asio::ssl::context& ssl_ctx);
 
@@ -67,7 +65,6 @@ public:
     */ 
     client(
         boost::urls::url endpoint,
-        boost::http::polystore& capy_ctx,
         std::unique_ptr<any_stream> stream);
 
     /// Get the executor associated with the object.
