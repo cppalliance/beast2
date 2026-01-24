@@ -7,7 +7,7 @@
   <class kind="class">boost::http::is_sink</class>
   <class kind="class">boost::http::is_source</class>
   <class kind="class">boost::http::route_result</class>
-  <class kind="class">boost::http::router</class>
+  <class kind="class">boost::http::basic_router</class>
   <class kind="class">boost::http::acceptor_config</class>
   <class kind="class">boost::http::any_router</class>
   <class kind="class">boost::http::basic_router</class>
@@ -149,8 +149,8 @@
   <filename>boost/http/route_result.adoc</filename>
 </compound>
 <compound kind="class">
-  <name>boost::http::router</name>
-  <filename>boost/http/router.adoc</filename>
+  <name>boost::http::basic_router</name>
+  <filename>boost/http/basic_router.adoc</filename>
 </compound>
 <compound kind="class">
   <name>boost::http::acceptor_config</name>

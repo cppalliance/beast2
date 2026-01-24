@@ -11,15 +11,15 @@
 #define BOOST_BEAST2_SERVER_ROUTER_HPP
 
 #include <boost/beast2/detail/config.hpp>
+#include <boost/http/server/basic_router.hpp>
 #include <boost/http/server/router.hpp>
-#include <boost/http/server/route_handler.hpp>
 
 namespace boost {
 namespace beast2 {
 
 /** The sans-IO router type
 */
-using router = http::router<http::route_params>;
+using router = http::basic_router<http::route_params>;
 
 } // beast2
 } // boost

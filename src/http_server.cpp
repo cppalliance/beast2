@@ -17,7 +17,7 @@
 #include <boost/http/serializer.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/http/server/flat_router.hpp>
-#include <boost/http/server/router.hpp>
+#include <boost/http/server/basic_router.hpp>
 #include <boost/http/error.hpp>
 #include <boost/url/parse.hpp>
 
@@ -39,6 +39,8 @@ struct http_server::impl
     }
 };
 
+// Each worker owns its own socket and parser/serializer state,
+// allowing concurrent connection handling without synchronization.
 struct http_server::
     worker : tcp_server::worker_base
 {

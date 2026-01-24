@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTE_HANDLER_COROSIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http/server/route_handler.hpp>
+#include <boost/http/server/router.hpp>
 #include <boost/http/field.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/corosio/socket.hpp>

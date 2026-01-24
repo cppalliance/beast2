@@ -164,7 +164,7 @@ int server_main( int argc, char* argv[] )
         auto port = static_cast<std::uint16_t>(std::atoi(argv[2]));
         corosio::endpoint ep(addr.value(), port);
 
-        http::router<corosio_route_params> rr;
+        http::basic_router<corosio_route_params> rr;
 
         rr.use( "/", http::serve_static( argv[3] ) );
 #if 0

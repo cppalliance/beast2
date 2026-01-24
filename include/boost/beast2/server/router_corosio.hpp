@@ -11,7 +11,7 @@
 #define BOOST_BEAST2_SERVER_ROUTER_COROSIO_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/http/server/router.hpp>
+#include <boost/http/server/basic_router.hpp>
 #include <boost/beast2/server/route_handler_corosio.hpp>
 
 namespace boost {
@@ -19,7 +19,7 @@ namespace beast2 {
 
 /** The Corosio-aware router type
 */
-using router_corosio = http::router<corosio_route_params>;
+using router_corosio = http::basic_router<corosio_route_params>;
 
 } // beast2
 } // boost
