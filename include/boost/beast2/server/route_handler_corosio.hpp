@@ -16,7 +16,7 @@
 #include <boost/http/string_body.hpp>
 #include <boost/corosio/socket.hpp>
 #include <boost/capy/buffers.hpp>
-#include <boost/capy/buffers/copy.hpp>
+#include <boost/capy/buffers/buffer_copy.hpp>
 #include <boost/capy/write.hpp>
 
 namespace boost {
@@ -90,7 +90,7 @@ protected:
                 break;
 
             // Copy data to serializer stream
-            std::size_t bytes = capy::copy(srs_.prepare(), bufs);
+            std::size_t bytes = capy::buffer_copy(srs_.prepare(), bufs);
             srs_.commit(bytes);
             buffers.consume(bytes);
 
