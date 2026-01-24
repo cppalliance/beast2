@@ -59,7 +59,7 @@ public:
                 co_return cbs.error();
             }
 
-            if(capy::buffer_size(*cbs) == 0)
+            if(capy::buffer_empty(*cbs))
             {
                 serializer.consume(0);
                 continue;
