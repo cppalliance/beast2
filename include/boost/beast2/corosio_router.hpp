@@ -7,8 +7,8 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#ifndef BOOST_BEAST2_SERVER_ROUTE_HANDLER_COROSIO_HPP
-#define BOOST_BEAST2_SERVER_ROUTE_HANDLER_COROSIO_HPP
+#ifndef BOOST_BEAST2_SERVER_COROSIO_ROUTER_HPP
+#define BOOST_BEAST2_SERVER_COROSIO_ROUTER_HPP
 
 #include <boost/beast2/detail/config.hpp>
 #include <boost/http/server/router.hpp>
@@ -38,8 +38,7 @@ public:
     corosio_route_params(
         corosio::socket& s)
         : stream(s)
-    {
-    }
+    {}
 
     http::route_task
     end() override
@@ -112,6 +111,10 @@ protected:
         co_return {};
     }
 };
+
+/** The Corosio-aware router type
+*/
+using corosio_router = http::basic_router<corosio_route_params>;
 
 } // beast2
 } // boost

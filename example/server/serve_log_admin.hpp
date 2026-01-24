@@ -11,12 +11,12 @@
 #define BOOST_BEAST2_SERVER_SERVE_LOG_ADMIN_HPP
 
 #include <boost/beast2/detail/config.hpp>
-#include <boost/beast2/server/router.hpp>
+#include <boost/http/server/router.hpp>
 
 namespace boost {
 namespace beast2 {
 
-router
+http::router
 serve_log_admin();
 
 } // beast2

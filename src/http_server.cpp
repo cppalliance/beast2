@@ -11,7 +11,7 @@
 #include <boost/http/server/flat_router.hpp>
 #include <boost/capy/task.hpp>
 #include <boost/capy/ex/strand.hpp>
-#include <boost/beast2/server/route_handler_corosio.hpp>
+#include <boost/beast2/corosio_router.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/response.hpp>
 #include <boost/http/serializer.hpp>
@@ -21,15 +21,12 @@
 #include <boost/http/error.hpp>
 #include <boost/url/parse.hpp>
 
-#include <boost/http/application.hpp>
-
 namespace boost {
 namespace beast2 {
 
 struct http_server::impl
 {
     http::flat_router router;
-    http::application app;
     http::shared_parser_config parser_cfg;
     http::shared_serializer_config serializer_cfg;
 

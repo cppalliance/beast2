@@ -7,7 +7,7 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include "src/server/route_rule.hpp"
+#include "src/route_rule.hpp"
 
 #include "test_suite.hpp"
 

@@ -8,16 +8,15 @@
 //
 
 #include "serve_log_admin.hpp"
-#include <boost/beast2/server/router.hpp>
+#include <boost/beast2/corosio_router.hpp>
+#include <boost/beast2/error.hpp>
+#include <boost/beast2/http_server.hpp>
+#include <boost/capy/ex/thread_pool.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/http/server/serve_static.hpp>
-#include <boost/beast2/error.hpp>
-#include <boost/http/application.hpp>
-#include <boost/capy/ex/thread_pool.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/server/cors.hpp>
-#include <boost/beast2/http_server.hpp>
 #include <boost/http/bcrypt.hpp>
 #include <boost/http/brotli/decode.hpp>
 #include <boost/http/brotli/encode.hpp>
@@ -26,8 +25,6 @@
 #include <boost/json/parser.hpp>
 #include <boost/url/ipv4_address.hpp>
 #include <iostream>
-
-#include <boost/beast2/server/route_handler_corosio.hpp>
 
 namespace boost {
 namespace beast2 {
@@ -150,7 +147,6 @@ int server_main( int argc, char* argv[] )
             return EXIT_FAILURE;
         }
 
-        http::application app;
         corosio::io_context ioc;
 
         install_services();
@@ -164,7 +160,7 @@ int server_main( int argc, char* argv[] )
         auto port = static_cast<std::uint16_t>(std::atoi(argv[2]));
         corosio::endpoint ep(addr.value(), port);
 
-        http::basic_router<corosio_route_params> rr;
+        corosio_router rr;
 
         rr.use( "/", http::serve_static( argv[3] ) );
 #if 0
