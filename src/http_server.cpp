@@ -30,16 +30,12 @@ struct http_server::impl
 {
     http::flat_router router;
     http::application app;
+    http::shared_parser_config parser_cfg;
+    http::shared_serializer_config serializer_cfg;
 
     impl(http::flat_router r)
         : router(std::move(r))
     {
-        // VFALCO These ugly incantations are needed
-        // for http and will hopefully go away soon.
-        http::install_parser_service(app,
-            http::request_parser::config());
-        http::install_serializer_service(app,
-            http::serializer::config());
     }
 };
 
@@ -62,8 +58,8 @@ struct http_server::
         , rp(sock)
     {
         sock.open();
-        rp.parser = http::request_parser(srv->impl_->app);
-        rp.serializer = http::serializer(srv->impl_->app);
+        rp.parser = http::request_parser(srv->impl_->parser_cfg);
+        rp.serializer = http::serializer(srv->impl_->serializer_cfg);
     }
 
     corosio::socket& socket() override
@@ -151,10 +147,14 @@ http_server::
 http_server(
     corosio::io_context& ctx,
     std::size_t num_workers,
-    http::flat_router router)
+    http::flat_router router,
+    http::shared_parser_config parser_cfg,
+    http::shared_serializer_config serializer_cfg)
     : tcp_server(ctx, ctx.get_executor())
     , impl_(new impl(std::move(router)))
 {
+    impl_->parser_cfg = std::move(parser_cfg);
+    impl_->serializer_cfg = std::move(serializer_cfg);
     wv_.reserve(num_workers);
     for(std::size_t i = 0; i < num_workers; ++i)
         wv_.emplace<worker>(ctx, this);

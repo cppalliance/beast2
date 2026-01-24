@@ -37,19 +37,12 @@ capy::thread_pool g_tp;
 void install_services()
 {
 #ifdef BOOST_HTTP_HAS_BROTLI
-    http::brotli::install_decode_service();
-    http::brotli::install_encode_service();
+    http::brotli::install_brotli_service();
 #endif
 
 #ifdef BOOST_HTTP_HAS_ZLIB
-    http::zlib::install_deflate_service();
-    http::zlib::install_inflate_service();
+    http::zlib::install_zlib_service();
 #endif
-
-    http::install_parser_service(
-        http::request_parser::config());
-    http::install_serializer_service(
-        http::serializer::config());
 }
 
 #if 0
@@ -181,7 +174,15 @@ int server_main( int argc, char* argv[] )
                 co_return co_await rp.send( "Hello, coworld!" );
             });
 #endif
-        http_server hsrv(ioc, std::atoi(argv[4]), std::move(rr));
+        auto parser_cfg = http::make_parser_config(http::parser_config(true));
+        auto serializer_cfg = http::make_serializer_config(http::serializer_config());
+
+        http_server hsrv(
+            ioc,
+            std::atoi(argv[4]),
+            std::move(rr),
+            std::move(parser_cfg),
+            std::move(serializer_cfg));
         auto ec = hsrv.bind(ep);
         if(ec)
         {

@@ -13,6 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/corosio/tcp_server.hpp>
 #include <boost/corosio/io_context.hpp>
+#include <boost/http/config.hpp>
 #include <cstddef>
 
 namespace boost {
@@ -31,7 +32,10 @@ public:
     http_server(
         corosio::io_context& ctx,
         std::size_t num_workers,
-        http::flat_router router);
+        http::flat_router router,
+        http::shared_parser_config parser_cfg,
+        http::shared_serializer_config serializer_cfg);
+
 
 private:
     struct worker;
