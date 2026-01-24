@@ -7,10 +7,12 @@
 // Official repository: https://github.com/cppalliance/beast2
 //
 
-#include <boost/beast2/http_server.hpp>
+#include <boost/beast2/https_server.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/capy/task.hpp>
 #include <boost/capy/ex/strand.hpp>
+#include <boost/corosio/tls/context.hpp>
+#include <boost/corosio/tls/openssl_stream.hpp>
 #include <boost/beast2/corosio_router.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/response.hpp>
@@ -24,7 +26,7 @@
 namespace boost {
 namespace beast2 {
 
-struct http_server::impl
+struct https_server::impl
 {
     http::flat_router router;
     http::shared_parser_config parser_cfg;
@@ -38,22 +40,27 @@ struct http_server::impl
 
 // Each worker owns its own socket and parser/serializer state,
 // allowing concurrent connection handling without synchronization.
-struct http_server::
+struct https_server::
     worker : tcp_server::worker_base
 {
-    http_server* srv;
+    https_server* srv;
     corosio::io_context& ctx;
     capy::strand<corosio::io_context::executor_type> strand;
     corosio::socket sock;
+    corosio::tls::context tls_ctx;
+    corosio::openssl_stream stream;
     corosio_route_params rp;
 
     worker(
         corosio::io_context& ctx_,
-        http_server* srv_)
+        corosio::tls::context tls_ctx_,
+        https_server* srv_)
         : srv(srv_)
         , ctx(ctx_)
         , strand(ctx_.get_executor())
         , sock(ctx_)
+        , tls_ctx(tls_ctx_)
+        , stream(sock, tls_ctx)
         , rp(sock)
     {
         sock.open();
@@ -128,24 +135,25 @@ struct http_server::
         if (rv.has_error())
         {
             rp.status(http::status::bad_request);
-            //auto [ec] = co_await rp.send("Bad Request: " + rv.error().message());
-            //co_return;
+            //rp.set_body("Bad Request: " + rv.error().message());
+            return;
         }
 
         rp.url = rv.value();
     }
 };
 
-http_server::
-~http_server()
+https_server::
+~https_server()
 {
     delete impl_;
 }
 
-http_server::
-http_server(
+https_server::
+https_server(
     corosio::io_context& ctx,
     std::size_t num_workers,
+    corosio::tls::context tls_ctx,
     http::flat_router router,
     http::shared_parser_config parser_cfg,
     http::shared_serializer_config serializer_cfg)
@@ -156,11 +164,11 @@ http_server(
     impl_->serializer_cfg = std::move(serializer_cfg);
     wv_.reserve(num_workers);
     for(std::size_t i = 0; i < num_workers; ++i)
-        wv_.emplace<worker>(ctx, this);
+        wv_.emplace<worker>(ctx, tls_ctx, this);
 }
 
 capy::task<void>
-http_server::
+https_server::
 do_session(
     worker& w)
 {

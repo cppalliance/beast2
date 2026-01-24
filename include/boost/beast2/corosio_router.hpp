@@ -18,6 +18,7 @@
 #include <boost/capy/buffers.hpp>
 #include <boost/capy/buffers/buffer_copy.hpp>
 #include <boost/capy/write.hpp>
+#include <span>
 
 namespace boost {
 namespace beast2 {
@@ -74,41 +75,36 @@ public:
     }
 
 protected:
-    http::route_task
-    write_impl(capy::const_buffer_param buffers) override
+    capy::task<capy::io_result<std::size_t>>
+    write_impl(
+        std::span<capy::const_buffer> buffers) override
     {
         // Initialize streaming on first call
         if(!srs_.is_open())
             srs_ = serializer.start_stream(res);
 
-        // Loop until all input buffers are consumed
+        // Copy input buffers to serializer stream
+        auto bytes_written = capy::buffer_copy(srs_.prepare(), buffers);
+        srs_.commit(bytes_written);
+
+        // Flush serializer output to socket
         while(true)
         {
-            auto bufs = buffers.data();
-            if(bufs.empty())
-                break;
-
-            // Copy data to serializer stream
-            std::size_t bytes = capy::buffer_copy(srs_.prepare(), bufs);
-            srs_.commit(bytes);
-            buffers.consume(bytes);
-
-            // Write serializer output to socket
             auto cbs = serializer.prepare();
             if(cbs.has_error())
             {
                 if(cbs.error() != http::error::need_data)
-                    co_return cbs.error();
-                continue;
+                    co_return {cbs.error()};
+                break;
             }
 
             auto [ec, n] = co_await capy::write(stream, *cbs);
             if(ec)
-                co_return ec;
+                co_return {ec};
             serializer.consume(capy::buffer_size(*cbs));
         }
 
-        co_return {};
+        co_return {{}, bytes_written};
     }
 };
 
