@@ -70,43 +70,73 @@ struct http_server::
 
     void run(launcher launch) override
     {
-        launch(ctx.get_executor(), srv->do_session(*this));
+        launch(ctx.get_executor(), do_session());
     }
 
-    capy::task<capy::io_result<std::size_t>>
-    read_header()
+    capy::task<void>
+    do_session()
     {
-        std::size_t total_bytes = 0;
-        system::error_code ec;
-
-        for (;;)
+        struct guard
         {
-            // Try to parse what we have
-            rp.parser.parse(ec);
-        
-            if (ec == http::condition::need_more_input)
+            corosio_route_params& rp;
+
+            guard(corosio_route_params& rp_)
+                : rp(rp_)
             {
-                // Need to read more data
-                auto buf = rp.parser.prepare();
-                auto [read_ec, n] = co_await sock.read_some(buf);
-            
-                if (read_ec == capy::cond::eof)
-                    rp.parser.commit_eof();
-                else if (read_ec.failed())
-                    co_return {read_ec, total_bytes};
-                else
-                {
-                    rp.parser.commit(n);
-                    total_bytes += n;
-                }
-                continue;
             }
 
-            if (ec.failed())
-                co_return {ec, total_bytes};
+            ~guard()
+            {
+                rp.parser.reset();
+                rp.session_data.clear();
+                rp.parser.start();
+            }
+        };
 
-            if (rp.parser.got_header())
-                co_return {{}, total_bytes};
+        guard g(rp); // clear things when session ends
+
+        for(;;)
+        {
+            rp.parser.reset();
+            rp.session_data.clear();
+            rp.parser.start();
+
+            // Read HTTP request header
+            //auto [ec, n] = co_await w.read_header();
+            auto [ec] = co_await rp.parser.read_header( sock );
+            if (ec.failed())
+            {
+                std::cerr << "read_header error: " << ec.message() << "\n";
+                break;
+            }
+
+            //LOG_TRC(sect_)("{} read_header bytes={}", id(), n);
+
+            // Process headers and dispatch
+            on_headers();
+
+            auto rv = co_await srv->impl_->router.dispatch(
+                rp.req.method(), rp.url, rp);
+            (void)rv;
+    #if 0
+            do_respond(rv); 
+
+            // Write response
+            if (!rp.serializer.is_done())
+            {
+                auto [wec, wn] = co_await write_response();
+                if (wec)
+                {
+                    LOG_TRC(sect_)("{} write_response: {}", id(), wec.message());
+                    break;
+                }
+                LOG_TRC(sect_)("{} write_response bytes={}", id(), wn);
+            }
+
+            // Check keep-alive
+            if (!rp.res.keep_alive())
+                break;
+    #endif
         }
     }
 
@@ -154,74 +184,6 @@ http_server(
     wv_.reserve(num_workers);
     for(std::size_t i = 0; i < num_workers; ++i)
         wv_.emplace<worker>(ctx, this);
-}
-
-capy::task<void>
-http_server::
-do_session(
-    worker& w)
-{
-    struct guard
-    {
-        corosio_route_params& rp;
-
-        guard(corosio_route_params& rp_)
-            : rp(rp_)
-        {
-        }
-
-        ~guard()
-        {
-            rp.parser.reset();
-            rp.session_data.clear();
-            rp.parser.start();
-        }
-    };
-
-    guard g(w.rp); // clear things when session ends
-
-    for(;;)
-    {
-        w.rp.parser.reset();
-        w.rp.session_data.clear();
-        w.rp.parser.start();
-
-        // Read HTTP request header
-        auto [ec, n] = co_await w.read_header();
-        if (ec.failed())
-        {
-            std::cerr << "read_header error: " << ec.message() << "\n";
-            break;
-        }
-
-        //LOG_TRC(sect_)("{} read_header bytes={}", id(), n);
-
-        // Process headers and dispatch
-        w.on_headers();
-
-        auto rv = co_await impl_->router.dispatch(
-            w.rp.req.method(), w.rp.url, w.rp);
-        (void)rv;
-#if 0
-        do_respond(rv); 
-
-        // Write response
-        if (!rp.serializer.is_done())
-        {
-            auto [wec, wn] = co_await write_response();
-            if (wec)
-            {
-                LOG_TRC(sect_)("{} write_response: {}", id(), wec.message());
-                break;
-            }
-            LOG_TRC(sect_)("{} write_response bytes={}", id(), wn);
-        }
-
-        // Check keep-alive
-        if (!rp.res.keep_alive())
-            break;
-#endif
-    }
 }
 
 } // beast2

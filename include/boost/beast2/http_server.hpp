@@ -54,6 +54,8 @@ class BOOST_BEAST2_DECL
     struct impl;
     impl* impl_;
 
+    struct worker;
+
 public:
     /// Destroy the server.
     ~http_server();
@@ -74,12 +76,6 @@ public:
         http::flat_router router,
         http::shared_parser_config parser_cfg,
         http::shared_serializer_config serializer_cfg);
-
-private:
-    struct worker;
-
-    capy::task<void>
-    do_session(worker& w);
 };
 
 } // beast2
