@@ -11,7 +11,11 @@
 #include <boost/beast2/corosio_router.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/http_server.hpp>
+#include <boost/capy/buffers/string_dynamic_buffer.hpp>
 #include <boost/capy/ex/thread_pool.hpp>
+#include <boost/capy/io/push_to.hpp>
+#include <boost/capy/read.hpp>
+#include <boost/http/json/json_sink.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/http/server/serve_static.hpp>
 #include <boost/http/request_parser.hpp>
@@ -60,8 +64,22 @@ int server_main( int argc, char* argv[] )
     corosio::endpoint ep(addr, port);
 
     corosio_router rr;
-    rr.use( "/", http::serve_static( argv[3] ) );
-
+    rr.use( http::cors() );
+    rr.use(
+        [&]( auto& rp ) -> http::route_task
+        {
+            if(rp.req.method() != http::method::post)
+                co_return http::route::next;
+            http::json_sink js;
+            auto [ec, n] = co_await capy::push_to(rp.req_bufs, js);
+            if(ec.failed())
+                co_return ec;
+            (void)n;
+            json::value jv = js.release();
+            co_return {};
+        });
+   rr.use( "/", http::serve_static( argv[3] ) );
+  
     http_server hsrv(
         ioc,
         std::atoi(argv[2]),

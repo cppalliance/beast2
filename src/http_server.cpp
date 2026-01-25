@@ -12,6 +12,8 @@
 #include <boost/capy/task.hpp>
 #include <boost/capy/cond.hpp>
 #include <boost/capy/ex/strand.hpp>
+#include <boost/capy/io/any_read_source.hpp>
+#include <boost/capy/io/any_write_sink.hpp>
 #include <boost/beast2/corosio_router.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/response.hpp>
@@ -47,6 +49,9 @@ struct http_server::
     capy::strand<corosio::io_context::executor_type> strand;
     corosio::socket sock;
     corosio_route_params rp;
+    http::serializer::sink<corosio::socket> ss;
+    http::parser::source<corosio::socket> ps;
+    http::parser::buffer_source_adapter<corosio::socket> bs;
 
     worker(
         corosio::io_context& ctx_,
@@ -58,8 +63,16 @@ struct http_server::
         , rp(sock)
     {
         sock.open();
+
         rp.parser = http::request_parser(srv->impl_->parser_cfg);
+        ps = rp.parser.source_for(sock);
+        bs = rp.parser.buffer_source_for(sock);
+        rp.req_body = capy::any_read_source(ps);
+        rp.req_bufs = capy::any_buffer_source(bs);
         rp.serializer = http::serializer(srv->impl_->serializer_cfg);
+        rp.serializer.set_message(rp.res);
+        ss = rp.serializer.sink_for( sock );
+        rp.res_body = capy::any_write_sink(ss);
     }
 
     corosio::socket& socket() override
@@ -94,6 +107,7 @@ struct http_server::
 
         guard g(rp); // clear things when session ends
 
+        // read request, send response loop
         for(;;)
         {
             rp.parser.reset();
@@ -117,21 +131,8 @@ struct http_server::
             auto rv = co_await srv->impl_->router.dispatch(
                 rp.req.method(), rp.url, rp);
             (void)rv;
+
     #if 0
-            do_respond(rv); 
-
-            // Write response
-            if (!rp.serializer.is_done())
-            {
-                auto [wec, wn] = co_await write_response();
-                if (wec)
-                {
-                    LOG_TRC(sect_)("{} write_response: {}", id(), wec.message());
-                    break;
-                }
-                LOG_TRC(sect_)("{} write_response bytes={}", id(), wn);
-            }
-
             // Check keep-alive
             if (!rp.res.keep_alive())
                 break;
