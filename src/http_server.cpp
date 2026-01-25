@@ -17,7 +17,6 @@
 #include <boost/http/response.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/string_body.hpp>
-#include <boost/http/server/flat_router.hpp>
 #include <boost/http/server/basic_router.hpp>
 #include <boost/http/error.hpp>
 #include <boost/url/parse.hpp>

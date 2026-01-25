@@ -33,11 +33,11 @@ class corosio_route_params
 public:
     using stream_type = corosio::socket;
 
-    corosio::socket& stream;
+    corosio::io_stream& stream;
 
     explicit
     corosio_route_params(
-        corosio::socket& s)
+        corosio::io_stream& s)
         : stream(s)
     {}
 
