@@ -10,6 +10,7 @@
 #include <boost/beast2/https_server.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/capy/task.hpp>
+#include <boost/capy/cond.hpp>
 #include <boost/capy/ex/strand.hpp>
 #include <boost/corosio/tls/context.hpp>
 #include <boost/corosio/tls/openssl_stream.hpp>
@@ -95,15 +96,10 @@ struct https_server::
                 auto buf = rp.parser.prepare();
                 auto [read_ec, n] = co_await sock.read_some(buf);
             
-                if (read_ec)
-                    co_return {read_ec, total_bytes};
-            
-                if (n == 0)
-                {
-                    // EOF
+                if (read_ec == capy::cond::eof)
                     rp.parser.commit_eof();
-                    ec = {};
-                }
+                else if (read_ec.failed())
+                    co_return {read_ec, total_bytes};
                 else
                 {
                     rp.parser.commit(n);

@@ -10,6 +10,7 @@
 #include <boost/beast2/http_server.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/capy/task.hpp>
+#include <boost/capy/cond.hpp>
 #include <boost/capy/ex/strand.hpp>
 #include <boost/beast2/corosio_router.hpp>
 #include <boost/http/request_parser.hpp>
@@ -20,6 +21,7 @@
 #include <boost/http/server/basic_router.hpp>
 #include <boost/http/error.hpp>
 #include <boost/url/parse.hpp>
+#include <iostream>
 
 namespace boost {
 namespace beast2 {
@@ -88,15 +90,10 @@ struct http_server::
                 auto buf = rp.parser.prepare();
                 auto [read_ec, n] = co_await sock.read_some(buf);
             
-                if (read_ec)
-                    co_return {read_ec, total_bytes};
-            
-                if (n == 0)
-                {
-                    // EOF
+                if (read_ec == capy::cond::eof)
                     rp.parser.commit_eof();
-                    ec = {};
-                }
+                else if (read_ec.failed())
+                    co_return {read_ec, total_bytes};
                 else
                 {
                     rp.parser.commit(n);
@@ -191,9 +188,9 @@ do_session(
 
         // Read HTTP request header
         auto [ec, n] = co_await w.read_header();
-        if (ec)
+        if (ec.failed())
         {
-            //LOG_TRC(sect_)("{} read_header: {}", id(), ec.message());
+            std::cerr << "read_header error: " << ec.message() << "\n";
             break;
         }
 
