@@ -68,17 +68,27 @@ int server_main( int argc, char* argv[] )
     rr.use(
         [&]( auto& rp ) -> http::route_task
         {
+            //co_return co_await rp.send("Hello, World!");
+            auto [ec] = co_await rp.send("Hello, World!");
+            co_return ec;
+        });
+#if 1
+    rr.use(
+        [&]( auto& rp ) -> http::route_task
+        {
             if(rp.req.method() != http::method::post)
                 co_return http::route::next;
             http::json_sink js;
-            auto [ec, n] = co_await capy::push_to(rp.req_bufs, js);
+            auto [ec, n] = co_await capy::push_to(rp.req_body, js);
             if(ec.failed())
                 co_return ec;
-            (void)n;
+            //(void)n;
             json::value jv = js.release();
             co_return {};
+
         });
-   rr.use( "/", http::serve_static( argv[3] ) );
+    rr.use( "/", http::serve_static( argv[3] ) );
+#endif
   
     http_server hsrv(
         ioc,
