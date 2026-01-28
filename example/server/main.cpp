@@ -65,6 +65,7 @@ int server_main( int argc, char* argv[] )
 
     corosio_router rr;
     rr.use( http::cors() );
+#if 0
     rr.use(
         [&]( auto& rp ) -> http::route_task
         {
@@ -72,8 +73,9 @@ int server_main( int argc, char* argv[] )
             auto [ec] = co_await rp.send("Hello, World!");
             co_return ec;
         });
-#if 1
-    rr.use(
+#endif
+
+    rr.use( "/api",
         [&]( auto& rp ) -> http::route_task
         {
             if(rp.req.method() != http::method::post)
@@ -82,13 +84,10 @@ int server_main( int argc, char* argv[] )
             auto [ec, n] = co_await capy::push_to(rp.req_body, js);
             if(ec.failed())
                 co_return ec;
-            //(void)n;
             json::value jv = js.release();
             co_return {};
-
         });
     rr.use( "/", http::serve_static( argv[3] ) );
-#endif
   
     http_server hsrv(
         ioc,
