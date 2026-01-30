@@ -111,7 +111,7 @@ struct http_server::
             // Read HTTP request header
             //auto [ec, n] = co_await w.read_header();
             auto [ec] = co_await rp.parser.read_header( sock );
-            if (ec.failed())
+            if (ec)
             {
                 std::cerr << "read_header error: " << ec.message() << "\n";
                 break;

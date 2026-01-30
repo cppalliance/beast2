@@ -15,6 +15,7 @@
 #include <boost/capy/ex/thread_pool.hpp>
 #include <boost/capy/io/push_to.hpp>
 #include <boost/capy/read.hpp>
+#include <boost/corosio/signal_set.hpp>
 #include <boost/http/json/json_sink.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/http/server/serve_static.hpp>
@@ -28,6 +29,7 @@
 #include <boost/http/zlib/inflate.hpp>
 #include <boost/json/parser.hpp>
 #include <boost/url/ipv4_address.hpp>
+#include <csignal>
 #include <iostream>
 
 namespace boost {
@@ -59,7 +61,7 @@ int server_main( int argc, char* argv[] )
 
     install_services();
 
-    urls::ipv4_address addr;
+    corosio::ipv4_address addr;
     auto port = static_cast<std::uint16_t>(std::atoi(argv[1]));
     corosio::endpoint ep(addr, port);
 
@@ -79,13 +81,13 @@ int server_main( int argc, char* argv[] )
         [&]( auto& rp ) -> http::route_task
         {
             if(rp.req.method() != http::method::post)
-                co_return http::route::next;
+                co_return http::route_next;
             http::json_sink js;
             auto [ec, n] = co_await capy::push_to(rp.req_body, js);
-            if(ec.failed())
-                co_return ec;
+            if(ec)
+                co_return http::route_error(ec);
             json::value jv = js.release();
-            co_return {};
+            co_return http::route_next;
         });
     rr.use( "/", http::serve_static( argv[3] ) );
   
@@ -102,7 +104,20 @@ int server_main( int argc, char* argv[] )
         return EXIT_FAILURE;
     }
 
-    hsrv.start();
+    std::stop_source sts;
+    hsrv.start(sts.get_token());
+
+    corosio::signal_set sigs(ioc);
+    sigs.add(SIGINT);
+    capy::run_async(ioc.get_executor())(
+        [&]() -> capy::task<void>
+        {
+            auto [ec, sig] = co_await sigs.async_wait();
+            if(ec)
+                throw std::system_error(ec);
+            sts.request_stop();
+        }());
+
     ioc.run();
     return EXIT_SUCCESS;
 }
