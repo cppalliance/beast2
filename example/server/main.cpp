@@ -104,21 +104,21 @@ int server_main( int argc, char* argv[] )
         return EXIT_FAILURE;
     }
 
-    std::stop_source sts;
-    hsrv.start(sts.get_token());
+    hsrv.start();
 
     corosio::signal_set sigs(ioc);
     sigs.add(SIGINT);
     capy::run_async(ioc.get_executor())(
         [&]() -> capy::task<void>
         {
-            auto [ec, sig] = co_await sigs.async_wait();
+            auto [ec, sig] = co_await sigs.wait();
             if(ec)
                 throw std::system_error(ec);
-            sts.request_stop();
+            hsrv.stop();
         }());
 
     ioc.run();
+    hsrv.join();
     return EXIT_SUCCESS;
 }
 

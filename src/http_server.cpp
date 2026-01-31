@@ -175,9 +175,12 @@ http_server(
 {
     impl_->parser_cfg = std::move(parser_cfg);
     impl_->serializer_cfg = std::move(serializer_cfg);
-    wv_.reserve(num_workers);
+
+    std::vector<std::unique_ptr<tcp_server::worker_base>> workers;
+    workers.reserve(num_workers);
     for(std::size_t i = 0; i < num_workers; ++i)
-        wv_.emplace<worker>(ctx, this);
+        workers.push_back(std::make_unique<worker>(ctx, this));
+    set_workers(std::move(workers));
 }
 
 } // beast2
