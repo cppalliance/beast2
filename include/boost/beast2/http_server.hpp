@@ -54,7 +54,6 @@ class BOOST_BEAST2_DECL
     struct impl;
     impl* impl_;
 
-    class http_worker;
     struct worker;
 
 public:

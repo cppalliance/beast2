@@ -8,6 +8,7 @@
 //
 
 #include <boost/beast2/http_server.hpp>
+#include <boost/beast2/http_worker.hpp>
 #include <boost/http/server/flat_router.hpp>
 #include <boost/capy/task.hpp>
 #include <boost/capy/cond.hpp>
@@ -37,101 +38,6 @@ struct http_server::impl
     impl(http::flat_router r)
         : router(std::move(r))
     {
-    }
-};
-
-class http_server::http_worker
-{
-public:
-    http::flat_router fr;
-    http::route_params rp;
-    capy::any_read_stream stream;
-    http::request_parser parser;
-    http::serializer serializer;
-
-    http_worker(
-        http::flat_router fr_,
-        http::shared_parser_config parser_cfg,
-        http::shared_serializer_config serializer_cfg)
-        : fr(std::move(fr_))
-        , parser(parser_cfg)
-        , serializer(serializer_cfg)
-    {
-        serializer.set_message(rp.res);
-    }
-
-    capy::task<void>
-    do_http_session(
-        corosio::socket& stream)
-    {
-        struct guard
-        {
-            http_worker& self;
-
-            guard(http_worker& self_)
-                : self(self_)
-            {
-            }
-
-            ~guard()
-            {
-                self.parser.reset();
-                self.parser.start();
-                self.rp.session_data.clear();
-            }
-        };
-
-        guard g(*this); // clear things when session ends
-
-        // read request, send response loop
-        for(;;)
-        {
-            parser.reset();
-            parser.start();
-            rp.session_data.clear();
-
-            // Read HTTP request header
-            //auto [ec, n] = co_await w.read_header();
-            auto [ec] = co_await parser.read_header( stream );
-            if (ec)
-            {
-                std::cerr << "read_header error: " << ec.message() << "\n";
-                break;
-            }
-
-            // Process headers and dispatch
-            // Set up Request and Response objects
-            rp.req = parser.get();
-            rp.route_data.clear();
-            rp.res.set_start_line(
-                http::status::ok, rp.req.version());
-            rp.res.set_keep_alive(rp.req.keep_alive());
-            serializer.reset();
-
-            // Parse the URL
-            {
-                auto rv = urls::parse_uri_reference(rp.req.target());
-                if (rv.has_error())
-                {
-                    rp.status(http::status::bad_request);
-                    //auto [ec] = co_await rp.send("Bad Request: " + rv.error().message());
-                    //co_return;
-                }
-                rp.url = rv.value();
-            }
-
-            {
-                auto rv = co_await fr.dispatch(rp.req.method(), rp.url, rp);
-                if(rv.failed())
-                {
-                    // VFALCO log rv.error()
-                    break;
-                }
-
-                if(! rp.res.keep_alive())
-                    break;
-            }
-        }
     }
 };
 
@@ -177,7 +83,7 @@ struct http_server::
     capy::task<void>
     do_session()
     {
-        co_await do_http_session(sock);
+        co_await do_http_session();
 
         sock.shutdown(corosio::socket::shutdown_both); // VFALCO too wordy
     }
