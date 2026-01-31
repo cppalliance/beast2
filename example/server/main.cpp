@@ -8,7 +8,7 @@
 //
 
 #include "serve_log_admin.hpp"
-#include <boost/beast2/corosio_router.hpp>
+#include <boost/http/server/router.hpp>
 #include <boost/beast2/error.hpp>
 #include <boost/beast2/http_server.hpp>
 #include <boost/capy/buffers/string_dynamic_buffer.hpp>
@@ -65,7 +65,7 @@ int server_main( int argc, char* argv[] )
     auto port = static_cast<std::uint16_t>(std::atoi(argv[1]));
     corosio::endpoint ep(addr, port);
 
-    corosio_router rr;
+    http::router rr;
     rr.use( http::cors() );
 #if 0
     rr.use(

@@ -13,10 +13,11 @@
 #include <boost/capy/cond.hpp>
 #include <boost/capy/ex/strand.hpp>
 #include <boost/capy/io/any_read_source.hpp>
+#include <boost/capy/io/any_read_stream.hpp>
 #include <boost/capy/io/any_buffer_sink.hpp>
-#include <boost/beast2/corosio_router.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/response.hpp>
+#include <boost/http/server/router.hpp>
 #include <boost/http/serializer.hpp>
 #include <boost/http/string_body.hpp>
 #include <boost/http/server/basic_router.hpp>
@@ -39,34 +40,128 @@ struct http_server::impl
     }
 };
 
+class http_server::http_worker
+{
+public:
+    http::flat_router fr;
+    http::route_params rp;
+    capy::any_read_stream stream;
+    http::request_parser parser;
+    http::serializer serializer;
+
+    http_worker(
+        http::flat_router fr_,
+        http::shared_parser_config parser_cfg,
+        http::shared_serializer_config serializer_cfg)
+        : fr(std::move(fr_))
+        , parser(parser_cfg)
+        , serializer(serializer_cfg)
+    {
+        serializer.set_message(rp.res);
+    }
+
+    capy::task<void>
+    do_http_session(
+        corosio::socket& stream)
+    {
+        struct guard
+        {
+            http_worker& self;
+
+            guard(http_worker& self_)
+                : self(self_)
+            {
+            }
+
+            ~guard()
+            {
+                self.parser.reset();
+                self.parser.start();
+                self.rp.session_data.clear();
+            }
+        };
+
+        guard g(*this); // clear things when session ends
+
+        // read request, send response loop
+        for(;;)
+        {
+            parser.reset();
+            parser.start();
+            rp.session_data.clear();
+
+            // Read HTTP request header
+            //auto [ec, n] = co_await w.read_header();
+            auto [ec] = co_await parser.read_header( stream );
+            if (ec)
+            {
+                std::cerr << "read_header error: " << ec.message() << "\n";
+                break;
+            }
+
+            // Process headers and dispatch
+            // Set up Request and Response objects
+            rp.req = parser.get();
+            rp.route_data.clear();
+            rp.res.set_start_line(
+                http::status::ok, rp.req.version());
+            rp.res.set_keep_alive(rp.req.keep_alive());
+            serializer.reset();
+
+            // Parse the URL
+            {
+                auto rv = urls::parse_uri_reference(rp.req.target());
+                if (rv.has_error())
+                {
+                    rp.status(http::status::bad_request);
+                    //auto [ec] = co_await rp.send("Bad Request: " + rv.error().message());
+                    //co_return;
+                }
+                rp.url = rv.value();
+            }
+
+            {
+                auto rv = co_await fr.dispatch(rp.req.method(), rp.url, rp);
+                if(rv.failed())
+                {
+                    // VFALCO log rv.error()
+                    break;
+                }
+
+                if(! rp.res.keep_alive())
+                    break;
+            }
+        }
+    }
+};
+
 // Each worker owns its own socket and parser/serializer state,
 // allowing concurrent connection handling without synchronization.
 struct http_server::
-    worker : tcp_server::worker_base
+    worker
+    : tcp_server::worker_base
+    , http_worker
 {
-    http_server* srv;
     corosio::io_context& ctx;
     capy::strand<corosio::io_context::executor_type> strand;
     corosio::socket sock;
-    corosio_route_params rp;
 
     worker(
         corosio::io_context& ctx_,
         http_server* srv_)
-        : srv(srv_)
+        : http_worker(
+            srv_->impl_->router,
+            srv_->impl_->parser_cfg,
+            srv_->impl_->serializer_cfg)
         , ctx(ctx_)
         , strand(ctx_.get_executor())
         , sock(ctx_)
-        , rp(sock)
     {
         sock.open();
 
-        rp.parser = http::request_parser(srv->impl_->parser_cfg);
-        rp.serializer = http::serializer(srv->impl_->serializer_cfg);
-        rp.serializer.set_message(rp.res);
-
-        rp.req_body = capy::any_buffer_source(rp.parser.source_for(sock));
-        rp.res_body = capy::any_buffer_sink(rp.serializer.sink_for(sock));
+        rp.req_body = capy::any_buffer_source(parser.source_for(sock));
+        rp.res_body = capy::any_buffer_sink(serializer.sink_for(sock));
+        stream = capy::any_read_stream(&sock);
     }
 
     corosio::socket& socket() override
@@ -82,78 +177,9 @@ struct http_server::
     capy::task<void>
     do_session()
     {
-        struct guard
-        {
-            corosio_route_params& rp;
+        co_await do_http_session(sock);
 
-            guard(corosio_route_params& rp_)
-                : rp(rp_)
-            {
-            }
-
-            ~guard()
-            {
-                rp.parser.reset();
-                rp.session_data.clear();
-                rp.parser.start();
-            }
-        };
-
-        guard g(rp); // clear things when session ends
-
-        // read request, send response loop
-        for(;;)
-        {
-            rp.parser.reset();
-            rp.session_data.clear();
-            rp.parser.start();
-
-            // Read HTTP request header
-            //auto [ec, n] = co_await w.read_header();
-            auto [ec] = co_await rp.parser.read_header( sock );
-            if (ec)
-            {
-                std::cerr << "read_header error: " << ec.message() << "\n";
-                break;
-            }
-
-            //LOG_TRC(sect_)("{} read_header bytes={}", id(), n);
-
-            // Process headers and dispatch
-            on_headers();
-
-            auto rv = co_await srv->impl_->router.dispatch(
-                rp.req.method(), rp.url, rp);
-            (void)rv;
-
-    #if 0
-            // Check keep-alive
-            if (!rp.res.keep_alive())
-                break;
-    #endif
-        }
-    }
-
-    void on_headers()
-    {
-        // Set up Request and Response objects
-        rp.req = rp.parser.get();
-        rp.route_data.clear();
-        rp.res.set_start_line(
-            http::status::ok, rp.req.version());
-        rp.res.set_keep_alive(rp.req.keep_alive());
-        rp.serializer.reset();
-
-        // Parse the URL
-        auto rv = urls::parse_uri_reference(rp.req.target());
-        if (rv.has_error())
-        {
-            rp.status(http::status::bad_request);
-            //auto [ec] = co_await rp.send("Bad Request: " + rv.error().message());
-            //co_return;
-        }
-
-        rp.url = rv.value();
+        sock.shutdown(corosio::socket::shutdown_both); // VFALCO too wordy
     }
 };
 
