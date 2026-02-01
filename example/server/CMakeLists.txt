@@ -33,3 +33,11 @@ endif()
 if (TARGET Boost::http_brotli)
     target_link_libraries(beast2_server_example Boost::http_brotli)
 endif()
+
+if (TARGET Boost::corosio_openssl)
+    target_link_libraries(beast2_server_example Boost::corosio_openssl)
+endif()
+
+if (TARGET Boost::corosio_wolfssl)
+    target_link_libraries(beast2_server_example Boost::corosio_wolfssl)
+endif()
