@@ -50,7 +50,7 @@ struct http_server::
 {
     corosio::io_context& ctx;
     capy::strand<corosio::io_context::executor_type> strand;
-    corosio::socket sock;
+    corosio::tcp_socket sock;
 
     worker(
         corosio::io_context& ctx_,
@@ -70,7 +70,7 @@ struct http_server::
         stream = capy::any_read_stream(&sock);
     }
 
-    corosio::socket& socket() override
+    corosio::tcp_socket& socket() override
     {
         return sock;
     }
@@ -85,7 +85,7 @@ struct http_server::
     {
         co_await do_http_session();
 
-        sock.shutdown(corosio::socket::shutdown_both); // VFALCO too wordy
+        sock.shutdown(corosio::tcp_socket::shutdown_both); // VFALCO too wordy
     }
 };
 

@@ -47,7 +47,7 @@ namespace beast2 {
         : tcp_server::worker_base
         , http_worker
     {
-        corosio::socket sock;
+        corosio::tcp_socket sock;
 
         my_worker(
             corosio::io_context& ctx,
@@ -63,7 +63,7 @@ namespace beast2 {
             stream = capy::any_read_stream(&sock);
         }
 
-        corosio::socket& socket() override { return sock; }
+        corosio::tcp_socket& socket() override { return sock; }
 
         void run(launcher launch) override
         {

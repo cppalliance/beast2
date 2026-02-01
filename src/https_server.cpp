@@ -16,7 +16,7 @@
 #include <boost/capy/io/any_read_source.hpp>
 #include <boost/capy/io/any_read_stream.hpp>
 #include <boost/capy/io/any_buffer_sink.hpp>
-#include <boost/corosio/tls/openssl_stream.hpp>
+#include <boost/corosio/openssl_stream.hpp>
 #include <boost/http/request_parser.hpp>
 #include <boost/http/response.hpp>
 #include <boost/http/server/router.hpp>
@@ -33,13 +33,13 @@ namespace beast2 {
 
 struct https_server::impl
 {
-    corosio::tls::context tls_ctx;
+    corosio::tls_context tls_ctx;
     http::flat_router router;
     http::shared_parser_config parser_cfg;
     http::shared_serializer_config serializer_cfg;
 
     impl(
-        corosio::tls::context tc,
+        corosio::tls_context tc,
         http::flat_router r)
         : tls_ctx(std::move(tc))
         , router(std::move(r))
@@ -54,8 +54,8 @@ struct https_server::
 {
     corosio::io_context& ctx;
     capy::strand<corosio::io_context::executor_type> strand;
-    corosio::socket sock;
-    corosio::tls::context tls_ctx;
+    corosio::tcp_socket sock;
+    corosio::tls_context tls_ctx;
     std::unique_ptr<corosio::openssl_stream> ssl;
 
     worker(
@@ -73,7 +73,7 @@ struct https_server::
         sock.open();
     }
 
-    corosio::socket& socket() override
+    corosio::tcp_socket& socket() override
     {
         return sock;
     }
@@ -87,14 +87,14 @@ struct https_server::
     do_session()
     {
         // Create TLS stream wrapping the socket
-        ssl = std::make_unique<corosio::openssl_stream>(sock, tls_ctx);
+        ssl = std::make_unique<corosio::openssl_stream>(&sock, tls_ctx);
 
         // Perform TLS handshake as server
         auto [hs_ec] = co_await ssl->handshake(corosio::tls_stream::server);
         if(hs_ec)
         {
             std::cerr << "TLS handshake error: " << hs_ec.message() << "\n";
-            sock.shutdown(corosio::socket::shutdown_both);
+            sock.shutdown(corosio::tcp_socket::shutdown_both);
             ssl.reset();
             co_return;
         }
@@ -117,7 +117,7 @@ struct https_server::
         // Clean up TLS stream before TCP shutdown
         ssl.reset();
 
-        sock.shutdown(corosio::socket::shutdown_both);
+        sock.shutdown(corosio::tcp_socket::shutdown_both);
     }
 };
 
@@ -131,7 +131,7 @@ https_server::
 https_server(
     corosio::io_context& ctx,
     std::size_t num_workers,
-    corosio::tls::context tls_ctx,
+    corosio::tls_context tls_ctx,
     http::flat_router router,
     http::shared_parser_config parser_cfg,
     http::shared_serializer_config serializer_cfg)

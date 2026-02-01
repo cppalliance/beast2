@@ -13,7 +13,7 @@
 #include <boost/beast2/detail/config.hpp>
 #include <boost/corosio/tcp_server.hpp>
 #include <boost/corosio/io_context.hpp>
-#include <boost/corosio/tls/context.hpp>
+#include <boost/corosio/tls_context.hpp>
 #include <boost/http/config.hpp>
 #include <cstddef>
 
@@ -38,9 +38,9 @@ namespace beast2 {
     corosio::io_context ctx;
 
     // Configure TLS context for server
-    corosio::tls::context tls_ctx;
-    tls_ctx.use_certificate_chain_file("server.crt", tls::file_format::pem);
-    tls_ctx.use_private_key_file("server.key", tls::file_format::pem);
+    corosio::tls_context tls_ctx;
+    tls_ctx.use_certificate_chain_file("server.crt", corosio::tls_file_format::pem);
+    tls_ctx.use_private_key_file("server.key", corosio::tls_file_format::pem);
 
     http::flat_router router;
     router.add( http::verb::get, "/", my_handler );
@@ -85,7 +85,7 @@ public:
     https_server(
         corosio::io_context& ctx,
         std::size_t num_workers,
-        corosio::tls::context tls_ctx,
+        corosio::tls_context tls_ctx,
         http::flat_router router,
         http::shared_parser_config parser_cfg,
         http::shared_serializer_config serializer_cfg);
